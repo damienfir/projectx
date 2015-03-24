@@ -1,0 +1,60 @@
+@main("projectx") {
+
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12 centered">
+          <button type="button" class="btn btn-primary" id="upload-btn" data-toggle="modal" data-target="#upload-modal"><i class="fa fa-cloud-upload fa-lg"></i> Upload pictures</button>
+          <!-- <a class="btn btn-primary" href=""><i class="fa fa-facebook fa-lg"></i> Choose from Facebook</a> -->
+          <button class="btn btn-primary" href="" id="dropbox-btn"><i class="fa fa-dropbox fa-lg"></i> Choose from Dropbox</button>
+          <!-- <a class="btn btn-primary" href=""><i class="fa fa-flickr fa-lg"></i> Choose from Flickr</a> -->
+          <!-- <a class="btn btn-primary" href="" id="google-btn"><i class="fa fa-google-plus fa-lg"></i> Choose from Google</a> -->
+        </div>
+      </div>
+
+
+      <div class="row">
+        <div class="col-lg-12 centered">
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-lg-12 centered">
+          <a class="btn btn-primary" href=""><i class="fa fa-cloud-download fa-lg"></i> Download as wallpaper</a>
+          <a class="btn btn-primary" href=""><i class="fa fa-file fa-lg"></i> Download as pdf</a>
+          <a class="btn btn-primary" href=""><i class="fa fa-photo fa-lg"></i> Print poster</a>
+          <a class="btn btn-primary" href=""><i class="fa fa-photo fa-lg"></i> Print photo album</a>
+          <a class="btn btn-primary" href=""><i class="fa fa-share-alt fa-lg"></i> Share</a>
+        </div>
+      </div>
+
+
+      <div class="row" id="images_list">
+        <div class="col-md-1"><img src="" /></div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="upload-modal" tabindex="-1">
+    	<div class="modal-dialog">
+    		<div class="modal-content">
+          <div class="modal-header">
+            <form action="/upload" method="post" enctype="multipart/form-data" class="form-inline centered" id="upload-form">
+              <input type="file" name="images" id="file-upload" multiple>
+              <button type="submit" class="btn btn-default">Upload</button>
+            </form>
+          </div>
+          <div class="modal-body">
+            <div class="row" id="dropzone-wrapper">
+              <div id="dropzone" class="jumbotron" style="height:200px">Drop your photos here</div>
+            </div>
+          </div>
+        </div>
+    	</div>
+    </div>
+
+    <script type="text/javascript" src="//www.dropbox.com/static/api/2/dropins.js" id="dropboxjs" data-app-key="z7bsczzlaqyb8zr"></script>
+    <script type="text/javascript" src="//apis.google.com/js/api.js"></script>
+    <script src="/assets/bower_components/jquery/dist/jquery.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="/assets/bower_components/bootstrap/dist/js/bootstrap.min.js" type="text/javascript" charset="utf-8"></script>
+
+    <script src="@routes.Assets.at("bower_components/requirejs/require.js")" data-main="/assets/js/main" type="text/javascript"></script>
+}

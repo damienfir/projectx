@@ -1,0 +1,9 @@
+body {
+  font-family: 'Raleway', sans-serif;
+}
+
+.row { margin: 10px 0; }
+
+.centered { text-align: center; }
+
+#dropzone { text-align: center; }
