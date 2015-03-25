@@ -1,5 +1,5 @@
-New log file opened at Wed Mar 25 10:17:56 CET 2015 by 27972@arch
-jvm 27972@arch
+New log file opened at Wed Mar 25 17:26:55 CET 2015 by 408@arch
+jvm 408@arch
 jvm vmName=OpenJDK 64-Bit Server VM vmVendor=Oracle Corporation vmVersion=24.75-b04
 jvm specName=Java Virtual Machine Specification specVendor=Oracle Corporation specVersion=1.7
 jvm arguments: [-Xms256m, -Xmx1024m, -XX:PermSize=64m, -XX:MaxPermSize=256m]
@@ -27,7 +27,7 @@ sorting: ns: List(sbt.plugins.CorePlugin, sbt.plugins.IvyPlugin, sbt.plugins.Jvm
   :: sorted deduced result: List(sbt.plugins.CorePlugin, sbt.plugins.IvyPlugin, sbt.plugins.JvmPlugin, sbt.plugins.JUnitXmlReportPlugin)
 [Loading] Done in /home/ab/epfl/di55erent/projectx/projectx/project, returning: (projectx-build)
 Loading project definition from /home/ab/epfl/di55erent/projectx/projectx/project
-Running task... Cancel: sbt.TaskCancellationStrategy$Null$@2b399081, check cycles: false
+Running task... Cancel: sbt.TaskCancellationStrategy$Null$@189d625a, check cycles: false
 [info] Updating {file:/home/ab/epfl/di55erent/projectx/projectx/project/}projectx-build...
 Updating {file:/home/ab/epfl/di55erent/projectx/projectx/project/}projectx-build...
 Other repositories:
@@ -15890,7 +15890,7 @@ all callers are evicted for org.scala-sbt#control;0.13.8-M3: evicting too
 	[NOT REQUIRED] org.scala-sbt#apply-macro;0.13.8-M5!apply-macro.jar
 	[NOT REQUIRED] org.scala-lang#jline;2.10.4!jline.jar
 	[NOT REQUIRED] org.fusesource.jansi#jansi;1.4!jansi.jar
-:: resolution report :: resolve 12386ms :: artifacts dl 204ms
+:: resolution report :: resolve 9117ms :: artifacts dl 223ms
 	report for default#projectx-build;0.1-SNAPSHOT compile produced in /home/ab/epfl/di55erent/projectx/projectx/project/target/resolution-cache/reports/default-projectx-build-compile.xml
 	report for default#projectx-build;0.1-SNAPSHOT runtime produced in /home/ab/epfl/di55erent/projectx/projectx/project/target/resolution-cache/reports/default-projectx-build-runtime.xml
 	report for default#projectx-build;0.1-SNAPSHOT test produced in /home/ab/epfl/di55erent/projectx/projectx/project/target/resolution-cache/reports/default-projectx-build-test.xml
@@ -15904,7 +15904,7 @@ all callers are evicted for org.scala-sbt#control;0.13.8-M3: evicting too
 	report for default#projectx-build;0.1-SNAPSHOT docs produced in /home/ab/epfl/di55erent/projectx/projectx/project/target/resolution-cache/reports/default-projectx-build-docs.xml
 	report for default#projectx-build;0.1-SNAPSHOT pom produced in /home/ab/epfl/di55erent/projectx/projectx/project/target/resolution-cache/reports/default-projectx-build-pom.xml
 	report for default#projectx-build;0.1-SNAPSHOT scala-tool produced in /home/ab/epfl/di55erent/projectx/projectx/project/target/resolution-cache/reports/default-projectx-build-scala-tool.xml
-	resolve done (12386ms resolve - 204ms download)
+	resolve done (9117ms resolve - 223ms download)
 [info] Done updating.
 Done updating.
 
@@ -15944,31 +15944,9 @@ Set current project to projectx (in build file:/home/ab/epfl/di55erent/projectx/
 > iflast shell
 > server-send-ready-for-request
 > server-handle-next-server-request
-> compile
-Evaluating tasks: compile:compile
-Running task... Cancel: sbt.server.ServerTaskCancellation@36c1115e, check cycles: false
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set()
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set()
-
-Total time: 2 s, completed Mar 25, 2015 10:18:24 AM
-> server-post-command-cleanup
-> server-handle-next-server-request
 > {file:/home/ab/epfl/di55erent/projectx/projectx/}root/compile:discoveredMainClasses
 Evaluating tasks: compile:discoveredMainClasses
-Running task... Cancel: sbt.server.ServerTaskCancellation@1d41a08a, check cycles: false
+Running task... Cancel: sbt.server.ServerTaskCancellation@337f2396, check cycles: false
 
 Initial source changes: 
 	removed:Set()
@@ -15985,56 +15963,97 @@ Sources indirectly invalidated by:
 	external source: Set()
 All initially invalidated sources: Set()
 
-Total time: 0 s, completed Mar 25, 2015 10:18:25 AM
+Total time: 1 s, completed Mar 25, 2015 5:27:19 PM
 > server-post-command-cleanup
 > server-handle-next-server-request
 > {file:/home/ab/epfl/di55erent/projectx/projectx/}root/compile:mainClass
 Evaluating tasks: compile:mainClass
-Running task... Cancel: sbt.server.ServerTaskCancellation@b0df1a6, check cycles: false
-Total time: 0 s, completed Mar 25, 2015 10:18:25 AM
+Running task... Cancel: sbt.server.ServerTaskCancellation@4f631652, check cycles: false
+Total time: 0 s, completed Mar 25, 2015 5:27:19 PM
 > server-post-command-cleanup
 > server-handle-next-server-request
 > {file:/home/ab/epfl/di55erent/projectx/projectx/}root/echo:echoTraceSupported
 Evaluating tasks: echo:echoTraceSupported
-Running task... Cancel: sbt.server.ServerTaskCancellation@a49b99, check cycles: false
-Total time: 0 s, completed Mar 25, 2015 10:18:25 AM
+Running task... Cancel: sbt.server.ServerTaskCancellation@6457ba9f, check cycles: false
+Total time: 0 s, completed Mar 25, 2015 5:27:19 PM
 > server-post-command-cleanup
 > server-handle-next-server-request
 > {file:/home/ab/epfl/di55erent/projectx/projectx/}root/echo:echoPlayVersionReport
 Evaluating tasks: echo:echoPlayVersionReport
-Running task... Cancel: sbt.server.ServerTaskCancellation@9ad50d9, check cycles: false
-Total time: 0 s, completed Mar 25, 2015 10:18:25 AM
+Running task... Cancel: sbt.server.ServerTaskCancellation@44d439e7, check cycles: false
+Received TaskFinished for a task we don't know about TaskFinished(4,131,Some(AttributeKey[java.lang.String]("echoPlayVersionReport") in Scope(Build: file:/home/ab/epfl/di55erent/projectx/projectx/, , Project: ProjectReference(file:/home/ab/epfl/di55erent/projectx/projectx/,root), Config: echo)),true,None)
+Received TaskFinished for a task we don't know about TaskFinished(4,131,Some(AttributeKey[java.lang.String]("echoPlayVersionReport") in Scope(Build: file:/home/ab/epfl/di55erent/projectx/projectx/, , Project: ProjectReference(file:/home/ab/epfl/di55erent/projectx/projectx/,root), Config: echo)),true,None)
+Use 'last' for the full log.
+> server-post-command-error-handler
 > server-post-command-cleanup
 > server-handle-next-server-request
 > {file:/home/ab/epfl/di55erent/projectx/projectx/}root/echo:echoAkkaVersionReport
 Evaluating tasks: echo:echoAkkaVersionReport
-Running task... Cancel: sbt.server.ServerTaskCancellation@16e22c0d, check cycles: false
-Total time: 0 s, completed Mar 25, 2015 10:18:25 AM
+Running task... Cancel: sbt.server.ServerTaskCancellation@44b40d42, check cycles: false
+Total time: 0 s, completed Mar 25, 2015 5:27:19 PM
+> server-post-command-cleanup
+> server-handle-next-server-request
+> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/compile:discoveredMainClasses
+Evaluating tasks: compile:discoveredMainClasses
+Running task... Cancel: sbt.server.ServerTaskCancellation@5855fc3b, check cycles: false
+
+Initial source changes: 
+	removed:Set()
+	added: Set()
+	modified: Set()
+Removed products: Set()
+External API changes: API Changes: Set()
+Modified binary dependencies: Set()
+Initial directly invalidated sources: Set()
+
+Sources indirectly invalidated by:
+	product: Set()
+	binary dep: Set()
+	external source: Set()
+All initially invalidated sources: Set()
+
+Total time: 0 s, completed Mar 25, 2015 5:27:19 PM
+> server-post-command-cleanup
+> server-handle-next-server-request
+> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/compile:mainClass
+Evaluating tasks: compile:mainClass
+Running task... Cancel: sbt.server.ServerTaskCancellation@61482313, check cycles: false
+Total time: 0 s, completed Mar 25, 2015 5:27:19 PM
+> server-post-command-cleanup
+> server-handle-next-server-request
+> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/echo:echoTraceSupported
+Evaluating tasks: echo:echoTraceSupported
+Running task... Cancel: sbt.server.ServerTaskCancellation@407beadd, check cycles: false
+Total time: 0 s, completed Mar 25, 2015 5:27:19 PM
+> server-post-command-cleanup
+> server-handle-next-server-request
+> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/echo:echoPlayVersionReport
+Evaluating tasks: echo:echoPlayVersionReport
+Running task... Cancel: sbt.server.ServerTaskCancellation@1d731a5f, check cycles: false
+Total time: 0 s, completed Mar 25, 2015 5:27:19 PM
 > server-post-command-cleanup
 > server-handle-next-server-request
 > backgroundRun
 Evaluating tasks: compile:backgroundRun
-Running task... Cancel: sbt.server.ServerTaskCancellation@2deb13b3, check cycles: false
-Total time: 0 s, completed Mar 25, 2015 10:18:36 AM
+Running task... Cancel: sbt.server.ServerTaskCancellation@45d1146f, check cycles: false
+Total time: 0 s, completed Mar 25, 2015 5:27:21 PM
 > server-post-command-cleanup
 > server-handle-next-server-request
 > {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkConfig
 Evaluating tasks: *:playForkConfig
-Running task... Cancel: sbt.server.ServerTaskCancellation@635be1d1, check cycles: false
-Total time: 0 s, completed Mar 25, 2015 10:18:39 AM
+Running task... Cancel: sbt.server.ServerTaskCancellation@1436a4a5, check cycles: false
+Total time: 0 s, completed Mar 25, 2015 5:27:24 PM
 > server-post-command-cleanup
 > server-handle-next-server-request
 > root/playForkNotifyStart http://localhost:9000
 Evaluating tasks: *:playForkNotifyStart
-Running task... Cancel: sbt.server.ServerTaskCancellation@63ede172, check cycles: false
-Total time: 0 s, completed Mar 25, 2015 10:18:39 AM
+Running task... Cancel: sbt.server.ServerTaskCancellation@7f19e5bc, check cycles: false
+Total time: 0 s, completed Mar 25, 2015 5:27:25 PM
 > server-post-command-cleanup
 > server-handle-next-server-request
 > {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
 Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@1cb0fc8f, check cycles: false
-Read from stdout: JavaScript linting on 1 source(s)
-JavaScript linting on 1 source(s)
+Running task... Cancel: sbt.server.ServerTaskCancellation@5d0132f4, check cycles: false
 
 Initial source changes: 
 	removed:Set()
@@ -16054,1116 +16073,27 @@ All initially invalidated sources: Set()
 Copy resource mappings: 
 	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
 	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 4 s, completed Mar 25, 2015 10:18:46 AM
+Total time: 1 s, completed Mar 25, 2015 5:27:26 PM
 > server-post-command-cleanup
 > server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@3edf2dd0, check cycles: false
-Read from stdout: JavaScript linting on 1 source(s)
-JavaScript linting on 1 source(s)
+> compile
+Evaluating tasks: compile:compile
+Running task... Cancel: sbt.server.ServerTaskCancellation@21e16bb5, check cycles: false
 
 Initial source changes: 
 	removed:Set()
 	added: Set()
-	modified: Set()
+	modified: Set(/home/ab/epfl/di55erent/projectx/projectx/app/controllers/Application.scala)
 Removed products: Set()
 External API changes: API Changes: Set()
 Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
+Initial directly invalidated sources: Set(/home/ab/epfl/di55erent/projectx/projectx/app/controllers/Application.scala)
 
 Sources indirectly invalidated by:
 	product: Set()
 	binary dep: Set()
 	external source: Set()
-All initially invalidated sources: Set()
-
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 2 s, completed Mar 25, 2015 10:19:50 AM
-> server-post-command-cleanup
-> server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@4baf273d, check cycles: false
-Read from stdout: JavaScript linting on 1 source(s)
-JavaScript linting on 1 source(s)
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set()
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set()
-
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 1 s, completed Mar 25, 2015 10:20:26 AM
-> server-post-command-cleanup
-> server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@77ea9f4b, check cycles: false
-Read from stdout: JavaScript linting on 1 source(s)
-JavaScript linting on 1 source(s)
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set()
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set()
-
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 1 s, completed Mar 25, 2015 10:23:04 AM
-> server-post-command-cleanup
-> server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@5ebe7dc2, check cycles: false
-Read from stdout: JavaScript linting on 1 source(s)
-JavaScript linting on 1 source(s)
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set()
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set()
-
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Read from stdout: /home/ab/epfl/di55erent/projectx/projectx/app/assets/js/main.js:32: Missing semicolon.
-/home/ab/epfl/di55erent/projectx/projectx/app/assets/js/main.js:32: Missing semicolon.
-Read from stdout: });
-    });
-Read from stdout: ^
-     ^
-Read from stdout: one error found
-one error found
-Total time: 1 s, completed Mar 25, 2015 10:27:18 AM
-> server-post-command-cleanup
-> server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@12df97cd, check cycles: false
-Read from stdout: JavaScript linting on 1 source(s)
-JavaScript linting on 1 source(s)
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set()
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set()
-
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 1 s, completed Mar 25, 2015 10:27:26 AM
-> server-post-command-cleanup
-> server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@bcbcbb8, check cycles: false
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set()
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set()
-
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 1 s, completed Mar 25, 2015 10:27:32 AM
-> server-post-command-cleanup
-> server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@492f6ba8, check cycles: false
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set()
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set()
-
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 0 s, completed Mar 25, 2015 10:27:46 AM
-> server-post-command-cleanup
-> server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@4ddf95b5, check cycles: false
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set()
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set()
-
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 0 s, completed Mar 25, 2015 10:28:07 AM
-> server-post-command-cleanup
-> server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@363aeb0f, check cycles: false
-Read from stdout: JavaScript linting on 1 source(s)
-JavaScript linting on 1 source(s)
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set()
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set()
-
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 1 s, completed Mar 25, 2015 10:28:23 AM
-> server-post-command-cleanup
-> server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@371c25b2, check cycles: false
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set()
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set()
-
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 0 s, completed Mar 25, 2015 10:28:25 AM
-> server-post-command-cleanup
-> server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@23a61826, check cycles: false
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set()
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set()
-
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 0 s, completed Mar 25, 2015 10:28:26 AM
-> server-post-command-cleanup
-> server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@3f3eec0b, check cycles: false
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set()
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set()
-
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 0 s, completed Mar 25, 2015 10:28:36 AM
-> server-post-command-cleanup
-> server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@445781b1, check cycles: false
-Read from stdout: JavaScript linting on 1 source(s)
-JavaScript linting on 1 source(s)
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set()
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set()
-
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 1 s, completed Mar 25, 2015 10:28:39 AM
-> server-post-command-cleanup
-> server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@56852340, check cycles: false
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set()
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set()
-
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 0 s, completed Mar 25, 2015 10:28:47 AM
-> server-post-command-cleanup
-> server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@31e8f7f3, check cycles: false
-Read from stdout: JavaScript linting on 1 source(s)
-JavaScript linting on 1 source(s)
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set()
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set()
-
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 1 s, completed Mar 25, 2015 10:29:49 AM
-> server-post-command-cleanup
-> server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@2f03f42c, check cycles: false
-Read from stdout: JavaScript linting on 1 source(s)
-JavaScript linting on 1 source(s)
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set()
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set()
-
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 1 s, completed Mar 25, 2015 10:30:15 AM
-> server-post-command-cleanup
-> server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@30efc225, check cycles: false
-Read from stdout: JavaScript linting on 1 source(s)
-JavaScript linting on 1 source(s)
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set()
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set()
-
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 1 s, completed Mar 25, 2015 10:30:36 AM
-> server-post-command-cleanup
-> server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@1058dc57, check cycles: false
-Read from stdout: JavaScript linting on 1 source(s)
-JavaScript linting on 1 source(s)
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set()
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set()
-
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 1 s, completed Mar 25, 2015 10:31:00 AM
-> server-post-command-cleanup
-> server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@3e691a47, check cycles: false
-Read from stdout: JavaScript linting on 1 source(s)
-JavaScript linting on 1 source(s)
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set()
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set()
-
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 1 s, completed Mar 25, 2015 10:37:03 AM
-> server-post-command-cleanup
-> server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@7245da5b, check cycles: false
-Read from stdout: JavaScript linting on 1 source(s)
-JavaScript linting on 1 source(s)
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set()
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set()
-
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 1 s, completed Mar 25, 2015 10:37:57 AM
-> server-post-command-cleanup
-> server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@6aab0a8b, check cycles: false
-Read from stdout: JavaScript linting on 1 source(s)
-JavaScript linting on 1 source(s)
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set()
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set()
-
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 1 s, completed Mar 25, 2015 10:38:09 AM
-> server-post-command-cleanup
-> server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@6811eadf, check cycles: false
-Read from stdout: JavaScript linting on 1 source(s)
-JavaScript linting on 1 source(s)
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set()
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set()
-
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 1 s, completed Mar 25, 2015 10:40:06 AM
-> server-post-command-cleanup
-> server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@76164d84, check cycles: false
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set()
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set()
-
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 0 s, completed Mar 25, 2015 10:40:11 AM
-> server-post-command-cleanup
-> server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@3b841f13, check cycles: false
-Read from stdout: JavaScript linting on 1 source(s)
-JavaScript linting on 1 source(s)
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set()
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set()
-
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 1 s, completed Mar 25, 2015 10:40:48 AM
-> server-post-command-cleanup
-> server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@5b9329cf, check cycles: false
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set()
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set()
-
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 0 s, completed Mar 25, 2015 10:40:54 AM
-> server-post-command-cleanup
-> server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@44194231, check cycles: false
-Read from stdout: JavaScript linting on 1 source(s)
-JavaScript linting on 1 source(s)
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set()
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set()
-
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 1 s, completed Mar 25, 2015 10:41:02 AM
-> server-post-command-cleanup
-> server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@332eca51, check cycles: false
-Read from stdout: JavaScript linting on 1 source(s)
-JavaScript linting on 1 source(s)
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set()
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set()
-
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 1 s, completed Mar 25, 2015 10:41:32 AM
-> server-post-command-cleanup
-> server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@a28e281, check cycles: false
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set()
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set()
-
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 0 s, completed Mar 25, 2015 10:41:41 AM
-> server-post-command-cleanup
-> server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@2aaead4d, check cycles: false
-Read from stdout: JavaScript linting on 1 source(s)
-JavaScript linting on 1 source(s)
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set()
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set()
-
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 1 s, completed Mar 25, 2015 10:42:04 AM
-> server-post-command-cleanup
-> server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@4f0fabd5, check cycles: false
-Read from stdout: JavaScript linting on 1 source(s)
-JavaScript linting on 1 source(s)
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set()
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set()
-
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 1 s, completed Mar 25, 2015 10:47:41 AM
-> server-post-command-cleanup
-> server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@475ce079, check cycles: false
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set()
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set()
-
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 0 s, completed Mar 25, 2015 10:47:42 AM
-> server-post-command-cleanup
-> server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@50001109, check cycles: false
-Read from stdout: JavaScript linting on 1 source(s)
-JavaScript linting on 1 source(s)
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set()
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set()
-
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 1 s, completed Mar 25, 2015 10:47:55 AM
-> server-post-command-cleanup
-> server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@a065be2, check cycles: false
-Read from stdout: JavaScript linting on 1 source(s)
-JavaScript linting on 1 source(s)
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set()
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set()
-
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 1 s, completed Mar 25, 2015 10:49:16 AM
-> server-post-command-cleanup
-> server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@36f2b3aa, check cycles: false
-Read from stdout: JavaScript linting on 1 source(s)
-JavaScript linting on 1 source(s)
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set()
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set()
-
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 1 s, completed Mar 25, 2015 10:50:21 AM
-> server-post-command-cleanup
-> server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@3e35d337, check cycles: false
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set()
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set()
-
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 0 s, completed Mar 25, 2015 10:50:28 AM
-> server-post-command-cleanup
-> server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@85482d0, check cycles: false
-Read from stdout: JavaScript linting on 1 source(s)
-JavaScript linting on 1 source(s)
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set()
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set()
-
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 1 s, completed Mar 25, 2015 10:51:22 AM
-> server-post-command-cleanup
-> server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@338b3e8d, check cycles: false
-Read from stdout: JavaScript linting on 1 source(s)
-JavaScript linting on 1 source(s)
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set()
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set()
-
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 1 s, completed Mar 25, 2015 10:51:47 AM
-> server-post-command-cleanup
-> server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@4a9d098b, check cycles: false
-Read from stdout: JavaScript linting on 1 source(s)
-JavaScript linting on 1 source(s)
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set()
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set()
-
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 1 s, completed Mar 25, 2015 10:52:06 AM
-> server-post-command-cleanup
-> server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@31ec7995, check cycles: false
-Read from stdout: JavaScript linting on 1 source(s)
-JavaScript linting on 1 source(s)
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set()
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set()
-
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 1 s, completed Mar 25, 2015 10:52:40 AM
-> server-post-command-cleanup
-> server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@5c392cfe, check cycles: false
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set()
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set()
-
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 0 s, completed Mar 25, 2015 10:53:04 AM
-> server-post-command-cleanup
-> server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@238843f2, check cycles: false
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set()
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set()
-
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 0 s, completed Mar 25, 2015 10:53:33 AM
-> server-post-command-cleanup
-> server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@69e9efa6, check cycles: false
-Read from stdout: JavaScript linting on 1 source(s)
-JavaScript linting on 1 source(s)
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set(/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/twirl/main/views/html/index.template.scala)
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set(/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/twirl/main/views/html/index.template.scala)
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set(/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/twirl/main/views/html/index.template.scala)
+All initially invalidated sources: Set(/home/ab/epfl/di55erent/projectx/projectx/app/controllers/Application.scala)
 
 Read from stdout: Compiling 1 Scala source to /home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes...
 Compiling 1 Scala source to /home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes...
@@ -17173,7 +16103,7 @@ Default repositories:
 Getting compiler-interface from component compiler for Scala 2.11.1
 Other repositories:
 Default repositories:
-Running cached compiler 7b7c667a, interfacing (CompilerInterface) with Scala compiler version 2.11.1
+Running cached compiler 1d3451be, interfacing (CompilerInterface) with Scala compiler version 2.11.1
 Calling Scala compiler with arguments  (CompilerInterface):
 	-deprecation
 	-unchecked
@@ -17183,22 +16113,43 @@ Calling Scala compiler with arguments  (CompilerInterface):
 	/usr/lib/jvm/java-7-openjdk/jre/lib/resources.jar:/usr/lib/jvm/java-7-openjdk/jre/lib/rt.jar:/usr/lib/jvm/java-7-openjdk/jre/lib/sunrsasign.jar:/usr/lib/jvm/java-7-openjdk/jre/lib/jsse.jar:/usr/lib/jvm/java-7-openjdk/jre/lib/jce.jar:/usr/lib/jvm/java-7-openjdk/jre/lib/charsets.jar:/usr/lib/jvm/java-7-openjdk/jre/lib/rhino.jar:/usr/lib/jvm/java-7-openjdk/jre/lib/jfr.jar:/usr/lib/jvm/java-7-openjdk/jre/classes:/home/ab/.ivy2/cache/org.scala-lang/scala-library/jars/scala-library-2.11.1.jar
 	-classpath
 	/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes:/home/ab/.ivy2/cache/com.typesafe.play/twirl-api_2.11/jars/twirl-api_2.11-1.0.2.jar:/home/ab/.ivy2/cache/org.apache.commons/commons-lang3/jars/commons-lang3-3.1.jar:/home/ab/.ivy2/cache/org.scala-lang.modules/scala-xml_2.11/bundles/scala-xml_2.11-1.0.1.jar:/home/ab/.ivy2/cache/com.typesafe.play/play_2.11/jars/play_2.11-2.3.8.jar:/home/ab/.ivy2/cache/com.typesafe.play/build-link/jars/build-link-2.3.8.jar:/home/ab/.ivy2/cache/com.typesafe.play/play-exceptions/jars/play-exceptions-2.3.8.jar:/home/ab/.ivy2/cache/org.javassist/javassist/bundles/javassist-3.18.2-GA.jar:/home/ab/.ivy2/cache/com.typesafe.play/play-iteratees_2.11/jars/play-iteratees_2.11-2.3.8.jar:/home/ab/.ivy2/cache/org.scala-stm/scala-stm_2.11/jars/scala-stm_2.11-0.7.jar:/home/ab/.ivy2/cache/com.typesafe/config/bundles/config-1.2.1.jar:/home/ab/.ivy2/cache/com.typesafe.play/play-json_2.11/jars/play-json_2.11-2.3.8.jar:/home/ab/.ivy2/cache/com.typesafe.play/play-functional_2.11/jars/play-functional_2.11-2.3.8.jar:/home/ab/.ivy2/cache/com.typesafe.play/play-datacommons_2.11/jars/play-datacommons_2.11-2.3.8.jar:/home/ab/.ivy2/cache/joda-time/joda-time/jars/joda-time-2.3.jar:/home/ab/.ivy2/cache/org.joda/joda-convert/jars/joda-convert-1.6.jar:/home/ab/.ivy2/cache/com.fasterxml.jackson.core/jackson-annotations/bundles/jackson-annotations-2.3.2.jar:/home/ab/.ivy2/cache/com.fasterxml.jackson.core/jackson-core/bundles/jackson-core-2.3.2.jar:/home/ab/.ivy2/cache/com.fasterxml.jackson.core/jackson-databind/bundles/jackson-databind-2.3.2.jar:/home/ab/.ivy2/cache/org.scala-lang/scala-reflect/jars/scala-reflect-2.11.1.jar:/home/ab/.ivy2/cache/org.scala-lang.modules/scala-parser-combinators_2.11/bundles/scala-parser-combinators_2.11-1.0.1.jar:/home/ab/.ivy2/cache/io.netty/netty/bundles/netty-3.9.3.Final.jar:/home/ab/.ivy2/cache/com.typesafe.netty/netty-http-pipelining/jars/netty-http-pipelining-1.1.2.jar:/home/ab/.ivy2/cache/org.slf4j/slf4j-api/jars/slf4j-api-1.7.6.jar:/home/ab/.ivy2/cache/org.slf4j/jul-to-slf4j/jars/jul-to-slf4j-1.7.6.jar:/home/ab/.ivy2/cache/org.slf4j/jcl-over-slf4j/jars/jcl-over-slf4j-1.7.6.jar:/home/ab/.ivy2/cache/ch.qos.logback/logback-core/jars/logback-core-1.1.1.jar:/home/ab/.ivy2/cache/ch.qos.logback/logback-classic/jars/logback-classic-1.1.1.jar:/home/ab/.ivy2/cache/com.typesafe.akka/akka-actor_2.11/jars/akka-actor_2.11-2.3.4.jar:/home/ab/.ivy2/cache/com.typesafe.akka/akka-slf4j_2.11/jars/akka-slf4j_2.11-2.3.4.jar:/home/ab/.ivy2/cache/commons-codec/commons-codec/jars/commons-codec-1.9.jar:/home/ab/.ivy2/cache/xerces/xercesImpl/jars/xercesImpl-2.11.0.jar:/home/ab/.ivy2/cache/xml-apis/xml-apis/jars/xml-apis-1.4.01.jar:/home/ab/.ivy2/cache/javax.transaction/jta/jars/jta-1.1.jar:/home/ab/.ivy2/cache/com.typesafe.play/play-jdbc_2.11/jars/play-jdbc_2.11-2.3.8.jar:/home/ab/.ivy2/cache/com.jolbox/bonecp/bundles/bonecp-0.8.0.RELEASE.jar:/home/ab/.ivy2/cache/com.h2database/h2/jars/h2-1.3.175.jar:/home/ab/.ivy2/cache/tyrex/tyrex/jars/tyrex-1.0.1.jar:/home/ab/.ivy2/cache/com.typesafe.play/anorm_2.11/jars/anorm_2.11-2.3.8.jar:/home/ab/.ivy2/cache/com.jsuereth/scala-arm_2.11/jars/scala-arm_2.11-1.4.jar:/home/ab/.ivy2/cache/org.scala-lang.plugins/scala-continuations-library_2.11/bundles/scala-continuations-library_2.11-1.0.1.jar:/home/ab/.ivy2/cache/com.typesafe.play/play-cache_2.11/jars/play-cache_2.11-2.3.8.jar:/home/ab/.ivy2/cache/net.sf.ehcache/ehcache-core/jars/ehcache-core-2.6.8.jar:/home/ab/.ivy2/cache/com.typesafe.play/play-ws_2.11/jars/play-ws_2.11-2.3.8.jar:/home/ab/.ivy2/cache/com.google.guava/guava/bundles/guava-16.0.1.jar:/home/ab/.ivy2/cache/com.ning/async-http-client/jars/async-http-client-1.8.15.jar:/home/ab/.ivy2/cache/oauth.signpost/signpost-core/jars/signpost-core-1.2.1.2.jar:/home/ab/.ivy2/cache/oauth.signpost/signpost-commonshttp4/jars/signpost-commonshttp4-1.2.1.2.jar:/home/ab/.ivy2/cache/org.apache.httpcomponents/httpcore/jars/httpcore-4.0.1.jar:/home/ab/.ivy2/cache/org.apache.httpcomponents/httpclient/jars/httpclient-4.0.1.jar:/home/ab/.ivy2/cache/commons-logging/commons-logging/jars/commons-logging-1.1.1.jar:/home/ab/.ivy2/cache/commons-io/commons-io/jars/commons-io-2.4.jar:/home/ab/.ivy2/cache/org.scalaj/scalaj-http_2.11/jars/scalaj-http_2.11-1.1.4.jar
-Scala compilation took 3.835990861 s
+Scala compilation took 7.141782305 s
 New invalidations:
 	Set()
 Initial set of included nodes: Set()
 Previously invalidated, but (transitively) depend on new invalidations:
 	Set()
 All newly invalidated sources after taking into account (previously) recompiled sources:Set()
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 5 s, completed Mar 25, 2015 11:02:27 AM
+Total time: 8 s, completed Mar 25, 2015 5:28:28 PM
 > server-post-command-cleanup
 > server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@34af29cb, check cycles: false
+> jobStop 1
+Evaluating tasks: *:jobStop
+Running task... Cancel: sbt.server.ServerTaskCancellation@451a907, check cycles: false
+Total time: 0 s, completed Mar 25, 2015 5:28:28 PM
+> server-post-command-cleanup
+> server-handle-next-server-request
+> backgroundRun
+Evaluating tasks: compile:backgroundRun
+Running task... Cancel: sbt.server.ServerTaskCancellation@78c59e28, check cycles: false
+Total time: 0 s, completed Mar 25, 2015 5:28:28 PM
+> server-post-command-cleanup
+> server-handle-next-server-request
+> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkConfig
+Evaluating tasks: *:playForkConfig
+Running task... Cancel: sbt.server.ServerTaskCancellation@6784beaa, check cycles: false
+Total time: 0 s, completed Mar 25, 2015 5:28:31 PM
+> server-post-command-cleanup
+> server-handle-next-server-request
+> root/playForkNotifyStart http://localhost:9000
+Evaluating tasks: *:playForkNotifyStart
+Running task... Cancel: sbt.server.ServerTaskCancellation@40230ce2, check cycles: false
+Total time: 0 s, completed Mar 25, 2015 5:28:32 PM
+> server-post-command-cleanup
+> server-handle-next-server-request
+> compile
+Evaluating tasks: compile:compile
+Running task... Cancel: sbt.server.ServerTaskCancellation@1584589f, check cycles: false
 
 Initial source changes: 
 	removed:Set()
@@ -17215,17 +16166,36 @@ Sources indirectly invalidated by:
 	external source: Set()
 All initially invalidated sources: Set()
 
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 0 s, completed Mar 25, 2015 11:02:28 AM
+Total time: 0 s, completed Mar 25, 2015 5:29:43 PM
 > server-post-command-cleanup
 > server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@403c2bf2, check cycles: false
-Read from stdout: JavaScript linting on 1 source(s)
-JavaScript linting on 1 source(s)
+> jobStop 2
+Evaluating tasks: *:jobStop
+Running task... Cancel: sbt.server.ServerTaskCancellation@cb11aef, check cycles: false
+Total time: 0 s, completed Mar 25, 2015 5:29:43 PM
+> server-post-command-cleanup
+> server-handle-next-server-request
+> backgroundRun
+Evaluating tasks: compile:backgroundRun
+Running task... Cancel: sbt.server.ServerTaskCancellation@17871d02, check cycles: false
+Total time: 0 s, completed Mar 25, 2015 5:29:43 PM
+> server-post-command-cleanup
+> server-handle-next-server-request
+> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkConfig
+Evaluating tasks: *:playForkConfig
+Running task... Cancel: sbt.server.ServerTaskCancellation@68bc4d0e, check cycles: false
+Total time: 0 s, completed Mar 25, 2015 5:29:46 PM
+> server-post-command-cleanup
+> server-handle-next-server-request
+> root/playForkNotifyStart http://localhost:9000
+Evaluating tasks: *:playForkNotifyStart
+Running task... Cancel: sbt.server.ServerTaskCancellation@41aa4aeb, check cycles: false
+Total time: 0 s, completed Mar 25, 2015 5:29:47 PM
+> server-post-command-cleanup
+> server-handle-next-server-request
+> compile
+Evaluating tasks: compile:compile
+Running task... Cancel: sbt.server.ServerTaskCancellation@3758de82, check cycles: false
 
 Initial source changes: 
 	removed:Set()
@@ -17242,57 +16212,51 @@ Sources indirectly invalidated by:
 	external source: Set()
 All initially invalidated sources: Set()
 
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 1 s, completed Mar 25, 2015 11:03:34 AM
+Total time: 0 s, completed Mar 25, 2015 5:29:52 PM
 > server-post-command-cleanup
 > server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@434f44b9, check cycles: false
-Read from stdout: JavaScript linting on 1 source(s)
-JavaScript linting on 1 source(s)
+> jobStop 3
+Evaluating tasks: *:jobStop
+Running task... Cancel: sbt.server.ServerTaskCancellation@2d51643d, check cycles: false
+Total time: 0 s, completed Mar 25, 2015 5:29:52 PM
+> server-post-command-cleanup
+> server-handle-next-server-request
+> backgroundRun
+Evaluating tasks: compile:backgroundRun
+Running task... Cancel: sbt.server.ServerTaskCancellation@4d34b0c6, check cycles: false
+Total time: 0 s, completed Mar 25, 2015 5:29:53 PM
+> server-post-command-cleanup
+> server-handle-next-server-request
+> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkConfig
+Evaluating tasks: *:playForkConfig
+Running task... Cancel: sbt.server.ServerTaskCancellation@2b78a64a, check cycles: false
+Total time: 0 s, completed Mar 25, 2015 5:29:55 PM
+> server-post-command-cleanup
+> server-handle-next-server-request
+> root/playForkNotifyStart http://localhost:9000
+Evaluating tasks: *:playForkNotifyStart
+Running task... Cancel: sbt.server.ServerTaskCancellation@1f42edd6, check cycles: false
+Total time: 0 s, completed Mar 25, 2015 5:29:56 PM
+> server-post-command-cleanup
+> server-handle-next-server-request
+> compile
+Evaluating tasks: compile:compile
+Running task... Cancel: sbt.server.ServerTaskCancellation@3c265fa3, check cycles: false
 
 Initial source changes: 
 	removed:Set()
 	added: Set()
-	modified: Set()
+	modified: Set(/home/ab/epfl/di55erent/projectx/projectx/app/controllers/Application.scala)
 Removed products: Set()
 External API changes: API Changes: Set()
 Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
+Initial directly invalidated sources: Set(/home/ab/epfl/di55erent/projectx/projectx/app/controllers/Application.scala)
 
 Sources indirectly invalidated by:
 	product: Set()
 	binary dep: Set()
 	external source: Set()
-All initially invalidated sources: Set()
-
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 1 s, completed Mar 25, 2015 11:03:48 AM
-> server-post-command-cleanup
-> server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@1d892525, check cycles: false
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set(/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/twirl/main/views/html/index.template.scala)
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set(/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/twirl/main/views/html/index.template.scala)
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set(/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/twirl/main/views/html/index.template.scala)
+All initially invalidated sources: Set(/home/ab/epfl/di55erent/projectx/projectx/app/controllers/Application.scala)
 
 Read from stdout: Compiling 1 Scala source to /home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes...
 Compiling 1 Scala source to /home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes...
@@ -17302,7 +16266,7 @@ Default repositories:
 Getting compiler-interface from component compiler for Scala 2.11.1
 Other repositories:
 Default repositories:
-Running cached compiler 7dbc023a, interfacing (CompilerInterface) with Scala compiler version 2.11.1
+Running cached compiler 362cbe9a, interfacing (CompilerInterface) with Scala compiler version 2.11.1
 Calling Scala compiler with arguments  (CompilerInterface):
 	-deprecation
 	-unchecked
@@ -17312,22 +16276,43 @@ Calling Scala compiler with arguments  (CompilerInterface):
 	/usr/lib/jvm/java-7-openjdk/jre/lib/resources.jar:/usr/lib/jvm/java-7-openjdk/jre/lib/rt.jar:/usr/lib/jvm/java-7-openjdk/jre/lib/sunrsasign.jar:/usr/lib/jvm/java-7-openjdk/jre/lib/jsse.jar:/usr/lib/jvm/java-7-openjdk/jre/lib/jce.jar:/usr/lib/jvm/java-7-openjdk/jre/lib/charsets.jar:/usr/lib/jvm/java-7-openjdk/jre/lib/rhino.jar:/usr/lib/jvm/java-7-openjdk/jre/lib/jfr.jar:/usr/lib/jvm/java-7-openjdk/jre/classes:/home/ab/.ivy2/cache/org.scala-lang/scala-library/jars/scala-library-2.11.1.jar
 	-classpath
 	/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes:/home/ab/.ivy2/cache/com.typesafe.play/twirl-api_2.11/jars/twirl-api_2.11-1.0.2.jar:/home/ab/.ivy2/cache/org.apache.commons/commons-lang3/jars/commons-lang3-3.1.jar:/home/ab/.ivy2/cache/org.scala-lang.modules/scala-xml_2.11/bundles/scala-xml_2.11-1.0.1.jar:/home/ab/.ivy2/cache/com.typesafe.play/play_2.11/jars/play_2.11-2.3.8.jar:/home/ab/.ivy2/cache/com.typesafe.play/build-link/jars/build-link-2.3.8.jar:/home/ab/.ivy2/cache/com.typesafe.play/play-exceptions/jars/play-exceptions-2.3.8.jar:/home/ab/.ivy2/cache/org.javassist/javassist/bundles/javassist-3.18.2-GA.jar:/home/ab/.ivy2/cache/com.typesafe.play/play-iteratees_2.11/jars/play-iteratees_2.11-2.3.8.jar:/home/ab/.ivy2/cache/org.scala-stm/scala-stm_2.11/jars/scala-stm_2.11-0.7.jar:/home/ab/.ivy2/cache/com.typesafe/config/bundles/config-1.2.1.jar:/home/ab/.ivy2/cache/com.typesafe.play/play-json_2.11/jars/play-json_2.11-2.3.8.jar:/home/ab/.ivy2/cache/com.typesafe.play/play-functional_2.11/jars/play-functional_2.11-2.3.8.jar:/home/ab/.ivy2/cache/com.typesafe.play/play-datacommons_2.11/jars/play-datacommons_2.11-2.3.8.jar:/home/ab/.ivy2/cache/joda-time/joda-time/jars/joda-time-2.3.jar:/home/ab/.ivy2/cache/org.joda/joda-convert/jars/joda-convert-1.6.jar:/home/ab/.ivy2/cache/com.fasterxml.jackson.core/jackson-annotations/bundles/jackson-annotations-2.3.2.jar:/home/ab/.ivy2/cache/com.fasterxml.jackson.core/jackson-core/bundles/jackson-core-2.3.2.jar:/home/ab/.ivy2/cache/com.fasterxml.jackson.core/jackson-databind/bundles/jackson-databind-2.3.2.jar:/home/ab/.ivy2/cache/org.scala-lang/scala-reflect/jars/scala-reflect-2.11.1.jar:/home/ab/.ivy2/cache/org.scala-lang.modules/scala-parser-combinators_2.11/bundles/scala-parser-combinators_2.11-1.0.1.jar:/home/ab/.ivy2/cache/io.netty/netty/bundles/netty-3.9.3.Final.jar:/home/ab/.ivy2/cache/com.typesafe.netty/netty-http-pipelining/jars/netty-http-pipelining-1.1.2.jar:/home/ab/.ivy2/cache/org.slf4j/slf4j-api/jars/slf4j-api-1.7.6.jar:/home/ab/.ivy2/cache/org.slf4j/jul-to-slf4j/jars/jul-to-slf4j-1.7.6.jar:/home/ab/.ivy2/cache/org.slf4j/jcl-over-slf4j/jars/jcl-over-slf4j-1.7.6.jar:/home/ab/.ivy2/cache/ch.qos.logback/logback-core/jars/logback-core-1.1.1.jar:/home/ab/.ivy2/cache/ch.qos.logback/logback-classic/jars/logback-classic-1.1.1.jar:/home/ab/.ivy2/cache/com.typesafe.akka/akka-actor_2.11/jars/akka-actor_2.11-2.3.4.jar:/home/ab/.ivy2/cache/com.typesafe.akka/akka-slf4j_2.11/jars/akka-slf4j_2.11-2.3.4.jar:/home/ab/.ivy2/cache/commons-codec/commons-codec/jars/commons-codec-1.9.jar:/home/ab/.ivy2/cache/xerces/xercesImpl/jars/xercesImpl-2.11.0.jar:/home/ab/.ivy2/cache/xml-apis/xml-apis/jars/xml-apis-1.4.01.jar:/home/ab/.ivy2/cache/javax.transaction/jta/jars/jta-1.1.jar:/home/ab/.ivy2/cache/com.typesafe.play/play-jdbc_2.11/jars/play-jdbc_2.11-2.3.8.jar:/home/ab/.ivy2/cache/com.jolbox/bonecp/bundles/bonecp-0.8.0.RELEASE.jar:/home/ab/.ivy2/cache/com.h2database/h2/jars/h2-1.3.175.jar:/home/ab/.ivy2/cache/tyrex/tyrex/jars/tyrex-1.0.1.jar:/home/ab/.ivy2/cache/com.typesafe.play/anorm_2.11/jars/anorm_2.11-2.3.8.jar:/home/ab/.ivy2/cache/com.jsuereth/scala-arm_2.11/jars/scala-arm_2.11-1.4.jar:/home/ab/.ivy2/cache/org.scala-lang.plugins/scala-continuations-library_2.11/bundles/scala-continuations-library_2.11-1.0.1.jar:/home/ab/.ivy2/cache/com.typesafe.play/play-cache_2.11/jars/play-cache_2.11-2.3.8.jar:/home/ab/.ivy2/cache/net.sf.ehcache/ehcache-core/jars/ehcache-core-2.6.8.jar:/home/ab/.ivy2/cache/com.typesafe.play/play-ws_2.11/jars/play-ws_2.11-2.3.8.jar:/home/ab/.ivy2/cache/com.google.guava/guava/bundles/guava-16.0.1.jar:/home/ab/.ivy2/cache/com.ning/async-http-client/jars/async-http-client-1.8.15.jar:/home/ab/.ivy2/cache/oauth.signpost/signpost-core/jars/signpost-core-1.2.1.2.jar:/home/ab/.ivy2/cache/oauth.signpost/signpost-commonshttp4/jars/signpost-commonshttp4-1.2.1.2.jar:/home/ab/.ivy2/cache/org.apache.httpcomponents/httpcore/jars/httpcore-4.0.1.jar:/home/ab/.ivy2/cache/org.apache.httpcomponents/httpclient/jars/httpclient-4.0.1.jar:/home/ab/.ivy2/cache/commons-logging/commons-logging/jars/commons-logging-1.1.1.jar:/home/ab/.ivy2/cache/commons-io/commons-io/jars/commons-io-2.4.jar:/home/ab/.ivy2/cache/org.scalaj/scalaj-http_2.11/jars/scalaj-http_2.11-1.1.4.jar
-Scala compilation took 1.406678742 s
+Scala compilation took 3.214747438 s
 New invalidations:
 	Set()
 Initial set of included nodes: Set()
 Previously invalidated, but (transitively) depend on new invalidations:
 	Set()
 All newly invalidated sources after taking into account (previously) recompiled sources:Set()
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 2 s, completed Mar 25, 2015 11:04:04 AM
+Total time: 4 s, completed Mar 25, 2015 5:30:20 PM
+> server-post-command-cleanup
+> server-handle-next-server-request
+> jobStop 4
+Evaluating tasks: *:jobStop
+Running task... Cancel: sbt.server.ServerTaskCancellation@216f468c, check cycles: false
+Total time: 0 s, completed Mar 25, 2015 5:30:20 PM
+> server-post-command-cleanup
+> server-handle-next-server-request
+> backgroundRun
+Evaluating tasks: compile:backgroundRun
+Running task... Cancel: sbt.server.ServerTaskCancellation@68df7d7b, check cycles: false
+Total time: 0 s, completed Mar 25, 2015 5:30:20 PM
+> server-post-command-cleanup
+> server-handle-next-server-request
+> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkConfig
+Evaluating tasks: *:playForkConfig
+Running task... Cancel: sbt.server.ServerTaskCancellation@106e99a8, check cycles: false
+Total time: 0 s, completed Mar 25, 2015 5:30:23 PM
+> server-post-command-cleanup
+> server-handle-next-server-request
+> root/playForkNotifyStart http://localhost:9000
+Evaluating tasks: *:playForkNotifyStart
+Running task... Cancel: sbt.server.ServerTaskCancellation@4d1be84f, check cycles: false
+Total time: 0 s, completed Mar 25, 2015 5:30:24 PM
 > server-post-command-cleanup
 > server-handle-next-server-request
 > {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
 Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@5896d3a4, check cycles: false
+Running task... Cancel: sbt.server.ServerTaskCancellation@354d2cad, check cycles: false
 
 Initial source changes: 
 	removed:Set()
@@ -17347,14 +16332,12 @@ All initially invalidated sources: Set()
 Copy resource mappings: 
 	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
 	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 0 s, completed Mar 25, 2015 11:04:22 AM
+Total time: 1 s, completed Mar 25, 2015 5:30:25 PM
 > server-post-command-cleanup
 > server-handle-next-server-request
 > {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
 Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@5c12c0f4, check cycles: false
-Read from stdout: JavaScript linting on 1 source(s)
-JavaScript linting on 1 source(s)
+Running task... Cancel: sbt.server.ServerTaskCancellation@1e9c272e, check cycles: false
 
 Initial source changes: 
 	removed:Set()
@@ -17374,22 +16357,12 @@ All initially invalidated sources: Set()
 Copy resource mappings: 
 	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
 	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Read from stdout: /home/ab/epfl/di55erent/projectx/projectx/app/assets/js/main.js:190: Missing semicolon.
-/home/ab/epfl/di55erent/projectx/projectx/app/assets/js/main.js:190: Missing semicolon.
-Read from stdout: var val = (Math.round(progress*100) * (index+1)) / total);
-    var val = (Math.round(progress*100) * (index+1)) / total);
-Read from stdout: ^
-                                                            ^
-Read from stdout: one error found
-one error found
-Total time: 1 s, completed Mar 25, 2015 11:06:49 AM
+Total time: 1 s, completed Mar 25, 2015 5:30:38 PM
 > server-post-command-cleanup
 > server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@2f670d1b, check cycles: false
-Read from stdout: JavaScript linting on 1 source(s)
-JavaScript linting on 1 source(s)
+> compile
+Evaluating tasks: compile:compile
+Running task... Cancel: sbt.server.ServerTaskCancellation@3330927b, check cycles: false
 
 Initial source changes: 
 	removed:Set()
@@ -17406,17 +16379,24 @@ Sources indirectly invalidated by:
 	external source: Set()
 All initially invalidated sources: Set()
 
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 1 s, completed Mar 25, 2015 11:06:55 AM
+Total time: 0 s, completed Mar 25, 2015 5:31:05 PM
 > server-post-command-cleanup
 > server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@7b61869c, check cycles: false
-Read from stdout: JavaScript linting on 1 source(s)
-JavaScript linting on 1 source(s)
+> jobStop 5
+Evaluating tasks: *:jobStop
+Running task... Cancel: sbt.server.ServerTaskCancellation@4c33a376, check cycles: false
+Total time: 0 s, completed Mar 25, 2015 5:31:05 PM
+> server-post-command-cleanup
+> server-handle-next-server-request
+> backgroundRun
+Evaluating tasks: compile:backgroundRun
+Running task... Cancel: sbt.server.ServerTaskCancellation@4d29b9bf, check cycles: false
+Total time: 0 s, completed Mar 25, 2015 5:31:05 PM
+> server-post-command-cleanup
+> server-handle-next-server-request
+> compile
+Evaluating tasks: compile:compile
+Running task... Cancel: sbt.server.ServerTaskCancellation@423302dd, check cycles: false
 
 Initial source changes: 
 	removed:Set()
@@ -17433,105 +16413,93 @@ Sources indirectly invalidated by:
 	external source: Set()
 All initially invalidated sources: Set()
 
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 1 s, completed Mar 25, 2015 11:08:37 AM
+Total time: 0 s, completed Mar 25, 2015 5:31:07 PM
 > server-post-command-cleanup
 > server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@22b580a5, check cycles: false
+> jobStop 5
+Evaluating tasks: *:jobStop
+Running task... Cancel: sbt.server.ServerTaskCancellation@85c34e1, check cycles: false
+Exception in thread "sbt-bg-threads-5" java.lang.Error: java.lang.InterruptedException: sleep interrupted
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1151)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:615)
+	at java.lang.Thread.run(Thread.java:745)
+Caused by: java.lang.InterruptedException: sleep interrupted
+	at java.lang.Thread.sleep(Native Method)
+	at play.sbt.forkrun.PlayForkProcess$.timedWaitFor$1(PlayForkProcess.scala:57)
+	at play.sbt.forkrun.PlayForkProcess$.play$sbt$forkrun$PlayForkProcess$$stop$1(PlayForkProcess.scala:64)
+	at play.sbt.forkrun.PlayForkProcess$.run(PlayForkProcess.scala:82)
+	at play.sbt.forkrun.PlayForkProcess$.apply(PlayForkProcess.scala:34)
+	at play.sbt.forkrun.PlayForkRun$$anonfun$backgroundForkRunTask$1$$anonfun$apply$7$$anonfun$apply$8$$anonfun$apply$9.apply(PlayForkRun.scala:108)
+	at play.sbt.forkrun.PlayForkRun$$anonfun$backgroundForkRunTask$1$$anonfun$apply$7$$anonfun$apply$8$$anonfun$apply$9.apply(PlayForkRun.scala:107)
+	at sbt.BackgroundThreadPool$$anonfun$1.apply$mcV$sp(AbstractBackgroundJobService.scala:134)
+	at sbt.BackgroundThreadPool$BackgroundRunnable.run(AbstractBackgroundJobService.scala:68)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+	... 2 more
+Total time: 0 s, completed Mar 25, 2015 5:31:07 PM
+> server-post-command-cleanup
+> server-handle-next-server-request
+> jobStop 6
+Evaluating tasks: *:jobStop
+Running task... Cancel: sbt.server.ServerTaskCancellation@2fcea24, check cycles: false
+Total time: 0 s, completed Mar 25, 2015 5:31:07 PM
+> server-post-command-cleanup
+> server-handle-next-server-request
+> backgroundRun
+Evaluating tasks: compile:backgroundRun
+Running task... Cancel: sbt.server.ServerTaskCancellation@5302b72e, check cycles: false
+Total time: 0 s, completed Mar 25, 2015 5:31:07 PM
+> server-post-command-cleanup
+> server-handle-next-server-request
+> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkConfig
+Evaluating tasks: *:playForkConfig
+Running task... Cancel: sbt.server.ServerTaskCancellation@6f34c33, check cycles: false
+Total time: 0 s, completed Mar 25, 2015 5:31:10 PM
+> server-post-command-cleanup
+> server-handle-next-server-request
+> root/playForkNotifyStart http://localhost:9000
+Evaluating tasks: *:playForkNotifyStart
+Running task... Cancel: sbt.server.ServerTaskCancellation@d580ff2, check cycles: false
+Total time: 0 s, completed Mar 25, 2015 5:31:10 PM
+> server-post-command-cleanup
+> server-handle-next-server-request
+Exception in thread "Thread-23" java.io.IOException: Stream closed
+	at java.io.BufferedInputStream.getBufIfOpen(BufferedInputStream.java:162)
+	at java.io.BufferedInputStream.read1(BufferedInputStream.java:272)
+	at java.io.BufferedInputStream.read(BufferedInputStream.java:334)
+	at sun.nio.cs.StreamDecoder.readBytes(StreamDecoder.java:283)
+	at sun.nio.cs.StreamDecoder.implRead(StreamDecoder.java:325)
+	at sun.nio.cs.StreamDecoder.read(StreamDecoder.java:177)
+	at java.io.InputStreamReader.read(InputStreamReader.java:184)
+	at java.io.BufferedReader.fill(BufferedReader.java:154)
+	at java.io.BufferedReader.readLine(BufferedReader.java:317)
+	at java.io.BufferedReader.readLine(BufferedReader.java:382)
+	at sbt.BasicIO$$anonfun$processFully$1$$anonfun$apply$8.apply(ProcessImpl.scala:58)
+	at sbt.BasicIO$$anonfun$processFully$1$$anonfun$apply$8.apply(ProcessImpl.scala:58)
+	at sbt.BasicIO$.readFully$1(ProcessImpl.scala:63)
+	at sbt.BasicIO$.processLinesFully(ProcessImpl.scala:69)
+	at sbt.BasicIO$$anonfun$processFully$1.apply(ProcessImpl.scala:58)
+	at sbt.BasicIO$$anonfun$processFully$1.apply(ProcessImpl.scala:55)
+	at play.sbt.forkrun.PlayForkProcess$$anonfun$2.apply$mcV$sp(PlayForkProcess.scala:47)
+	at play.sbt.forkrun.PlayForkProcess$$anon$1.run(PlayForkProcess.scala:120)
+	at java.lang.Thread.run(Thread.java:745)
+> compile
+Evaluating tasks: compile:compile
+Running task... Cancel: sbt.server.ServerTaskCancellation@18d971f3, check cycles: false
 
 Initial source changes: 
 	removed:Set()
 	added: Set()
-	modified: Set()
+	modified: Set(/home/ab/epfl/di55erent/projectx/projectx/app/controllers/Application.scala)
 Removed products: Set()
 External API changes: API Changes: Set()
 Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
+Initial directly invalidated sources: Set(/home/ab/epfl/di55erent/projectx/projectx/app/controllers/Application.scala)
 
 Sources indirectly invalidated by:
 	product: Set()
 	binary dep: Set()
 	external source: Set()
-All initially invalidated sources: Set()
-
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 0 s, completed Mar 25, 2015 11:08:44 AM
-> server-post-command-cleanup
-> server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@43150726, check cycles: false
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set()
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set()
-
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 0 s, completed Mar 25, 2015 11:09:06 AM
-> server-post-command-cleanup
-> server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@5bd29cac, check cycles: false
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set()
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set()
-
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 0 s, completed Mar 25, 2015 11:09:15 AM
-> server-post-command-cleanup
-> server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@7ed2eb90, check cycles: false
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set(/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/twirl/main/views/html/index.template.scala)
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set(/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/twirl/main/views/html/index.template.scala)
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set(/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/twirl/main/views/html/index.template.scala)
+All initially invalidated sources: Set(/home/ab/epfl/di55erent/projectx/projectx/app/controllers/Application.scala)
 
 Read from stdout: Compiling 1 Scala source to /home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes...
 Compiling 1 Scala source to /home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes...
@@ -17541,7 +16509,7 @@ Default repositories:
 Getting compiler-interface from component compiler for Scala 2.11.1
 Other repositories:
 Default repositories:
-Running cached compiler 39611fd9, interfacing (CompilerInterface) with Scala compiler version 2.11.1
+Running cached compiler 3805e1c7, interfacing (CompilerInterface) with Scala compiler version 2.11.1
 Calling Scala compiler with arguments  (CompilerInterface):
 	-deprecation
 	-unchecked
@@ -17551,37 +16519,58 @@ Calling Scala compiler with arguments  (CompilerInterface):
 	/usr/lib/jvm/java-7-openjdk/jre/lib/resources.jar:/usr/lib/jvm/java-7-openjdk/jre/lib/rt.jar:/usr/lib/jvm/java-7-openjdk/jre/lib/sunrsasign.jar:/usr/lib/jvm/java-7-openjdk/jre/lib/jsse.jar:/usr/lib/jvm/java-7-openjdk/jre/lib/jce.jar:/usr/lib/jvm/java-7-openjdk/jre/lib/charsets.jar:/usr/lib/jvm/java-7-openjdk/jre/lib/rhino.jar:/usr/lib/jvm/java-7-openjdk/jre/lib/jfr.jar:/usr/lib/jvm/java-7-openjdk/jre/classes:/home/ab/.ivy2/cache/org.scala-lang/scala-library/jars/scala-library-2.11.1.jar
 	-classpath
 	/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes:/home/ab/.ivy2/cache/com.typesafe.play/twirl-api_2.11/jars/twirl-api_2.11-1.0.2.jar:/home/ab/.ivy2/cache/org.apache.commons/commons-lang3/jars/commons-lang3-3.1.jar:/home/ab/.ivy2/cache/org.scala-lang.modules/scala-xml_2.11/bundles/scala-xml_2.11-1.0.1.jar:/home/ab/.ivy2/cache/com.typesafe.play/play_2.11/jars/play_2.11-2.3.8.jar:/home/ab/.ivy2/cache/com.typesafe.play/build-link/jars/build-link-2.3.8.jar:/home/ab/.ivy2/cache/com.typesafe.play/play-exceptions/jars/play-exceptions-2.3.8.jar:/home/ab/.ivy2/cache/org.javassist/javassist/bundles/javassist-3.18.2-GA.jar:/home/ab/.ivy2/cache/com.typesafe.play/play-iteratees_2.11/jars/play-iteratees_2.11-2.3.8.jar:/home/ab/.ivy2/cache/org.scala-stm/scala-stm_2.11/jars/scala-stm_2.11-0.7.jar:/home/ab/.ivy2/cache/com.typesafe/config/bundles/config-1.2.1.jar:/home/ab/.ivy2/cache/com.typesafe.play/play-json_2.11/jars/play-json_2.11-2.3.8.jar:/home/ab/.ivy2/cache/com.typesafe.play/play-functional_2.11/jars/play-functional_2.11-2.3.8.jar:/home/ab/.ivy2/cache/com.typesafe.play/play-datacommons_2.11/jars/play-datacommons_2.11-2.3.8.jar:/home/ab/.ivy2/cache/joda-time/joda-time/jars/joda-time-2.3.jar:/home/ab/.ivy2/cache/org.joda/joda-convert/jars/joda-convert-1.6.jar:/home/ab/.ivy2/cache/com.fasterxml.jackson.core/jackson-annotations/bundles/jackson-annotations-2.3.2.jar:/home/ab/.ivy2/cache/com.fasterxml.jackson.core/jackson-core/bundles/jackson-core-2.3.2.jar:/home/ab/.ivy2/cache/com.fasterxml.jackson.core/jackson-databind/bundles/jackson-databind-2.3.2.jar:/home/ab/.ivy2/cache/org.scala-lang/scala-reflect/jars/scala-reflect-2.11.1.jar:/home/ab/.ivy2/cache/org.scala-lang.modules/scala-parser-combinators_2.11/bundles/scala-parser-combinators_2.11-1.0.1.jar:/home/ab/.ivy2/cache/io.netty/netty/bundles/netty-3.9.3.Final.jar:/home/ab/.ivy2/cache/com.typesafe.netty/netty-http-pipelining/jars/netty-http-pipelining-1.1.2.jar:/home/ab/.ivy2/cache/org.slf4j/slf4j-api/jars/slf4j-api-1.7.6.jar:/home/ab/.ivy2/cache/org.slf4j/jul-to-slf4j/jars/jul-to-slf4j-1.7.6.jar:/home/ab/.ivy2/cache/org.slf4j/jcl-over-slf4j/jars/jcl-over-slf4j-1.7.6.jar:/home/ab/.ivy2/cache/ch.qos.logback/logback-core/jars/logback-core-1.1.1.jar:/home/ab/.ivy2/cache/ch.qos.logback/logback-classic/jars/logback-classic-1.1.1.jar:/home/ab/.ivy2/cache/com.typesafe.akka/akka-actor_2.11/jars/akka-actor_2.11-2.3.4.jar:/home/ab/.ivy2/cache/com.typesafe.akka/akka-slf4j_2.11/jars/akka-slf4j_2.11-2.3.4.jar:/home/ab/.ivy2/cache/commons-codec/commons-codec/jars/commons-codec-1.9.jar:/home/ab/.ivy2/cache/xerces/xercesImpl/jars/xercesImpl-2.11.0.jar:/home/ab/.ivy2/cache/xml-apis/xml-apis/jars/xml-apis-1.4.01.jar:/home/ab/.ivy2/cache/javax.transaction/jta/jars/jta-1.1.jar:/home/ab/.ivy2/cache/com.typesafe.play/play-jdbc_2.11/jars/play-jdbc_2.11-2.3.8.jar:/home/ab/.ivy2/cache/com.jolbox/bonecp/bundles/bonecp-0.8.0.RELEASE.jar:/home/ab/.ivy2/cache/com.h2database/h2/jars/h2-1.3.175.jar:/home/ab/.ivy2/cache/tyrex/tyrex/jars/tyrex-1.0.1.jar:/home/ab/.ivy2/cache/com.typesafe.play/anorm_2.11/jars/anorm_2.11-2.3.8.jar:/home/ab/.ivy2/cache/com.jsuereth/scala-arm_2.11/jars/scala-arm_2.11-1.4.jar:/home/ab/.ivy2/cache/org.scala-lang.plugins/scala-continuations-library_2.11/bundles/scala-continuations-library_2.11-1.0.1.jar:/home/ab/.ivy2/cache/com.typesafe.play/play-cache_2.11/jars/play-cache_2.11-2.3.8.jar:/home/ab/.ivy2/cache/net.sf.ehcache/ehcache-core/jars/ehcache-core-2.6.8.jar:/home/ab/.ivy2/cache/com.typesafe.play/play-ws_2.11/jars/play-ws_2.11-2.3.8.jar:/home/ab/.ivy2/cache/com.google.guava/guava/bundles/guava-16.0.1.jar:/home/ab/.ivy2/cache/com.ning/async-http-client/jars/async-http-client-1.8.15.jar:/home/ab/.ivy2/cache/oauth.signpost/signpost-core/jars/signpost-core-1.2.1.2.jar:/home/ab/.ivy2/cache/oauth.signpost/signpost-commonshttp4/jars/signpost-commonshttp4-1.2.1.2.jar:/home/ab/.ivy2/cache/org.apache.httpcomponents/httpcore/jars/httpcore-4.0.1.jar:/home/ab/.ivy2/cache/org.apache.httpcomponents/httpclient/jars/httpclient-4.0.1.jar:/home/ab/.ivy2/cache/commons-logging/commons-logging/jars/commons-logging-1.1.1.jar:/home/ab/.ivy2/cache/commons-io/commons-io/jars/commons-io-2.4.jar:/home/ab/.ivy2/cache/org.scalaj/scalaj-http_2.11/jars/scalaj-http_2.11-1.1.4.jar
-Scala compilation took 1.01389865 s
+Scala compilation took 2.248389944 s
 New invalidations:
 	Set()
 Initial set of included nodes: Set()
 Previously invalidated, but (transitively) depend on new invalidations:
 	Set()
 All newly invalidated sources after taking into account (previously) recompiled sources:Set()
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 1 s, completed Mar 25, 2015 11:09:55 AM
+Total time: 3 s, completed Mar 25, 2015 5:31:36 PM
 > server-post-command-cleanup
 > server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@5b439c83, check cycles: false
+> jobStop 7
+Evaluating tasks: *:jobStop
+Running task... Cancel: sbt.server.ServerTaskCancellation@38b7b2eb, check cycles: false
+Total time: 0 s, completed Mar 25, 2015 5:31:36 PM
+> server-post-command-cleanup
+> server-handle-next-server-request
+> backgroundRun
+Evaluating tasks: compile:backgroundRun
+Running task... Cancel: sbt.server.ServerTaskCancellation@62e5a7ea, check cycles: false
+Total time: 0 s, completed Mar 25, 2015 5:31:36 PM
+> server-post-command-cleanup
+> server-handle-next-server-request
+> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkConfig
+Evaluating tasks: *:playForkConfig
+Running task... Cancel: sbt.server.ServerTaskCancellation@7bff947c, check cycles: false
+Total time: 0 s, completed Mar 25, 2015 5:31:38 PM
+> server-post-command-cleanup
+> server-handle-next-server-request
+> root/playForkNotifyStart http://localhost:9000
+Evaluating tasks: *:playForkNotifyStart
+Running task... Cancel: sbt.server.ServerTaskCancellation@306566bb, check cycles: false
+Total time: 0 s, completed Mar 25, 2015 5:31:39 PM
+> server-post-command-cleanup
+> server-handle-next-server-request
+> compile
+Evaluating tasks: compile:compile
+Running task... Cancel: sbt.server.ServerTaskCancellation@355a7f37, check cycles: false
 
 Initial source changes: 
 	removed:Set()
 	added: Set()
-	modified: Set(/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/twirl/main/views/html/index.template.scala)
+	modified: Set(/home/ab/epfl/di55erent/projectx/projectx/app/controllers/Application.scala)
 Removed products: Set()
 External API changes: API Changes: Set()
 Modified binary dependencies: Set()
-Initial directly invalidated sources: Set(/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/twirl/main/views/html/index.template.scala)
+Initial directly invalidated sources: Set(/home/ab/epfl/di55erent/projectx/projectx/app/controllers/Application.scala)
 
 Sources indirectly invalidated by:
 	product: Set()
 	binary dep: Set()
 	external source: Set()
-All initially invalidated sources: Set(/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/twirl/main/views/html/index.template.scala)
+All initially invalidated sources: Set(/home/ab/epfl/di55erent/projectx/projectx/app/controllers/Application.scala)
 
 Read from stdout: Compiling 1 Scala source to /home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes...
 Compiling 1 Scala source to /home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes...
@@ -17591,7 +16580,7 @@ Default repositories:
 Getting compiler-interface from component compiler for Scala 2.11.1
 Other repositories:
 Default repositories:
-Running cached compiler 581f91d7, interfacing (CompilerInterface) with Scala compiler version 2.11.1
+Running cached compiler 2ea9a029, interfacing (CompilerInterface) with Scala compiler version 2.11.1
 Calling Scala compiler with arguments  (CompilerInterface):
 	-deprecation
 	-unchecked
@@ -17601,22 +16590,54 @@ Calling Scala compiler with arguments  (CompilerInterface):
 	/usr/lib/jvm/java-7-openjdk/jre/lib/resources.jar:/usr/lib/jvm/java-7-openjdk/jre/lib/rt.jar:/usr/lib/jvm/java-7-openjdk/jre/lib/sunrsasign.jar:/usr/lib/jvm/java-7-openjdk/jre/lib/jsse.jar:/usr/lib/jvm/java-7-openjdk/jre/lib/jce.jar:/usr/lib/jvm/java-7-openjdk/jre/lib/charsets.jar:/usr/lib/jvm/java-7-openjdk/jre/lib/rhino.jar:/usr/lib/jvm/java-7-openjdk/jre/lib/jfr.jar:/usr/lib/jvm/java-7-openjdk/jre/classes:/home/ab/.ivy2/cache/org.scala-lang/scala-library/jars/scala-library-2.11.1.jar
 	-classpath
 	/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes:/home/ab/.ivy2/cache/com.typesafe.play/twirl-api_2.11/jars/twirl-api_2.11-1.0.2.jar:/home/ab/.ivy2/cache/org.apache.commons/commons-lang3/jars/commons-lang3-3.1.jar:/home/ab/.ivy2/cache/org.scala-lang.modules/scala-xml_2.11/bundles/scala-xml_2.11-1.0.1.jar:/home/ab/.ivy2/cache/com.typesafe.play/play_2.11/jars/play_2.11-2.3.8.jar:/home/ab/.ivy2/cache/com.typesafe.play/build-link/jars/build-link-2.3.8.jar:/home/ab/.ivy2/cache/com.typesafe.play/play-exceptions/jars/play-exceptions-2.3.8.jar:/home/ab/.ivy2/cache/org.javassist/javassist/bundles/javassist-3.18.2-GA.jar:/home/ab/.ivy2/cache/com.typesafe.play/play-iteratees_2.11/jars/play-iteratees_2.11-2.3.8.jar:/home/ab/.ivy2/cache/org.scala-stm/scala-stm_2.11/jars/scala-stm_2.11-0.7.jar:/home/ab/.ivy2/cache/com.typesafe/config/bundles/config-1.2.1.jar:/home/ab/.ivy2/cache/com.typesafe.play/play-json_2.11/jars/play-json_2.11-2.3.8.jar:/home/ab/.ivy2/cache/com.typesafe.play/play-functional_2.11/jars/play-functional_2.11-2.3.8.jar:/home/ab/.ivy2/cache/com.typesafe.play/play-datacommons_2.11/jars/play-datacommons_2.11-2.3.8.jar:/home/ab/.ivy2/cache/joda-time/joda-time/jars/joda-time-2.3.jar:/home/ab/.ivy2/cache/org.joda/joda-convert/jars/joda-convert-1.6.jar:/home/ab/.ivy2/cache/com.fasterxml.jackson.core/jackson-annotations/bundles/jackson-annotations-2.3.2.jar:/home/ab/.ivy2/cache/com.fasterxml.jackson.core/jackson-core/bundles/jackson-core-2.3.2.jar:/home/ab/.ivy2/cache/com.fasterxml.jackson.core/jackson-databind/bundles/jackson-databind-2.3.2.jar:/home/ab/.ivy2/cache/org.scala-lang/scala-reflect/jars/scala-reflect-2.11.1.jar:/home/ab/.ivy2/cache/org.scala-lang.modules/scala-parser-combinators_2.11/bundles/scala-parser-combinators_2.11-1.0.1.jar:/home/ab/.ivy2/cache/io.netty/netty/bundles/netty-3.9.3.Final.jar:/home/ab/.ivy2/cache/com.typesafe.netty/netty-http-pipelining/jars/netty-http-pipelining-1.1.2.jar:/home/ab/.ivy2/cache/org.slf4j/slf4j-api/jars/slf4j-api-1.7.6.jar:/home/ab/.ivy2/cache/org.slf4j/jul-to-slf4j/jars/jul-to-slf4j-1.7.6.jar:/home/ab/.ivy2/cache/org.slf4j/jcl-over-slf4j/jars/jcl-over-slf4j-1.7.6.jar:/home/ab/.ivy2/cache/ch.qos.logback/logback-core/jars/logback-core-1.1.1.jar:/home/ab/.ivy2/cache/ch.qos.logback/logback-classic/jars/logback-classic-1.1.1.jar:/home/ab/.ivy2/cache/com.typesafe.akka/akka-actor_2.11/jars/akka-actor_2.11-2.3.4.jar:/home/ab/.ivy2/cache/com.typesafe.akka/akka-slf4j_2.11/jars/akka-slf4j_2.11-2.3.4.jar:/home/ab/.ivy2/cache/commons-codec/commons-codec/jars/commons-codec-1.9.jar:/home/ab/.ivy2/cache/xerces/xercesImpl/jars/xercesImpl-2.11.0.jar:/home/ab/.ivy2/cache/xml-apis/xml-apis/jars/xml-apis-1.4.01.jar:/home/ab/.ivy2/cache/javax.transaction/jta/jars/jta-1.1.jar:/home/ab/.ivy2/cache/com.typesafe.play/play-jdbc_2.11/jars/play-jdbc_2.11-2.3.8.jar:/home/ab/.ivy2/cache/com.jolbox/bonecp/bundles/bonecp-0.8.0.RELEASE.jar:/home/ab/.ivy2/cache/com.h2database/h2/jars/h2-1.3.175.jar:/home/ab/.ivy2/cache/tyrex/tyrex/jars/tyrex-1.0.1.jar:/home/ab/.ivy2/cache/com.typesafe.play/anorm_2.11/jars/anorm_2.11-2.3.8.jar:/home/ab/.ivy2/cache/com.jsuereth/scala-arm_2.11/jars/scala-arm_2.11-1.4.jar:/home/ab/.ivy2/cache/org.scala-lang.plugins/scala-continuations-library_2.11/bundles/scala-continuations-library_2.11-1.0.1.jar:/home/ab/.ivy2/cache/com.typesafe.play/play-cache_2.11/jars/play-cache_2.11-2.3.8.jar:/home/ab/.ivy2/cache/net.sf.ehcache/ehcache-core/jars/ehcache-core-2.6.8.jar:/home/ab/.ivy2/cache/com.typesafe.play/play-ws_2.11/jars/play-ws_2.11-2.3.8.jar:/home/ab/.ivy2/cache/com.google.guava/guava/bundles/guava-16.0.1.jar:/home/ab/.ivy2/cache/com.ning/async-http-client/jars/async-http-client-1.8.15.jar:/home/ab/.ivy2/cache/oauth.signpost/signpost-core/jars/signpost-core-1.2.1.2.jar:/home/ab/.ivy2/cache/oauth.signpost/signpost-commonshttp4/jars/signpost-commonshttp4-1.2.1.2.jar:/home/ab/.ivy2/cache/org.apache.httpcomponents/httpcore/jars/httpcore-4.0.1.jar:/home/ab/.ivy2/cache/org.apache.httpcomponents/httpclient/jars/httpclient-4.0.1.jar:/home/ab/.ivy2/cache/commons-logging/commons-logging/jars/commons-logging-1.1.1.jar:/home/ab/.ivy2/cache/commons-io/commons-io/jars/commons-io-2.4.jar:/home/ab/.ivy2/cache/org.scalaj/scalaj-http_2.11/jars/scalaj-http_2.11-1.1.4.jar
-Scala compilation took 0.789970117 s
+Scala compilation took 2.330154927 s
 New invalidations:
 	Set()
 Initial set of included nodes: Set()
 Previously invalidated, but (transitively) depend on new invalidations:
 	Set()
 All newly invalidated sources after taking into account (previously) recompiled sources:Set()
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 1 s, completed Mar 25, 2015 11:10:07 AM
+Total time: 3 s, completed Mar 25, 2015 5:31:53 PM
 > server-post-command-cleanup
 > server-handle-next-server-request
 > {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
 Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@6f58f99d, check cycles: false
+Running task... Cancel: sbt.server.ServerTaskCancellation@4c29e464, check cycles: false
+
+Canceling execution...
+Task java.util.concurrent.ExecutorCompletionService$QueueingFuture@581bdd44 rejected from java.util.concurrent.ThreadPoolExecutor@d5bc88d[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0]
+java.util.concurrent.RejectedExecutionException: Task java.util.concurrent.ExecutorCompletionService$QueueingFuture@581bdd44 rejected from java.util.concurrent.ThreadPoolExecutor@d5bc88d[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0]
+Use 'last' for the full log.
+> server-post-command-error-handler
+> server-post-command-cleanup
+> server-handle-next-server-request
+> jobStop 8
+Evaluating tasks: *:jobStop
+Running task... Cancel: sbt.server.ServerTaskCancellation@58df8e8, check cycles: false
+Total time: 0 s, completed Mar 25, 2015 5:31:53 PM
+> server-post-command-cleanup
+> server-handle-next-server-request
+> backgroundRun
+Evaluating tasks: compile:backgroundRun
+Running task... Cancel: sbt.server.ServerTaskCancellation@14b8ccad, check cycles: false
+Total time: 0 s, completed Mar 25, 2015 5:31:53 PM
+> server-post-command-cleanup
+> server-handle-next-server-request
+> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkConfig
+Evaluating tasks: *:playForkConfig
+Running task... Cancel: sbt.server.ServerTaskCancellation@5f7d1e1b, check cycles: false
+Total time: 0 s, completed Mar 25, 2015 5:31:56 PM
+> server-post-command-cleanup
+> server-handle-next-server-request
+> root/playForkNotifyStart http://localhost:9000
+Evaluating tasks: *:playForkNotifyStart
+Running task... Cancel: sbt.server.ServerTaskCancellation@5c20e957, check cycles: false
+Total time: 0 s, completed Mar 25, 2015 5:31:57 PM
+> server-post-command-cleanup
+> server-handle-next-server-request
+> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
+Evaluating tasks: *:playForkReload
+Running task... Cancel: sbt.server.ServerTaskCancellation@4c5ec960, check cycles: false
 
 Initial source changes: 
 	removed:Set()
@@ -17636,14 +16657,12 @@ All initially invalidated sources: Set()
 Copy resource mappings: 
 	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
 	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 0 s, completed Mar 25, 2015 11:10:15 AM
+Total time: 1 s, completed Mar 25, 2015 5:31:58 PM
 > server-post-command-cleanup
 > server-handle-next-server-request
 > {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
 Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@55a0c68e, check cycles: false
-Read from stdout: JavaScript linting on 1 source(s)
-JavaScript linting on 1 source(s)
+Running task... Cancel: sbt.server.ServerTaskCancellation@2bb9c220, check cycles: false
 
 Initial source changes: 
 	removed:Set()
@@ -17663,28 +16682,32 @@ All initially invalidated sources: Set()
 Copy resource mappings: 
 	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
 	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Read from stdout: /home/ab/epfl/di55erent/projectx/projectx/app/assets/js/main.js:190: Expected ')' to match '(' from line 190 and instead saw ';'.
-/home/ab/epfl/di55erent/projectx/projectx/app/assets/js/main.js:190: Expected ')' to match '(' from line 190 and instead saw ';'.
-Read from stdout: var val = (Math.round((progress+index+1)*100) / total;
-    var val = (Math.round((progress+index+1)*100) / total;
-Read from stdout: ^
-                                                         ^
-Read from stdout: /home/ab/epfl/di55erent/projectx/projectx/app/assets/js/main.js:190: Missing semicolon.
-/home/ab/epfl/di55erent/projectx/projectx/app/assets/js/main.js:190: Missing semicolon.
-Read from stdout: var val = (Math.round((progress+index+1)*100) / total;
-    var val = (Math.round((progress+index+1)*100) / total;
-Read from stdout: ^
-                                                          ^
-Read from stdout: two errors found
-two errors found
-Total time: 1 s, completed Mar 25, 2015 11:11:22 AM
+Total time: 1 s, completed Mar 25, 2015 5:32:00 PM
 > server-post-command-cleanup
 > server-handle-next-server-request
+Exception in thread "Thread-31" java.io.IOException: Stream closed
+	at java.io.BufferedInputStream.getBufIfOpen(BufferedInputStream.java:162)
+	at java.io.BufferedInputStream.read1(BufferedInputStream.java:272)
+	at java.io.BufferedInputStream.read(BufferedInputStream.java:334)
+	at sun.nio.cs.StreamDecoder.readBytes(StreamDecoder.java:283)
+	at sun.nio.cs.StreamDecoder.implRead(StreamDecoder.java:325)
+	at sun.nio.cs.StreamDecoder.read(StreamDecoder.java:177)
+	at java.io.InputStreamReader.read(InputStreamReader.java:184)
+	at java.io.BufferedReader.fill(BufferedReader.java:154)
+	at java.io.BufferedReader.readLine(BufferedReader.java:317)
+	at java.io.BufferedReader.readLine(BufferedReader.java:382)
+	at sbt.BasicIO$$anonfun$processFully$1$$anonfun$apply$8.apply(ProcessImpl.scala:58)
+	at sbt.BasicIO$$anonfun$processFully$1$$anonfun$apply$8.apply(ProcessImpl.scala:58)
+	at sbt.BasicIO$.readFully$1(ProcessImpl.scala:63)
+	at sbt.BasicIO$.processLinesFully(ProcessImpl.scala:69)
+	at sbt.BasicIO$$anonfun$processFully$1.apply(ProcessImpl.scala:58)
+	at sbt.BasicIO$$anonfun$processFully$1.apply(ProcessImpl.scala:55)
+	at play.sbt.forkrun.PlayForkProcess$$anonfun$2.apply$mcV$sp(PlayForkProcess.scala:47)
+	at play.sbt.forkrun.PlayForkProcess$$anon$1.run(PlayForkProcess.scala:120)
+	at java.lang.Thread.run(Thread.java:745)
 > {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
 Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@6e03a7b2, check cycles: false
-Read from stdout: JavaScript linting on 1 source(s)
-JavaScript linting on 1 source(s)
+Running task... Cancel: sbt.server.ServerTaskCancellation@7432f35b, check cycles: false
 
 Initial source changes: 
 	removed:Set()
@@ -17704,12 +16727,12 @@ All initially invalidated sources: Set()
 Copy resource mappings: 
 	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
 	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 1 s, completed Mar 25, 2015 11:11:30 AM
+Total time: 1 s, completed Mar 25, 2015 5:32:04 PM
 > server-post-command-cleanup
 > server-handle-next-server-request
 > {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
 Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@3a646a78, check cycles: false
+Running task... Cancel: sbt.server.ServerTaskCancellation@7de2d332, check cycles: false
 
 Initial source changes: 
 	removed:Set()
@@ -17729,14 +16752,58 @@ All initially invalidated sources: Set()
 Copy resource mappings: 
 	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
 	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 0 s, completed Mar 25, 2015 11:11:37 AM
+Total time: 1 s, completed Mar 25, 2015 5:32:12 PM
+> server-post-command-cleanup
+> server-handle-next-server-request
+> compile
+Evaluating tasks: compile:compile
+Running task... Cancel: sbt.server.ServerTaskCancellation@6b6d6158, check cycles: false
+
+Initial source changes: 
+	removed:Set()
+	added: Set()
+	modified: Set()
+Removed products: Set()
+External API changes: API Changes: Set()
+Modified binary dependencies: Set()
+Initial directly invalidated sources: Set()
+
+Sources indirectly invalidated by:
+	product: Set()
+	binary dep: Set()
+	external source: Set()
+All initially invalidated sources: Set()
+
+Total time: 0 s, completed Mar 25, 2015 5:32:22 PM
+> server-post-command-cleanup
+> server-handle-next-server-request
+> jobStop 9
+Evaluating tasks: *:jobStop
+Running task... Cancel: sbt.server.ServerTaskCancellation@d5bfdf8, check cycles: false
+Total time: 0 s, completed Mar 25, 2015 5:32:22 PM
+> server-post-command-cleanup
+> server-handle-next-server-request
+> backgroundRun
+Evaluating tasks: compile:backgroundRun
+Running task... Cancel: sbt.server.ServerTaskCancellation@6c828c0f, check cycles: false
+Total time: 0 s, completed Mar 25, 2015 5:32:22 PM
+> server-post-command-cleanup
+> server-handle-next-server-request
+> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkConfig
+Evaluating tasks: *:playForkConfig
+Running task... Cancel: sbt.server.ServerTaskCancellation@1437b401, check cycles: false
+Total time: 0 s, completed Mar 25, 2015 5:32:25 PM
+> server-post-command-cleanup
+> server-handle-next-server-request
+> root/playForkNotifyStart http://localhost:9000
+Evaluating tasks: *:playForkNotifyStart
+Running task... Cancel: sbt.server.ServerTaskCancellation@69101206, check cycles: false
+Total time: 0 s, completed Mar 25, 2015 5:32:26 PM
 > server-post-command-cleanup
 > server-handle-next-server-request
 > {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
 Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@4f895f23, check cycles: false
-Read from stdout: JavaScript linting on 1 source(s)
-JavaScript linting on 1 source(s)
+Running task... Cancel: sbt.server.ServerTaskCancellation@648c99fa, check cycles: false
 
 Initial source changes: 
 	removed:Set()
@@ -17756,12 +16823,12 @@ All initially invalidated sources: Set()
 Copy resource mappings: 
 	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
 	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 1 s, completed Mar 25, 2015 11:11:56 AM
+Total time: 0 s, completed Mar 25, 2015 5:32:32 PM
 > server-post-command-cleanup
 > server-handle-next-server-request
 > {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
 Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@264e45a7, check cycles: false
+Running task... Cancel: sbt.server.ServerTaskCancellation@2c131cb5, check cycles: false
 
 Initial source changes: 
 	removed:Set()
@@ -17781,14 +16848,12 @@ All initially invalidated sources: Set()
 Copy resource mappings: 
 	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
 	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 0 s, completed Mar 25, 2015 11:12:03 AM
+Total time: 1 s, completed Mar 25, 2015 5:32:38 PM
 > server-post-command-cleanup
 > server-handle-next-server-request
 > {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
 Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@54f7fde2, check cycles: false
-Read from stdout: JavaScript linting on 1 source(s)
-JavaScript linting on 1 source(s)
+Running task... Cancel: sbt.server.ServerTaskCancellation@2b0a2c23, check cycles: false
 
 Initial source changes: 
 	removed:Set()
@@ -17808,12 +16873,12 @@ All initially invalidated sources: Set()
 Copy resource mappings: 
 	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
 	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 1 s, completed Mar 25, 2015 11:12:27 AM
+Total time: 1 s, completed Mar 25, 2015 5:32:51 PM
 > server-post-command-cleanup
 > server-handle-next-server-request
 > {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
 Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@2ddea78c, check cycles: false
+Running task... Cancel: sbt.server.ServerTaskCancellation@731756aa, check cycles: false
 
 Initial source changes: 
 	removed:Set()
@@ -17833,14 +16898,12 @@ All initially invalidated sources: Set()
 Copy resource mappings: 
 	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
 	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 0 s, completed Mar 25, 2015 11:12:35 AM
+Total time: 1 s, completed Mar 25, 2015 5:33:25 PM
 > server-post-command-cleanup
 > server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@efd2717, check cycles: false
-Read from stdout: JavaScript linting on 1 source(s)
-JavaScript linting on 1 source(s)
+> compile
+Evaluating tasks: compile:compile
+Running task... Cancel: sbt.server.ServerTaskCancellation@7d4d3953, check cycles: false
 
 Initial source changes: 
 	removed:Set()
@@ -17857,15 +16920,24 @@ Sources indirectly invalidated by:
 	external source: Set()
 All initially invalidated sources: Set()
 
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 1 s, completed Mar 25, 2015 11:16:13 AM
+Total time: 0 s, completed Mar 25, 2015 5:34:47 PM
 > server-post-command-cleanup
 > server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@357345ce, check cycles: false
+> jobStop 10
+Evaluating tasks: *:jobStop
+Running task... Cancel: sbt.server.ServerTaskCancellation@bcdbb74, check cycles: false
+Total time: 0 s, completed Mar 25, 2015 5:34:47 PM
+> server-post-command-cleanup
+> server-handle-next-server-request
+> backgroundRun
+Evaluating tasks: compile:backgroundRun
+Running task... Cancel: sbt.server.ServerTaskCancellation@23d194ab, check cycles: false
+Total time: 0 s, completed Mar 25, 2015 5:34:47 PM
+> server-post-command-cleanup
+> server-handle-next-server-request
+> compile
+Evaluating tasks: compile:compile
+Running task... Cancel: sbt.server.ServerTaskCancellation@1f66652e, check cycles: false
 
 Initial source changes: 
 	removed:Set()
@@ -17882,323 +16954,61 @@ Sources indirectly invalidated by:
 	external source: Set()
 All initially invalidated sources: Set()
 
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 0 s, completed Mar 25, 2015 11:16:20 AM
+Total time: 0 s, completed Mar 25, 2015 5:34:48 PM
 > server-post-command-cleanup
 > server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@797a3112, check cycles: false
-Read from stdout: JavaScript linting on 1 source(s)
-JavaScript linting on 1 source(s)
+> jobStop 10
+Evaluating tasks: *:jobStop
+Running task... Cancel: sbt.server.ServerTaskCancellation@30e16d26, check cycles: false
+Exception in thread "sbt-bg-threads-10" java.lang.Error: java.lang.InterruptedException: sleep interrupted
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1151)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:615)
+	at java.lang.Thread.run(Thread.java:745)
+Caused by: java.lang.InterruptedException: sleep interrupted
+	at java.lang.Thread.sleep(Native Method)
+	at play.sbt.forkrun.PlayForkProcess$.timedWaitFor$1(PlayForkProcess.scala:57)
+	at play.sbt.forkrun.PlayForkProcess$.play$sbt$forkrun$PlayForkProcess$$stop$1(PlayForkProcess.scala:64)
+	at play.sbt.forkrun.PlayForkProcess$.run(PlayForkProcess.scala:82)
+	at play.sbt.forkrun.PlayForkProcess$.apply(PlayForkProcess.scala:34)
+	at play.sbt.forkrun.PlayForkRun$$anonfun$backgroundForkRunTask$1$$anonfun$apply$7$$anonfun$apply$8$$anonfun$apply$9.apply(PlayForkRun.scala:108)
+	at play.sbt.forkrun.PlayForkRun$$anonfun$backgroundForkRunTask$1$$anonfun$apply$7$$anonfun$apply$8$$anonfun$apply$9.apply(PlayForkRun.scala:107)
+	at sbt.BackgroundThreadPool$$anonfun$1.apply$mcV$sp(AbstractBackgroundJobService.scala:134)
+	at sbt.BackgroundThreadPool$BackgroundRunnable.run(AbstractBackgroundJobService.scala:68)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+	... 2 more
+Total time: 0 s, completed Mar 25, 2015 5:34:48 PM
+> server-post-command-cleanup
+> server-handle-next-server-request
+> jobStop 11
+Evaluating tasks: *:jobStop
+Running task... Cancel: sbt.server.ServerTaskCancellation@6cb1efd4, check cycles: false
+Total time: 0 s, completed Mar 25, 2015 5:34:48 PM
+> server-post-command-cleanup
+> server-handle-next-server-request
+> backgroundRun
+Evaluating tasks: compile:backgroundRun
+Running task... Cancel: sbt.server.ServerTaskCancellation@3e3999d7, check cycles: false
+Total time: 0 s, completed Mar 25, 2015 5:34:48 PM
+> server-post-command-cleanup
+> server-handle-next-server-request
+> compile
+Evaluating tasks: compile:compile
+Running task... Cancel: sbt.server.ServerTaskCancellation@a3413e5, check cycles: false
 
 Initial source changes: 
 	removed:Set()
 	added: Set()
-	modified: Set()
+	modified: Set(/home/ab/epfl/di55erent/projectx/projectx/app/controllers/Application.scala)
 Removed products: Set()
 External API changes: API Changes: Set()
 Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
+Initial directly invalidated sources: Set(/home/ab/epfl/di55erent/projectx/projectx/app/controllers/Application.scala)
 
 Sources indirectly invalidated by:
 	product: Set()
 	binary dep: Set()
 	external source: Set()
-All initially invalidated sources: Set()
-
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 1 s, completed Mar 25, 2015 11:20:40 AM
-> server-post-command-cleanup
-> server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@460ad983, check cycles: false
-Read from stdout: JavaScript linting on 1 source(s)
-JavaScript linting on 1 source(s)
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set()
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set()
-
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 1 s, completed Mar 25, 2015 11:23:54 AM
-> server-post-command-cleanup
-> server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@84a0de8, check cycles: false
-Read from stdout: JavaScript linting on 1 source(s)
-JavaScript linting on 1 source(s)
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set()
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set()
-
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 1 s, completed Mar 25, 2015 11:24:09 AM
-> server-post-command-cleanup
-> server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@34ebe068, check cycles: false
-Read from stdout: JavaScript linting on 1 source(s)
-JavaScript linting on 1 source(s)
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set()
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set()
-
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 1 s, completed Mar 25, 2015 11:24:35 AM
-> server-post-command-cleanup
-> server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@66a9be54, check cycles: false
-Read from stdout: JavaScript linting on 1 source(s)
-JavaScript linting on 1 source(s)
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set()
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set()
-
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 1 s, completed Mar 25, 2015 11:25:08 AM
-> server-post-command-cleanup
-> server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@389ebddd, check cycles: false
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set()
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set()
-
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 0 s, completed Mar 25, 2015 11:25:16 AM
-> server-post-command-cleanup
-> server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@3205a7d1, check cycles: false
-Read from stdout: JavaScript linting on 1 source(s)
-JavaScript linting on 1 source(s)
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set()
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set()
-
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 1 s, completed Mar 25, 2015 11:26:32 AM
-> server-post-command-cleanup
-> server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@3cd3caa0, check cycles: false
-Read from stdout: JavaScript linting on 1 source(s)
-JavaScript linting on 1 source(s)
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set()
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set()
-
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 1 s, completed Mar 25, 2015 11:27:31 AM
-> server-post-command-cleanup
-> server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@5197eefb, check cycles: false
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set()
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set()
-
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 0 s, completed Mar 25, 2015 11:27:37 AM
-> server-post-command-cleanup
-> server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@570c7678, check cycles: false
-Read from stdout: JavaScript linting on 1 source(s)
-JavaScript linting on 1 source(s)
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set()
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set()
-
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 1 s, completed Mar 25, 2015 11:29:12 AM
-> server-post-command-cleanup
-> server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@71b44ef6, check cycles: false
-Read from stdout: JavaScript linting on 1 source(s)
-JavaScript linting on 1 source(s)
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set()
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set()
-
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 1 s, completed Mar 25, 2015 11:34:25 AM
-> server-post-command-cleanup
-> server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@18aa1594, check cycles: false
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set(/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/twirl/main/views/html/index.template.scala)
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set(/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/twirl/main/views/html/index.template.scala)
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set(/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/twirl/main/views/html/index.template.scala)
+All initially invalidated sources: Set(/home/ab/epfl/di55erent/projectx/projectx/app/controllers/Application.scala)
 
 Read from stdout: Compiling 1 Scala source to /home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes...
 Compiling 1 Scala source to /home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes...
@@ -18208,7 +17018,7 @@ Default repositories:
 Getting compiler-interface from component compiler for Scala 2.11.1
 Other repositories:
 Default repositories:
-Running cached compiler 3c39ecb7, interfacing (CompilerInterface) with Scala compiler version 2.11.1
+Running cached compiler 8b200e4, interfacing (CompilerInterface) with Scala compiler version 2.11.1
 Calling Scala compiler with arguments  (CompilerInterface):
 	-deprecation
 	-unchecked
@@ -18218,147 +17028,90 @@ Calling Scala compiler with arguments  (CompilerInterface):
 	/usr/lib/jvm/java-7-openjdk/jre/lib/resources.jar:/usr/lib/jvm/java-7-openjdk/jre/lib/rt.jar:/usr/lib/jvm/java-7-openjdk/jre/lib/sunrsasign.jar:/usr/lib/jvm/java-7-openjdk/jre/lib/jsse.jar:/usr/lib/jvm/java-7-openjdk/jre/lib/jce.jar:/usr/lib/jvm/java-7-openjdk/jre/lib/charsets.jar:/usr/lib/jvm/java-7-openjdk/jre/lib/rhino.jar:/usr/lib/jvm/java-7-openjdk/jre/lib/jfr.jar:/usr/lib/jvm/java-7-openjdk/jre/classes:/home/ab/.ivy2/cache/org.scala-lang/scala-library/jars/scala-library-2.11.1.jar
 	-classpath
 	/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes:/home/ab/.ivy2/cache/com.typesafe.play/twirl-api_2.11/jars/twirl-api_2.11-1.0.2.jar:/home/ab/.ivy2/cache/org.apache.commons/commons-lang3/jars/commons-lang3-3.1.jar:/home/ab/.ivy2/cache/org.scala-lang.modules/scala-xml_2.11/bundles/scala-xml_2.11-1.0.1.jar:/home/ab/.ivy2/cache/com.typesafe.play/play_2.11/jars/play_2.11-2.3.8.jar:/home/ab/.ivy2/cache/com.typesafe.play/build-link/jars/build-link-2.3.8.jar:/home/ab/.ivy2/cache/com.typesafe.play/play-exceptions/jars/play-exceptions-2.3.8.jar:/home/ab/.ivy2/cache/org.javassist/javassist/bundles/javassist-3.18.2-GA.jar:/home/ab/.ivy2/cache/com.typesafe.play/play-iteratees_2.11/jars/play-iteratees_2.11-2.3.8.jar:/home/ab/.ivy2/cache/org.scala-stm/scala-stm_2.11/jars/scala-stm_2.11-0.7.jar:/home/ab/.ivy2/cache/com.typesafe/config/bundles/config-1.2.1.jar:/home/ab/.ivy2/cache/com.typesafe.play/play-json_2.11/jars/play-json_2.11-2.3.8.jar:/home/ab/.ivy2/cache/com.typesafe.play/play-functional_2.11/jars/play-functional_2.11-2.3.8.jar:/home/ab/.ivy2/cache/com.typesafe.play/play-datacommons_2.11/jars/play-datacommons_2.11-2.3.8.jar:/home/ab/.ivy2/cache/joda-time/joda-time/jars/joda-time-2.3.jar:/home/ab/.ivy2/cache/org.joda/joda-convert/jars/joda-convert-1.6.jar:/home/ab/.ivy2/cache/com.fasterxml.jackson.core/jackson-annotations/bundles/jackson-annotations-2.3.2.jar:/home/ab/.ivy2/cache/com.fasterxml.jackson.core/jackson-core/bundles/jackson-core-2.3.2.jar:/home/ab/.ivy2/cache/com.fasterxml.jackson.core/jackson-databind/bundles/jackson-databind-2.3.2.jar:/home/ab/.ivy2/cache/org.scala-lang/scala-reflect/jars/scala-reflect-2.11.1.jar:/home/ab/.ivy2/cache/org.scala-lang.modules/scala-parser-combinators_2.11/bundles/scala-parser-combinators_2.11-1.0.1.jar:/home/ab/.ivy2/cache/io.netty/netty/bundles/netty-3.9.3.Final.jar:/home/ab/.ivy2/cache/com.typesafe.netty/netty-http-pipelining/jars/netty-http-pipelining-1.1.2.jar:/home/ab/.ivy2/cache/org.slf4j/slf4j-api/jars/slf4j-api-1.7.6.jar:/home/ab/.ivy2/cache/org.slf4j/jul-to-slf4j/jars/jul-to-slf4j-1.7.6.jar:/home/ab/.ivy2/cache/org.slf4j/jcl-over-slf4j/jars/jcl-over-slf4j-1.7.6.jar:/home/ab/.ivy2/cache/ch.qos.logback/logback-core/jars/logback-core-1.1.1.jar:/home/ab/.ivy2/cache/ch.qos.logback/logback-classic/jars/logback-classic-1.1.1.jar:/home/ab/.ivy2/cache/com.typesafe.akka/akka-actor_2.11/jars/akka-actor_2.11-2.3.4.jar:/home/ab/.ivy2/cache/com.typesafe.akka/akka-slf4j_2.11/jars/akka-slf4j_2.11-2.3.4.jar:/home/ab/.ivy2/cache/commons-codec/commons-codec/jars/commons-codec-1.9.jar:/home/ab/.ivy2/cache/xerces/xercesImpl/jars/xercesImpl-2.11.0.jar:/home/ab/.ivy2/cache/xml-apis/xml-apis/jars/xml-apis-1.4.01.jar:/home/ab/.ivy2/cache/javax.transaction/jta/jars/jta-1.1.jar:/home/ab/.ivy2/cache/com.typesafe.play/play-jdbc_2.11/jars/play-jdbc_2.11-2.3.8.jar:/home/ab/.ivy2/cache/com.jolbox/bonecp/bundles/bonecp-0.8.0.RELEASE.jar:/home/ab/.ivy2/cache/com.h2database/h2/jars/h2-1.3.175.jar:/home/ab/.ivy2/cache/tyrex/tyrex/jars/tyrex-1.0.1.jar:/home/ab/.ivy2/cache/com.typesafe.play/anorm_2.11/jars/anorm_2.11-2.3.8.jar:/home/ab/.ivy2/cache/com.jsuereth/scala-arm_2.11/jars/scala-arm_2.11-1.4.jar:/home/ab/.ivy2/cache/org.scala-lang.plugins/scala-continuations-library_2.11/bundles/scala-continuations-library_2.11-1.0.1.jar:/home/ab/.ivy2/cache/com.typesafe.play/play-cache_2.11/jars/play-cache_2.11-2.3.8.jar:/home/ab/.ivy2/cache/net.sf.ehcache/ehcache-core/jars/ehcache-core-2.6.8.jar:/home/ab/.ivy2/cache/com.typesafe.play/play-ws_2.11/jars/play-ws_2.11-2.3.8.jar:/home/ab/.ivy2/cache/com.google.guava/guava/bundles/guava-16.0.1.jar:/home/ab/.ivy2/cache/com.ning/async-http-client/jars/async-http-client-1.8.15.jar:/home/ab/.ivy2/cache/oauth.signpost/signpost-core/jars/signpost-core-1.2.1.2.jar:/home/ab/.ivy2/cache/oauth.signpost/signpost-commonshttp4/jars/signpost-commonshttp4-1.2.1.2.jar:/home/ab/.ivy2/cache/org.apache.httpcomponents/httpcore/jars/httpcore-4.0.1.jar:/home/ab/.ivy2/cache/org.apache.httpcomponents/httpclient/jars/httpclient-4.0.1.jar:/home/ab/.ivy2/cache/commons-logging/commons-logging/jars/commons-logging-1.1.1.jar:/home/ab/.ivy2/cache/commons-io/commons-io/jars/commons-io-2.4.jar:/home/ab/.ivy2/cache/org.scalaj/scalaj-http_2.11/jars/scalaj-http_2.11-1.1.4.jar
-Scala compilation took 0.832066308 s
+Scala compilation took 2.276591074 s
 New invalidations:
 	Set()
 Initial set of included nodes: Set()
 Previously invalidated, but (transitively) depend on new invalidations:
 	Set()
 All newly invalidated sources after taking into account (previously) recompiled sources:Set()
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 1 s, completed Mar 25, 2015 11:35:08 AM
+Total time: 3 s, completed Mar 25, 2015 5:34:51 PM
 > server-post-command-cleanup
 > server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@363161fd, check cycles: false
-Read from stdout: JavaScript linting on 1 source(s)
-JavaScript linting on 1 source(s)
+> compile
+Evaluating tasks: compile:compile
+Running task... Cancel: sbt.server.ServerTaskCancellation@634b2376, check cycles: false
 
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set(/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/twirl/main/views/html/index.template.scala)
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set(/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/twirl/main/views/html/index.template.scala)
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set(/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/twirl/main/views/html/index.template.scala)
-
-Read from stdout: Compiling 1 Scala source to /home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes...
-Compiling 1 Scala source to /home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes...
-Getting compiler-interface from component compiler for Scala 2.11.1
-Other repositories:
-Default repositories:
-Getting compiler-interface from component compiler for Scala 2.11.1
-Other repositories:
-Default repositories:
-Running cached compiler 3b6fb138, interfacing (CompilerInterface) with Scala compiler version 2.11.1
-Calling Scala compiler with arguments  (CompilerInterface):
-	-deprecation
-	-unchecked
-	-encoding
-	utf8
-	-bootclasspath
-	/usr/lib/jvm/java-7-openjdk/jre/lib/resources.jar:/usr/lib/jvm/java-7-openjdk/jre/lib/rt.jar:/usr/lib/jvm/java-7-openjdk/jre/lib/sunrsasign.jar:/usr/lib/jvm/java-7-openjdk/jre/lib/jsse.jar:/usr/lib/jvm/java-7-openjdk/jre/lib/jce.jar:/usr/lib/jvm/java-7-openjdk/jre/lib/charsets.jar:/usr/lib/jvm/java-7-openjdk/jre/lib/rhino.jar:/usr/lib/jvm/java-7-openjdk/jre/lib/jfr.jar:/usr/lib/jvm/java-7-openjdk/jre/classes:/home/ab/.ivy2/cache/org.scala-lang/scala-library/jars/scala-library-2.11.1.jar
-	-classpath
-	/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes:/home/ab/.ivy2/cache/com.typesafe.play/twirl-api_2.11/jars/twirl-api_2.11-1.0.2.jar:/home/ab/.ivy2/cache/org.apache.commons/commons-lang3/jars/commons-lang3-3.1.jar:/home/ab/.ivy2/cache/org.scala-lang.modules/scala-xml_2.11/bundles/scala-xml_2.11-1.0.1.jar:/home/ab/.ivy2/cache/com.typesafe.play/play_2.11/jars/play_2.11-2.3.8.jar:/home/ab/.ivy2/cache/com.typesafe.play/build-link/jars/build-link-2.3.8.jar:/home/ab/.ivy2/cache/com.typesafe.play/play-exceptions/jars/play-exceptions-2.3.8.jar:/home/ab/.ivy2/cache/org.javassist/javassist/bundles/javassist-3.18.2-GA.jar:/home/ab/.ivy2/cache/com.typesafe.play/play-iteratees_2.11/jars/play-iteratees_2.11-2.3.8.jar:/home/ab/.ivy2/cache/org.scala-stm/scala-stm_2.11/jars/scala-stm_2.11-0.7.jar:/home/ab/.ivy2/cache/com.typesafe/config/bundles/config-1.2.1.jar:/home/ab/.ivy2/cache/com.typesafe.play/play-json_2.11/jars/play-json_2.11-2.3.8.jar:/home/ab/.ivy2/cache/com.typesafe.play/play-functional_2.11/jars/play-functional_2.11-2.3.8.jar:/home/ab/.ivy2/cache/com.typesafe.play/play-datacommons_2.11/jars/play-datacommons_2.11-2.3.8.jar:/home/ab/.ivy2/cache/joda-time/joda-time/jars/joda-time-2.3.jar:/home/ab/.ivy2/cache/org.joda/joda-convert/jars/joda-convert-1.6.jar:/home/ab/.ivy2/cache/com.fasterxml.jackson.core/jackson-annotations/bundles/jackson-annotations-2.3.2.jar:/home/ab/.ivy2/cache/com.fasterxml.jackson.core/jackson-core/bundles/jackson-core-2.3.2.jar:/home/ab/.ivy2/cache/com.fasterxml.jackson.core/jackson-databind/bundles/jackson-databind-2.3.2.jar:/home/ab/.ivy2/cache/org.scala-lang/scala-reflect/jars/scala-reflect-2.11.1.jar:/home/ab/.ivy2/cache/org.scala-lang.modules/scala-parser-combinators_2.11/bundles/scala-parser-combinators_2.11-1.0.1.jar:/home/ab/.ivy2/cache/io.netty/netty/bundles/netty-3.9.3.Final.jar:/home/ab/.ivy2/cache/com.typesafe.netty/netty-http-pipelining/jars/netty-http-pipelining-1.1.2.jar:/home/ab/.ivy2/cache/org.slf4j/slf4j-api/jars/slf4j-api-1.7.6.jar:/home/ab/.ivy2/cache/org.slf4j/jul-to-slf4j/jars/jul-to-slf4j-1.7.6.jar:/home/ab/.ivy2/cache/org.slf4j/jcl-over-slf4j/jars/jcl-over-slf4j-1.7.6.jar:/home/ab/.ivy2/cache/ch.qos.logback/logback-core/jars/logback-core-1.1.1.jar:/home/ab/.ivy2/cache/ch.qos.logback/logback-classic/jars/logback-classic-1.1.1.jar:/home/ab/.ivy2/cache/com.typesafe.akka/akka-actor_2.11/jars/akka-actor_2.11-2.3.4.jar:/home/ab/.ivy2/cache/com.typesafe.akka/akka-slf4j_2.11/jars/akka-slf4j_2.11-2.3.4.jar:/home/ab/.ivy2/cache/commons-codec/commons-codec/jars/commons-codec-1.9.jar:/home/ab/.ivy2/cache/xerces/xercesImpl/jars/xercesImpl-2.11.0.jar:/home/ab/.ivy2/cache/xml-apis/xml-apis/jars/xml-apis-1.4.01.jar:/home/ab/.ivy2/cache/javax.transaction/jta/jars/jta-1.1.jar:/home/ab/.ivy2/cache/com.typesafe.play/play-jdbc_2.11/jars/play-jdbc_2.11-2.3.8.jar:/home/ab/.ivy2/cache/com.jolbox/bonecp/bundles/bonecp-0.8.0.RELEASE.jar:/home/ab/.ivy2/cache/com.h2database/h2/jars/h2-1.3.175.jar:/home/ab/.ivy2/cache/tyrex/tyrex/jars/tyrex-1.0.1.jar:/home/ab/.ivy2/cache/com.typesafe.play/anorm_2.11/jars/anorm_2.11-2.3.8.jar:/home/ab/.ivy2/cache/com.jsuereth/scala-arm_2.11/jars/scala-arm_2.11-1.4.jar:/home/ab/.ivy2/cache/org.scala-lang.plugins/scala-continuations-library_2.11/bundles/scala-continuations-library_2.11-1.0.1.jar:/home/ab/.ivy2/cache/com.typesafe.play/play-cache_2.11/jars/play-cache_2.11-2.3.8.jar:/home/ab/.ivy2/cache/net.sf.ehcache/ehcache-core/jars/ehcache-core-2.6.8.jar:/home/ab/.ivy2/cache/com.typesafe.play/play-ws_2.11/jars/play-ws_2.11-2.3.8.jar:/home/ab/.ivy2/cache/com.google.guava/guava/bundles/guava-16.0.1.jar:/home/ab/.ivy2/cache/com.ning/async-http-client/jars/async-http-client-1.8.15.jar:/home/ab/.ivy2/cache/oauth.signpost/signpost-core/jars/signpost-core-1.2.1.2.jar:/home/ab/.ivy2/cache/oauth.signpost/signpost-commonshttp4/jars/signpost-commonshttp4-1.2.1.2.jar:/home/ab/.ivy2/cache/org.apache.httpcomponents/httpcore/jars/httpcore-4.0.1.jar:/home/ab/.ivy2/cache/org.apache.httpcomponents/httpclient/jars/httpclient-4.0.1.jar:/home/ab/.ivy2/cache/commons-logging/commons-logging/jars/commons-logging-1.1.1.jar:/home/ab/.ivy2/cache/commons-io/commons-io/jars/commons-io-2.4.jar:/home/ab/.ivy2/cache/org.scalaj/scalaj-http_2.11/jars/scalaj-http_2.11-1.1.4.jar
-Scala compilation took 1.0852836 s
-New invalidations:
-	Set()
-Initial set of included nodes: Set()
-Previously invalidated, but (transitively) depend on new invalidations:
-	Set()
-All newly invalidated sources after taking into account (previously) recompiled sources:Set()
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 1 s, completed Mar 25, 2015 11:36:20 AM
+Canceling execution...
+Task java.util.concurrent.ExecutorCompletionService$QueueingFuture@60fd8c0e rejected from java.util.concurrent.ThreadPoolExecutor@25f61ce1[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0]
+java.util.concurrent.RejectedExecutionException: Task java.util.concurrent.ExecutorCompletionService$QueueingFuture@60fd8c0e rejected from java.util.concurrent.ThreadPoolExecutor@25f61ce1[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0]
+Use 'last' for the full log.
+> server-post-command-error-handler
 > server-post-command-cleanup
 > server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@c19412f, check cycles: false
-Read from stdout: JavaScript linting on 1 source(s)
-JavaScript linting on 1 source(s)
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set(/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/twirl/main/views/html/index.template.scala)
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set(/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/twirl/main/views/html/index.template.scala)
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set(/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/twirl/main/views/html/index.template.scala)
-
-Read from stdout: Compiling 1 Scala source to /home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes...
-Compiling 1 Scala source to /home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes...
-Getting compiler-interface from component compiler for Scala 2.11.1
-Other repositories:
-Default repositories:
-Getting compiler-interface from component compiler for Scala 2.11.1
-Other repositories:
-Default repositories:
-Running cached compiler 255d52ca, interfacing (CompilerInterface) with Scala compiler version 2.11.1
-Calling Scala compiler with arguments  (CompilerInterface):
-	-deprecation
-	-unchecked
-	-encoding
-	utf8
-	-bootclasspath
-	/usr/lib/jvm/java-7-openjdk/jre/lib/resources.jar:/usr/lib/jvm/java-7-openjdk/jre/lib/rt.jar:/usr/lib/jvm/java-7-openjdk/jre/lib/sunrsasign.jar:/usr/lib/jvm/java-7-openjdk/jre/lib/jsse.jar:/usr/lib/jvm/java-7-openjdk/jre/lib/jce.jar:/usr/lib/jvm/java-7-openjdk/jre/lib/charsets.jar:/usr/lib/jvm/java-7-openjdk/jre/lib/rhino.jar:/usr/lib/jvm/java-7-openjdk/jre/lib/jfr.jar:/usr/lib/jvm/java-7-openjdk/jre/classes:/home/ab/.ivy2/cache/org.scala-lang/scala-library/jars/scala-library-2.11.1.jar
-	-classpath
-	/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes:/home/ab/.ivy2/cache/com.typesafe.play/twirl-api_2.11/jars/twirl-api_2.11-1.0.2.jar:/home/ab/.ivy2/cache/org.apache.commons/commons-lang3/jars/commons-lang3-3.1.jar:/home/ab/.ivy2/cache/org.scala-lang.modules/scala-xml_2.11/bundles/scala-xml_2.11-1.0.1.jar:/home/ab/.ivy2/cache/com.typesafe.play/play_2.11/jars/play_2.11-2.3.8.jar:/home/ab/.ivy2/cache/com.typesafe.play/build-link/jars/build-link-2.3.8.jar:/home/ab/.ivy2/cache/com.typesafe.play/play-exceptions/jars/play-exceptions-2.3.8.jar:/home/ab/.ivy2/cache/org.javassist/javassist/bundles/javassist-3.18.2-GA.jar:/home/ab/.ivy2/cache/com.typesafe.play/play-iteratees_2.11/jars/play-iteratees_2.11-2.3.8.jar:/home/ab/.ivy2/cache/org.scala-stm/scala-stm_2.11/jars/scala-stm_2.11-0.7.jar:/home/ab/.ivy2/cache/com.typesafe/config/bundles/config-1.2.1.jar:/home/ab/.ivy2/cache/com.typesafe.play/play-json_2.11/jars/play-json_2.11-2.3.8.jar:/home/ab/.ivy2/cache/com.typesafe.play/play-functional_2.11/jars/play-functional_2.11-2.3.8.jar:/home/ab/.ivy2/cache/com.typesafe.play/play-datacommons_2.11/jars/play-datacommons_2.11-2.3.8.jar:/home/ab/.ivy2/cache/joda-time/joda-time/jars/joda-time-2.3.jar:/home/ab/.ivy2/cache/org.joda/joda-convert/jars/joda-convert-1.6.jar:/home/ab/.ivy2/cache/com.fasterxml.jackson.core/jackson-annotations/bundles/jackson-annotations-2.3.2.jar:/home/ab/.ivy2/cache/com.fasterxml.jackson.core/jackson-core/bundles/jackson-core-2.3.2.jar:/home/ab/.ivy2/cache/com.fasterxml.jackson.core/jackson-databind/bundles/jackson-databind-2.3.2.jar:/home/ab/.ivy2/cache/org.scala-lang/scala-reflect/jars/scala-reflect-2.11.1.jar:/home/ab/.ivy2/cache/org.scala-lang.modules/scala-parser-combinators_2.11/bundles/scala-parser-combinators_2.11-1.0.1.jar:/home/ab/.ivy2/cache/io.netty/netty/bundles/netty-3.9.3.Final.jar:/home/ab/.ivy2/cache/com.typesafe.netty/netty-http-pipelining/jars/netty-http-pipelining-1.1.2.jar:/home/ab/.ivy2/cache/org.slf4j/slf4j-api/jars/slf4j-api-1.7.6.jar:/home/ab/.ivy2/cache/org.slf4j/jul-to-slf4j/jars/jul-to-slf4j-1.7.6.jar:/home/ab/.ivy2/cache/org.slf4j/jcl-over-slf4j/jars/jcl-over-slf4j-1.7.6.jar:/home/ab/.ivy2/cache/ch.qos.logback/logback-core/jars/logback-core-1.1.1.jar:/home/ab/.ivy2/cache/ch.qos.logback/logback-classic/jars/logback-classic-1.1.1.jar:/home/ab/.ivy2/cache/com.typesafe.akka/akka-actor_2.11/jars/akka-actor_2.11-2.3.4.jar:/home/ab/.ivy2/cache/com.typesafe.akka/akka-slf4j_2.11/jars/akka-slf4j_2.11-2.3.4.jar:/home/ab/.ivy2/cache/commons-codec/commons-codec/jars/commons-codec-1.9.jar:/home/ab/.ivy2/cache/xerces/xercesImpl/jars/xercesImpl-2.11.0.jar:/home/ab/.ivy2/cache/xml-apis/xml-apis/jars/xml-apis-1.4.01.jar:/home/ab/.ivy2/cache/javax.transaction/jta/jars/jta-1.1.jar:/home/ab/.ivy2/cache/com.typesafe.play/play-jdbc_2.11/jars/play-jdbc_2.11-2.3.8.jar:/home/ab/.ivy2/cache/com.jolbox/bonecp/bundles/bonecp-0.8.0.RELEASE.jar:/home/ab/.ivy2/cache/com.h2database/h2/jars/h2-1.3.175.jar:/home/ab/.ivy2/cache/tyrex/tyrex/jars/tyrex-1.0.1.jar:/home/ab/.ivy2/cache/com.typesafe.play/anorm_2.11/jars/anorm_2.11-2.3.8.jar:/home/ab/.ivy2/cache/com.jsuereth/scala-arm_2.11/jars/scala-arm_2.11-1.4.jar:/home/ab/.ivy2/cache/org.scala-lang.plugins/scala-continuations-library_2.11/bundles/scala-continuations-library_2.11-1.0.1.jar:/home/ab/.ivy2/cache/com.typesafe.play/play-cache_2.11/jars/play-cache_2.11-2.3.8.jar:/home/ab/.ivy2/cache/net.sf.ehcache/ehcache-core/jars/ehcache-core-2.6.8.jar:/home/ab/.ivy2/cache/com.typesafe.play/play-ws_2.11/jars/play-ws_2.11-2.3.8.jar:/home/ab/.ivy2/cache/com.google.guava/guava/bundles/guava-16.0.1.jar:/home/ab/.ivy2/cache/com.ning/async-http-client/jars/async-http-client-1.8.15.jar:/home/ab/.ivy2/cache/oauth.signpost/signpost-core/jars/signpost-core-1.2.1.2.jar:/home/ab/.ivy2/cache/oauth.signpost/signpost-commonshttp4/jars/signpost-commonshttp4-1.2.1.2.jar:/home/ab/.ivy2/cache/org.apache.httpcomponents/httpcore/jars/httpcore-4.0.1.jar:/home/ab/.ivy2/cache/org.apache.httpcomponents/httpclient/jars/httpclient-4.0.1.jar:/home/ab/.ivy2/cache/commons-logging/commons-logging/jars/commons-logging-1.1.1.jar:/home/ab/.ivy2/cache/commons-io/commons-io/jars/commons-io-2.4.jar:/home/ab/.ivy2/cache/org.scalaj/scalaj-http_2.11/jars/scalaj-http_2.11-1.1.4.jar
-Scala compilation took 1.45620581 s
-New invalidations:
-	Set()
-Initial set of included nodes: Set()
-Previously invalidated, but (transitively) depend on new invalidations:
-	Set()
-All newly invalidated sources after taking into account (previously) recompiled sources:Set()
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 2 s, completed Mar 25, 2015 11:39:58 AM
+> jobStop 11
+Evaluating tasks: *:jobStop
+Running task... Cancel: sbt.server.ServerTaskCancellation@7e19a721, check cycles: false
+Exception in thread "sbt-bg-threads-11" java.lang.Error: java.lang.InterruptedException: sleep interrupted
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1151)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:615)
+	at java.lang.Thread.run(Thread.java:745)
+Caused by: java.lang.InterruptedException: sleep interrupted
+	at java.lang.Thread.sleep(Native Method)
+	at play.sbt.forkrun.PlayForkProcess$.timedWaitFor$1(PlayForkProcess.scala:57)
+	at play.sbt.forkrun.PlayForkProcess$.play$sbt$forkrun$PlayForkProcess$$stop$1(PlayForkProcess.scala:64)
+	at play.sbt.forkrun.PlayForkProcess$.run(PlayForkProcess.scala:82)
+	at play.sbt.forkrun.PlayForkProcess$.apply(PlayForkProcess.scala:34)
+	at play.sbt.forkrun.PlayForkRun$$anonfun$backgroundForkRunTask$1$$anonfun$apply$7$$anonfun$apply$8$$anonfun$apply$9.apply(PlayForkRun.scala:108)
+	at play.sbt.forkrun.PlayForkRun$$anonfun$backgroundForkRunTask$1$$anonfun$apply$7$$anonfun$apply$8$$anonfun$apply$9.apply(PlayForkRun.scala:107)
+	at sbt.BackgroundThreadPool$$anonfun$1.apply$mcV$sp(AbstractBackgroundJobService.scala:134)
+	at sbt.BackgroundThreadPool$BackgroundRunnable.run(AbstractBackgroundJobService.scala:68)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)
+	... 2 more
+Total time: 0 s, completed Mar 25, 2015 5:34:51 PM
 > server-post-command-cleanup
 > server-handle-next-server-request
-> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkReload
-Evaluating tasks: *:playForkReload
-Running task... Cancel: sbt.server.ServerTaskCancellation@68a428e1, check cycles: false
-Read from stdout: JavaScript linting on 1 source(s)
-JavaScript linting on 1 source(s)
-
-Initial source changes: 
-	removed:Set()
-	added: Set()
-	modified: Set()
-Removed products: Set()
-External API changes: API Changes: Set()
-Modified binary dependencies: Set()
-Initial directly invalidated sources: Set()
-
-Sources indirectly invalidated by:
-	product: Set()
-	binary dep: Set()
-	external source: Set()
-All initially invalidated sources: Set()
-
-Copy resource mappings: 
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/routes,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/routes)
-	(/home/ab/epfl/di55erent/projectx/projectx/conf/application.conf,/home/ab/epfl/di55erent/projectx/projectx/target/scala-2.11/classes/application.conf)
-Total time: 1 s, completed Mar 25, 2015 11:40:25 AM
+> jobStop 12
+Evaluating tasks: *:jobStop
+Running task... Cancel: sbt.server.ServerTaskCancellation@2d787d54, check cycles: false
+Total time: 0 s, completed Mar 25, 2015 5:34:51 PM
 > server-post-command-cleanup
 > server-handle-next-server-request
+> backgroundRun
+Evaluating tasks: compile:backgroundRun
+Running task... Cancel: sbt.server.ServerTaskCancellation@53286ca6, check cycles: false
+Total time: 0 s, completed Mar 25, 2015 5:34:52 PM
+> server-post-command-cleanup
+> server-handle-next-server-request
+> {file:/home/ab/epfl/di55erent/projectx/projectx/}root/*:playForkConfig
+Evaluating tasks: *:playForkConfig
+Running task... Cancel: sbt.server.ServerTaskCancellation@2361671e, check cycles: false
+Total time: 0 s, completed Mar 25, 2015 5:34:54 PM
+> server-post-command-cleanup
+> server-handle-next-server-request
+> root/playForkNotifyStart http://localhost:9000
+Evaluating tasks: *:playForkNotifyStart
+Running task... Cancel: sbt.server.ServerTaskCancellation@72ea4fb, check cycles: false
+Total time: 0 s, completed Mar 25, 2015 5:34:55 PM
+> server-post-command-cleanup
+> server-handle-next-server-request
+Exception in thread "Thread-47" java.io.IOException: Stream closed
+	at java.io.BufferedInputStream.getBufIfOpen(BufferedInputStream.java:162)
+	at java.io.BufferedInputStream.read1(BufferedInputStream.java:272)
+	at java.io.BufferedInputStream.read(BufferedInputStream.java:334)
+	at sun.nio.cs.StreamDecoder.readBytes(StreamDecoder.java:283)
+	at sun.nio.cs.StreamDecoder.implRead(StreamDecoder.java:325)
+	at sun.nio.cs.StreamDecoder.read(StreamDecoder.java:177)
+	at java.io.InputStreamReader.read(InputStreamReader.java:184)
+	at java.io.BufferedReader.fill(BufferedReader.java:154)
+	at java.io.BufferedReader.readLine(BufferedReader.java:317)
+	at java.io.BufferedReader.readLine(BufferedReader.java:382)
+	at sbt.BasicIO$$anonfun$processFully$1$$anonfun$apply$8.apply(ProcessImpl.scala:58)
+	at sbt.BasicIO$$anonfun$processFully$1$$anonfun$apply$8.apply(ProcessImpl.scala:58)
+	at sbt.BasicIO$.readFully$1(ProcessImpl.scala:63)
+	at sbt.BasicIO$.processLinesFully(ProcessImpl.scala:69)
+	at sbt.BasicIO$$anonfun$processFully$1.apply(ProcessImpl.scala:58)
+	at sbt.BasicIO$$anonfun$processFully$1.apply(ProcessImpl.scala:55)
+	at play.sbt.forkrun.PlayForkProcess$$anonfun$2.apply$mcV$sp(PlayForkProcess.scala:47)
+	at play.sbt.forkrun.PlayForkProcess$$anon$1.run(PlayForkProcess.scala:120)
+	at java.lang.Thread.run(Thread.java:745)

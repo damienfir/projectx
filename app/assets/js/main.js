@@ -11,7 +11,7 @@ requirejs.config({
   }
 });
 
-requirejs(['q', 'jquery'], function(Q, $) {
+requirejs(['q'], function(Q) {
 
 
 var Request = function() {
@@ -83,11 +83,14 @@ var Backend = function() {
     return http.postData("/upload", fd);
   };
 
-  this.imagesList = function (){
+  this.process = function() {
     var http = new Request();
-    return http.get("/session/info").then(function(info){
-      return info.images;
-    });
+    return http.get("/process");
+  };
+
+  this.reset = function() {
+    var http = new Request();
+    return http.get("/reset");
   };
 };
 
@@ -182,20 +185,44 @@ var GoogleModule = function(backend) {
 };
 
 var ProgressBar = function(list) {
-  var bar = document.getElementById("progress-bar");
-  bar.style.width = "0%";
+  var bar = $("#progress-bar");
+  bar.width("0%");
+  $("#progress-row").fadeIn();
   var total = list.length;
 
   this.notify = function(progress, index) {
     var val = Math.round((progress+index)*100) / total;
-    console.log(val);
-    bar.style.width = val + "%";
+    bar.width(val + "%");
+  };
+
+  this.finish = function() {
+    bar.fadeOut();
+    bar.width("0%");
+    $("#progress-row").fadeOut();
   };
 };
 
-var UploadModule = function (backend, gallery) {
+
+var Mosaic = function() {
+  var img = $('#mosaic-img');
+  var btn = $('#download-row');
+  
+  this.reload = function(url) {
+    img.fadeOut();
+    btn.fadeOut();
+    img.attr("src", "/assets/mosaics/"+url);
+    img.fadeIn(1000, function(){
+      btn.fadeIn();
+    });
+  };
+};
+
+
+var UploadModule = function (backend, mosaic) {
   var self = this;
   self.progressBar = undefined;
+
+  var dropzone = document.getElementById("dropzone");
 
   this.uploadFiles = function(files) {
     return Q.Promise(function(resolve, reject){
@@ -224,10 +251,21 @@ var UploadModule = function (backend, gallery) {
 
     var files = ev.dataTransfer.files;
     self.progressBar = new ProgressBar(files);
+    $("#upload-modal").modal("hide");
+
     self.uploadFiles(files).then(function(){
-      var el = $('#upload-modal');
-      el.modal('hide');
+      return backend.process();
+    }).then(function(res){
+      var obj = JSON.parse(res);
+      mosaic.reload(obj.mosaic);
+      backend.reset();
     });
+  };
+
+  this.dragHandler = function(ev) {
+    ev.stopPropagation();
+    ev.preventDefault();
+    ev.dataTransfer.dropEffect = 'copy';
   };
 
   this.submitHandler = function(ev) {
@@ -239,21 +277,16 @@ var UploadModule = function (backend, gallery) {
     self.uploadFiles(files);
   };
 
-  var dropzone = document.getElementById("dropzone");
-  dropzone.addEventListener("dragover", function(ev){
-    ev.stopPropagation();
-    ev.preventDefault();
-    ev.dataTransfer.dropEffect = 'copy';
-  });
-
+  dropzone.addEventListener("dragover", self.dragHandler);
   dropzone.addEventListener("drop", self.dropHandler);
   document.getElementById("upload-form").addEventListener("submit", this.submitHandler);
 };
 
 
 var backend = new Backend();
-new UploadModule(backend);
-new DropboxModule(backend);
+var mosaic = new Mosaic();
+new UploadModule(backend, mosaic);
+// new DropboxModule(backend);
 // new GoogleModule();
 
 });

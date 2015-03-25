@@ -6,16 +6,22 @@
     <head>
         <title>@title</title>
 
-        <link href="/assets/bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link href="@routes.Assets.at("bower_components/bootstrap/dist/css/bootstrap.min.css")" rel="stylesheet">
+        <link href="@routes.Assets.at("bower_components/font-awesome/css/font-awesome.min.css")" rel="stylesheet">
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("css/main.css")">
+
         <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
+
+        <link href='//fonts.googleapis.com/css?family=Raleway:400,300,700' rel='stylesheet' type='text/css'>
     </head>
     <body>
 
       <div class="navbar navbar-fixed-top">
         <div class="container-fluid">
           <ul class="nav navbar-nav">
-            <li>projectx</li>
+            <li class="title">projectx</li>
+            <li><a href="">About</a></li>
+            <li><a href="">FAQ</a></li>
           </ul>
         </div>
       </div>
