@@ -10,11 +10,11 @@ libraryDependencies ++= Seq(
   jdbc,
   anorm,
   cache,
-  ws
+  ws,
+  "commons-codec" % "commons-codec" % "1.9",
+  "commons-io" % "commons-io" % "2.4"
 )
 
-libraryDependencies += "commons-codec" %   "commons-codec" % "1.9"
-libraryDependencies += "commons-io" %   "commons-io" % "2.4"
 libraryDependencies +=  "org.scalaj" %% "scalaj-http" % "1.1.4"
 
 fork in run := true

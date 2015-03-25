@@ -1,5 +1,5 @@
-New log file opened at Tue Mar 24 21:24:20 CET 2015 by 12090@arch
-jvm 12090@arch
+New log file opened at Wed Mar 25 10:08:09 CET 2015 by 27241@arch
+jvm 27241@arch
 jvm vmName=OpenJDK 64-Bit Server VM vmVendor=Oracle Corporation vmVersion=24.75-b04
 jvm specName=Java Virtual Machine Specification specVendor=Oracle Corporation specVersion=1.7
 jvm arguments: [-Xms256m, -Xmx1024m, -XX:PermSize=64m, -XX:MaxPermSize=256m]
@@ -27,7 +27,7 @@ sorting: ns: List(sbt.plugins.CorePlugin, sbt.plugins.IvyPlugin, sbt.plugins.Jvm
   :: sorted deduced result: List(sbt.plugins.CorePlugin, sbt.plugins.IvyPlugin, sbt.plugins.JvmPlugin, sbt.plugins.JUnitXmlReportPlugin)
 [Loading] Done in /home/ab/epfl/di55erent/projectx/projectx/project, returning: (projectx-build)
 Loading project definition from /home/ab/epfl/di55erent/projectx/projectx/project
-Running task... Cancel: sbt.TaskCancellationStrategy$Null$@5e6cd722, check cycles: false
+Running task... Cancel: sbt.TaskCancellationStrategy$Null$@148e56c2, check cycles: false
 
 Initial source changes: 
 	removed:Set()
@@ -65,10 +65,3 @@ Set current project to projectx (in build file:/home/ab/epfl/di55erent/projectx/
 > iflast shell
 > server-send-ready-for-request
 > server-handle-next-server-request
-Done executing sbt server engine, result Right(Exit(0))
-Closing listening server socket
-Waiting for socket thread
-Waiting for request processor thread
-Waiting for command engine result
-Returning control to sbt launcher with result Exit(0)
-Closing the 12090@arch logs at Tue Mar 24 21:24:27 CET 2015, goodbye.

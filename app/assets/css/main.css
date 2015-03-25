@@ -1,8 +1,7 @@
 body {
   font-family: 'Raleway', sans-serif;
+  padding-top: 70px;
 }
-
-.row { margin: 10px 0; }
 
 .centered { text-align: center; }
 

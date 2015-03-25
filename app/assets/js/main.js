@@ -15,52 +15,55 @@ requirejs(['q', 'jquery'], function(Q, $) {
 
 
 var Request = function() {
-  this.http = new XMLHttpRequest();
   var self = this;
+  var http = new XMLHttpRequest();
 
   this.request = function(method, path) {
-    self.http.open(method, path, true);
-    var deferred = Q.defer();
-    self.http.onload = function() {
-        if (self.http.status == 200) {
-          deferred.resolve(http.response);
+    return Q.Promise(function(resolve, reject, notify){
+      http.open(method, path, true);
+      http.onload = function(ev) {
+        if (ev.target.status == 200) {
+          resolve(ev.target.response);
         }
         else {
-          deferred.reject(new Error(self.http.statusText));
+          reject(new Error(ev.target.statusText));
         }
-    };
-    self.http.onerror = function() {
-      deferred.reject(new Error("error"));
-    };
-    return deferred.promise;
+      };
+      http.onerror = function(ev) {
+        reject(new Error(ev.target.statusText));
+      };
+      http.upload.onprogress = function(ev) {
+        notify(ev.loaded / ev.total);
+      };
+    });
   };
 
   this.setContent = function(type) {
     if (type === undefined) {
-      self.http.setRequestHeader("Content-Type", "application/json");
+      http.setRequestHeader("Content-Type", "application/json");
     }
     else {
-      self.http.setRequestHeader("Content-Type", type);
+      http.setRequestHeader("Content-Type", type);
     }
   };
 
   this.get = function(path, params, type) {
     var promise = self.request("GET", path);
     self.setContent(type);
-    self.http.send(params);
+    http.send(params);
     return promise;
   };
 
   this.post = function(path, data, params, type) {
     var promise = self.request("POST", path);
     self.setContent(type);
-    self.http.send(data);
+    http.send(data);
     return promise;
   };
 
   this.postData = function(path, data) {
     var promise = self.request("POST", path);
-    self.http.send(data);
+    http.send(data);
     return promise;
   };
 };
@@ -178,19 +181,53 @@ var GoogleModule = function(backend) {
   };
 };
 
+var ProgressBar = function(list) {
+  var bar = document.getElementById("progress-bar");
+  bar.style.width = "0%";
+  var total = list.length;
+
+  this.notify = function(progress, index) {
+    var val = Math.round((progress+index)*100) / total;
+    console.log(val);
+    bar.style.width = val + "%";
+  };
+};
 
 var UploadModule = function (backend, gallery) {
   var self = this;
+  self.progressBar = undefined;
+
+  this.uploadFiles = function(files) {
+    return Q.Promise(function(resolve, reject){
+      function chainUpload(index) {
+        if (files.length > index) {
+          backend.uploadFile(files[index]).then(
+              function(res){
+                chainUpload(index+1);
+              }, reject,
+              function(progress) {
+                if (self.progressBar !== undefined) {
+                  self.progressBar.notify(progress, index);
+                }
+              });
+        } else {
+          resolve();
+        }
+      }
+      chainUpload(0);
+    });
+  };
 
   this.dropHandler = function(ev) {
     ev.stopPropagation();
     ev.preventDefault();
 
     var files = ev.dataTransfer.files;
-    for (var i = 0, f; (f = files[i]); i++) {
-      if (!f.type.match("image.*")) continue;
-      backend.uploadFile(f);
-    }
+    self.progressBar = new ProgressBar(files);
+    self.uploadFiles(files).then(function(){
+      var el = $('#upload-modal');
+      el.modal('hide');
+    });
   };
 
   this.submitHandler = function(ev) {
@@ -198,21 +235,9 @@ var UploadModule = function (backend, gallery) {
     ev.preventDefault();
 
     var files = document.getElementById("file-upload").files;
-    for (var i = 0, f; (f = files[i]); i++) {
-      if (!f.type.match("image.*")) continue;
-      backend.uploadFile(f);
-    }
+    self.progressBar = new ProgressBar(files);
+    self.uploadFiles(files);
   };
-
-
-  // document.getElementById("upload-btn").addEventListener("click", function() {
-  //   var wrapper = document.getElementById('dropzone-wrapper');
-  //   if (!wrapper.style.display || wrapper.style.display === "none") {
-  //     wrapper.style.display = "block";
-  //   } else {
-  //     wrapper.style.display = "none";
-  //   }
-  // });
 
   var dropzone = document.getElementById("dropzone");
   dropzone.addEventListener("dragover", function(ev){

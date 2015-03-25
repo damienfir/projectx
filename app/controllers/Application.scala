@@ -4,6 +4,7 @@ import play.api._
 import play.api.mvc._
 import play.api.libs.json._
 import play.api.libs.Files.TemporaryFile
+import play.api.mvc.MultipartFormData._
 import scalaj.http._
 import scala.util.{Try, Success, Failure}      
 import java.io._
@@ -11,25 +12,30 @@ import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.io.FileUtils;
 import java.security.MessageDigest
 
-object Application extends Controller {
 
-  def index = Action {
-    Ok(views.html.index()).withSession("session" -> SessionManager.generateSession)
+object Application extends Controller {
+  implicit val dropboxForm = Json.format[DropboxFile]
+
+  def index = Action { request =>
+    val session = request.session.get("session").getOrElse(SessionManager.generateSession)
+    Ok(views.html.index()).withSession("session" -> session)
   }
 
 
   def upload = Action(parse.multipartFormData) { request =>
-    implicit val session = request.session.get("session").get
-    request.body.file("image") map { image =>
+    implicit val session = request.session.get("session").getOrElse(SessionManager.generateSession)
+    request.body.file("image").map { image: FilePart[TemporaryFile] =>
       SessionManager.addImage(image.ref) match {
-        case true => Ok("")
-        case false => BadRequest("")
+        case true => Ok("").withSession("session" -> session)
+        case false => BadRequest
       }
-    }.getOrElse {
-      BadRequest("")
-    }
+    }.getOrElse(BadRequest)
   }
 
+  
+  def dropbox = Action(parse.json[List[DropboxFile]]) { dropboxFiles =>
+    Ok("")
+  }
 }
 
 
@@ -60,7 +66,7 @@ object FileManager {
       newfile.moveTo(file)
       Success(filename)
     } catch {
-      case e: IOException => Failure(new Exception)
+      case e: IOException => Failure(e)
     }
   }
 }
@@ -117,7 +123,9 @@ object SessionManager {
         case Success(filename) =>
           addToSession(filename)
           true
-        case Failure(_) => false
+        case Failure(e) =>
+          println(e)
+          false
       }
     }
   }
