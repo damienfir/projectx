@@ -2,7 +2,7 @@
 @import url(http://fonts.googleapis.com/css?family=Raleway);
 
 body {
-  font-family: 'Open Sans', sans-serif;
+  /* font-family: 'Open Sans', sans-serif; */
   padding-top: 70px;
 }
 
@@ -10,21 +10,29 @@ body {
 
 #dropzone { text-align: center; }
 
+.navbar { box-shadow: none; border: 0; }
+
+
 .navbar-nav > li {
-  font-size: 14px;
   padding: 5px 10px;
-  padding-left: 0px;
+  margin: 0;
 }
 
-.navbar-nav>li>a {
+.navbar-nav > li > a {
   font-size: 12px;
   padding: 0px;
-  color: #999;
+  margin-top: 1px;
+  /* color: #999; */
 }
 
-.navbar-nav > li > a:hover {
-  background-color: transparent;
+.navbar-nav > .navbar-brand {
+  font-size: 16px;
+  font-weight: bold;
 }
+
+/* .navbar-nav > li > a:hover { */
+/*   background-color: transparent; */
+/* } */
 
 .title { font-family: "Raleway", sans-serif; font-weight: bold;}
 

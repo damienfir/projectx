@@ -186,9 +186,11 @@ var GoogleModule = function(backend) {
 
 var ProgressBar = function(list) {
   var bar = $("#progress-bar");
-  bar.width("0%");
-  $("#progress-row").fadeIn();
+  var barRow = $("#progress-row");
   var total = list.length;
+
+  bar.width("0%");
+  barRow.fadeIn();
 
   this.notify = function(progress, index) {
     var val = Math.round((progress+index)*100) / total;
@@ -198,7 +200,23 @@ var ProgressBar = function(list) {
   this.finish = function() {
     bar.fadeOut();
     bar.width("0%");
-    $("#progress-row").fadeOut();
+    barRow.fadeOut();
+  };
+};
+
+
+var ProcessIndicator = function() {
+  var indicatorRow = $("#indicator-row");
+  var indicator = $("#indicator");
+
+  this.start = function() {
+    indicator.fadeIn();
+  };
+
+  this.finish = function() {
+    return Q.Promise(function(resolve){
+      indicator.fadeOut(resolve);
+      });
   };
 };
 
@@ -220,12 +238,15 @@ var Mosaic = function() {
 
 var UploadModule = function (backend, mosaic) {
   var self = this;
-  self.progressBar = undefined;
 
   var dropzone = document.getElementById("dropzone");
 
   this.uploadFiles = function(files) {
-    return Q.Promise(function(resolve, reject){
+    var progressBar = new ProgressBar(files);
+    var processIndicator = new ProcessIndicator();
+    $("#upload-modal").modal("hide");
+
+    Q.Promise(function(resolve, reject){
       function chainUpload(index) {
         if (files.length > index) {
           backend.uploadFile(files[index]).then(
@@ -233,33 +254,30 @@ var UploadModule = function (backend, mosaic) {
                 chainUpload(index+1);
               }, reject,
               function(progress) {
-                if (self.progressBar !== undefined) {
-                  self.progressBar.notify(progress, index);
-                }
+                progressBar.notify(progress, index);
               });
         } else {
           resolve();
         }
       }
       chainUpload(0);
+    }).then(function(){
+      var promise = backend.process();
+      progressBar.finish();
+      processIndicator.start();
+      return promise;
+    }).then(function(res){
+      var obj = JSON.parse(res);
+      mosaic.reload(obj.mosaic);
+      backend.reset();
     });
   };
 
   this.dropHandler = function(ev) {
     ev.stopPropagation();
     ev.preventDefault();
-
     var files = ev.dataTransfer.files;
-    self.progressBar = new ProgressBar(files);
-    $("#upload-modal").modal("hide");
-
-    self.uploadFiles(files).then(function(){
-      return backend.process();
-    }).then(function(res){
-      var obj = JSON.parse(res);
-      mosaic.reload(obj.mosaic);
-      backend.reset();
-    });
+    self.uploadFiles(files);
   };
 
   this.dragHandler = function(ev) {
@@ -271,22 +289,20 @@ var UploadModule = function (backend, mosaic) {
   this.submitHandler = function(ev) {
     ev.stopPropagation();
     ev.preventDefault();
-
     var files = document.getElementById("file-upload").files;
-    self.progressBar = new ProgressBar(files);
     self.uploadFiles(files);
   };
 
   dropzone.addEventListener("dragover", self.dragHandler);
   dropzone.addEventListener("drop", self.dropHandler);
   document.getElementById("upload-form").addEventListener("submit", this.submitHandler);
+  document.getElementById("file-upload").addEventListener("change", this.submitHandler);
 };
-
 
 var backend = new Backend();
 var mosaic = new Mosaic();
 new UploadModule(backend, mosaic);
-// new DropboxModule(backend);
+new DropboxModule(backend);
 // new GoogleModule();
 
 });

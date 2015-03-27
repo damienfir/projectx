@@ -14,16 +14,18 @@
       <div class="row" id="progress-row">
       	<div class="col-lg-12">
           <div class="progress">
-            <div class="progress-bar" id="progress-bar" style="width: 0%;">
-            </div>
+            <div class="progress-bar" id="progress-bar" style="width: 0%;"> </div>
           </div>
         </div>
       </div>
 
+      <div id="indicator-row" class="row">
+        <div class="col-lg-12" id="indicator">Processing...</div>
+      </div>
 
       <div class="row">
         <div class="col-lg-12 centered">
-          <img src="http://placehold.it/960x400" id="mosaic-img" />
+          <img id="mosaic-img" class="img-responsive img-thumbnail" />
         </div>
       </div>
 
@@ -44,8 +46,8 @@
           <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             <form action="/upload" method="post" enctype="multipart/form-data" class="form-inline centered" id="upload-form">
-              <input type="file" name="images" class="form-control" id="file-upload" multiple>
-              <button type="submit" class="btn btn-primary">Upload</button>
+              <input type="file" name="image" class="form-control" id="file-upload" multiple>
+              <!-- <button type="submit" class="btn btn-primary">Upload</button> -->
             </form>
           </div>
           <div class="modal-body">
@@ -57,10 +59,11 @@
     	</div>
     </div>
 
-    <!-- <script type="text/javascript" src="//www.dropbox.com/static/api/2/dropins.js" id="dropboxjs" data-app-key="z7bsczzlaqyb8zr"></script> -->
-    <!-- <script type="text/javascript" src="//apis.google.com/js/api.js"></script> -->
     <script src="@routes.Assets.at("bower_components/jquery/dist/jquery.min.js")" type="text/javascript" charset="utf-8"></script>
     <script src="@routes.Assets.at("bower_components/bootstrap/dist/js/bootstrap.min.js")" type="text/javascript" charset="utf-8"></script>
+
+    <!-- <script type="text/javascript" src="//www.dropbox.com/static/api/2/dropins.js" id="dropboxjs" data-app-key="z7bsczzlaqyb8zr"></script> -->
+    <!-- <script type="text/javascript" src="//apis.google.com/js/api.js"></script> -->
 
     <script src="@routes.Assets.at("bower_components/requirejs/require.js")" data-main="/assets/js/main" type="text/javascript"></script>
 }
