@@ -14,6 +14,8 @@ dist
 /RUNNING_PID
 /.settings
 .sbtserver
-storage
+storage/photos/*
+storage/generated/*
+db/sessions/*
+db/users/*
 *.swp
-public/mosaics
