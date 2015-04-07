@@ -32,7 +32,7 @@
 
 <div class="row">
   <div class="col-lg-12 centered">
-    <img id="mosaic-img" class="img-responsive center-block" @if(!filename.isEmpty){ src="/assets/mosaics/@{filename}.jpg"} />
+    <img id="mosaic-img" class="img-responsive center-block" @if(!filename.isEmpty){ src="@routes.Assets.at("/storage", s"generated/$filename.jpg")"} />
   </div>
 </div>
 
@@ -129,5 +129,5 @@
   </div>
 </div>
 
-<script src="@routes.Assets.at("bower_components/requirejs/require.js")" data-main="/assets/js/main" type="text/javascript"></script>
+<script src="@routes.Assets.at("/public","bower_components/requirejs/require.js")" data-main="/assets/js/main" type="text/javascript"></script>
 }

@@ -51,7 +51,7 @@ function($){
         });
       });
 
-      var url = "/assets/mosaics/"+filename+".jpg";
+      var url = "/storage/generated/"+filename+".jpg";
       img.attr("src", url);
       document.getElementById("download-btn").href = url;
       document.getElementById("share-btn").href = "/view/"+filename;

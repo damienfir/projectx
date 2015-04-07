@@ -4,13 +4,14 @@ package controllers;
 import play.api.libs.Files.TemporaryFile
 import scala.util.{Try, Success, Failure}
 import play.api.libs.json._
+import play.api.Play
 
 case class Session(images: List[String])
 
 object SessionModel extends JsonModel[Session] {
   type T = Session
 
-  val baseDir = "storage/sessions"
+  val baseDir = Play.current.configuration.getString("px.dir_sessions").get
   implicit val jsonFormat = Json.format[Session]
 
   def default = Session(Nil)

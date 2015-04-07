@@ -1,6 +1,7 @@
 package controllers;
 
 import play.api.libs.Files.TemporaryFile
+import play.api.Play
 import scala.util.{Try, Success, Failure}
 import java.io._
 import org.apache.commons.io.FileUtils;
@@ -9,7 +10,7 @@ import java.security.MessageDigest
 
 
 object ImageModel extends FileModel {
-  val baseDir = "storage/images"
+  val baseDir = Play.current.configuration.getString("px.dir_photos").get
   
   def hashFromContent(data: Array[Byte]): String = {
     var digest = MessageDigest.getInstance("SHA-1")

@@ -2,7 +2,7 @@ define(function(){
 
   function Mosaic(){
     var self = this;
-    self.baseURL = "http://localhost/";
+    self.baseURL = "//" + window.location.hostname;
 
     this.hash = undefined;
 
@@ -33,7 +33,7 @@ define(function(){
     };
 
     this.getImageURL = function() {
-      return self.baseURL + "assets/mosaics/" + self.hash;
+      return self.baseURL + "/storage/generated/" + self.hash;
     };
   }
 
