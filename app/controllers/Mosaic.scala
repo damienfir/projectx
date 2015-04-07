@@ -15,9 +15,9 @@ object MosaicModel extends FileModel {
     val filename = session + ".jpg"
     val outputLocation = fullPath(filename)
     // val cmd = "montage" +: SessionModel.getImagePaths :+ "-geometry" :+ "120x90+2+2" :+ outputLocation
-    val cmd = "../mosaic/PhotoSummary" +: SessionModel.getImagePaths :+ outputLocation
+    val cmd = "../mosaic/PhotoSummary" +: "-platform" +: "offscreen" +: SessionModel.getImagePaths :+ outputLocation
     cmd.! match {
-      case 0 => Success(Json.toJson(Mosaic(filename)))
+      case 0 => Success(Json.toJson(Mosaic(session)))
       case _ => Failure(new Exception)
     }
   }

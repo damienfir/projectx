@@ -15,8 +15,8 @@ import org.apache.commons.io.FileUtils;
 
 object Application extends Controller {
 
-  def index = Action { request =>
-    Ok(views.html.index()).withSession("session" -> SessionModel.generateNew)
+  def index(filename: String) = Action { request =>
+    Ok(views.html.index(filename)).withSession("session" -> SessionModel.generateNew)
   }
 
   def upload = Action(parse.multipartFormData) { request =>
@@ -36,6 +36,7 @@ object Application extends Controller {
       }
     }.getOrElse(BadRequest)
   }
+
 }
 
 
