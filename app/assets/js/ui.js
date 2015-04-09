@@ -1,7 +1,8 @@
 define([
-    "jquery"
+    "jquery",
+    "mosaic"
 ],
-function($){
+function($, mosaic){
 
   // function Mosaic() {
   var img = $('#mosaic-img');
@@ -11,19 +12,6 @@ function($){
   var indicatorRow = $("#indicator-row");
   var indicator = $("#indicator");
   var total = 1;
-
-  img.load(function(ev) {
-    console.log("ok");
-    img.width("auto");
-    img.height("50%");
-  });
-
-  img.click(function(ev) {
-    img.width("auto");
-    img.height("50%");
-    // img.width("100%");
-    // img.height("auto");
-  });
 
   return {
     uploading: function(list) {
@@ -51,10 +39,9 @@ function($){
         });
       });
 
-      var url = "/storage/generated/"+filename+".jpg";
-      img.attr("src", url);
-      document.getElementById("download-btn").href = url;
-      document.getElementById("share-btn").href = "/view/"+filename;
+      img.attr("src", mosaic.getImageURLSmall());
+      document.getElementById("download-btn").href = mosaic.getImageURL();
+      document.getElementById("share-btn").href = mosaic.getViewURL();
     }
   };
 });

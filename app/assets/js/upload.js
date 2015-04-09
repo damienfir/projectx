@@ -43,8 +43,8 @@ define([
       console.log(reason);
     }).then(function(res){
       var obj = JSON.parse(res);
-      ui.loaded(obj.mosaic);
       mosaic.loaded(obj);
+      ui.loaded(obj.mosaic);
       download.show_buttons();
     });
   };

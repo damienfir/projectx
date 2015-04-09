@@ -5,9 +5,10 @@
 POST    /upload                     controllers.Application.upload
 GET     /process                    controllers.Application.process
 
-GET     /storage/*file              controllers.Assets.at(path="/storage", file)
+GET     /storage/*file              controllers.ExternalAssets.at(path="storage", file)
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
 
+GET     /reset                      controllers.Application.reset
 GET     /                           controllers.Application.index(filename: String = "")
 GET     /:filename                  controllers.Application.index(filename: String)
 

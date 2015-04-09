@@ -1,5 +1,6 @@
 package controllers
 
+import scalaj.http._
 
 // trait CloudHandler
 

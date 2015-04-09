@@ -2,9 +2,12 @@ define(function(){
 
   function Mosaic(){
     var self = this;
-    self.baseURL = "//" + window.location.hostname;
+    self.hostname = "//" + window.location.hostname + ":" + window.location.port;
+    self.baseURL = self.hostname + "/storage/generated/";
 
-    this.hash = undefined;
+    self.hash = undefined;
+    self.filename = undefined;
+    self.filename_small = undefined;
 
     this.load_from_url = function() {
       var path = window.location.pathname.split('/');
@@ -15,25 +18,31 @@ define(function(){
     };
 
     this.loaded = function(obj) {
-      self.set_hash(obj.mosaic);
+      self.setHash(obj.id);
+      self.filename = obj.mosaic;
+      self.filename_small = obj.display;
     };
 
-    this.set_hash = function(hash) {
+    this.setHash = function(hash) {
       self.hash = hash;
     };
 
-    this.get_hash = function() {
+    this.getHash = function() {
       return self.hash;
     };
 
     this.load_from_url();
 
     this.getViewURL = function() {
-      return self.baseURL + self.hash;
+      return self.hostname + self.hash;
     };
 
     this.getImageURL = function() {
-      return self.baseURL + "/storage/generated/" + self.hash;
+      return self.baseURL + self.filename;
+    };
+
+    this.getImageURLSmall = function() {
+      return self.baseURL + self.filename_small;
     };
   }
 
