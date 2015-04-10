@@ -47,13 +47,11 @@ body {
 /*   background-color: transparent; */
 /* } */
 
-#upload-btn { margin-right: 10px; }
-
 /* .title { font-family: "Raleway", sans-serif; font-weight: bold;} */
 
 .row { margin: 0px 5px; }
 
-#progress-row { display: none; }
+#progress-row { opacity: 0; }
 .progress { margin: 0; }
 
 #indicator-row { display: none; }
@@ -61,6 +59,9 @@ body {
 #droptext { vertical-align: middle; }
 .dragover { background-color: #333; }
 
+#mosaic-row { padding-top: 10px; }
 #mosaic-img { box-shadow: #ccc 5px 5px 15px; }
 
-#output-buttons { display: none; }
+#share-btn { opacity: 0; margin-right: 10px; }
+
+.div-btn { display: inline-block; }

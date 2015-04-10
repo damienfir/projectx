@@ -4,48 +4,47 @@ define([
   "q",
   "backend",
   "ui",
-  "mosaic",
-  "download"
-], function($, _bs, Q, backend, ui, mosaic, download){
+  "mosaic"
+], function($, _bs, Q, backend, ui, mosaic){
 
   var self = this;
   var dropzone = document.getElementById("dropzone");
   var dropicon = document.getElementById("dropicon");
-  var modal = $("#upload-modal").modal("hide");
+
+  $("#cloud-btn .div-btn").tooltip();
 
   this.uploadFiles = function(files) {
-    ui.uploading(files);
-    modal.modal("hide");
+    ui.uploading(files.length);
 
-    Q.Promise(function(resolve, reject){
-      function chainUpload(index) {
-        if (files.length > index) {
-          backend.uploadFile(files[index]).then(
-              function(res){
-                console.log("ok2");
-                chainUpload(index+1);
-              }, reject,
-              function(progress) {
-                ui.notify(progress, index);
-              });
-        } else {
-          resolve();
+    backend.reset()
+    .then(function() {
+      return Q.Promise(function(resolve, reject){
+        function chainUpload(index) {
+          if (files.length > index) {
+            backend.uploadFile(files[index]).then(
+                function(res){
+                  chainUpload(index+1);
+                }, reject,
+                function(progress) {
+                  ui.notify(progress, index);
+                });
+          } else {
+            resolve();
+          }
         }
-        console.log("uploading");
-      }
-      chainUpload(0);
-    }).then(function(){
-      var promise = backend.process();
-      // progressBar.finish();
+        chainUpload(0);
+      });
+    })
+    .then(function(){
       ui.processing();
-      return promise;
+      return backend.process();
     }, function(reason) {
       console.log(reason);
-    }).then(function(res){
+    })
+    .then(function(res){
       var obj = JSON.parse(res);
       mosaic.loaded(obj);
       ui.loaded(obj.mosaic);
-      download.show_buttons();
     });
   };
 

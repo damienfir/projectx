@@ -27,4 +27,8 @@ object UserModel {
     } map {
       user => User(Some(user[Long]("id")), user[String]("name"))
     }
+
+    def addEmail(email: String)(implicit user: User) = DB.withConnection { implicit c =>
+      SQL("UPDATE users SET email={email} WHERE id={id}").on("email"-> email, "id" -> user.id).executeUpdate();
+    }
 }

@@ -1,19 +1,24 @@
-define(function(){
+define([
+  "jquery",
+  "observers"
+], function($, observers){
 
   function Mosaic(){
     var self = this;
-    self.hostname = "//" + window.location.hostname + ":" + window.location.port;
-    self.baseURL = self.hostname + "/storage/generated/";
+    self.watch = new observers(["loaded"]);
+
+    self.hostURL = window.location.protocol + "//" + window.location.hostname + ":" + window.location.port + "/";
+    self.baseURL = self.hostURL + "storage/generated/";
 
     self.hash = undefined;
     self.filename = undefined;
     self.filename_small = undefined;
 
-    this.load_from_url = function() {
+    this.loadFromURL = function() {
       var path = window.location.pathname.split('/');
-      console.log(path.length);
       if (path.length > 1 && path[1] !== "") {
-        self.set_hash(path[1]);
+        var obj = {id: path[1], mosaic: path[1]+".jpg", display: path[1]+".jpg"};
+        self.loaded(obj);
       }
     };
 
@@ -21,6 +26,7 @@ define(function(){
       self.setHash(obj.id);
       self.filename = obj.mosaic;
       self.filename_small = obj.display;
+      self.watch.notify("loaded");
     };
 
     this.setHash = function(hash) {
@@ -31,10 +37,9 @@ define(function(){
       return self.hash;
     };
 
-    this.load_from_url();
 
     this.getViewURL = function() {
-      return self.hostname + self.hash;
+      return self.hostURL + self.hash;
     };
 
     this.getImageURL = function() {
@@ -44,6 +49,8 @@ define(function(){
     this.getImageURLSmall = function() {
       return self.baseURL + self.filename_small;
     };
+    
+    this.loadFromURL();
   }
 
   return new Mosaic();

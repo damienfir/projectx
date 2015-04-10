@@ -4,6 +4,7 @@
 
 POST    /upload                     controllers.Application.upload
 GET     /process                    controllers.Application.process
+POST    /download                   controllers.Application.download
 
 GET     /storage/*file              controllers.ExternalAssets.at(path="storage", file)
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
@@ -11,5 +12,7 @@ GET     /assets/*file               controllers.Assets.at(path="/public", file)
 GET     /reset                      controllers.Application.reset
 GET     /                           controllers.Application.index(filename: String = "")
 GET     /:filename                  controllers.Application.index(filename: String)
+
+POST    /dropbox                    controllers.Application.dropbox
 
 # GET     /download                   controllers.Application.download

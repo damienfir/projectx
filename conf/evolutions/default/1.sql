@@ -2,7 +2,8 @@
 
 CREATE TABLE users (
   id    SERIAL PRIMARY KEY,
-  name  VARCHAR(255)
+  name  VARCHAR(255),
+  email VARCHAR(255)
 );
 
 CREATE TABLE collections (
@@ -30,8 +31,8 @@ CREATE TABLE collections_photos (
 
 # --- !Downs
 
-DROP TABLE users;
-DROP TABLE collections;
-DROP TABLE photos;
-DROP TABLE users_collections;
-DROP TABLE collections_photos;
+DROP TABLE users CASCADE;
+DROP TABLE collections CASCADE;
+DROP TABLE photos CASCADE;
+DROP TABLE users_collections CASCADE;
+DROP TABLE collections_photos CASCADE;

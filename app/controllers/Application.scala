@@ -42,4 +42,22 @@ object Application extends Controller {
       }
     }.getOrElse(BadRequest)
   }
+
+  def dropbox = Action(parse.json) { implicit request =>
+    CollectionModel.getFromSession(request.session.get("collection")) map { implicit collection =>
+      val files = Dropbox.download(request.body)
+      println(files)
+      CollectionModel.addToCollection(files);
+      Ok
+    } getOrElse(BadRequest)
+  }
+
+  def download = Action(parse.urlFormEncoded) { implicit request =>
+    UserModel.getFromSession(request.session.get("user")) flatMap { implicit user =>
+      request.body.get("email") map { email =>
+        UserModel.addEmail(email.head)
+        Ok
+      }
+    } getOrElse(BadRequest)
+  }
 }

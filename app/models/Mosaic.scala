@@ -14,14 +14,12 @@ object MosaicModel extends FileModel {
 
   def process(implicit collection: Collection): Try[JsValue] = {
     val id = collection.id.get.toString
-    println(id)
     val image = id + ".jpg"
     val image_display = image
     val outputLocation = fullPath(image)
     val binary = Play.current.configuration.getString("px.binary").get
     val paths = CollectionModel.getImagePaths
     val cmd = binary +: "-platform" +: "offscreen" +: paths :+ outputLocation
-    println(cmd)
     cmd.! match {
       case 0 => Success(Json.toJson(Mosaic(id, image, image_display)))
       case _ => Failure(new Exception)
