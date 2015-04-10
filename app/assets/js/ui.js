@@ -1,60 +1,56 @@
 define([
-    "jquery"
+    "jquery",
+    "mosaic",
+    "share",
+    "observers"
 ],
-function($){
+function($, mosaic, share, observers){
 
-  // function Mosaic() {
-  var img = $('#mosaic-img');
-  var btn = $('#download-row');
-  var progressbar = $("#progress-bar");
-  var barRow = $("#progress-row");
-  var indicatorRow = $("#indicator-row");
-  var indicator = $("#indicator");
-  var total = 1;
+  function UI() {
+    var self = this;
 
-  img.load(function(ev) {
-    console.log("ok");
-    img.width("auto");
-    img.height("50%");
-  });
+    self.watch = new observers(["loaded"]);
 
-  img.click(function(ev) {
-    img.width("auto");
-    img.height("50%");
-    // img.width("100%");
-    // img.height("auto");
-  });
+    var img = $('#mosaic-img');
+    var progressbar = $("#progress-bar");
+    var progressrow = $("#progress-row");
+    var uploadModal = $("#upload-modal");
+    self.total = 1;
 
-  return {
-    uploading: function(list) {
-      total = list.length;
+    this.uploading = function(length) {
+      self.total = length;
+      uploadModal.modal("hide");
       progressbar.width("0%");
-      barRow.fadeIn();
-    },
+      progressrow.fadeTo(400, 1);
+      share.hide_buttons();
+    };
 
-    notify: function(progress, index) {
-      var val = Math.round((progress+index)*100) / total;
+    this.notify = function(progress, index) {
+      var val = Math.round((progress+index)*100) / self.total;
       progressbar.width(val + "%");
-    },
+    };
 
-    processing: function() {
-      barRow.fadeOut();
-      indicatorRow.fadeIn();
-      img.fadeOut();
-    },
+    this.processing = function() {
+      progressbar.width("100%");
+      progressbar.addClass("progress-bar-success");
+    };
 
-    loaded: function(filename) {
+    this.loaded = function(filename) {
       img.load(function() {
-        indicatorRow.fadeOut();
         img.fadeIn(1000, function(){
-          btn.fadeIn();
+          share.show_buttons();
         });
       });
+      progressrow.fadeTo(400, 0, function() {
+        progressbar.removeClass("progress-bar-success");
+      });
+      img.fadeOut(function(){
+        img.attr("src", mosaic.getImageURLSmall());
+      });
 
-      var url = "/storage/generated/"+filename+".jpg";
-      img.attr("src", url);
-      document.getElementById("download-btn").href = url;
-      document.getElementById("share-btn").href = "/view/"+filename;
-    }
-  };
+      self.watch.notify("loaded");
+    };
+  }
+
+  return new UI();
 });

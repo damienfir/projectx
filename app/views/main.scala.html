@@ -6,11 +6,11 @@
     <head>
         <title>@title</title>
 
-        <link href="@routes.Assets.at("/public","css/bootstrap.min.css")" rel="stylesheet">
-        <link href="@routes.Assets.at("/public","bower_components/font-awesome/css/font-awesome.min.css")" rel="stylesheet">
-        <link rel="stylesheet" media="screen" href="@routes.Assets.at("/public","css/main.css")">
+        <link href="@routes.Assets.at("css/bootstrap.min.css")" rel="stylesheet">
+        <link href="@routes.Assets.at("bower_components/font-awesome/css/font-awesome.min.css")" rel="stylesheet">
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("css/main.css")">
 
-        <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("/public","images/favicon.png")">
+        <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
 
         <link href='//fonts.googleapis.com/css?family=Raleway:400,300,700' rel='stylesheet' type='text/css'>
     </head>
@@ -22,6 +22,7 @@
             <li class="navbar-brand">projectx</li>
             <li><a href="#" data-toggle="modal" data-target="#about-modal">About</a></li>
             <li><a href="#" data-toggle="modal" data-target="#product-modal">Product</a></li>
+            <li><a href="#" data-toggle="modal" data-target="#api-modal">API</a></li>
           </ul>
           @navbar
         </div>
@@ -47,23 +48,41 @@
         </div>
       </div>
 
-    <div class="modal fade" id="product-modal" tabindex="-1">
-    	<div class="modal-dialog">
-    		<div class="modal-content">
-          <div class="modal-header">
-            <h4 class="modal-title">Product</h4>
-        </div>
-        <div class="modal-body">
-          <p>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec nisl ligula, egestas in massa a, auctor dictum neque. Duis venenatis enim tortor. Morbi at mi eu felis sollicitudin varius eget id odio. Nullam imperdiet, ipsum eget convallis sagittis, purus nisl lobortis odio, id maximus elit tellus id orci. Vestibulum mollis ac mi quis porttitor. Ut eleifend eleifend sollicitudin. Cras placerat augue tellus, ut dictum diam auctor at. Sed dapibus sit amet justo non accumsan. Suspendisse pellentesque arcu eu ultricies ornare. Vivamus lobortis scelerisque nisi, in pharetra mi interdum a. Aliquam quis risus vel sem varius facilisis. Sed at scelerisque velit. 
-          </p>
-        </div>
-        <div class="modal-footer">
-          <button class="btn btn-primary" data-dismiss="modal">Close</button>
+      <div class="modal fade" id="product-modal" tabindex="-1">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h4 class="modal-title">Product</h4>
+            </div>
+            <div class="modal-body">
+              <p>
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec nisl ligula, egestas in massa a, auctor dictum neque. Duis venenatis enim tortor. Morbi at mi eu felis sollicitudin varius eget id odio. Nullam imperdiet, ipsum eget convallis sagittis, purus nisl lobortis odio, id maximus elit tellus id orci. Vestibulum mollis ac mi quis porttitor. Ut eleifend eleifend sollicitudin. Cras placerat augue tellus, ut dictum diam auctor at. Sed dapibus sit amet justo non accumsan. Suspendisse pellentesque arcu eu ultricies ornare. Vivamus lobortis scelerisque nisi, in pharetra mi interdum a. Aliquam quis risus vel sem varius facilisis. Sed at scelerisque velit. 
+              </p>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-primary" data-dismiss="modal">Close</button>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-  </div>
+
+      <div class="modal fade" id="api-modal" tabindex="-1">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h4 class="modal-title">API</h4>
+            </div>
+            <div class="modal-body">
+              <p>
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec nisl ligula, egestas in massa a, auctor dictum neque. Duis venenatis enim tortor. Morbi at mi eu felis sollicitudin varius eget id odio. Nullam imperdiet, ipsum eget convallis sagittis, purus nisl lobortis odio, id maximus elit tellus id orci. Vestibulum mollis ac mi quis porttitor. Ut eleifend eleifend sollicitudin. Cras placerat augue tellus, ut dictum diam auctor at. Sed dapibus sit amet justo non accumsan. Suspendisse pellentesque arcu eu ultricies ornare. Vivamus lobortis scelerisque nisi, in pharetra mi interdum a. Aliquam quis risus vel sem varius facilisis. Sed at scelerisque velit. 
+              </p>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-primary" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
 
     </body>
 </html>

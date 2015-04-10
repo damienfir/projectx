@@ -16,6 +16,7 @@ define([
     },
 
     process: function() {
+      console.log("sent /process");
       var http = new Request();
       return http.get("/process");
     },
@@ -24,5 +25,14 @@ define([
       var http = new Request();
       return http.get("/reset");
     },
+
+    upload: function(files) {
+      
+    },
+
+    download: function(email) {
+      var http = new Request();
+      return http.post("/download", "email="+encodeURIComponent(email), "application/x-www-form-urlencoded");
+    }
   };
 });

@@ -42,7 +42,7 @@ define([
       return promise;
     };
 
-    this.post = function(path, data, params, type) {
+    this.post = function(path, data, type) {
       var promise = self.request("POST", path);
       self.setContent(type);
       http.send(data);

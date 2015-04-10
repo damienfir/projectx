@@ -2,58 +2,51 @@
 
 @main("projectx") {
 
-<ul class="navbar-nav nav navbar-right" id="output-buttons">
+<ul class="navbar-nav nav navbar-right">
   <li>
-    <button class="btn btn-success navbar-btn" href="#" data-toggle="modal" data-target="#download-modal"><i class="fa fa-cloud-download fa-lg"></i> Download</button>
-  </li>
-  <li>
-    <button class="btn btn-success navbar-btn" data-toggle="modal" data-target="#share-modal" id="share-btn"><i class="fa fa-share-alt fa-lg"></i> Share</button>
+    <button class="btn btn-primary navbar-btn" id="upload-btn" data-toggle="modal" data-target="#upload-modal"><i class="fa fa-plus-square fa-lg"></i> <span id="add-txt">Add pictures</span></button>
   </li>
 </ul>
 
 <ul class="navbar-nav nav navbar-right">
   <li>
-    <button class="btn btn-primary navbar-btn" id="upload-btn" data-toggle="modal" data-target="#upload-modal"><i class="fa fa-plus-square fa-lg"></i> Add pictures</button>
+    <button class="btn btn-success navbar-btn" data-toggle="modal" data-target="#share-modal" id="share-btn"><i class="fa fa-share-alt fa-lg"></i> Share</button>
   </li>
 </ul>
 
 } {
 
-
 <div class="row" id="progress-row">
   <div class="progress">
-    <div class="progress-bar" id="progress-bar" style="width: 0%;"> </div>
+    <div class="progress-bar progress-bar-striped active" id="progress-bar" style="width: 0%;"> </div>
   </div>
 </div>
 
-<div id="indicator-row" class="row">
-  <div class="col-lg-12" id="indicator">Processing...</div>
+<div class="container">
+
+  <div class="row" id="mosaic-row">
+    <div class="col-lg-12">
+      <img id="mosaic-img" class="img-responsive center-block" @if(!filename.isEmpty){ src="/storage/generated/@{filename}.jpg"} />
+    </div>
+  </div>
+
 </div>
 
-<div class="row">
-  <div class="col-lg-12 centered">
-    <img id="mosaic-img" class="img-responsive center-block" @if(!filename.isEmpty){ src="@routes.Assets.at("/storage", s"generated/$filename.jpg")"} />
-  </div>
-</div>
-
-<div class="row" id="download-row">
-  <div class="col-lg-12 centered">
-  </div>
-</div>
-</div>
 
 <div class="modal fade" id="upload-modal" tabindex="-1">
   <div class="modal-dialog">
     <div class="modal-content">
-      <div class="modal-body">
+      <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <div class="row">
+      </div>
+      <div class="modal-body">
+        <div class="row" id="cloud-btn">
           <div class="col-sm-4"><big>Choose from</big></div>
           <div class="col-sm-12 centered">
             <button class="btn btn-primary navbar-btn" id="dropbox-btn"><i class="fa fa-dropbox fa-lg"></i> Dropbox</button>
-            <button class="btn btn-primary navbar-btn" id="google-btn"><i class="fa fa-google-plus fa-lg"></i> Google+</button>
-            <button class="btn btn-primary navbar-btn" id="facebook-btn"><i class="fa fa-facebook fa-lg"></i> Facebook</button>
-            <button class="btn btn-primary navbar-btn" id="flickr-btn"><i class="fa fa-flickr fa-lg"></i> Flickr</button>
+            <div data-toggle="tooltip" title="Coming soon" class="div-btn"><button class="btn btn-primary navbar-btn" id="google-btn" disabled><i class="fa fa-google-plus fa-lg"></i> Google+</button></div>
+            <div data-toggle="tooltip" title="Coming soon" class="div-btn"><button class="btn btn-primary navbar-btn" id="facebook-btn" disabled><i class="fa fa-facebook fa-lg"></i> Facebook</button></div>
+              <div data-toggle="tooltip" title="Coming soon" class="div-btn"><button class="btn btn-primary navbar-btn" id="flickr-btn" disabled><i class="fa fa-flickr fa-lg"></i> Flickr</button></div>
             <hr>
           </div>
         </div>
@@ -75,59 +68,63 @@
   </div>
 </div>
 
-<div class="modal fade" id="download-modal" tabindex="-1">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <form action="/download" method="get" id="download-form">
-        <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-          <h5>Please enter your email address</h5>
-          <span class="text-muted">We will send you a download link to your poster to view it later.</span>
-        </div>
-        <div class="modal-body">
-          <div class="form-group">
-            <div class="input-group input-group-lg">
-              <span class="input-group-addon">@@</span>
-              <input type="text" name="email" class="form-control" id="email-input">
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <div class="form-group centered">
-            <button type="submit" class="btn btn-success" id="download-btn" disabled><i class="fa fa-cloud-download fa-lg"></i> Download</button>
-          </div>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-
 <div class="modal fade" id="share-modal" tabindex="-1">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h5>Share on...</h5>
       </div>
-      <div class="modal-body centered" id="share-list">
-        <button id="share-facebook" class="btn btn-primary btn-lg" data-toggle="tooltip" data-placement="top" title="Share on Facebook"><i class="fa fa-facebook"></i></button>
-        <button id="share-google" class="btn btn-primary btn-lg" data-toggle="tooltip" data-placement="top" title="Share on Google+"><i class="fa fa-google-plus"></i></button>
-        <button id="share-pinterest" class="btn btn-primary btn-lg" data-toggle="tooltip" data-placement="top" title="Share on Pinterest"><i class="fa fa-pinterest"></i></button>
-        <button id="share-twitter" class="btn btn-primary btn-lg" data-toggle="tooltip" data-placement="top" title="Share on Twitter"><i class="fa fa-twitter"></i></button>
-        <button id="share-reddit" class="btn btn-primary btn-lg" data-toggle="tooltip" data-placement="top" title="Share on Reddit"><i class="fa fa-reddit"></i></button>
-        <button id="share-instagram" class="btn btn-primary btn-lg" data-toggle="tooltip" data-placement="top" title="Share on Instagram"><i class="fa fa-instagram"></i></button>
-        <!-- <g:plus action="share"></g:plus> -->
+      <form action="/download" method="get" id="download-form">
+      <div class="modal-body" id="share-list">
         <div class="row">
-        	<div class="col-lg-12">
-            <input class="form-control" />
+          <div class="col-lg-3">
+            <h5>Share on...</h5>
+          </div>
+          <div class="col-lg-9 centered">
+            <button id="share-facebook" class="btn btn-primary btn-lg" data-toggle="tooltip" title="Share on Facebook"><i class="fa fa-facebook"></i></button>
+            <button id="share-google" class="btn btn-primary btn-lg" data-toggle="tooltip" title="Share on Google+"><i class="fa fa-google-plus"></i></button>
+            <button id="share-pinterest" class="btn btn-primary btn-lg" data-toggle="tooltip" title="Share on Pinterest"><i class="fa fa-pinterest"></i></button>
+            <button id="share-twitter" class="btn btn-primary btn-lg" data-toggle="tooltip" title="Share on Twitter"><i class="fa fa-twitter"></i></button>
+            <!-- <button id="share-reddit" class="btn btn-primary btn-lg" data-toggle="tooltip" title="Share on Reddit"><i class="fa fa-reddit"></i></button> -->
+            <div data-toggle="tooltip" title="Coming soon" class="div-btn"><button id="share-instagram" class="btn btn-primary btn-lg" disabled><i class="fa fa-instagram"></i></button></div>
+          </div>
+        </div>
+        <hr />
+        <div class="row">
+          <div class="col-lg-3"><h5>Share link</h5></div>
+          <div class="col-lg-7">
+            <div class="input-group">
+              <span class="input-group-addon"><i class="fa fa-link"></i></span>
+              <input class="form-control" id="share-link" />
+            </div>
+          </div>
+          <div class="col-lg-2">
+            <a class="btn btn-primary pull-right" id="goto-btn">View</a>
+          </div>
+        </div>
+        <hr />
+        <div class="row">
+          <div class="col-lg-3"><h5>Download</h5></div>
+          <div class="col-lg-9">
+            <div class="form-group">
+              <div class="input-group input-group-lg">
+                <span class="input-group-addon">@@</span>
+                <input type="text" name="email" placeholder="Please enter your email address" class="form-control" id="email-input">
+              </div>
+              <!-- <span class="pull-right text-muted">We will send you a download link to your poster to view it later.</span> -->
+            </div>
           </div>
         </div>
       </div>
       <div class="modal-footer">
+            <div class="form-group">
+              <button type="submit" class="btn btn-success" id="download-btn" disabled><i class="fa fa-cloud-download fa-lg"></i> Download</button>
+            </div>
       </div>
+      </form>
     </div>
   </div>
 </div>
 
-<script src="@routes.Assets.at("/public","bower_components/requirejs/require.js")" data-main="/assets/js/main" type="text/javascript"></script>
+<script src="@routes.Assets.at("bower_components/requirejs/require.js")" data-main="/assets/js/main" type="text/javascript"></script>
 }
