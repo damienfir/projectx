@@ -1,5 +1,6 @@
-package models;
+package models
 
+import play.api.libs.json._
 import play.api.libs.Files.TemporaryFile
 import play.api.Play
 import scala.util.{Try, Success, Failure}
@@ -7,10 +8,12 @@ import java.io._
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.codec.binary.Hex;
 import java.security.MessageDigest
+import collection.JavaConversions._
 
 
 object ImageModel extends FileModel {
   val baseDir = Play.current.configuration.getString("px.dir_photos").get
+  val stockDir = Play.current.configuration.getString("px.dir_stock").get
   
   def hashFromContent(data: Array[Byte]): String = {
     var digest = MessageDigest.getInstance("SHA-1")
@@ -40,5 +43,10 @@ object ImageModel extends FileModel {
     } catch {
       case e: IOException => Failure(e)
     }
+  }
+
+  def listStock = {
+    val stockFileDir = new File(stockDir)
+    Json.toJson(FileUtils.listFiles(stockFileDir, Array("jpeg"), false).map(_.getName()))
   }
 }

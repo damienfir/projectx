@@ -2,10 +2,10 @@ define([
   "jquery",
   "bootstrap",
   "mosaic",
-  "fb",
+  // "fb",
   // "pinterest-api",
   "backend"
-], function($, _bs, mosaic, FB, backend){
+], function($, _bs, mosaic, backend){
 
   function Share() {
     var self = this;
@@ -42,14 +42,14 @@ define([
       window.open(url, 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=600,width=600');
     }
 
-    document.getElementById("share-facebook").addEventListener("click", function(ev){
-      ev.preventDefault();
-      ev.stopPropagation();
-      FB.ui({
-        method: 'share',
-        href: mosaic.getViewURL(),
-      }, function(response){});
-    });
+    // document.getElementById("share-facebook").addEventListener("click", function(ev){
+    //   ev.preventDefault();
+    //   ev.stopPropagation();
+    //   FB.ui({
+    //     method: 'share',
+    //     href: mosaic.getViewURL(),
+    //   }, function(response){});
+    // });
 
     document.getElementById("share-google").addEventListener("click", function(ev){
       shareURL(ev, "https://plus.google.com/share?url=" + mosaic.getViewURL());

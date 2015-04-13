@@ -45,9 +45,7 @@ object Application extends Controller {
 
   def dropbox = Action(parse.json) { implicit request =>
     CollectionModel.getFromSession(request.session.get("collection")) map { implicit collection =>
-      val files = Dropbox.download(request.body)
-      println(files)
-      CollectionModel.addToCollection(files);
+      CollectionModel.addToCollection(Dropbox.download(request.body));
       Ok
     } getOrElse(BadRequest)
   }
@@ -59,5 +57,9 @@ object Application extends Controller {
         Ok
       }
     } getOrElse(BadRequest)
+  }
+
+  def stock = Action {
+    Ok(ImageModel.listStock)
   }
 }

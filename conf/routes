@@ -5,6 +5,7 @@
 POST    /upload                     controllers.Application.upload
 GET     /process                    controllers.Application.process
 POST    /download                   controllers.Application.download
+GET     /stock                      controllers.Application.stock
 
 GET     /storage/*file              controllers.ExternalAssets.at(path="storage", file)
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

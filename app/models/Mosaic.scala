@@ -15,7 +15,7 @@ object MosaicModel extends FileModel {
   def process(implicit collection: Collection): Try[JsValue] = {
     val id = collection.id.get.toString
     val image = id + ".jpg"
-    val image_display = id + "_display.jpg"
+    val image_display = id + "_display.jpeg"
     val outputLocation = fullPath(image)
     val binary = Play.current.configuration.getString("px.binary").get
     val paths = CollectionModel.getImagePaths

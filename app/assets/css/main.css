@@ -64,4 +64,29 @@ body {
 
 #share-btn { opacity: 0; margin-right: 10px; }
 
+.img-overlay {
+  background-color: white;
+  position: absolute;
+  text-align: center;
+  vertical-align: center;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+}
+
+.img-overlay:hover {
+  opacity: 0.5;
+  cursor: pointer;
+}
+
+.overlay-btn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin: 0 auto;
+  transform: translateY(-50%) translateX(-50%);
+}
+
 .div-btn { display: inline-block; }
