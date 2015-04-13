@@ -17,7 +17,7 @@ define([
     this.loadFromURL = function() {
       var path = window.location.pathname.split('/');
       if (path.length > 1 && path[1] !== "") {
-        var obj = {id: path[1], mosaic: path[1]+".jpg", display: path[1]+".jpg"};
+        var obj = {id: path[1], mosaic: path[1]+".jpg", display: path[1]+"_display.jpg"};
         self.loaded(obj);
       }
     };
