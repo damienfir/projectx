@@ -16,7 +16,6 @@ define([
     },
 
     process: function() {
-      console.log("sent /process");
       var http = new Request();
       return http.get("/process");
     },

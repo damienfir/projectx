@@ -47,7 +47,7 @@ define([
       ev.stopPropagation();
       FB.ui({
         method: 'share',
-        href: "http://localhost/"+mosaic.hash,
+        href: mosaic.getViewURL(),
       }, function(response){});
     });
 
@@ -69,7 +69,6 @@ define([
 
     // Methods
     this.show_buttons = function() {
-      console.log("showing buttons");
       $("#share-btn").fadeTo(400, 1);
       $("#share-list button, #share-list .div-btn").tooltip();
       $("#share-link").val(mosaic.getViewURL());
