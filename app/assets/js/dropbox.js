@@ -21,12 +21,10 @@ define([
             return backend.uploadFromDropbox(JSON.stringify(files));
           })
           .then(function() {
-            console.log("uploaded from Dropbox");
             ui.processing();
             return backend.process();
           })
           .then(function(res) {
-            console.log("processed");
             var obj = JSON.parse(res);
             mosaic.loaded(obj);
             ui.loaded(obj.mosaic);
