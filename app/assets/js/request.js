@@ -9,7 +9,6 @@ define([
     this.request = function(method, path, async) {
       return Q.Promise(function(resolve, reject, notify){
         if (async === undefined) async = true;
-        console.log(async);
         http.open(method, path, async);
         http.onload = function(ev) {
           if (ev.target.status == 200) {
@@ -53,13 +52,6 @@ define([
 
     this.postData = function(path, data) {
       var promise = self.request("POST", path);
-      http.send(data);
-      return promise;
-    };
-
-    this.postSync = function(path, data, type) {
-      var promise = self.request("POST", path, false);
-      self.setContent(type);
       http.send(data);
       return promise;
     };

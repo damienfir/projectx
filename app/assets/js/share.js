@@ -16,15 +16,6 @@ define([
 
 
     // Download form
-    // download_form.addEventListener("submit", function(ev){
-    //   ev.preventDefault();
-    //   ev.stopPropagation();
-    //   backend.download(ev.target.elements.namedItem("email").value);
-    //   // .then(function(){
-    //   //   window.location.assign(mosaic.getImageURL());
-    //   // });
-    // });
-
     var emailRegex = /[^@]+@[^\.]+\..+/;
     email.addEventListener("input", function(ev){
       if (emailRegex.test(ev.target.value)) {

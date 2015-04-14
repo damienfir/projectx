@@ -32,11 +32,6 @@ define([
     stock: function() {
       var http = new Request();
       return http.get("/stock");
-    },
-
-    download: function(email) {
-      var http = new Request();
-      return http.postSync("/download", "email="+encodeURIComponent(email), "application/x-www-form-urlencoded");
     }
   };
 });
