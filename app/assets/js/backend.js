@@ -36,7 +36,7 @@ define([
 
     download: function(email) {
       var http = new Request();
-      return http.post("/download", "email="+encodeURIComponent(email), "application/x-www-form-urlencoded");
+      return http.postSync("/download", "email="+encodeURIComponent(email), "application/x-www-form-urlencoded");
     }
   };
 });

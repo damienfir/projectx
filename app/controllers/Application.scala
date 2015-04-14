@@ -52,9 +52,11 @@ object Application extends Controller {
 
   def download = Action(parse.urlFormEncoded) { implicit request =>
     UserModel.getFromSession(request.session.get("user")) flatMap { implicit user =>
-      request.body.get("email") map { email =>
-        UserModel.addEmail(email.head)
-        Ok
+      CollectionModel.getFromSession(request.session.get("collection")) flatMap { implicit collection =>
+        request.body.get("email") map { email =>
+          UserModel.addEmail(email.head)
+          Ok.sendFile(MosaicModel.getFile)
+        }
       }
     } getOrElse(BadRequest)
   }

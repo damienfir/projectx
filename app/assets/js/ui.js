@@ -28,7 +28,7 @@ function($, mosaic, share, observers, backend){
       progressbar.width("0%");
       progressrow.fadeTo(400, 1);
       share.hide_buttons();
-      self.stopStock();
+      // self.stopStock();
     };
 
     this.notify = function(progress, index) {
@@ -102,7 +102,7 @@ function($, mosaic, share, observers, backend){
       clearTimeout(self.timeoutID);
     };
 
-    self.startStock();
+    // self.startStock();
   }
 
   return new UI();
