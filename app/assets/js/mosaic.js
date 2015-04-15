@@ -1,15 +1,18 @@
 define([
-  "jquery",
   "observers"
-], function($, observers){
+], function(observers){
 
   function Mosaic(){
     var self = this;
     self.watch = new observers(["loaded"]);
 
-    self.hostURL = window.location.protocol + "//" + window.location.hostname + ":" + window.location.port + "/";
+    self.hostURL = window.location.protocol + "//" + window.location.hostname;
+    if (window.location.port !== "") self.hostURL += ":" + window.location.port;
+    self.hostURL += "/";
+
     self.baseURL = self.hostURL + "storage/generated/";
 
+    self.$loaded = false;
     self.hash = undefined;
     self.filename = undefined;
     self.filename_small = undefined;
@@ -26,7 +29,8 @@ define([
       self.setHash(obj.id);
       self.filename = obj.mosaic;
       self.filename_small = obj.display;
-      self.watch.notify("loaded");
+      self.watch.notify("loaded", [obj]);
+      self.$loaded = true;
     };
 
     this.setHash = function(hash) {
@@ -36,7 +40,6 @@ define([
     this.getHash = function() {
       return self.hash;
     };
-
 
     this.getViewURL = function() {
       return self.hostURL + self.hash;

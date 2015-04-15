@@ -4,7 +4,7 @@
 
 <ul class="navbar-nav nav navbar-right">
   <li>
-    <button class="btn btn-primary navbar-btn upload-btn" data-toggle="modal" data-target="#upload-modal"><i class="fa fa-plus-square fa-lg"></i> <span id="add-txt">Add pictures</span></button>
+    <button class="btn btn-primary navbar-btn upload-btn" data-toggle="modal" data-target="#upload-modal"><i class="fa fa-plus-square fa-lg"></i> <span id="add-txt">Choose photos</span></button>
   </li>
 </ul>
 
@@ -26,7 +26,7 @@
 
   <div class="row" id="mosaic-row">
     <div class="col-lg-12" id="mosaic-col">
-      <img id="mosaic-img" class="img-responsive center-block" @if(!filename.isEmpty){ src="/storage/generated/@{filename}_display.jpg"} />
+      <img id="mosaic-img" class="img-responsive center-block" />
       <div class="img-overlay" id="img-overlay" data-toggle="modal" data-target="#upload-modal"></div>
     </div>
   </div>

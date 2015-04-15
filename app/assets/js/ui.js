@@ -3,106 +3,180 @@ define([
     "mosaic",
     "share",
     "observers",
-    "backend"
+    "backend",
+    "upload"
 ],
-function($, mosaic, share, observers, backend){
+function($, mosaic, share, observers, backend, upload){
 
   function UI() {
     var self = this;
 
-    self.watch = new observers(["loaded"]);
+    self.uploadBtn = $(".upload-btn");
+    self.img = $('#mosaic-img');
+    self.uploadModal = $("#upload-modal");
 
-    var btn = $(".upload-btn");
-    var btn2;
-    var overlay = $("#img-overlay");
-    var img = $('#mosaic-img');
-    var progressbar = $("#progress-bar");
-    var progressrow = $("#progress-row");
-    var uploadModal = $("#upload-modal");
-    self.timeoutID = 0;
-    self.total = 1;
 
-    this.uploading = function(length) {
-      self.total = length;
-      uploadModal.modal("hide");
-      progressbar.width("0%");
-      progressrow.fadeTo(400, 1);
-      share.hide_buttons();
-      // self.stopStock();
+    function Loader() {
+      var progressbar = $("#progress-bar");
+      var progressrow = $("#progress-row");
+      var total = 1;
+
+      this.init = function() {
+        progressbar.width("0%");
+        progressrow.fadeTo(400, 1);
+      };
+
+      this.start = function(length) { total = length; };
+
+      this.progress = function(progress, index) {
+        var val = Math.round((progress+index)*100) / total;
+        progressbar.width(val + "%");
+      };
+
+      this.processing = function() {
+        progressbar.width("100%");
+        progressbar.addClass("progress-bar-success");
+      };
+
+      this.finish = function() {
+        progressrow.fadeTo(400, 0, function() {
+          progressbar.removeClass("progress-bar-success");
+        });
+      };
+    }
+    self.loader = new Loader();
+
+
+    function StockGallery() {
+      var timeoutID = 0;
+      var btn2;
+      var stop = false;
+      var overlay = $("#img-overlay");
+
+      this.start = function() {
+        backend.stock().then(function(res){
+          var list = JSON.parse(res);
+          list = list.slice(0, Math.min(6, list.length));
+          var images = [];
+
+          list.forEach(function(url) {
+            var im = new Image();
+            im.src = "/assets/stock/" + url;
+            images.push(im);
+          });
+          return images;
+        })
+        .then(function(images){
+          var i = 0;
+          var t = 800;
+
+          function showBtn() {
+            btn2 = self.uploadBtn.clone();
+            btn2.addClass("overlay-btn");
+            $("#mosaic-col").append(btn2);
+            btn2.fadeTo(600, 1);
+          }
+
+          function replaceImage(url) {
+            if (stop) return;
+
+            self.img.fadeTo(t, 0, function(){
+              self.img.attr("src", url);
+              self.img.fadeTo(t, 0.3, function(){
+                if (i === 0) showBtn();
+                i++;
+                timeoutID = setTimeout(replaceImage, 3000, images[i % images.length].src);
+              });
+            });
+          }
+          replaceImage(images[i].src);
+
+        });
+      };
+
+      this.stop = function() {
+        overlay.remove();
+        if (btn2 !== undefined) btn2.remove();
+        stop = true;
+        clearTimeout(timeoutID);
+        self.showUploadBtn();
+      };
+    }
+    self.stockGallery = new StockGallery();
+
+
+
+    this.submitted = function() {
+      self.uploadModal.modal("hide");
+      self.hideShareButtons();
+      self.loader.init();
+      self.stockGallery.stop();
     };
 
-    this.notify = function(progress, index) {
-      var val = Math.round((progress+index)*100) / self.total;
-      progressbar.width(val + "%");
+    this.uploading = function(length) {
+      self.loader.start(length);
+    };
+
+    this.progress = function(progress, index) {
+      self.loader.progress(progress, index);
     };
 
     this.processing = function() {
-      progressbar.width("100%");
-      progressbar.addClass("progress-bar-success");
+      self.loader.processing();
     };
 
-    this.loaded = function(filename) {
-      img.load(function() {
-        img.fadeTo(1000, 1, function(){
-          share.show_buttons();
+    this.loaded = function(obj) {
+      var filename = obj.mosaic;
+
+      self.img.load(function() {
+        self.img.fadeTo(1000, 1, function(){
+          self.showShareButtons();
         });
       });
-      progressrow.fadeTo(400, 0, function() {
-        progressbar.removeClass("progress-bar-success");
-      });
-      img.fadeTo(400, 0, function(){
-        img.attr("src", mosaic.getImageURLSmall());
-      });
 
-      self.watch.notify("loaded");
-    };
+      self.loader.finish();
 
-    this.startStock = function() {
-      backend.stock().then(function(res){
-        var list = JSON.parse(res);
-        list = list.slice(0, Math.min(6, list.length));
-        var images = [];
-
-        list.forEach(function(url) {
-          var im = new Image();
-          im.src = "/assets/stock/" + url;
-          images.push(im);
-        });
-        return images;
-      })
-      .then(function(images){
-        var i = 0;
-        var t = 800;
-
-        function replaceImage(url) {
-          if (self.stop) return;
-
-          img.fadeTo(t, 0, function(){
-            img.attr("src", url);
-            img.fadeTo(t, 0.3, function(){
-              i++;
-              self.timeoutID = setTimeout(replaceImage, 3000, images[i % images.length].src);
-            });
-          });
-        }
-        replaceImage(images[i].src);
-
-        btn2 = btn.clone();
-        btn.hide();
-        btn2.addClass("overlay-btn");
-        $("#mosaic-col").append(btn2);
+      self.img.fadeTo(400, 0, function(){
+        self.img.attr("src", mosaic.getImageURLSmall());
       });
     };
 
-    this.stopStock = function() {
-      overlay.remove();
-      btn2.remove();
-      btn.show();
-      self.stop = true;
-      clearTimeout(self.timeoutID);
+    this.showUploadBtn = function() {
+      self.uploadBtn.fadeTo(300,1);
     };
 
-    // self.startStock();
+    this.hideUploadBtn = function() {
+
+    };
+
+    this.showShareButtons = function() {
+      $("#share-btn").fadeTo(400, 1);
+      $("#share-list button, #share-list .div-btn").tooltip();
+      $("#share-link").val(mosaic.getViewURL());
+      $("#goto-btn").attr("href", mosaic.getViewURL());
+    };
+
+    this.hideShareButtons = function() {
+      $("#share-btn").fadeTo(400, 0);
+    };
+
+
+    $("#cloud-btn .div-btn").tooltip();
+
+
+    upload.watch.add("uploading", self.uploading);
+    upload.watch.add("progress", self.progress);
+    upload.watch.add("processing", self.processing);
+    upload.watch.add("submitted", self.submitted);
+    mosaic.watch.add("loaded", self.loaded);
+
+
+    if (!mosaic.$loaded) {
+      self.stockGallery.start();
+    } else {
+      self.stockGallery.stop();
+    }
+
   }
 
   return new UI();
