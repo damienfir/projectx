@@ -19,4 +19,4 @@ require.config({
   }
 });
 
-require(['bootstrap', 'add', 'mosaic', 'dropbox', 'share']);
+require(['bootstrap', 'ui', 'dropbox', 'share']);

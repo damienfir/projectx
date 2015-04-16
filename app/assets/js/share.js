@@ -14,17 +14,7 @@ define([
     var download = document.getElementById("download-btn");
     var download_form = document.getElementById("download-form");
 
-
     // Download form
-    download_form.addEventListener("submit", function(ev){
-      ev.preventDefault();
-      ev.stopPropagation();
-      backend.download(ev.target.elements.namedItem("email").value)
-      .then(function(){
-        window.location.assign(mosaic.getImageURL());
-      });
-    });
-
     var emailRegex = /[^@]+@[^\.]+\..+/;
     email.addEventListener("input", function(ev){
       if (emailRegex.test(ev.target.value)) {
@@ -65,22 +55,6 @@ define([
 
     document.getElementById("share-instagram").addEventListener("click", function(ev){
       shareURL("https://twitter.com/intent/tweet?url="+ mosaic.getViewURL());
-    });
-
-    // Methods
-    this.show_buttons = function() {
-      $("#share-btn").fadeTo(400, 1);
-      $("#share-list button, #share-list .div-btn").tooltip();
-      $("#share-link").val(mosaic.getViewURL());
-      $("#goto-btn").attr("href", mosaic.getViewURL());
-    };
-
-    this.hide_buttons = function() {
-      $("#share-btn").fadeTo(400, 0);
-    };
-
-    mosaic.watch.add("loaded", function() {
-      self.show_buttons();
     });
   }
 

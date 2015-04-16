@@ -6,9 +6,10 @@ define([
     var self = this;
     var http = new XMLHttpRequest();
 
-    this.request = function(method, path) {
+    this.request = function(method, path, async) {
       return Q.Promise(function(resolve, reject, notify){
-        http.open(method, path, true);
+        if (async === undefined) async = true;
+        http.open(method, path, async);
         http.onload = function(ev) {
           if (ev.target.status == 200) {
             resolve(ev.target.response);

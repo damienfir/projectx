@@ -2,64 +2,132 @@ package controllers
 
 import play.api._
 import play.api.mvc._
-// import play.api.mvc.MultipartFormData._
 import scala.util.{Try, Success, Failure, Random}
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
+import scala.concurrent.Future
 
 import models._
+import services._
+
+import play.api.libs.json.Json
+
+import reactivemongo.api._
+import reactivemongo.bson._
+import play.modules.reactivemongo.MongoController
+import play.modules.reactivemongo.json.collection._
 
 
-object Application extends Controller {
+object Application extends Controller with MongoController {
 
-  def index(filename: String) = Action { implicit request =>
-    implicit val user = UserModel.getOrCreateFromSession(request.session.get("user"))
-    Ok(views.html.index(filename)).addingToSession(
-      "user" -> user.id.get.toString
-    )
+  import JsonFormats._
+
+  def userCollection = db.collection[JSONCollection]("users")
+  def mosaicCollection = db.collection[JSONCollection]("mosaics")
+
+
+  private def getUser(implicit request: Request[_]): Future[Option[User]] = request.session.get("user") match {
+    case Some(user_id) => userCollection.find(Json.obj("_id" -> Json.obj("$oid" -> user_id))).one[User]
+    case None => Future(None)
   }
 
-  def reset = Action { implicit request =>
-    UserModel.getFromSession(request.session.get("user")).map { implicit user =>
-      Ok.addingToSession(
-        "collection" -> CollectionModel.generateNew.id.get.toString
+
+  private def getOrCreateUser(implicit request: Request[_]): Future[User] = getUser flatMap {
+    case Some(user) => Future(user)
+    case None => {
+      val user = User(BSONObjectID.generate, None)
+      userCollection.insert(user) map { _ =>
+        user
+      }
+    }
+  }
+
+  private def getMosaic(implicit request: Request[_]): Future[Option[Mosaic]] = {
+    request.session.get("mosaic") match {
+      case Some(mosaic_id) => mosaicCollection.find(Json.obj("_id" -> Json.obj("$oid" -> mosaic_id))).one[Mosaic]
+      case None => Future(None)
+    }
+  }
+
+
+  def index(filename: String) = Action.async { implicit request =>
+    getOrCreateUser map { user =>
+      Ok(views.html.index(filename)).withSession(
+        "user" -> user._id.stringify
       )
-    }.getOrElse(BadRequest)
+    }
   }
 
-  def upload = Action(parse.multipartFormData) { request =>
-    CollectionModel.getFromSession(request.session.get("collection")) map { implicit collection =>
-      CollectionModel.addImages(request.body.files.map(_.ref).toList)
-      Ok
-    } getOrElse(BadRequest)
+
+  def reset = Action.async { implicit request =>
+    getUser flatMap { _ map { user =>
+        val id = BSONObjectID.generate
+        mosaicCollection.insert(Mosaic(id, user._id, None, None, List())) map { _ =>
+          Ok.withSession(
+            "user" -> user._id.stringify,
+            "mosaic" -> id.stringify
+          )
+        }
+      } getOrElse(Future(BadRequest))
+    }
   }
 
-  def process = Action { request =>
-    CollectionModel.getFromSession(request.session.get("collection")).map { implicit collection =>
-      MosaicModel.process match {
-        case Success(json) => Ok(json.toString)
-        case Failure(e) =>
-          println(e)
-          InternalServerError
-      }
-    }.getOrElse(BadRequest)
+
+  def upload = Action.async(parse.multipartFormData) { implicit request =>
+    getMosaic flatMap { _ map { mosaic =>
+        MosaicService.addImages(request.body.files.map(_.ref).toList) flatMap { addToMosaic(mosaic, _) }
+      } getOrElse(Future(BadRequest))
+    }
   }
 
-  def dropbox = Action(parse.json) { implicit request =>
-    CollectionModel.getFromSession(request.session.get("collection")) map { implicit collection =>
-      CollectionModel.addToCollection(Dropbox.download(request.body));
-      Ok
-    } getOrElse(BadRequest)
+
+  def process = Action.async { implicit request =>
+    getMosaic flatMap { _ map { mosaic =>
+        MosaicService.process(mosaic) flatMap {
+          case Success(processed) =>
+            mosaicCollection.save(processed) map { lastError =>
+              Ok(Json.toJson(processed).toString)
+            }
+          case Failure(e) => Future(InternalServerError)
+        }
+      } getOrElse(Future(BadRequest))
+    }
   }
 
-  def download = Action(parse.urlFormEncoded) { implicit request =>
-    UserModel.getFromSession(request.session.get("user")) flatMap { implicit user =>
-      request.body.get("email") map { email =>
-        UserModel.addEmail(email.head)
-        Ok
-      }
-    } getOrElse(BadRequest)
+
+  def dropbox = Action.async(parse.json) { implicit request =>
+    getMosaic flatMap { _ map { mosaic =>
+        Dropbox.download(request.body) flatMap { addToMosaic(mosaic, _) }
+      } getOrElse(Future(BadRequest))
+    }
   }
+
+
+  private def addToMosaic(mosaic: Mosaic, names: List[String]): Future[Result] = {
+    mosaicCollection.save(mosaic.copy(images = mosaic.images ++ names)) map { _ => Ok }
+  }
+
+  def download = Action.async(parse.urlFormEncoded) { implicit request =>
+    getUser flatMap {
+      _ flatMap { user =>
+        request.body.get("email") map { email =>
+          println("got email")
+          userCollection.save(user.copy(email = email.headOption))
+        }
+      } map { lastError =>
+        getMosaic map {
+          _ flatMap { mosaic =>
+            mosaic.filename map { fname =>
+              println("got filename")
+              Ok.sendFile(MosaicService.getFile(fname))
+            }
+          } getOrElse(BadRequest)
+        }
+      } getOrElse(Future(BadRequest))
+    }
+  }
+
 
   def stock = Action {
-    Ok(ImageModel.listStock)
+    Ok(Json.toJson(ImageService.listStock))
   }
 }
