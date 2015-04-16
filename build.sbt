@@ -13,7 +13,8 @@ libraryDependencies ++= Seq(
   ws,
   "commons-codec" % "commons-codec" % "1.9",
   "commons-io" % "commons-io" % "2.4",
-  "org.postgresql"      %   "postgresql"    % "9.4-1200-jdbc4"
+  "org.postgresql"      %   "postgresql"    % "9.4-1200-jdbc4",
+  "org.reactivemongo" %% "play2-reactivemongo" % "0.10.5.0.akka23"
 )
 
 libraryDependencies +=  "org.scalaj" %% "scalaj-http" % "1.1.4"

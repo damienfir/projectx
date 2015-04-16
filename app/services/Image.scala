@@ -1,4 +1,4 @@
-package models
+package services
 
 import play.api.libs.json._
 import play.api.libs.Files.TemporaryFile
@@ -11,7 +11,14 @@ import java.security.MessageDigest
 import collection.JavaConversions._
 
 
-object ImageModel extends FileModel {
+trait FileService {
+  val baseDir: String
+  def fullPath(filename: String) = s"$baseDir/$filename"
+  def getFile(filename: String) = new File(fullPath(filename))
+}
+
+
+object ImageService extends FileService {
   val baseDir = Play.current.configuration.getString("px.dir_photos").get
   val stockDir = Play.current.configuration.getString("px.dir_stock").get
   
@@ -47,6 +54,6 @@ object ImageModel extends FileModel {
 
   def listStock = {
     val stockFileDir = new File(stockDir)
-    Json.toJson(FileUtils.listFiles(stockFileDir, Array("jpeg"), false).map(_.getName()))
+    FileUtils.listFiles(stockFileDir, Array("jpeg"), false).map(_.getName())
   }
 }
