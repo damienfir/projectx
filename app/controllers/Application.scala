@@ -16,9 +16,13 @@ import reactivemongo.bson._
 import play.modules.reactivemongo.MongoController
 import play.modules.reactivemongo.json.collection._
 
+import reactivemongo.bson._
+import play.modules.reactivemongo.json.BSONFormats._
+
+
+
 
 object Application extends Controller with MongoController {
-
   import JsonFormats._
 
   def userCollection = db.collection[JSONCollection]("users")
@@ -41,9 +45,13 @@ object Application extends Controller with MongoController {
     }
   }
 
+  private def getMosaicFromID(id: String): Future[Option[Mosaic]] = {
+    mosaicCollection.find(Json.obj("_id" -> Json.obj("$oid" -> id))).one[Mosaic]
+  }
+
   private def getMosaic(implicit request: Request[_]): Future[Option[Mosaic]] = {
     request.session.get("mosaic") match {
-      case Some(mosaic_id) => mosaicCollection.find(Json.obj("_id" -> Json.obj("$oid" -> mosaic_id))).one[Mosaic]
+      case Some(mosaic_id) => getMosaicFromID(mosaic_id)
       case None => Future(None)
     }
   }
@@ -54,6 +62,14 @@ object Application extends Controller with MongoController {
       Ok(views.html.index(filename)).withSession(
         "user" -> user._id.stringify
       )
+    } flatMap { result =>
+      filename match {
+        case "" => Future(result)
+        case mosaic_id => getMosaicFromID(mosaic_id) map { _ map { mosaic =>
+          result.addingToSession("mosaic" -> mosaic._id.stringify)
+        } getOrElse (result)
+        }
+      }
     }
   }
 
@@ -110,14 +126,12 @@ object Application extends Controller with MongoController {
     getUser flatMap {
       _ flatMap { user =>
         request.body.get("email") map { email =>
-          println("got email")
           userCollection.save(user.copy(email = email.headOption))
         }
       } map { lastError =>
         getMosaic map {
           _ flatMap { mosaic =>
             mosaic.filename map { fname =>
-              println("got filename")
               Ok.sendFile(MosaicService.getFile(fname))
             }
           } getOrElse(BadRequest)
@@ -129,5 +143,30 @@ object Application extends Controller with MongoController {
 
   def stock = Action {
     Ok(Json.toJson(ImageService.listStock))
+  }
+
+}
+
+object Feedback extends Controller with MongoController {
+
+  import JsonFormats._
+
+  def questionCollection = db.collection[JSONCollection]("questions")
+  def feedbackCollection = db.collection[JSONCollection]("feedbacks")
+
+  
+  def questions = Action.async {
+    questionCollection.find(Json.obj()).cursor[FeedbackQuestion].collect[List]() map { questions =>
+      Ok(Json.toJson(questions))
+    }
+  }
+
+  def feedback = Action.async(parse.json) { request =>
+    val user_id = request.session.get("user") map {BSONObjectID(_)}
+    println(request.body)
+    feedbackCollection.save(request.body.as[Feedback].copy(user_id = user_id)) map { lastError =>
+      // save question id
+      Ok
+    }
   }
 }

@@ -1,5 +1,4 @@
-@import url(http://fonts.googleapis.com/css?family=Open+Sans);
-@import url(http://fonts.googleapis.com/css?family=Raleway);
+@import url(http://fonts.googleapis.com/css?family=Open+Sans|Raleway|Indie+Flower|Dosis|Nunito);
 
 body {
   /* font-family: 'Open Sans', sans-serif; */
@@ -34,8 +33,9 @@ body {
 }
 
 .navbar-nav > .navbar-brand {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: bold;
+  font-family: "Raleway";
 }
 
 .centered-ul {
@@ -60,7 +60,7 @@ body {
 .dragover { background-color: #333; }
 
 #mosaic-row { padding-top: 10px; }
-#mosaic-img { box-shadow: #ccc 5px 5px 15px; }
+#mosaic-img { box-shadow: #ccc 5px 5px 15px; margin-bottom: 100px; }
 
 #share-btn { opacity: 0; margin-right: 10px; }
 
@@ -95,3 +95,14 @@ body {
 .upload-btn { opacity: 0 }
 
 .div-btn { display: inline-block; }
+
+#feedback-panel {
+  height: 270px;
+  width: 320px;
+  position: fixed;
+  padding-bottom: 20px;
+  padding-right: 20px;
+  right: 30px;
+  bottom: -235px;
+  transition: 200ms;
+}

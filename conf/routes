@@ -10,10 +10,12 @@ GET     /stock                      controllers.Application.stock
 GET     /storage/*file              controllers.ExternalAssets.at(path="storage", file)
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
 
-GET     /reset                      controllers.Application.reset
-GET     /                           controllers.Application.index(filename: String = "")
-GET     /:filename                  controllers.Application.index(filename: String)
 
 POST    /dropbox                    controllers.Application.dropbox
 
-# GET     /download                   controllers.Application.download
+GET     /questions                  controllers.Feedback.questions
+POST    /feedback                   controllers.Feedback.feedback
+GET     /reset                      controllers.Application.reset
+
+GET     /                           controllers.Application.index(filename: String = "")
+GET     /:filename                  controllers.Application.index(filename: String)

@@ -4,9 +4,10 @@ define([
     "share",
     "observers",
     "backend",
-    "upload"
+    "upload",
+    "q"
 ],
-function($, mosaic, share, observers, backend, upload){
+function($, mosaic, share, observers, backend, upload, Q){
 
   function UI() {
     var self = this;
@@ -48,25 +49,27 @@ function($, mosaic, share, observers, backend, upload){
 
 
     function StockGallery() {
+      var _self = this;
       var timeoutID = 0;
       var btn2;
       var stop = false;
       var overlay = $("#img-overlay");
+      var images = [];
 
       this.start = function() {
         backend.stock().then(function(res){
-          var list = JSON.parse(res);
-          list = list.slice(0, Math.min(6, list.length));
-          var images = [];
-
-          list.forEach(function(url) {
-            var im = new Image();
-            im.src = "/assets/stock/" + url;
-            images.push(im);
+          return Q.Promise(function(resolve, reject, notify){
+            var list = JSON.parse(res);
+            list = list.slice(0, Math.min(6, list.length));
+            list.forEach(function(url) {
+              var im = new Image();
+              im.src = "/assets/stock/" + url;
+              images.push(im);
+              if (images.length === 1) resolve();
+            });
           });
-          return images;
         })
-        .then(function(images){
+        .then(function(){
           var i = 0;
           var t = 800;
 
@@ -90,7 +93,6 @@ function($, mosaic, share, observers, backend, upload){
             });
           }
           replaceImage(images[i].src);
-
         });
       };
 
@@ -104,6 +106,39 @@ function($, mosaic, share, observers, backend, upload){
     }
     self.stockGallery = new StockGallery();
 
+    
+    function Feedback() {
+
+      function showQuestion(question) {
+        $("#feedback-question").html(question.question);
+        var choicesEl = $("#feedback-choices").empty();
+        for (var i = 0; i < question.choices.length; i++) {
+          var btn = $("<button></button>").addClass("btn btn-primary").data("index", i).html(question.choices[i]);
+          choicesEl.append(btn);
+        }
+      }
+
+      this.getQuestions = function() {
+        backend.questions().then(function(list){
+          var questions = JSON.parse(list);
+          showQuestion(questions[0]);
+        });
+      };
+
+      this.submitFeedback = function(el) {
+        var btn = el.target;
+        // console.log(btn);
+        // backend.feedback(btn)
+      };
+
+      $("#feedback-choices button").on("click", this.submitFeedback);
+
+      $("#feedback-panel").hover(
+        function(){ $(this).css("bottom", "0px"); },
+        function(){ $(this).css("bottom", "-235px"); }
+      );
+    }
+    self.feedback = new Feedback();
 
 
     this.submitted = function() {
@@ -126,8 +161,6 @@ function($, mosaic, share, observers, backend, upload){
     };
 
     this.loaded = function(obj) {
-      var filename = obj.mosaic;
-
       self.img.load(function() {
         self.img.fadeTo(1000, 1, function(){
           self.showShareButtons();
@@ -177,6 +210,7 @@ function($, mosaic, share, observers, backend, upload){
       self.stockGallery.stop();
     }
 
+    self.feedback.getQuestions();
   }
 
   return new UI();

@@ -32,6 +32,17 @@ define([
     stock: function() {
       var http = new Request();
       return http.get("/stock");
+    },
+
+    questions: function() {
+      return (new Request()).get("/questions");
+    },
+
+    feedback: function(question_id, choice) {
+      return (new Request()).post("/feedback", {
+        "question_id": {"$oid": question_id},
+        "choice": choice
+      });
     }
   };
 });
