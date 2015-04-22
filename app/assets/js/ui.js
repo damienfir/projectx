@@ -48,15 +48,65 @@ function($, mosaic, share, observers, backend, upload, Q){
     self.loader = new Loader();
 
 
-    function StockGallery() {
+    function Mosaic() {
       var _self = this;
-      var timeoutID = 0;
       var btn2;
+      var overlayStock = $("#img-overlay-stock");
+      var overlayShare = $("#img-overlay-share");
+      var progressLoader = $("#progress-loader");
+
+      this.changeImage = function(url) {
+        return Q.Promise(function(resolve, reject, notify){
+          self.img.load(function(){
+            self.img.fadeTo(800, 1, resolve);
+            self.img.unbind("load", this);
+          });
+
+          self.img.fadeTo(800, 0, function(){
+            self.img.attr("src", url);
+            notify();
+          });
+        });
+      };
+
+      this.forStock = function() {
+        overlayShare.fadeOut(100, overlayStock.fadeIn);
+        btn2 = self.uploadBtn.clone();
+        btn2.addClass("overlay-btn");
+        $("#mosaic-col").append(btn2);
+        btn2.fadeTo(600, 1);
+      };
+
+      this.forShare = function() {
+        progressLoader.fadeOut();
+        overlayStock.fadeOut(100, overlayShare.fadeIn);
+      };
+
+      this.showUploading = function() {
+        if (btn2 !== undefined) btn2.remove();
+        progressLoader.children("img").attr("src","/assets/images/358.GIF");
+        progressLoader.children("span").html("Uploading");
+        progressLoader.fadeIn();
+      };
+
+      this.showProcessing = function() {
+        progressLoader.fadeOut(30, function(){
+          progressLoader.children("img").attr("src", "/assets/images/285.GIF");
+          progressLoader.children("span").html("Processing");
+          progressLoader.fadeIn();
+        });
+      };
+    }
+    self.mosaic = new Mosaic();
+
+
+    function StockGallery() {
+      var timeoutID = 0;
       var stop = false;
-      var overlay = $("#img-overlay");
       var images = [];
 
       this.start = function() {
+
         backend.stock().then(function(res){
           return Q.Promise(function(resolve, reject, notify){
             var list = JSON.parse(res);
@@ -71,25 +121,12 @@ function($, mosaic, share, observers, backend, upload, Q){
         })
         .then(function(){
           var i = 0;
-          var t = 800;
-
-          function showBtn() {
-            btn2 = self.uploadBtn.clone();
-            btn2.addClass("overlay-btn");
-            $("#mosaic-col").append(btn2);
-            btn2.fadeTo(600, 1);
-          }
-
           function replaceImage(url) {
             if (stop) return;
-
-            self.img.fadeTo(t, 0, function(){
-              self.img.attr("src", url);
-              self.img.fadeTo(t, 0.3, function(){
-                if (i === 0) showBtn();
-                i++;
-                timeoutID = setTimeout(replaceImage, 3000, images[i % images.length].src);
-              });
+            self.mosaic.changeImage(url).then(function(){
+              if (i === 0) { self.mosaic.forStock(); }
+              i++;
+              timeoutID = setTimeout(replaceImage, 3000, images[i % images.length].src);
             });
           }
           replaceImage(images[i].src);
@@ -97,11 +134,8 @@ function($, mosaic, share, observers, backend, upload, Q){
       };
 
       this.stop = function() {
-        overlay.remove();
-        if (btn2 !== undefined) btn2.remove();
         stop = true;
         clearTimeout(timeoutID);
-        self.showUploadBtn();
       };
     }
     self.stockGallery = new StockGallery();
@@ -145,7 +179,7 @@ function($, mosaic, share, observers, backend, upload, Q){
       self.uploadModal.modal("hide");
       self.hideShareButtons();
       self.loader.init();
-      self.stockGallery.stop();
+      self.mosaic.showUploading();
     };
 
     this.uploading = function(length) {
@@ -158,20 +192,18 @@ function($, mosaic, share, observers, backend, upload, Q){
 
     this.processing = function() {
       self.loader.processing();
+      self.mosaic.showProcessing();
     };
 
     this.loaded = function(obj) {
-      self.img.load(function() {
-        self.img.fadeTo(1000, 1, function(){
-          self.showShareButtons();
-        });
-      });
-
+      self.stockGallery.stop();
       self.loader.finish();
-
-      self.img.fadeTo(400, 0, function(){
-        self.img.attr("src", mosaic.getImageURLSmall());
-      });
+      self.mosaic.forShare();
+      self.mosaic.changeImage(mosaic.getImageURLSmall())
+        .then(function() {
+          self.showShareButtons();
+          self.showUploadBtn();
+        });
     };
 
     this.showUploadBtn = function() {
