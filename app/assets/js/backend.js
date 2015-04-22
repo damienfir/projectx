@@ -39,10 +39,10 @@ define([
     },
 
     feedback: function(question_id, choice) {
-      return (new Request()).post("/feedback", {
-        "question_id": {"$oid": question_id},
+      return (new Request()).post("/feedback", JSON.stringify({
+        "question_id": question_id,
         "choice": choice
-      });
+      }));
     }
   };
 });

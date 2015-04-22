@@ -162,10 +162,8 @@ object Feedback extends Controller with MongoController {
   }
 
   def feedback = Action.async(parse.json) { request =>
-    val user_id = request.session.get("user") map {BSONObjectID(_)}
-    println(request.body)
+    val user_id = request.session.get("user") map (BSONObjectID(_))
     feedbackCollection.save(request.body.as[Feedback].copy(user_id = user_id)) map { lastError =>
-      // save question id
       Ok
     }
   }

@@ -5,9 +5,10 @@ define([
     "observers",
     "backend",
     "upload",
-    "q"
+    "q",
+    "dropbox"
 ],
-function($, mosaic, share, observers, backend, upload, Q){
+function($, mosaic, share, observers, backend, upload, Q, dropbox){
 
   function UI() {
     var self = this;
@@ -70,7 +71,7 @@ function($, mosaic, share, observers, backend, upload, Q){
       };
 
       this.forStock = function() {
-        overlayShare.fadeOut(100, overlayStock.fadeIn);
+        overlayShare.fadeOut(100, function(){ overlayStock.fadeIn(); });
         btn2 = self.uploadBtn.clone();
         btn2.addClass("overlay-btn");
         $("#mosaic-col").append(btn2);
@@ -79,7 +80,7 @@ function($, mosaic, share, observers, backend, upload, Q){
 
       this.forShare = function() {
         progressLoader.fadeOut();
-        overlayStock.fadeOut(100, overlayShare.fadeIn);
+        overlayStock.fadeOut(100, function(){ overlayShare.fadeIn(); });
       };
 
       this.showUploading = function() {
@@ -142,34 +143,51 @@ function($, mosaic, share, observers, backend, upload, Q){
 
     
     function Feedback() {
+      var questionEl = $("#feedback-question");
+      var choicesEl = $("#feedback-choices");
+      var panel = $("#feedback-panel");
+      var questions = [];
+      var currentQuestion;
 
       function showQuestion(question) {
-        $("#feedback-question").html(question.question);
-        var choicesEl = $("#feedback-choices").empty();
+        currentQuestion = question._id;
+        questionEl.html(question.question);
+        choicesEl.empty();
         for (var i = 0; i < question.choices.length; i++) {
           var btn = $("<button></button>").addClass("btn btn-primary").data("index", i).html(question.choices[i]);
           choicesEl.append(btn);
         }
       }
 
+      function nextQuestion() {
+        if (questions.length > 0) {
+          showQuestion(questions.shift());
+        } else {
+          questionEl.html("Thank you for your feedback !");
+          choicesEl.empty();
+        }
+      }
+
       this.getQuestions = function() {
         backend.questions().then(function(list){
-          var questions = JSON.parse(list);
-          showQuestion(questions[0]);
+          questions = JSON.parse(list);
+          nextQuestion();
         });
       };
 
-      this.submitFeedback = function(el) {
-        var btn = el.target;
-        // console.log(btn);
-        // backend.feedback(btn)
+      this.submitFeedback = function(ev) {
+        backend.feedback(currentQuestion, $(ev.target).data("index"));
+        nextQuestion();
       };
 
-      $("#feedback-choices button").on("click", this.submitFeedback);
+      this.show = function() { panel.fadeIn(); };
+      this.hide = function() { panel.fadeOut(); };
 
-      $("#feedback-panel").hover(
-        function(){ $(this).css("bottom", "0px"); },
-        function(){ $(this).css("bottom", "-235px"); }
+      choicesEl.on("click", "button", this.submitFeedback);
+
+      panel.hover(
+        function(){ $(this).css("bottom", "-10px"); },
+        function(){ $(this).css("bottom", "-205px"); }
       );
     }
     self.feedback = new Feedback();
@@ -200,14 +218,15 @@ function($, mosaic, share, observers, backend, upload, Q){
       self.loader.finish();
       self.mosaic.forShare();
       self.mosaic.changeImage(mosaic.getImageURLSmall())
-        .then(function() {
+        .then(function(){}, function(){}, function() {
           self.showShareButtons();
           self.showUploadBtn();
+          self.feedback.show();
         });
     };
 
     this.showUploadBtn = function() {
-      self.uploadBtn.fadeTo(300,1);
+      self.uploadBtn.fadeTo(600,1);
     };
 
     this.hideUploadBtn = function() {
@@ -215,14 +234,14 @@ function($, mosaic, share, observers, backend, upload, Q){
     };
 
     this.showShareButtons = function() {
-      $("#share-btn").fadeTo(400, 1);
+      $("#share-btn").fadeTo(600, 1);
       $("#share-list button, #share-list .div-btn").tooltip();
       $("#share-link").val(mosaic.getViewURL());
       $("#goto-btn").attr("href", mosaic.getViewURL());
     };
 
     this.hideShareButtons = function() {
-      $("#share-btn").fadeTo(400, 0);
+      $("#share-btn").fadeTo(800, 0);
     };
 
 
@@ -233,6 +252,12 @@ function($, mosaic, share, observers, backend, upload, Q){
     upload.watch.add("progress", self.progress);
     upload.watch.add("processing", self.processing);
     upload.watch.add("submitted", self.submitted);
+
+    dropbox.watch.add("uploading", self.uploading);
+    dropbox.watch.add("progress", self.progress);
+    dropbox.watch.add("processing", self.processing);
+    dropbox.watch.add("submitted", self.submitted);
+
     mosaic.watch.add("loaded", self.loaded);
 
 

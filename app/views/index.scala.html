@@ -27,24 +27,26 @@
   <div class="row" id="mosaic-row">
     <div class="col-lg-12" id="mosaic-col">
       <img id="mosaic-img" class="img-responsive center-block" />
-      <div class="img-overlay img-overlay-share" id="img-overlay-share" data-toggle="modal" data-target="#share-modal"></div>
-      <div class="img-overlay img-overlay-stock" id="img-overlay-stock" data-toggle="modal" data-target="#upload-modal"></div>
-      <div id="progress-loader"><img /><span></span></div>
+      <div class="img-overlay" id="img-overlay-share" data-toggle="modal" data-target="#share-modal"></div>
+      <div class="img-overlay" id="img-overlay-stock" data-toggle="modal" data-target="#upload-modal">
+        <!-- <div id="share-logo" class="overlay-element"><i class="fa fa-share-alt-square fa-5x"></i><br/>Share</div> -->
+      </div>
+      <div id="progress-loader" class="overlay-element"><img /><span></span></div>
     </div>
   </div>
 
-  <!-- <div id="feedback-panel"> -->
-  <!--   <div class="panel panel-success"> -->
-  <!--     <div class="panel-heading"> -->
-  <!--       <h3 class="panel-title">Feedback</h3> -->
-  <!--     </div> -->
-  <!--     <div class="panel-body"> -->
-  <!--       <div id="feedback-question"></div> -->
-  <!--       <div class="form-group" id="feedback-choices"> -->
-  <!--       </div> -->
-  <!--     </div> -->
-  <!--   </div> -->
-  <!-- </div> -->
+  <div id="feedback-panel">
+    <div class="panel panel-primary">
+      <div class="panel-heading">
+        <h3 class="panel-title">Feedback</h3>
+      </div>
+      <div class="panel-body center-content">
+        <div id="feedback-question"></div>
+        <div class="form-group" id="feedback-choices">
+        </div>
+      </div>
+    </div>
+  </div>
 
 </div>
 
