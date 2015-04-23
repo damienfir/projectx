@@ -21,15 +21,18 @@ define([
       var path = window.location.pathname.split('/');
       if (path.length > 1 && path[1] !== "") {
         var obj = {_id: {"$oid": path[1]}, filename: path[1]+".jpg", thumbnail: path[1]+"_display.jpg"};
-        self.loaded(obj);
+        self.loaded(obj, false);
       }
     };
 
-    this.loaded = function(obj) {
+    this.loaded = function(obj, notify) {
       self.setHash(obj._id.$oid);
       self.filename = obj.filename;
       self.filename_small = obj.thumbnail;
-      self.watch.notify("loaded", [obj]);
+      if (notify === undefined || notify) {
+        console.log("notified");
+        self.watch.notify("loaded", [obj]);
+      }
       self.$loaded = true;
     };
 

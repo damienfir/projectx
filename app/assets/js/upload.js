@@ -3,8 +3,9 @@ define([
   "backend",
   "ui",
   "mosaic",
-  "observers"
-], function(Q, backend, ui, mosaic, observers){
+  "observers",
+  "ga"
+], function(Q, backend, ui, mosaic, observers, ga){
 
   function Add() {
     var self = this;
