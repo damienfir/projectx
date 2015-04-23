@@ -19,4 +19,6 @@ libraryDependencies ++= Seq(
 
 libraryDependencies +=  "org.scalaj" %% "scalaj-http" % "1.1.4"
 
+pipelineStages := Seq(rjs)
+
 fork in run := true
