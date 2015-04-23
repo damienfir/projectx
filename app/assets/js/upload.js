@@ -55,6 +55,7 @@ define([
       ev.stopPropagation();
       ev.preventDefault();
       self.watch.notify("submitted");
+      ga("send", "event", "upload", "local", "drop");
 
       var files = ev.dataTransfer.files;
       self.uploadFiles(files);
@@ -83,6 +84,7 @@ define([
     this.submitHandler = function(ev) {
       ev.stopPropagation();
       ev.preventDefault();
+      ga("send", "event", "upload", "local", "button");
       self.watch.notify("submitted");
       var files = document.getElementById("file-upload").files;
       self.uploadFiles(files);

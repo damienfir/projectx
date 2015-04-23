@@ -10,6 +10,7 @@ case class Mosaic(_id: BSONObjectID, user_id: BSONObjectID, filename: Option[Str
 
 case class FeedbackQuestion(_id: BSONObjectID, question: String, choices: List[String])
 case class Feedback(_id: Option[BSONObjectID], user_id: Option[BSONObjectID], question_id: BSONObjectID, choice: Int)
+case class TextFeedback(_id: Option[BSONObjectID], user_id: Option[BSONObjectID], text: String)
 
 
 object JsonFormats {
@@ -17,4 +18,5 @@ object JsonFormats {
   implicit val mosaicFormat = Json.format[Mosaic]
   implicit val feebackQuestionFormat = Json.format[FeedbackQuestion]
   implicit val feebackFormat = Json.format[Feedback]
+  implicit val textFeebackFormat = Json.format[TextFeedback]
 }

@@ -1,3 +1,9 @@
+window.GoogleAnalyticsObject = "__ga__";
+window.__ga__ = {
+    q: [["create", "UA-69644-18", "none"]],
+    l: Date.now()
+};
+
 require.config({
   shim: {
     'bootstrap': ['jquery'],
@@ -6,6 +12,9 @@ require.config({
     },
     'dropbox-api': {
       exports: 'Dropbox'
+    },
+    "ga": {
+      exports: "__ga__"
     }
   },
   paths: {
@@ -15,8 +24,11 @@ require.config({
     'facebook-api': '//connect.facebook.net/en_US/all',
     'dropbox-api': "//www.dropbox.com/static/api/2/dropins",
     'google-api': "//apis.google.com/js/api",
-    'pinterest-api': "//assets.pinterest.com/js/pinit"
+    'pinterest-api': "//assets.pinterest.com/js/pinit",
+    "ga": "//www.google-analytics.com/analytics"
   }
 });
 
-require(['bootstrap', 'ui', 'dropbox', 'share']);
+require(['ga', 'bootstrap', 'ui', 'dropbox', 'share'], function(ga){
+  ga('send', 'pageview');
+});

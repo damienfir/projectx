@@ -130,7 +130,7 @@ body {
 }
 
 #feedback-question {
-  height: 100px;
+  min-height: 100px;
   font-size: 16px;
 }
 
