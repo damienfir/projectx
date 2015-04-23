@@ -1,11 +1,8 @@
 define([
-  "jquery",
-  "bootstrap",
   "mosaic",
-  "fb",
-  // "pinterest-api",
-  "backend"
-], function($, _bs, mosaic, FB, backend){
+  "backend",
+  "ga"
+], function(mosaic, backend, ga){
 
   function Share() {
     var self = this;
@@ -13,6 +10,8 @@ define([
     var email = document.getElementById("email-input");
     var download = document.getElementById("download-btn");
     var download_form = document.getElementById("download-form");
+
+    var facebookID = "1580376645513631";
 
     // Download form
     var emailRegex = /[^@]+@[^\.]+\..+/;
@@ -29,33 +28,39 @@ define([
     function shareURL(ev, url) {
       ev.preventDefault();
       ev.stopPropagation();
+      console.log(url);
       window.open(url, 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=600,width=600');
     }
 
     document.getElementById("share-facebook").addEventListener("click", function(ev){
-      ev.preventDefault();
-      ev.stopPropagation();
-      FB.ui({
-        method: 'share',
-        href: mosaic.getViewURL(),
-      }, function(response){});
+      var url = mosaic.getViewURL();
+      ga("send", "social", "facebook", "share", url);
+      shareURL(ev, "http://www.facebook.com/dialog/send?app_id="+facebookID+"&link="+url+"&redirect_uri="+mosaic.getViewURL());
     });
 
     document.getElementById("share-google").addEventListener("click", function(ev){
-      shareURL(ev, "https://plus.google.com/share?url=" + mosaic.getViewURL());
+      var url = mosaic.getViewURL();
+      ga("send", "social", "google", "share", url);
+      shareURL(ev, "https://plus.google.com/share?url=" + url);
     });
 
     document.getElementById("share-pinterest").addEventListener("click", function(ev){
-      shareURL(ev, "https://www.pinterest.com/pin/create/button/?url="+mosaic.getViewURL()+"&media="+mosaic.getImageURL()+"&description=");
+      var url = mosaic.getViewURL();
+      ga("send", "social", "pinterest", "share", url);
+      shareURL(ev, "https://www.pinterest.com/pin/create/button/?url="+url+"&media="+mosaic.getImageURL()+"&description=");
     });
 
     document.getElementById("share-twitter").addEventListener("click", function(ev){
-      shareURL(ev, "https://twitter.com/intent/tweet?url="+ mosaic.getViewURL());
+      var url = mosaic.getViewURL();
+      ga("send", "social", "twitter", "share", url);
+      shareURL(ev, "https://twitter.com/intent/tweet?url="+url);
     });
 
-    document.getElementById("share-instagram").addEventListener("click", function(ev){
-      shareURL("https://twitter.com/intent/tweet?url="+ mosaic.getViewURL());
-    });
+    // document.getElementById("share-instagram").addEventListener("click", function(ev){
+    //   var url = mosaic.getViewURL();
+    //   ga("send", "social", "instagram", "share", url);
+    //   shareURL("https://twitter.com/intent/tweet?url=" + url);
+    // });
   }
 
   return new Share();

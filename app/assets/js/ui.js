@@ -109,7 +109,6 @@ function($, mosaic, share, observers, backend, upload, Q, dropbox, ga){
       var images = [];
 
       this.start = function() {
-
         backend.stock().then(function(res){
           return Q.Promise(function(resolve, reject, notify){
             var list = JSON.parse(res);
@@ -167,6 +166,7 @@ function($, mosaic, share, observers, backend, upload, Q, dropbox, ga){
         var textarea = $("<textarea class='form-control' placeholder='Let us know if you have anything else to add'></textarea>");
         var submitButton = $('<button class="btn btn-primary btn-block">Send</button>');
         submitButton.click(function(){
+          ga("send", "event", "feedback", "submitted-text");
           backend.textFeedback(textarea.val());
           submitButton.html("Thank you").attr("disabled","true");
         });
@@ -193,6 +193,7 @@ function($, mosaic, share, observers, backend, upload, Q, dropbox, ga){
       this.submitFeedback = function(ev) {
         backend.feedback(currentQuestion, $(ev.target).data("index"));
         nextQuestion();
+        ga("send", "event", "feedback", "answered-question");
       };
 
       this.show = function() { panel.fadeIn(); };
@@ -203,7 +204,7 @@ function($, mosaic, share, observers, backend, upload, Q, dropbox, ga){
       panel.hover(
         function(){
           $(this).css("bottom", "-10px");
-          ga("send", "event", "feedback", "open")
+          ga("send", "event", "feedback", "opened-panel");
         },
         function(){ $(this).css("bottom", "-"+($(this).height()-35)+"px"); }
       );
@@ -231,17 +232,22 @@ function($, mosaic, share, observers, backend, upload, Q, dropbox, ga){
       self.mosaic.showProcessing();
     };
 
-    this.loaded = function(obj) {
+    function stopStock() {
       self.stockGallery.stop();
       self.loader.finish();
+    }
+
+    function showInteractions() {
+      self.mosaic.forShare();
+      self.showShareButtons();
+      self.showUploadButton();
+      self.feedback.show();
+    }
+
+    this.loaded = function(obj) {
+      stopStock();
       self.mosaic.changeImage(mosaic.getImageURLSmall())
-        .then(function(){
-          self.feedback.show();
-        }, function(){}, function() {
-          self.mosaic.forShare();
-          self.showShareButtons();
-          self.showUploadButton();
-        });
+        .then(function(){}, function(){}, showInteractions);
     };
 
     this.showUploadButton = function() {
@@ -283,12 +289,14 @@ function($, mosaic, share, observers, backend, upload, Q, dropbox, ga){
     if (!mosaic.$loaded) {
       self.stockGallery.start();
     } else {
-      self.stockGallery.stop();
+      stopStock();
+      showInteractions();
     }
 
     self.feedback.getQuestions();
 
     $(".modal").on("show.bs.modal", function(ev){ ga("send", "pageview", $(ev.target).data("content")); });
+    $(".modal").on("show.bs.modal", function(ev){ ga("send", "event", "modal", $(ev.relatedTarget).data("from")); });
   }
 
   return new UI();
