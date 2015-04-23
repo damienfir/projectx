@@ -15,6 +15,7 @@ POST    /dropbox                    controllers.Application.dropbox
 
 GET     /questions                  controllers.Feedback.questions
 POST    /feedback                   controllers.Feedback.feedback
+POST    /textfeedback               controllers.Feedback.textFeedback
 GET     /reset                      controllers.Application.reset
 
 GET     /                           controllers.Application.index(filename: String = "")

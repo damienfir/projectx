@@ -6,9 +6,10 @@ define([
     "backend",
     "upload",
     "q",
-    "dropbox"
+    "dropbox",
+    "ga"
 ],
-function($, mosaic, share, observers, backend, upload, Q, dropbox){
+function($, mosaic, share, observers, backend, upload, Q, dropbox, ga){
 
   function UI() {
     var self = this;
@@ -84,6 +85,7 @@ function($, mosaic, share, observers, backend, upload, Q, dropbox){
       };
 
       this.showUploading = function() {
+        if (mosaic.$loaded) overlayShare.fadeOut(100, function(){ overlayStock.fadeIn(); });
         if (btn2 !== undefined) btn2.remove();
         progressLoader.children("img").attr("src","/assets/images/358.GIF");
         progressLoader.children("span").html("Uploading");
@@ -107,7 +109,6 @@ function($, mosaic, share, observers, backend, upload, Q, dropbox){
       var images = [];
 
       this.start = function() {
-
         backend.stock().then(function(res){
           return Q.Promise(function(resolve, reject, notify){
             var list = JSON.parse(res);
@@ -159,18 +160,32 @@ function($, mosaic, share, observers, backend, upload, Q, dropbox){
         }
       }
 
+      function showForm() {
+        choicesEl.empty();
+        questionEl.html("<p>Thank you for your feedback !</p>");
+        var textarea = $("<textarea class='form-control' placeholder='Let us know if you have anything else to add'></textarea>");
+        var submitButton = $('<button class="btn btn-primary btn-block">Send</button>');
+        submitButton.click(function(){
+          ga("send", "event", "feedback", "submitted-text");
+          backend.textFeedback(textarea.val());
+          submitButton.html("Thank you").attr("disabled","true");
+        });
+        questionEl.append($("<div class='form-group'></div>").append(textarea), submitButton);
+        textarea.focus();
+      }
+
       function nextQuestion() {
         if (questions.length > 0) {
           showQuestion(questions.shift());
         } else {
-          questionEl.html("Thank you for your feedback !");
-          choicesEl.empty();
+          showForm();
         }
       }
 
       this.getQuestions = function() {
         backend.questions().then(function(list){
           questions = JSON.parse(list);
+          questions = questions.slice(0, Math.min(3, questions.length));
           nextQuestion();
         });
       };
@@ -178,6 +193,7 @@ function($, mosaic, share, observers, backend, upload, Q, dropbox){
       this.submitFeedback = function(ev) {
         backend.feedback(currentQuestion, $(ev.target).data("index"));
         nextQuestion();
+        ga("send", "event", "feedback", "answered-question");
       };
 
       this.show = function() { panel.fadeIn(); };
@@ -186,8 +202,11 @@ function($, mosaic, share, observers, backend, upload, Q, dropbox){
       choicesEl.on("click", "button", this.submitFeedback);
 
       panel.hover(
-        function(){ $(this).css("bottom", "-10px"); },
-        function(){ $(this).css("bottom", "-205px"); }
+        function(){
+          $(this).css("bottom", "-10px");
+          ga("send", "event", "feedback", "opened-panel");
+        },
+        function(){ $(this).css("bottom", "-"+($(this).height()-35)+"px"); }
       );
     }
     self.feedback = new Feedback();
@@ -213,19 +232,25 @@ function($, mosaic, share, observers, backend, upload, Q, dropbox){
       self.mosaic.showProcessing();
     };
 
-    this.loaded = function(obj) {
+    function stopStock() {
       self.stockGallery.stop();
       self.loader.finish();
+    }
+
+    function showInteractions() {
       self.mosaic.forShare();
+      self.showShareButtons();
+      self.showUploadButton();
+      self.feedback.show();
+    }
+
+    this.loaded = function(obj) {
+      stopStock();
       self.mosaic.changeImage(mosaic.getImageURLSmall())
-        .then(function(){}, function(){}, function() {
-          self.showShareButtons();
-          self.showUploadBtn();
-          self.feedback.show();
-        });
+        .then(function(){}, function(){}, showInteractions);
     };
 
-    this.showUploadBtn = function() {
+    this.showUploadButton = function() {
       self.uploadBtn.fadeTo(600,1);
     };
 
@@ -264,10 +289,14 @@ function($, mosaic, share, observers, backend, upload, Q, dropbox){
     if (!mosaic.$loaded) {
       self.stockGallery.start();
     } else {
-      self.stockGallery.stop();
+      stopStock();
+      showInteractions();
     }
 
     self.feedback.getQuestions();
+
+    $(".modal").on("show.bs.modal", function(ev){ ga("send", "pageview", $(ev.target).data("content")); });
+    $(".modal").on("show.bs.modal", function(ev){ ga("send", "event", "modal", $(ev.relatedTarget).data("from")); });
   }
 
   return new UI();

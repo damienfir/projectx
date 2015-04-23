@@ -3,8 +3,9 @@ define([
   "dropbox-api",
   "ui",
   "mosaic",
-  "observers"
-], function(backend, Dropbox, ui, mosaic, observers){
+  "observers",
+  "ga"
+], function(backend, Dropbox, ui, mosaic, observers, ga){
 
   Dropbox.appKey = "z7bsczzlaqyb8zr";
 
@@ -14,8 +15,11 @@ define([
 
     self.upload = function() {
       self.watch.notify("submitted");
+      ga("send", "event", "upload", "dropbox", "open");
+
       Dropbox.choose({
         success: function(files) {
+          ga("send", "event", "upload", "dropbox", "upload");
           self.watch.notify("uploading", [files.length]);
 
           backend.reset()

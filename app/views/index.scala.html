@@ -4,13 +4,13 @@
 
 <ul class="navbar-nav nav navbar-right">
   <li>
-    <button class="btn btn-primary navbar-btn upload-btn" data-toggle="modal" data-target="#upload-modal"><i class="fa fa-plus-square fa-lg"></i> <span id="add-txt">Choose photos</span></button>
+    <button class="btn btn-primary navbar-btn upload-btn" data-toggle="modal" data-target="#upload-modal" data-from="add-button"><i class="fa fa-plus-square fa-lg"></i> <span id="add-txt">Choose photos</span></button>
   </li>
 </ul>
 
 <ul class="navbar-nav nav navbar-right">
   <li>
-    <button class="btn btn-success navbar-btn" data-toggle="modal" data-target="#share-modal" id="share-btn"><i class="fa fa-share-alt fa-lg"></i> Share</button>
+    <button class="btn btn-success navbar-btn" data-toggle="modal" data-target="#share-modal" id="share-btn" data-from="share-button"><i class="fa fa-share-alt fa-lg"></i> Share</button>
   </li>
 </ul>
 
@@ -26,9 +26,9 @@
 
   <div class="row" id="mosaic-row">
     <div class="col-lg-12" id="mosaic-col">
-      <img id="mosaic-img" class="img-responsive center-block" />
-      <div class="img-overlay" id="img-overlay-share" data-toggle="modal" data-target="#share-modal"></div>
-      <div class="img-overlay" id="img-overlay-stock" data-toggle="modal" data-target="#upload-modal">
+      <img id="mosaic-img" class="img-responsive center-block" @if(filename) { src="/storage/generated/@{filename}_display.jpg" } />
+      <div class="img-overlay" id="img-overlay-share" data-toggle="modal" data-target="#share-modal" data-from="share-overlay"></div>
+      <div class="img-overlay" id="img-overlay-stock" data-toggle="modal" data-target="#upload-modal" data-from="stock-overlay">
         <!-- <div id="share-logo" class="overlay-element"><i class="fa fa-share-alt-square fa-5x"></i><br/>Share</div> -->
       </div>
       <div id="progress-loader" class="overlay-element"><img /><span></span></div>
@@ -51,7 +51,7 @@
 </div>
 
 
-<div class="modal fade" id="upload-modal" tabindex="-1">
+<div class="modal fade" id="upload-modal" tabindex="-1" data-content="/upload">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
@@ -86,7 +86,7 @@
   </div>
 </div>
 
-<div class="modal fade" id="share-modal" tabindex="-1">
+<div class="modal fade" id="share-modal" tabindex="-1" data-content="/share">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">

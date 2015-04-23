@@ -43,6 +43,12 @@ define([
         "question_id": question_id,
         "choice": choice
       }));
+    },
+
+    textFeedback: function(text) {
+      return (new Request()).post("/textfeedback", JSON.stringify({
+        "text": text
+      }));
     }
   };
 });
