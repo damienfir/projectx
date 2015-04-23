@@ -35,25 +35,25 @@ define([
     document.getElementById("share-facebook").addEventListener("click", function(ev){
       var url = mosaic.getViewURL();
       ga("send", "social", "facebook", "share", url);
-      shareURL(ev, "http://www.facebook.com/dialog/send?app_id="+facebookID+"&link="+url+"&redirect_uri="+mosaic.getViewURL());
+      shareURL(ev, "http://www.facebook.com/dialog/share?app_id="+facebookID+"&display=popup&href="+encodeURIComponent(url)+"&redirect_uri="+encodeURIComponent(mosaic.getViewURL()));
     });
 
     document.getElementById("share-google").addEventListener("click", function(ev){
       var url = mosaic.getViewURL();
       ga("send", "social", "google", "share", url);
-      shareURL(ev, "https://plus.google.com/share?url=" + url);
+      shareURL(ev, "https://plus.google.com/share?url=" + encodeURIComponent(url));
     });
 
     document.getElementById("share-pinterest").addEventListener("click", function(ev){
       var url = mosaic.getViewURL();
       ga("send", "social", "pinterest", "share", url);
-      shareURL(ev, "https://www.pinterest.com/pin/create/button/?url="+url+"&media="+mosaic.getImageURL()+"&description=");
+      shareURL(ev, "https://www.pinterest.com/pin/create/button/?url="+encodeURIComponent(url)+"&media="+encodeURIComponent(mosaic.getImageURL())+"&description=");
     });
 
     document.getElementById("share-twitter").addEventListener("click", function(ev){
       var url = mosaic.getViewURL();
       ga("send", "social", "twitter", "share", url);
-      shareURL(ev, "https://twitter.com/intent/tweet?url="+url);
+      shareURL(ev, "https://twitter.com/intent/tweet?url="+encodeURIComponent(url));
     });
 
     // document.getElementById("share-instagram").addEventListener("click", function(ev){
