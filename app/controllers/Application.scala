@@ -58,16 +58,12 @@ object Application extends Controller with MongoController {
 
 
   def index(filename: String) = Action.async { implicit request =>
-    getOrCreateUser map { user =>
-      Ok(views.html.index(filename)).withSession(
-        "user" -> user._id.stringify
-      )
-    } flatMap { result =>
+    Future(Ok(views.html.index(filename))) flatMap { result =>
       filename match {
         case "" => Future(result)
         case mosaic_id => getMosaicFromID(mosaic_id) map { _ map { mosaic =>
-          result.addingToSession("mosaic" -> mosaic._id.stringify)
-        } getOrElse (result)
+            result.addingToSession("mosaic" -> mosaic._id.stringify)
+          } getOrElse (result)
         }
       }
     }
@@ -75,15 +71,14 @@ object Application extends Controller with MongoController {
 
 
   def reset = Action.async { implicit request =>
-    getUser flatMap { _ map { user =>
-        val id = BSONObjectID.generate
-        mosaicCollection.insert(Mosaic(id, user._id, None, None, List())) map { _ =>
-          Ok.withSession(
-            "user" -> user._id.stringify,
-            "mosaic" -> id.stringify
-          )
-        }
-      } getOrElse(Future(BadRequest))
+    getOrCreateUser flatMap {  user =>
+      val id = BSONObjectID.generate
+      mosaicCollection.insert(Mosaic(id, user._id, None, None, List())) map { _ =>
+        Ok.withSession(
+          "user" -> user._id.stringify,
+          "mosaic" -> id.stringify
+        )
+      }
     }
   }
 

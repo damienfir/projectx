@@ -295,8 +295,10 @@ function($, mosaic, share, observers, backend, upload, Q, dropbox, ga){
 
     self.feedback.getQuestions();
 
+    // Google Analytics triggers
     $(".modal").on("show.bs.modal", function(ev){ ga("send", "pageview", $(ev.target).data("content")); });
     $(".modal").on("show.bs.modal", function(ev){ ga("send", "event", "modal", $(ev.relatedTarget).data("from")); });
+    $(".more-info").on("click", function(ev){ ga("send", "event", "more-info", $(ev.target).data("from")); });
   }
 
   return new UI();
