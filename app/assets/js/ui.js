@@ -271,6 +271,17 @@ function($, mosaic, share, observers, backend, upload, Q, dropbox, ga){
 
 
     $("#cloud-btn .div-btn").tooltip();
+    document.getElementById("contact-form").addEventListener("submit", function(ev){
+      ev.preventDefault();
+      ev.stopPropagation();
+      var el = ev.target.elements;
+      var button = $("#contact-submit-btn").text("Sending...").attr("disabled", "true");
+      backend.contact(el.namedItem("email").value, el.namedItem("message").value)
+        .then(function(){
+          button.text("Thank you !");
+        });
+      ga("send","event","contact","send-message");
+    });
 
 
     upload.watch.add("uploading", self.uploading);

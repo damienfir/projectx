@@ -23,6 +23,10 @@ define([
       }
     });
 
+    document.getElementById("share-link").addEventListener("focus", function(ev) {
+      ev.target.setSelectionRange(0, ev.target.value.length);
+    });
+
 
     // Share handlers
     function shareURL(ev, url) {
@@ -61,6 +65,8 @@ define([
     //   ga("send", "social", "instagram", "share", url);
     //   shareURL("https://twitter.com/intent/tweet?url=" + url);
     // });
+    //
+
   }
 
   return new Share();

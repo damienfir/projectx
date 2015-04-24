@@ -118,14 +118,17 @@ object Application extends Controller with MongoController {
   }
 
   def download = Action.async(parse.urlFormEncoded) { implicit request =>
+    var toSend = Email(None, None)
     getUser flatMap {
       _ flatMap { user =>
         request.body.get("email") map { email =>
+          toSend = toSend.copy(address=email.headOption)
           userCollection.save(user.copy(email = email.headOption))
         }
       } map { lastError =>
         getMosaic map {
           _ flatMap { mosaic =>
+            EmailService.send(toSend.copy(mosaic_id=Some(mosaic._id.stringify)))
             mosaic.filename map { fname =>
               Ok.sendFile(MosaicService.getFile(fname))
             }
@@ -148,6 +151,7 @@ object Feedback extends Controller with MongoController {
 
   def questionCollection = db.collection[JSONCollection]("questions")
   def feedbackCollection = db.collection[JSONCollection]("feedbacks")
+  def contactCollection = db.collection[JSONCollection]("contacts")
 
   
   def questions = Action.async {
@@ -164,8 +168,15 @@ object Feedback extends Controller with MongoController {
   }
 
   def textFeedback = Action.async(parse.json) { request =>
-    val user_id = request.session.get("user") map (BSONObjectID(_));
+    val user_id = request.session.get("user") map (BSONObjectID(_))
     feedbackCollection.save(request.body.as[TextFeedback].copy(user_id = user_id)) map { lastError =>
+      Ok
+    }
+  }
+
+  def contact = Action.async(parse.json) { request =>
+    val user_id = request.session.get("user") map (BSONObjectID(_))
+    contactCollection.save(request.body.as[ContactFeedback].copy(user_id=user_id)) map { lastError =>
       Ok
     }
   }
