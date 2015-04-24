@@ -49,6 +49,13 @@ define([
       return (new Request()).post("/textfeedback", JSON.stringify({
         "text": text
       }));
+    },
+
+    contact: function(email, message) {
+      return (new Request()).post("/contact", JSON.stringify({
+        "email": email,
+        "message": message
+      }));
     }
   };
 });

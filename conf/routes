@@ -17,6 +17,7 @@ GET     /questions                  controllers.Feedback.questions
 POST    /feedback                   controllers.Feedback.feedback
 POST    /textfeedback               controllers.Feedback.textFeedback
 GET     /reset                      controllers.Application.reset
+POST    /contact                    controllers.Feedback.contact
 
 GET     /                           controllers.Application.index(filename: String = "")
 GET     /:filename                  controllers.Application.index(filename: String)

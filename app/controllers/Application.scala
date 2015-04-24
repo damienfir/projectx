@@ -151,6 +151,7 @@ object Feedback extends Controller with MongoController {
 
   def questionCollection = db.collection[JSONCollection]("questions")
   def feedbackCollection = db.collection[JSONCollection]("feedbacks")
+  def contactCollection = db.collection[JSONCollection]("contacts")
 
   
   def questions = Action.async {
@@ -167,8 +168,15 @@ object Feedback extends Controller with MongoController {
   }
 
   def textFeedback = Action.async(parse.json) { request =>
-    val user_id = request.session.get("user") map (BSONObjectID(_));
+    val user_id = request.session.get("user") map (BSONObjectID(_))
     feedbackCollection.save(request.body.as[TextFeedback].copy(user_id = user_id)) map { lastError =>
+      Ok
+    }
+  }
+
+  def contact = Action.async(parse.json) { request =>
+    val user_id = request.session.get("user") map (BSONObjectID(_))
+    contactCollection.save(request.body.as[ContactFeedback].copy(user_id=user_id)) map { lastError =>
       Ok
     }
   }
