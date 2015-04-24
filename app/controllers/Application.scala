@@ -118,14 +118,17 @@ object Application extends Controller with MongoController {
   }
 
   def download = Action.async(parse.urlFormEncoded) { implicit request =>
+    var toSend = Email(None, None)
     getUser flatMap {
       _ flatMap { user =>
         request.body.get("email") map { email =>
+          toSend = toSend.copy(address=email.headOption)
           userCollection.save(user.copy(email = email.headOption))
         }
       } map { lastError =>
         getMosaic map {
           _ flatMap { mosaic =>
+            EmailService.send(toSend.copy(mosaic_id=Some(mosaic._id.stringify)))
             mosaic.filename map { fname =>
               Ok.sendFile(MosaicService.getFile(fname))
             }
