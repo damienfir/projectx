@@ -248,6 +248,7 @@ function($, mosaic, share, observers, backend, upload, Q, dropbox, ga){
       stopStock();
       self.mosaic.changeImage(mosaic.getImageURLSmall())
         .then(function(){}, function(){}, showInteractions);
+      window.history.pushState({}, document.title, mosaic.getViewURL());
     };
 
     this.showUploadButton = function() {
