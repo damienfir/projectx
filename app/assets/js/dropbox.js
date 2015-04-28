@@ -1,11 +1,10 @@
 define([
   "backend",
   "dropbox-api",
-  "ui",
   "mosaic",
   "observers",
   "ga"
-], function(backend, Dropbox, ui, mosaic, observers, ga){
+], function(backend, Dropbox, mosaic, observers, ga){
 
   Dropbox.appKey = "z7bsczzlaqyb8zr";
 

@@ -27,7 +27,7 @@
   <div class="row" id="mosaic-row">
     <div class="col-lg-12" id="mosaic-col">
       <img id="mosaic-img" class="img-responsive center-block" @if(filename) { src="/storage/generated/@{filename}_display.jpg" } />
-      <div class="img-overlay" id="img-overlay-share" data-toggle="modal" data-target="#share-modal" data-from="share-overlay"></div>
+      <!-- <div class="img-overlay" id="img-overlay-share" data-toggle="modal" data-target="#share-modal" data-from="share-overlay"></div> -->
       <div class="img-overlay" id="img-overlay-stock" data-toggle="modal" data-target="#upload-modal" data-from="stock-overlay">
         <!-- <div id="share-logo" class="overlay-element"><i class="fa fa-share-alt-square fa-5x"></i><br/>Share</div> -->
       </div>
@@ -96,7 +96,7 @@
       <div class="modal-body" id="share-list">
         <div class="row">
           <div class="col-lg-3">
-            <h5>Share on...</h5>
+            <h5>Share mosaic on...</h5>
           </div>
           <div class="col-lg-9 centered">
             <button id="share-facebook" class="btn btn-primary btn-lg" data-toggle="tooltip" title="Share on Facebook"><i class="fa fa-facebook"></i></button>
@@ -109,7 +109,20 @@
         </div>
         <hr />
         <div class="row">
-          <div class="col-lg-3"><h5>Share link</h5></div>
+          <div class="col-lg-3"><h5>Share by email</h5></div>
+          <div class="col-lg-7">
+            <div class="input-group">
+              <span class="input-group-addon">@@</span>
+              <input class="form-control" name="email-dst" id="email-link" />
+            </div>
+          </div>
+          <div class="col-lg-2">
+            <a class="btn btn-primary pull-right" id="email-btn">Send</a>
+          </div>
+        </div>
+        <hr />
+        <div class="row">
+          <div class="col-lg-3"><h5>Share mosaic</h5></div>
           <div class="col-lg-9">
             <div class="input-group">
               <span class="input-group-addon"><i class="fa fa-link"></i></span>
@@ -129,15 +142,13 @@
                 <span class="input-group-addon">@@</span>
                 <input type="text" name="email" placeholder="Please enter your email address" class="form-control" id="email-input">
               </div>
-              <!-- <span class="pull-right text-muted">We will send you a download link to your poster to view it later.</span> -->
+              <p class="centered text-muted">We will send you a link to your poster to view it later.</p>
             </div>
           </div>
         </div>
       </div>
       <div class="modal-footer">
-            <div class="form-group">
-              <button type="submit" class="btn btn-success" id="download-btn" disabled><i class="fa fa-cloud-download fa-lg"></i> Download</button>
-            </div>
+          <button type="submit" class="btn btn-success" id="download-btn" disabled><i class="fa fa-cloud-download fa-lg"></i> Download</button>
       </div>
       </form>
     </div>
