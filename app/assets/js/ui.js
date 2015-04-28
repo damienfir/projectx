@@ -72,7 +72,8 @@ function($, mosaic, share, observers, backend, upload, Q, dropbox, ga){
       };
 
       this.forStock = function() {
-        overlayShare.fadeOut(100, function(){ overlayStock.fadeIn(); });
+        overlayStock.fadeIn();
+        // overlayShare.fadeOut(100, function(){ overlayStock.fadeIn(); });
         btn2 = self.uploadBtn.clone();
         btn2.addClass("overlay-btn");
         $("#mosaic-col").append(btn2);
@@ -81,7 +82,8 @@ function($, mosaic, share, observers, backend, upload, Q, dropbox, ga){
 
       this.forShare = function() {
         progressLoader.fadeOut();
-        overlayStock.fadeOut(100, function(){ overlayShare.fadeIn(); });
+        overlayStock.fadeOut();
+        // overlayStock.fadeOut(100, function(){ overlayShare.fadeIn(); });
       };
 
       this.showUploading = function() {
@@ -126,9 +128,10 @@ function($, mosaic, share, observers, backend, upload, Q, dropbox, ga){
           function replaceImage(url) {
             if (stop) return;
             self.mosaic.changeImage(url).then(function(){
-              if (i === 0) { self.mosaic.forStock(); }
               i++;
               timeoutID = setTimeout(replaceImage, 3000, images[i % images.length].src);
+            }, null, function() {
+              if (i === 0) { self.mosaic.forStock(); }
             });
           }
           replaceImage(images[i].src);
@@ -167,7 +170,11 @@ function($, mosaic, share, observers, backend, upload, Q, dropbox, ga){
         var submitButton = $('<button class="btn btn-primary btn-block">Send</button>');
         submitButton.click(function(){
           ga("send", "event", "feedback", "submitted-text");
-          backend.textFeedback(textarea.val());
+          backend.textFeedback(textarea.val()).then(function() {
+            panel.find(".panel-title").html("Thank you!");
+            panel.removeClass("panel-primary").addClass("panel-success");
+            pullDown(panel);
+          });
           submitButton.html("Thank you").attr("disabled","true");
         });
         questionEl.append($("<div class='form-group'></div>").append(textarea), submitButton);
@@ -201,12 +208,16 @@ function($, mosaic, share, observers, backend, upload, Q, dropbox, ga){
 
       choicesEl.on("click", "button", this.submitFeedback);
 
+      function pullDown(element) {
+        element.css("bottom", "-"+(element.height()-35)+"px");
+      }
+
       panel.hover(
         function(){
           $(this).css("bottom", "-10px");
           ga("send", "event", "feedback", "opened-panel");
         },
-        function(){ $(this).css("bottom", "-"+($(this).height()-35)+"px"); }
+        function(){ pullDown($(this)); }
       );
     }
     self.feedback = new Feedback();
@@ -248,6 +259,7 @@ function($, mosaic, share, observers, backend, upload, Q, dropbox, ga){
       stopStock();
       self.mosaic.changeImage(mosaic.getImageURLSmall())
         .then(function(){}, function(){}, showInteractions);
+      window.history.pushState({}, document.title, mosaic.getViewURL());
     };
 
     this.showUploadButton = function() {
@@ -284,19 +296,6 @@ function($, mosaic, share, observers, backend, upload, Q, dropbox, ga){
     });
 
 
-    upload.watch.add("uploading", self.uploading);
-    upload.watch.add("progress", self.progress);
-    upload.watch.add("processing", self.processing);
-    upload.watch.add("submitted", self.submitted);
-
-    dropbox.watch.add("uploading", self.uploading);
-    dropbox.watch.add("progress", self.progress);
-    dropbox.watch.add("processing", self.processing);
-    dropbox.watch.add("submitted", self.submitted);
-
-    mosaic.watch.add("loaded", self.loaded);
-
-
     if (!mosaic.$loaded) {
       self.stockGallery.start();
     } else {
@@ -310,6 +309,19 @@ function($, mosaic, share, observers, backend, upload, Q, dropbox, ga){
     $(".modal").on("show.bs.modal", function(ev){ ga("send", "pageview", $(ev.target).data("content")); });
     $(".modal").on("show.bs.modal", function(ev){ ga("send", "event", "modal", $(ev.relatedTarget).data("from")); });
     $(".more-info").on("click", function(ev){ ga("send", "event", "more-info", $(ev.target).data("from")); });
+
+
+    upload.watch.add("uploading", self.uploading);
+    upload.watch.add("progress", self.progress);
+    upload.watch.add("processing", self.processing);
+    upload.watch.add("submitted", self.submitted);
+
+    mosaic.watch.add("loaded", self.loaded);
+
+    dropbox.watch.add("uploading", self.uploading);
+    dropbox.watch.add("progress", self.progress);
+    dropbox.watch.add("processing", self.processing);
+    dropbox.watch.add("submitted", self.submitted);
   }
 
   return new UI();
