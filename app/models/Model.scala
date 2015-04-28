@@ -13,6 +13,8 @@ case class Feedback(_id: Option[BSONObjectID], user_id: Option[BSONObjectID], qu
 case class TextFeedback(_id: Option[BSONObjectID], user_id: Option[BSONObjectID], text: String)
 case class ContactFeedback(_id: Option[BSONObjectID], user_id: Option[BSONObjectID], email: String, message: Option[String])
 
+case class Email(to: String, from: String)
+
 
 object JsonFormats {
   implicit val userFormat = Json.format[User]
@@ -21,4 +23,5 @@ object JsonFormats {
   implicit val feebackFormat = Json.format[Feedback]
   implicit val textFeebackFormat = Json.format[TextFeedback]
   implicit val contactFeebackFormat = Json.format[ContactFeedback]
+  implicit val emailFormat = Json.format[Email]
 }

@@ -92,7 +92,6 @@
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
       </div>
-      <form action="/download" method="post" id="download-form">
       <div class="modal-body" id="share-list">
         <div class="row">
           <div class="col-lg-3">
@@ -109,16 +108,23 @@
         </div>
         <hr />
         <div class="row">
+          <form id="email-form">
           <div class="col-lg-3"><h5>Share by email</h5></div>
           <div class="col-lg-7">
             <div class="input-group">
               <span class="input-group-addon">@@</span>
-              <input class="form-control" name="email-dst" id="email-link" />
+              <input class="form-control" name="from" placeholder="Your email address" />
+            </div>
+            <div class="input-group">
+              <span class="input-group-addon">@@</span>
+              <input class="form-control" name="to" placeholder="Your friend's email address" />
             </div>
           </div>
           <div class="col-lg-2">
-            <a class="btn btn-primary pull-right" id="email-btn">Send</a>
+            <button type="submit" class="btn btn-primary center-block" id="email-btn">Send</button>
+            <p class="centered text-success invisible" id="sent-label">Sent!</p>
           </div>
+          </form>
         </div>
         <hr />
         <div class="row">
@@ -129,11 +135,9 @@
               <input class="form-control" id="share-link" />
             </div>
           </div>
-          <!-- <div class="col-lg-2"> -->
-          <!--   <a class="btn btn-primary pull-right" id="goto-btn">View</a> -->
-          <!-- </div> -->
         </div>
         <hr />
+        <form action="/download" method="post" id="download-form">
         <div class="row">
           <div class="col-lg-3"><h5>Download</h5></div>
           <div class="col-lg-9">
@@ -146,11 +150,13 @@
             </div>
           </div>
         </div>
-      </div>
-      <div class="modal-footer">
-          <button type="submit" class="btn btn-success" id="download-btn" disabled><i class="fa fa-cloud-download fa-lg"></i> Download</button>
-      </div>
+        <div class="row">
+        	<div class="col-lg-12">
+            <button type="submit" class="btn btn-success pull-right" id="download-btn" disabled><i class="fa fa-cloud-download fa-lg"></i> Download</button>
+          </div>
+        </div>
       </form>
+      </div>
     </div>
   </div>
 </div>

@@ -145,3 +145,6 @@ body {
 }
 
 .center-content { text-align: center; }
+
+.invisible { opacity: 0; transition: opacity 200ms;}
+.visible { opacity: 1; transition: opacity 200ms; }

@@ -56,6 +56,13 @@ define([
         "email": email,
         "message": message
       }));
+    },
+    
+    email: function(to, from) {
+      return (new Request()).post("/email", JSON.stringify({
+        "from": from,
+        "to": to
+      }));
     }
   };
 });

@@ -27,6 +27,16 @@ define([
       ev.target.setSelectionRange(0, ev.target.value.length);
     });
 
+    document.getElementById("email-form").addEventListener("submit", function(ev){
+      ev.preventDefault();
+      ev.stopPropagation();
+      var fields = ev.target.elements;
+      backend.email(fields.namedItem("to").value, fields.namedItem("from").value).then(function(){}, function(){}, function(){
+        el.classList.remove("invisible");
+        el.classList.add("visible");
+      });
+    });
+
 
     // Share handlers
     function shareURL(ev, url) {
