@@ -118,23 +118,30 @@ object Application extends Controller with MongoController {
   }
 
   def download = Action.async(parse.urlFormEncoded) { implicit request =>
-    var toSend = Email(None, None)
-    getUser flatMap {
-      _ flatMap { user =>
-        request.body.get("email") map { email =>
-          toSend = toSend.copy(address=email.headOption)
-          userCollection.save(user.copy(email = email.headOption))
-        }
-      } map { lastError =>
-        getMosaic map {
-          _ flatMap { mosaic =>
-            EmailService.send(toSend.copy(mosaic_id=Some(mosaic._id.stringify)))
-            mosaic.filename map { fname =>
-              Ok.sendFile(MosaicService.getFile(fname))
-            }
+    request.body.get("email") map(_.head) map { email =>
+      getUser map {
+        case Some(user) => userCollection.save(user.copy(email = Some(email)))
+      }
+      getMosaic map {
+        case Some(mosaic) =>
+          EmailService.sendToSelf(email, mosaic._id.stringify)
+          mosaic.filename map { fname =>
+            Ok.sendFile(MosaicService.getFile(fname))
           } getOrElse(BadRequest)
-        }
-      } getOrElse(Future(BadRequest))
+      }
+    } getOrElse(Future(BadRequest))
+  }
+
+  def email = Action.async(parse.json) { implicit request =>
+    val req = request.body.as[Email]
+    getUser map {
+      case Some(user) => userCollection.save(user.copy(email = Some(req.from)))
+    }
+    getMosaic map {
+      case Some(mosaic) =>
+        EmailService.sendToFriend(req.to, req.from, mosaic._id.stringify)
+        Ok
+      case None => BadRequest
     }
   }
 
