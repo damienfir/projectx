@@ -32,6 +32,8 @@ define([
       ev.stopPropagation();
       var fields = ev.target.elements;
       backend.email(fields.namedItem("to").value, fields.namedItem("from").value).then(function(){}, function(){}, function(){
+        console.log("ok");
+        var el = document.getElementById("sent-label");
         el.classList.remove("invisible");
         el.classList.add("visible");
       });
@@ -42,7 +44,6 @@ define([
     function shareURL(ev, url) {
       ev.preventDefault();
       ev.stopPropagation();
-      console.log(url);
       window.open(url, 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=600,width=600');
     }
 

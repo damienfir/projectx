@@ -29,6 +29,6 @@ require.config({
   }
 });
 
-require(['ga', 'bootstrap', 'ui', 'dropbox', 'share'], function(ga){
+require(['ga', 'ui'], function(ga){
   ga('send', 'pageview');
 });
