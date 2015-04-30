@@ -70,6 +70,11 @@ object Application extends Controller with MongoController {
   }
 
 
+  def index2 = Action {
+    Ok(views.html.index2(""))
+  }
+
+
   def reset = Action.async { implicit request =>
     getOrCreateUser flatMap {  user =>
       val id = BSONObjectID.generate

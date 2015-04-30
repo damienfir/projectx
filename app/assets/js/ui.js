@@ -259,6 +259,7 @@ define(function(require){
 
     this.loaded = function(obj) {
       stopStock();
+      $("#title-phrase").fadeOut();
       self.mosaic.changeImage(mosaic.getImageURLSmall())
         .then(function(){}, function(){}, showInteractions);
       window.history.pushState({}, document.title, mosaic.getViewURL());
