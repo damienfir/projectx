@@ -18,9 +18,9 @@ require.config({
     }
   },
   paths: {
-    'q': "/assets/bower_components/q/q",
-    'jquery': "/assets/bower_components/jquery/dist/jquery.min",
-    'bootstrap': "/assets/bower_components/bootstrap/dist/js/bootstrap.min",
+    'q': "../bower_components/q/q",
+    'jquery': "../bower_components/jquery/dist/jquery.min",
+    'bootstrap': "../bower_components/bootstrap/dist/js/bootstrap.min",
     'facebook-api': '//connect.facebook.net/en_US/all',
     'dropbox-api': "//www.dropbox.com/static/api/2/dropins",
     'google-api': "//apis.google.com/js/api",
