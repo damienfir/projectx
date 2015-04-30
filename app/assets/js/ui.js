@@ -1,15 +1,9 @@
-define([
-    "jquery",
-    "mosaic",
-    "share",
-    "observers",
-    "backend",
-    "upload",
-    "q",
-    "dropbox",
-    "ga"
-],
-function($, mosaic, share, observers, backend, upload, Q, dropbox, ga){
+define(function(require){
+
+  var $ = require("jquery"),
+      mosaic = require("mosaic"),
+      Q = require("q"),
+      ga = require("ga");
 
   function UI() {
     var self = this;
@@ -109,9 +103,11 @@ function($, mosaic, share, observers, backend, upload, Q, dropbox, ga){
       var timeoutID = 0;
       var stop = false;
       var images = [];
+      var backend = require("backend");
 
       this.start = function() {
-        backend.stock().then(function(res){
+        self.mosaic.forStock();
+        return backend.stock().then(function(res){
           return Q.Promise(function(resolve, reject, notify){
             var list = JSON.parse(res);
             list = list.slice(0, Math.min(6, list.length));
@@ -119,21 +115,25 @@ function($, mosaic, share, observers, backend, upload, Q, dropbox, ga){
               var im = new Image();
               im.src = "/assets/stock/" + url;
               images.push(im);
-              if (images.length === 1) resolve();
+              console.log("loading "+images.length);
+              if (images.length === 1) {
+                console.log("resolving");
+                resolve();
+              }
             });
           });
         })
         .then(function(){
+          console.log("resolved");
           var i = 0;
           function replaceImage(url) {
             if (stop) return;
             self.mosaic.changeImage(url).then(function(){
               i++;
               timeoutID = setTimeout(replaceImage, 3000, images[i % images.length].src);
-            }, null, function() {
-              if (i === 0) { self.mosaic.forStock(); }
             });
           }
+          console.log(images.length);
           replaceImage(images[i].src);
         });
       };
@@ -147,6 +147,7 @@ function($, mosaic, share, observers, backend, upload, Q, dropbox, ga){
 
     
     function Feedback() {
+      var backend = require("backend");
       var questionEl = $("#feedback-question");
       var choicesEl = $("#feedback-choices");
       var panel = $("#feedback-panel");
@@ -203,7 +204,7 @@ function($, mosaic, share, observers, backend, upload, Q, dropbox, ga){
         ga("send", "event", "feedback", "answered-question");
       };
 
-      this.show = function() { panel.fadeIn(); };
+      this.show = function() { if (questions.length) panel.fadeIn(); };
       this.hide = function() { panel.fadeOut(); };
 
       choicesEl.on("click", "button", this.submitFeedback);
@@ -249,6 +250,7 @@ function($, mosaic, share, observers, backend, upload, Q, dropbox, ga){
     }
 
     function showInteractions() {
+      require("share");
       self.mosaic.forShare();
       self.showShareButtons();
       self.showUploadButton();
@@ -282,46 +284,60 @@ function($, mosaic, share, observers, backend, upload, Q, dropbox, ga){
     };
 
 
+    require("bootstrap");
     $("#cloud-btn .div-btn").tooltip();
-    document.getElementById("contact-form").addEventListener("submit", function(ev){
-      ev.preventDefault();
-      ev.stopPropagation();
-      var el = ev.target.elements;
-      var button = $("#contact-submit-btn").text("Sending...").attr("disabled", "true");
-      backend.contact(el.namedItem("email").value, el.namedItem("message").value)
-        .then(function(){
-          button.text("Thank you !");
-        });
-      ga("send","event","contact","send-message");
+
+    require(["backend"], function(backend){
+      document.getElementById("contact-form").addEventListener("submit", function(ev){
+        ev.preventDefault();
+        ev.stopPropagation();
+        var el = ev.target.elements;
+        var button = $("#contact-submit-btn").text("Sending...").attr("disabled", "true");
+        backend.contact(el.namedItem("email").value, el.namedItem("message").value)
+          .then(function(){
+            button.text("Thank you !");
+          });
+        ga("send","event","contact","send-message");
+      });
     });
 
 
+    function bindEvents() {
+      self.feedback.getQuestions();
+
+      // Google Analytics triggers
+      $(".modal").on("show.bs.modal", function(ev){ ga("send", "pageview", $(ev.target).data("content")); });
+      $(".modal").on("show.bs.modal", function(ev){ ga("send", "event", "modal", $(ev.relatedTarget).data("from")); });
+      $(".more-info").on("click", function(ev){ ga("send", "event", "more-info", $(ev.target).data("from")); });
+
+
+      require(["upload"], function(upload){
+        upload.watch.add("uploading", self.uploading);
+        upload.watch.add("progress", self.progress);
+        upload.watch.add("processing", self.processing);
+        upload.watch.add("submitted", self.submitted);
+      });
+
+      mosaic.watch.add("loaded", self.loaded);
+
+      require(["dropbox"], function(dropbox){
+        dropbox.watch.add("uploading", self.uploading);
+        dropbox.watch.add("progress", self.progress);
+        dropbox.watch.add("processing", self.processing);
+        dropbox.watch.add("submitted", self.submitted);
+      });
+    }
+
+
     if (!mosaic.$loaded) {
-      self.stockGallery.start();
+      self.stockGallery.start().then(function(){
+        bindEvents();
+      });
     } else {
       stopStock();
       showInteractions();
+      bindEvents();
     }
-
-    self.feedback.getQuestions();
-
-    // Google Analytics triggers
-    $(".modal").on("show.bs.modal", function(ev){ ga("send", "pageview", $(ev.target).data("content")); });
-    $(".modal").on("show.bs.modal", function(ev){ ga("send", "event", "modal", $(ev.relatedTarget).data("from")); });
-    $(".more-info").on("click", function(ev){ ga("send", "event", "more-info", $(ev.target).data("from")); });
-
-
-    upload.watch.add("uploading", self.uploading);
-    upload.watch.add("progress", self.progress);
-    upload.watch.add("processing", self.processing);
-    upload.watch.add("submitted", self.submitted);
-
-    mosaic.watch.add("loaded", self.loaded);
-
-    dropbox.watch.add("uploading", self.uploading);
-    dropbox.watch.add("progress", self.progress);
-    dropbox.watch.add("processing", self.processing);
-    dropbox.watch.add("submitted", self.submitted);
   }
 
   return new UI();

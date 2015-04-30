@@ -44,7 +44,6 @@ define([
     function shareURL(ev, url) {
       ev.preventDefault();
       ev.stopPropagation();
-      console.log(url);
       window.open(url, 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=600,width=600');
     }
 
