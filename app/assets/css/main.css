@@ -1,4 +1,4 @@
-@import url(http://fonts.googleapis.com/css?family=Open+Sans|Raleway|Indie+Flower|Dosis|Nunito);
+@import url(http://fonts.googleapis.com/css?family=Open+Sans|Raleway);
 
 html, body {
   font-family: 'Open Sans', sans-serif;
@@ -10,33 +10,37 @@ html, body {
 
 #dropzone { text-align: center; color: #999; font-size: 24px; background-color: #fff; animation: background-color 200ms; }
 
-.navbar { box-shadow: none; border: 0; margin-bottom: 0px; }
+.navbar { box-shadow: none; border: 0; margin-bottom: 70px; z-index: 1;}
 
-.navbar-nav { margin-right: 10px; }
-
-.navbar-nav > li {
-  /* padding: 5px 10px; */
-  /* margin: 0; */
-}
-
-.navbar-nav > li > a {
-  font-size: 12px;
-  /* padding: 0px; */
-  margin-top: 2px;
-  /* color: #999; */
-}
-
-.navbar-nav > li > button {
-  margin-right: 10px;
-}
-.navbar-nav > li:last-child > button {
-  margin-right: 0px;
-}
-
-.navbar-nav > .navbar-brand {
+.navbar-header > .navbar-brand {
   font-size: 18px;
   font-weight: bold;
   font-family: "Raleway";
+}
+
+.desc-text-page {
+  font-size: 30px;
+  color: #444;
+  text-shadow: 2px 2px 3px #eee;
+}
+.desc-text-page small {
+  display: block;
+  color: #aaa;
+  margin-top: 5px;
+  font-size: 18px;
+  display: none;
+}
+.desc-text-navbar {
+  font-size: 1.2em;
+}
+
+.centered-nav {
+  position: absolute;
+  width: 100%;
+  left: 0;
+  padding: 17px 0 0 0;
+  text-align: center;
+  margin: auto;
 }
 
 #title-phrase {
@@ -56,11 +60,14 @@ html, body {
 
 #indicator-row { display: none; }
 
-#mosaic-row { margin-top: 20px; position: relative; }
+/* #mosaic-row { margin-top: 70px; } */
 #mosaic-img { box-shadow: #ccc 5px 5px 15px; }
 
-
-#share-logo { font-size: 30px; }
+.top-btn { margin: 0 10px 20px 10px; }
+/* #upload-btn { } */
+#share-btn {
+  margin-top: 20px;
+}
 
 .div-btn { display: inline-block; }
 
@@ -127,6 +134,7 @@ html, body {
 }
 
 .first-section { margin-top: -30px; }
+.first-section .arrow-down { color: #999; }
 
 .products-row > div {
   text-align: center;

@@ -12,7 +12,7 @@ define(function(require){
     var self = this;
 
     self.img = $('#mosaic-img');
-    self.uploadBtn = $(".upload-btn");
+    self.uploadBtn = $("#upload-btn");
     self.uploadModal = $("#upload-modal");
 
 
@@ -82,7 +82,7 @@ define(function(require){
       };
 
       this.showUpload = function() {
-        overlayBtn.fadeIn();
+        overlayBtn.fadeIn(400);
       };
 
       this.hideOverlay = function() {
@@ -164,7 +164,6 @@ define(function(require){
 
 
     function bindEvents() {
-      feedback.getQuestions();
 
       // Google Analytics triggers
       $(".modal").on("show.bs.modal", function(ev){ ga("send", "pageview", $(ev.target).data("content")); });
@@ -191,8 +190,8 @@ define(function(require){
 
     if (!mosaic.$loaded) {
       self.mosaic.showOverlay();
-      self.mosaic.showUpload();
       self.stockGallery.start().then(function(){
+        self.mosaic.showUpload();
         bindEvents();
       });
     } else {

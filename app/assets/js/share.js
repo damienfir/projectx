@@ -23,9 +23,9 @@ define([
       }
     });
 
-    document.getElementById("share-link").addEventListener("focus", function(ev) {
-      ev.target.setSelectionRange(0, ev.target.value.length);
-    });
+    // document.getElementById("share-link").addEventListener("focus", function(ev) {
+    //   ev.target.setSelectionRange(0, ev.target.value.length);
+    // });
 
     document.getElementById("email-form").addEventListener("submit", function(ev){
       ev.preventDefault();

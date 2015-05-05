@@ -6,18 +6,22 @@
   <div class="navbar navbar-default navbar-static-top">
     <div class="container-fluid">
       <div class="navbar-header">
-        <span class="navbar-brand logo">Bigpiq</span>
+        <span class="navbar-brand logo">bigpiq</span>
+        <p class="desc-text-navbar navbar-text hidden-sm hidden-md hidden-lg">Effortless photo curation</p>
       </div>
-      <div  class="collapse navbar-collapse">
-        <ul class="nav navbar-nav navbar-right">
+      <p class="desc-text-page centered-nav hidden-xs">Give your photos a chance.<small>You shoot, we curate.</small></p>
+      <div  class="collapse navbar-collapse navbar-right">
+        <ul class="nav navbar-nav">
           <li><a href="#" data-toggle="modal" data-target="#about-modal" data-from="about-link">About</a></li>
           <li><a href="#" data-toggle="modal" data-target="#faq-modal" data-from="faq-link">FAQ & Terms</a></li>
           <li><a href="#" data-toggle="modal" data-target="#api-modal" data-from="api-link">API</a></li>
         </ul>
       </div>
+      <div class="navbar-nav navbar-right">
+        <!-- <button id="upload-btn" class="btn btn-primary navbar-btn" data-toggle="modal" data-target="#upload-modal" data-from="add-button"><i class="fa fa-photo fa-lg"></i> <span id="add-txt">Choose other photos</span></button> -->
+      </div>
     </div>
   </div>
-
 
   <div class="row" id="progress-row">
     <div class="progress">
@@ -25,39 +29,43 @@
     </div>
   </div>
 
-
-  <div class="container">
-    <div class="row">
-    	<div class="col-lg-12 centered">
-            <button id="upload-btn" class="btn btn-primary navbar-btn upload-btn" data-toggle="modal" data-target="#upload-modal" data-from="add-button"><i class="fa fa-plus-square fa-lg"></i> <span id="add-txt">Choose other photos</span></button>
-            <button id="share-btn" class="btn btn-success navbar-btn" data-toggle="modal" data-target="#share-modal" data-from="share-button"><i class="fa fa-share-alt fa-lg"></i> Share or Download</button>
-      </div>
-    </div>
+  <div class="container centered">
     <div class="row" id="mosaic-row">
-      <!-- <h3 id="title-phrase">Zero effort photos curation</h3> -->
 
-      <img id="mosaic-img" class="img-responsive center-block" @if(filename) { src="/storage/generated/@{filename}_display.jpg" } />
-      <div class="img-overlay" id="img-overlay-stock"></div>
-      <div class="overlay-element panel panel-default" id="btn-overlay">
-        <div class="panel-body">
-          <h5>Create your own bigpiq</h5>
-          <button class="btn btn-primary navbar-btn upload-btn" data-toggle="modal" data-target="#upload-modal" data-from="add-button"><i class="fa fa-plus-square fa-lg"></i> Choose photos</button>
+      <div class="col-xs-12">
+        <img id="mosaic-img" class="img-responsive center-block" @if(filename) { src="/storage/generated/@{filename}_display.jpg" } />
+
+        <div class="img-overlay" id="img-overlay-stock"></div>
+
+        <div class="overlay-element panel panel-default" id="btn-overlay">
+          <div class="panel-body">
+            <h5>Create your own mosaic</h5>
+            <button class="btn btn-primary navbar-btn upload-btn" data-toggle="modal" data-target="#upload-modal" data-from="add-button"><i class="fa fa-photo fa-lg"></i> Choose your photos</button>
+          </div>
         </div>
+
+        <div id="progress-uploading" class="overlay-element overlay-loader"><img src="/assets/images/358.GIF" /><span>Uploading...</span></div>
+
+        <div id="progress-processing" class="overlay-element overlay-loader"><img src="/assets/images/285.GIF" /><span>Processing...</span></div>
+
       </div>
-      <div id="progress-uploading" class="overlay-element overlay-loader"><img src="/assets/images/358.GIF" /><span>Uploading...</span></div>
-      <div id="progress-processing" class="overlay-element overlay-loader"><img src="/assets/images/285.GIF" /><span>Processing...</span></div>
+
+      <div class="col-xs-12">
+        <button id="share-btn" class="btn btn-success" data-toggle="modal" data-target="#share-modal" data-from="share-button"><i class="fa fa-share-alt fa-2x"></i></button>
+      </div>
+
     </div>
   </div>
 </div>
 
 <a name="intro" />
 <div class="row row-wide first-section" id="section-intro">
-  <a href="#intro" class="arrow-down btn btn-primary"><i class="fa fa-angle-down fa-3x"></i></a>
+  <a href="#intro" class="arrow-down"><i class="fa fa-angle-down fa-3x"></i></a>
   <div class="container-fluid">
     <h5 class="info-phrase centered">Bigpiq chooses the best photos from your collection to create a mosaic effortlessly.</h5>
     <div class="row row-intro">
       <div class="col-sm-4 photos-collection muted"  data-anchor-target="#section-intro" data-bottom-top="opacity:0" data--100-bottom-top="opacity:1">
-        <i class="fa fa-arrow-right fa-lg arrow"></i>
+        <i class="fa fa-arrow-right fa-lg arrow hidden-xs"></i>
         <img style="background-image: url(/assets/images/people/01.jpg)">
         <img style="background-image: url(/assets/images/people/02.jpg)">
         <img style="background-image: url(/assets/images/people/03.jpg)">
@@ -76,7 +84,7 @@
         </p>
       </div>
       <div class="col-sm-4 photos-collection">
-        <i class="fa fa-arrow-right fa-lg arrow"></i>
+        <i class="fa fa-arrow-right fa-lg arrow hidden-xs"></i>
         <img style="background-image: url(/assets/images/people/01.jpg)">
         <img style="background-image: url(/assets/images/people/03.jpg)" class="photo-muted">
         <img style="background-image: url(/assets/images/people/02.jpg)">
@@ -123,21 +131,21 @@
         <i class="fa fa-picture-o fa-5x"></i>
         <h4>Album</h4>
         <p>
-        You can create beautiful albums with <strong>Bigpiq</strong>. Again, just upload the pictures, choose the album option, and wait for the magic to appear. Once prepared, you can download the album and print it yourself or order a print with us. We really recommend the latter option. This is because we use state-of-the art printing technology to obtain a very high quality print. Not only is the print quality rare to match elsewhere, it is also the quality of the raw material and the structure of the album, which is very difficult, if not impossible to match for the price we offer it for.
+        Bigpic albums make great coffee table books. Your last holiday photos can be on you coffee table with just a few clicks. Bigpic albums have unparallelled quality and user experience.
         </p>
       </div>
       <div class="col-md-3">
         <i class="fa fa-bars fa-5x"></i>
         <h4>Piccordion</h4>
         <p>
-        Piccordions are our unique innovation. They are accordions of photos. Simply. You can order them to fit into your wallet, your bookshelf, or your coffee table. You can hang them on the wall by a nail, or put them on your office desk. Why accordions of photos? Well, depending on how you like to enjoy your photos, they are actually more convenient and expressive than books, yet more compact and portable than posters. You must try them to discover how much fun they are.
+        Piccordions are our unique creation. They are foldable accordions of photos that can go into your wallet, on your bookshelf, or on your office table
         </p>
       </div>
       <div class="col-md-3">
         <i class="fa fa-book fa-5x"></i>
         <h4>Pop-out book</h4>
         <p>
-        We make really cool pop-out books from your uploaded pictures. There is no way to download them and have them printed elsewhere. They can printed exclusively with us. The material and finishing is bound to amaze you. You will surprise yourself and others, when you would open up one of our pop-out books, which may otherwise appear to be simple albums.
+        We can never stop loving pop-out books. Bigpic pop-outs are one of the coolest ways of showing-off your holiday pictures or explain your childhood to your grandchildren.
         </p>
       </div>
     </div>
@@ -158,7 +166,9 @@
   </div>
 </div>
 
+<a name="contact" />
 <div class="row row-wide">
+  <a href="#contact" class="arrow-down btn btn-primary"><i class="fa fa-angle-down fa-3x"></i></a>
   <div class="container">
     <div class="row">
       <div class="col-lg-8">
@@ -242,22 +252,22 @@
             </div>
           </div>
           <div class="col-lg-2">
-            <button type="submit" class="btn btn-primary center-block" id="email-btn">Send</button>
+            <button type="submit" class="btn btn-primary center-block" id="email-btn"><i class="fa fa-send"></i></button>
             <p class="centered text-success invisible" id="sent-label">Sent!</p>
           </div>
           </form>
         </div>
         <hr />
-        <div class="row">
-          <div class="col-lg-3"><h5>Share mosaic</h5></div>
-          <div class="col-lg-9">
-            <div class="input-group">
-              <span class="input-group-addon"><i class="fa fa-link"></i></span>
-              <input class="form-control" id="share-link" />
-            </div>
-          </div>
-        </div>
-        <hr />
+        <!-- <div class="row"> -->
+        <!--   <div class="col-lg-3"><h5>Share mosaic</h5></div> -->
+        <!--   <div class="col-lg-9"> -->
+        <!--     <div class="input-group"> -->
+        <!--       <span class="input-group-addon"><i class="fa fa-link"></i></span> -->
+        <!--       <input class="form-control" id="share-link" /> -->
+        <!--     </div> -->
+        <!--   </div> -->
+        <!-- </div> -->
+        <!-- <hr /> -->
         <form action="/download" method="post" id="download-form">
         <div class="row">
           <div class="col-lg-3"><h5>Download</h5></div>
@@ -273,7 +283,7 @@
         </div>
         <div class="row">
         	<div class="col-lg-12">
-            <button type="submit" class="btn btn-success pull-right" id="download-btn" disabled><i class="fa fa-cloud-download fa-lg"></i> Download</button>
+            <button type="submit" class="btn btn-success pull-right" id="download-btn" disabled><i class="fa fa-cloud-download fa-lg"></i></button>
           </div>
         </div>
       </form>
@@ -282,7 +292,7 @@
   </div>
 </div>
 
-<div id="feedback-panel">
+<div id="feedback-panel" class="hidden-xs">
   <div class="panel panel-primary">
     <div class="panel-heading">
       <h3 class="panel-title">Feedback</h3>
