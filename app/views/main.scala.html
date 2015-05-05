@@ -1,4 +1,4 @@
-@(title: String)(navbar: Html)(content: Html)
+@(title: String)(content: Html)
 
 <!DOCTYPE html>
 
@@ -11,25 +11,13 @@
         <link href="@routes.Assets.at("css/bootstrap.min.css")" rel="stylesheet">
         <link href="@routes.Assets.at("bower_components/font-awesome/css/font-awesome.min.css")" rel="stylesheet">
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("css/main.css")">
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("css/interactions.css")">
 
         <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
 
         <link href='//fonts.googleapis.com/css?family=Raleway:400,300,700' rel='stylesheet' type='text/css'>
     </head>
     <body>
-
-      <div class="navbar navbar-default">
-        <div class="container-fluid">
-          <ul class="nav navbar-nav">
-            <li class="navbar-brand logo">bigpiq</li>
-            <li><a href="#" data-toggle="modal" data-target="#about-modal" data-from="about-link">About</a></li>
-            <li><a href="#" data-toggle="modal" data-target="#faq-modal" data-from="faq-link">FAQ & Terms</a></li>
-            <li><a href="#" data-toggle="modal" data-target="#product-modal" data-from="products-link">Products</a></li>
-            <li><a href="#" data-toggle="modal" data-target="#api-modal" data-from="api-link">API</a></li>
-          </ul>
-          @navbar
-        </div>
-      </div>
 
       @content
 

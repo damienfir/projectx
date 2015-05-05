@@ -25,7 +25,8 @@ require.config({
     'dropbox-api': "//www.dropbox.com/static/api/2/dropins",
     'google-api': "//apis.google.com/js/api",
     'pinterest-api': "//assets.pinterest.com/js/pinit",
-    "ga": "//www.google-analytics.com/analytics"
+    "ga": "//www.google-analytics.com/analytics",
+    "skrollr": "../bower_components/skrollr/dist/skrollr.min"
   }
 });
 
