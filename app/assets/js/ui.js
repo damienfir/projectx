@@ -16,10 +16,10 @@ define(function(require){
     self.uploadModal = $("#upload-modal");
 
 
-    var skrollr = require("skrollr");
-    skrollr.init({
-      forceHeight: false
-    });
+    // var skrollr = require("skrollr");
+    // skrollr.init({
+    //   forceHeight: false
+    // });
 
 
     function Loader() {
