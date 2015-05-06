@@ -80,9 +80,7 @@ define(function(require){
 
           window.setTimeout(function(){
             _theme.fadeTo(800, 0, function() {
-              if (theme !== undefined) {
-                _theme.children("span").html(theme);
-              }
+              _theme.children("span").html((theme !== undefined) ? theme : "");
             });
           }, 400);
         });
