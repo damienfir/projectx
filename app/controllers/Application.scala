@@ -27,6 +27,7 @@ object Application extends Controller with MongoController {
 
   def userCollection = db.collection[JSONCollection]("users")
   def mosaicCollection = db.collection[JSONCollection]("mosaics")
+  def themeCollection = db.collection[JSONCollection]("themes")
 
 
   private def getUser(implicit request: Request[_]): Future[Option[User]] = request.session.get("user") match {
@@ -67,11 +68,6 @@ object Application extends Controller with MongoController {
         }
       }
     }
-  }
-
-
-  def index2 = Action {
-    Ok(views.html.index2(""))
   }
 
 
@@ -153,6 +149,12 @@ object Application extends Controller with MongoController {
 
   def stock = Action {
     Ok(Json.toJson(ImageService.listStock))
+  }
+
+  def themes = Action.async {
+    themeCollection.find(Json.obj()).cursor[Theme].collect[List]() map { themes =>
+      Ok(Json.toJson(themes))
+    }
   }
 
 }

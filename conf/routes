@@ -6,6 +6,7 @@ POST    /upload                     controllers.Application.upload
 GET     /process                    controllers.Application.process
 POST    /download                   controllers.Application.download
 GET     /stock                      controllers.Application.stock
+GET     /themes                     controllers.Application.themes
 
 GET     /storage/*file              controllers.ExternalAssets.at(path="storage", file)
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
@@ -21,5 +22,4 @@ POST    /contact                    controllers.Feedback.contact
 POST    /email                      controllers.Application.email
 
 GET     /                           controllers.Application.index(filename: String = "")
-GET     /index2                     controllers.Application.index2
 GET     /:filename                  controllers.Application.index(filename: String)

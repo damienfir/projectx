@@ -8,14 +8,14 @@ define(function(require) {
     var images = [];
 
     this.start = function() {
-      return backend.stock().then(function(res){
+      return backend.themes().then(function(res){
         return Q.Promise(function(resolve, reject, notify){
           var list = JSON.parse(res);
           list = list.slice(0, Math.min(6, list.length));
-          list.forEach(function(url) {
+          list.forEach(function(obj) {
             var im = new Image();
-            im.src = "/assets/stock/" + url;
-            images.push(im);
+            im.src = "/assets/themes/" + obj.filename;
+            images.push({"image": im, "theme": obj.theme});
             if (images.length === 1) {
               resolve();
             }
@@ -25,15 +25,15 @@ define(function(require) {
       .then(function(){
         return Q.Promise(function(resolve) {
         var i = 0;
-        function replaceImage(url) {
+        function replaceImage(theme) {
           if (stop) return;
-          mosaicUI.changeImage(url).then(function(){
+          mosaicUI.changeImage(theme.image.src, theme.theme).then(function(){
             if (i === 0) resolve();
             i++;
-            timeoutID = setTimeout(replaceImage, 3000, images[i % images.length].src);
+            timeoutID = setTimeout(replaceImage, 3000, images[i % images.length]);
           });
         }
-        replaceImage(images[i].src);
+        replaceImage(images[i]);
         });
       });
     };

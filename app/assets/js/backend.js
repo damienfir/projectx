@@ -34,6 +34,10 @@ define([
       return http.get("/stock");
     },
 
+    themes: function() {
+      return (new Request()).get("/themes");
+    },
+
     questions: function() {
       return (new Request()).get("/questions");
     },

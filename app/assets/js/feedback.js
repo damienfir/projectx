@@ -19,6 +19,7 @@ define(function(require){
         var btn = $("<button></button>").addClass("btn btn-primary").data("index", i).html(question.choices[i]);
         choicesEl.append(btn);
       }
+      choicesEl.append($("<button>Skip</button>").addClass("btn btn-primary"));
     }
 
     function showForm() {
@@ -48,9 +49,12 @@ define(function(require){
     }
 
     this.submitFeedback = function(ev) {
-      backend.feedback(currentQuestion, $(ev.target).data("index"));
+      var data = $(ev.target).data("index");
+      if (data !== undefined) {
+        backend.feedback(currentQuestion, data);
+        ga("send", "event", "feedback", "answered-question");
+      }
       nextQuestion();
-      ga("send", "event", "feedback", "answered-question");
     };
 
     this.show = function() {

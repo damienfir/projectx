@@ -83,6 +83,16 @@ html, body {
   margin-top: 20px;
 }
 
+#img-desc {
+  color: #999;
+  font-style: italic;
+  font-size: 1.4em;
+  float: left;
+  margin-top: 10px;
+  margin-left: 60px;
+  opacity: 0;
+}
+
 .div-btn { display: inline-block; }
 
 .center-content { text-align: center; }

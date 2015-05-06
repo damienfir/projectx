@@ -59,7 +59,7 @@
 }
 #feedback-question { min-height: 100px; font-size: 16px; }
 #feedback-choices { vertical-align: bottom; }
-#feedback-choices button { margin: 0 10px; width: 100px; }
+#feedback-choices button { margin: 0 10px; width: auto; }
 
 
 #droptext { vertical-align: middle; }

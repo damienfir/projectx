@@ -11,7 +11,6 @@ define(function(require){
   function UI() {
     var self = this;
 
-    self.img = $('#mosaic-img');
     self.uploadBtn = $("#upload-btn");
     self.uploadModal = $("#upload-modal");
 
@@ -59,21 +58,33 @@ define(function(require){
 
 
     function Mosaic() {
-      var _self = this;
+      var img = $('#mosaic-img');
+      var _theme = $("#img-desc");
       var overlayBtn = $("#btn-overlay");
       var overlayStock = $("#img-overlay-stock");
 
-      this.changeImage = function(url) {
+      this.changeImage = function(url, theme) {
         return Q.Promise(function(resolve, reject, notify){
-          self.img.load(function(){
-            self.img.fadeTo(800, 1, resolve);
-            self.img.unbind("load", this);
+          img.load(function(){
+            img.fadeTo(800, 1, resolve);
+            img.unbind("load", this);
+            window.setTimeout(function(){
+              _theme.fadeTo(800, 1);
+            }, 400);
           });
 
-          self.img.fadeTo(800, 0, function(){
-            self.img.attr("src", url);
+          img.fadeTo(800, 0, function(){
+            img.attr("src", url);
             notify();
           });
+
+          window.setTimeout(function(){
+            _theme.fadeTo(800, 0, function() {
+              if (theme !== undefined) {
+                _theme.children("span").html(theme);
+              }
+            });
+          }, 400);
         });
       };
 
