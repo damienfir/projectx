@@ -8,7 +8,20 @@ html, body {
 
 .centered { text-align: center; }
 
-#dropzone { text-align: center; color: #999; font-size: 24px; background-color: #fff; animation: background-color 200ms; }
+#dropzone {
+  text-align: center;
+  color: #999;
+  font-size: 24px;
+  background-color: #fff;
+  transition: background-color 200ms;
+  vertical-align: middle;
+  margin: 0 20px;
+  padding: 50px;
+  border-radius: 10px;
+}
+#dropzone:hover { cursor: pointer; background-color: #FAFAFA; }
+.droptext { margin-bottom: 20px; }
+#file-upload { opacity: 0; }
 
 .navbar { box-shadow: none; border: 0; margin-bottom: 70px; z-index: 1;}
 

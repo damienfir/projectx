@@ -190,7 +190,7 @@
       </div>
       <div class="modal-body">
         <div class="row" id="cloud-btn">
-          <div class="col-sm-4"><big>Choose from</big></div>
+          <!-- <div class="col-sm-4"><big>Choose from</big></div> -->
           <div class="col-sm-12 centered">
             <button class="btn btn-primary navbar-btn" id="dropbox-btn"><i class="fa fa-dropbox fa-lg"></i> Dropbox</button>
             <div data-toggle="tooltip" title="Coming soon" class="div-btn"><button class="btn btn-primary navbar-btn" id="google-btn" disabled><i class="fa fa-google-plus fa-lg"></i> Google+</button></div>
@@ -200,18 +200,20 @@
           </div>
         </div>
         <div class="row" id="dropzone-wrapper">
-          <div id="dropzone" style="height:200px"><div class="droptext">Drop your photos here<br/><i class="fa fa-3x fa-picture-o" id="dropicon"></i></div></div>
-        </div>
-        <hr>
-        <div class="row">
-          <div class="col-sm-5"><big>Upload from your computer</big></div>
-          <div class="col-sm-7">
-            <form action="/upload" method="post" enctype="multipart/form-data" class="form-inline centered" id="upload-form">
-              <input type="file" name="image" id="file-upload" multiple>
-              <!-- <button type="submit" class="btn btn-primary">Upload</button> -->
-            </form>
+          <div id="dropzone">
+            <div class="droptext">Drop your photos or click here to upload</div>
+            <i class="fa fa-3x fa-photo" id="dropicon"></i>
           </div>
         </div>
+        <input type="file" name="image" id="file-upload" multiple>
+        <!-- <div class="row"> -->
+        <!--   <div class="col-sm-5"><big>Upload from your computer</big></div> -->
+        <!--   <div class="col-sm-7"> -->
+        <!--     <form action="/upload" method="post" enctype="multipart/form-data" class="form-inline centered" id="upload-form"> -->
+              <!-- <button type="submit" class="btn btn-primary">Upload</button> -->
+        <!--     </form> -->
+        <!--   </div> -->
+        <!-- </div> -->
       </div>
     </div>
   </div>

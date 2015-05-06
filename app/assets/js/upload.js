@@ -13,6 +13,7 @@ define([
 
     var dropzone = document.getElementById("dropzone");
     var dropicon = document.getElementById("dropicon");
+    var fileupload = document.getElementById("file-upload");
 
     this.uploadFiles = function(files) {
       self.watch.notify("uploading", [files.length]);
@@ -53,6 +54,7 @@ define([
     };
 
     this.dropHandler = function(ev) {
+      console.log("dropped");
       ev.stopPropagation();
       ev.preventDefault();
       self.watch.notify("submitted");
@@ -60,26 +62,17 @@ define([
 
       var files = ev.dataTransfer.files;
       self.uploadFiles(files);
-      dropicon.classList.remove("fa-download");
-      dropicon.classList.add("fa-check");
     };
 
     this.dragenterHandler = function(ev) {
+      console.log("dragged");
       ev.stopPropagation();
       ev.preventDefault();
       ev.dataTransfer.dropEffect = 'copy';
-      dropicon.classList.remove("fa-picture-o");
-      dropicon.classList.add("fa-download");
-      dropzone.classList.add("dragover");
     };
 
-    this.dragleaveHandler = function(ev) {
-      ev.stopPropagation();
-      ev.preventDefault();
-      var el = document.getElementById("dropicon");
-      dropicon.classList.remove("fa-download");
-      dropicon.classList.add("fa-picture-o");
-      dropzone.classList.remove("dragover");
+    this.triggerClick = function(ev) {
+      fileupload.dispatchEvent(new MouseEvent("click"));
     };
 
     this.submitHandler = function(ev) {
@@ -87,15 +80,14 @@ define([
       ev.preventDefault();
       ga("send", "event", "upload", "local", "button");
       self.watch.notify("submitted");
-      var files = document.getElementById("file-upload").files;
+      var files = fileupload.files;
       self.uploadFiles(files);
     };
 
     dropzone.addEventListener("dragover", self.dragenterHandler);
-    dropzone.addEventListener("dragleave", self.dragleaveHandler);
     dropzone.addEventListener("drop", self.dropHandler);
-    document.getElementById("upload-form").addEventListener("submit", this.submitHandler);
-    document.getElementById("file-upload").addEventListener("change", this.submitHandler);
+    dropzone.addEventListener("click", this.triggerClick);
+    fileupload.addEventListener("change", this.submitHandler);
   }
 
   return new Add();
