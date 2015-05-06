@@ -72,3 +72,33 @@
 #progress-row { opacity: 0; }
 .progress { margin: 0; }
 #progress-bar { width: 0%; }
+
+
+.bump {
+  animation-duration: 0.5s;
+  animation-name: bumping;
+  /* animatino-timing-function: ease-out; */
+  /* animation-iteration-count: infinite; */
+}
+
+@keyframes bumping {
+  from {
+    margin-top: 0px;
+  }
+
+  25% {
+    margin-top: -10px;
+  }
+
+  50% {
+    margin-top: 0px;
+  }
+
+  75% {
+    margin-top: -10px;
+  }
+
+  to {
+    margin-top: 0px;
+  }
+}

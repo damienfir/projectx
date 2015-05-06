@@ -41,6 +41,7 @@ html, body {
   padding: 17px 0 0 0;
   text-align: center;
   margin: auto;
+  z-index: -1;
 }
 
 #title-phrase {
@@ -134,7 +135,7 @@ html, body {
 }
 
 .first-section { margin-top: -30px; }
-.first-section .arrow-down { color: #999; }
+/* .first-section .arrow-down { color: #999; } */
 
 .products-row > div {
   text-align: center;

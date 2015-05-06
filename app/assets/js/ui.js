@@ -200,5 +200,13 @@ define(function(require){
     }
   }
 
+  var downArrow = document.getElementById("down-arrow");
+  function bumpArrow() { downArrow.classList.add("bump"); }
+  downArrow.addEventListener("animationend", function() {
+    downArrow.classList.remove("bump");
+    window.setTimeout(bumpArrow, 5000);
+  });
+  window.setTimeout(bumpArrow, 3000);
+
   return new UI();
 });
