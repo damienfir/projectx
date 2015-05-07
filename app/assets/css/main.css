@@ -1,4 +1,4 @@
-@import url(http://fonts.googleapis.com/css?family=Open+Sans|Raleway);
+@import url(http://fonts.googleapis.com/css?family=Open+Sans|Raleway|Nunito|Lobster|Play|Signika|Maven+Pro);
 
 html, body {
   font-family: 'Open Sans', sans-serif;
@@ -26,9 +26,16 @@ html, body {
 .navbar { box-shadow: none; border: 0; margin-bottom: 70px; z-index: 1;}
 
 .navbar-header > .navbar-brand {
-  font-size: 18px;
-  font-weight: bold;
-  font-family: "Raleway";
+  font-size: 40px;
+  /* font-weight: bold; */
+  font-family: "Maven Pro";
+  color: #3d7199;
+  width: auto;
+}
+
+.navbar-brand > img {
+  display: inline;
+  margin-top: -3px;
 }
 
 .desc-text-page {
