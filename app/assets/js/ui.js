@@ -79,9 +79,13 @@ define(function(require){
           });
 
           window.setTimeout(function(){
-            _theme.fadeTo(800, 0, function() {
-              _theme.children("span").html((theme !== undefined) ? theme : "");
-            });
+            if (theme === undefined) {
+              _theme.fadeOut();
+            } else {
+              _theme.fadeTo(800, 0, function() {
+                _theme.children("span").html(theme);
+              });
+            }
           }, 400);
         });
       };
@@ -139,6 +143,7 @@ define(function(require){
     };
 
     this.loaded = function(obj) {
+      console.log("loaded");
       self.stockGallery.stop();
       self.mosaic.changeImage(mosaic.getImageURLSmall())
         .then(function(){}, function(){},

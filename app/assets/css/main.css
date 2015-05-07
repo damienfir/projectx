@@ -81,7 +81,7 @@ html, body {
 
 #indicator-row { display: none; }
 
-/* #mosaic-row { margin-top: 70px; } */
+#mosaic-row { margin-bottom: 60px; }
 #mosaic-img { box-shadow: #ccc 5px 5px 15px; }
 
 .top-btn { margin: 0 10px 20px 10px; }
@@ -98,6 +98,7 @@ html, body {
   margin-top: 10px;
   margin-left: 60px;
   opacity: 0;
+  display: none;
 }
 
 .div-btn { display: inline-block; }

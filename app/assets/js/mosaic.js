@@ -30,7 +30,6 @@ define([
       self.filename = obj.filename;
       self.filename_small = obj.thumbnail;
       if (notify === undefined || notify) {
-        console.log("notified");
         self.watch.notify("loaded", [obj]);
       }
       self.$loaded = true;
