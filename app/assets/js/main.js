@@ -26,7 +26,8 @@ require.config({
     'google-api': "//apis.google.com/js/api",
     'pinterest-api': "//assets.pinterest.com/js/pinit",
     "ga": "//www.google-analytics.com/analytics",
-    "skrollr": "../bower_components/skrollr/dist/skrollr.min"
+    "skrollr": "../bower_components/skrollr/dist/skrollr.min",
+    "skrollr-menu": "../bower_components/skrollr-menu/dist/skrollr.menu.min"
   }
 });
 

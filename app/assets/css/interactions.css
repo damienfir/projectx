@@ -1,5 +1,5 @@
-#share-btn { opacity: 0; }
-#upload-btn { opacity: 0; }
+/* #share-btn { opacity: 0; } */
+/* #upload-btn { opacity: 0; } */
 
 .img-overlay {
   background-color: white;
@@ -72,7 +72,6 @@
 #progress-row { opacity: 0; }
 .progress { margin: 0; }
 #progress-bar { width: 0%; }
-
 
 .bump {
   animation-duration: 0.5s;

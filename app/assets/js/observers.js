@@ -1,30 +1,31 @@
 define(function() {
+
   function Observers(eventList) {
-    var self = this;
+    this.events = eventList;
+    this.callbacks = {};
+    this.args = {};
 
-    self.events = eventList;
-    self.callbacks = {};
-    self.args = {};
-    self.events.forEach(function(ev) {
-      self.callbacks[ev] = [];
-    });
-
-    self.add = function(ev, func) {
-      if (!self.callbacks.hasOwnProperty(ev)) {
-        console.log("error: cannot register to callback '"+ev+"', does not exist");
-        return;
-      }
-      if (self.callbacks[ev].indexOf(func) == -1) {
-        self.callbacks[ev].push(func);
-        if (self.args.hasOwnProperty(ev)) func.apply(null, self.args[ev]);
-      }
-    };
-
-    self.notify = function(ev, args) {
-      self.args[ev] = args || [];
-      self.callbacks[ev].forEach(function(func){ func.apply(null, args); });
-    };
+    this.events.forEach(function(ev) {
+      this.callbacks[ev] = [];
+    }.bind(this));
   }
+
+  Observers.prototype.add = function(ev, obj, func) {
+    if (!this.callbacks.hasOwnProperty(ev)) {
+      console.log("error: cannot register to callback '"+ev+"', does not exist");
+      return;
+    }
+    var cb = {'obj': obj, 'func': func};
+    if (this.callbacks[ev].indexOf(cb) == -1) {
+      this.callbacks[ev].push(cb);
+      if (this.args.hasOwnProperty(ev)) func.apply(obj, this.args[ev]);
+    }
+  };
+
+  Observers.prototype.notify = function(ev, args) {
+    this.args[ev] = args || [];
+    this.callbacks[ev].forEach(function(cb){ cb.func.apply(cb.obj, args); });
+  };
 
   return Observers;
 });
