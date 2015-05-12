@@ -8,25 +8,44 @@ html, body {
 
 .centered { text-align: center; }
 
+
 #dropzone {
-  text-align: center;
-  color: #999;
-  font-size: 24px;
-  background-color: #fff;
+  color: #fff;
+  /* background-color: #fff; */
+  font-size: 32px;
   transition: background-color 200ms;
-  vertical-align: middle;
-  margin: 0 20px;
-  padding: 50px;
-  border-radius: 10px;
+  padding: 12px 0;
 }
-#dropzone:hover { cursor: pointer; background-color: #FAFAFA; }
+#dropzone:hover { cursor: pointer; background-color: #0c7cd5; }
 .droptext { margin-bottom: 20px; }
-#file-upload { opacity: 0; }
+#dropicon { display: block; }
+#dropicon-box { margin-left: -20px; }
+#file-upload { opacity: 0; height: 0; }
+#cloud-btn {
+  /* margin: 10px 0; */
+  width: 100%;
+}
+#cloud-btn button {
+  width: 92px;
+  height: 74px;
+}
+#section-intro {
+  min-height: 100%;
+}
+
+
+#upload-row {
+  margin-top: 50px;
+}
+
+#container-intro {
+  margin-bottom: 30px;
+}
 
 .navbar { box-shadow: none; border: 0; margin-bottom: 70px; z-index: 1;}
 
 .navbar-header > .navbar-brand {
-  font-size: 40px;
+  font-size: 32px;
   /* font-weight: bold; */
   font-family: "Maven Pro";
   color: #3d7199;
@@ -95,13 +114,13 @@ html, body {
   font-style: italic;
   font-size: 1.4em;
   float: left;
-  margin-top: 10px;
-  margin-left: 60px;
+  padding-top: 10px;
+  padding-left: 60px;
   opacity: 0;
   display: none;
 }
 
-.div-btn { display: inline-block; }
+/* .div-btn { display: inline-block; } */
 
 .center-content { text-align: center; }
 

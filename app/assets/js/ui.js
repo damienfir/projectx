@@ -9,16 +9,16 @@ define(function(require){
   var StockGallery = require("stock");
 
   function UI() {
-    var self = this;
 
-    self.uploadBtn = $("#upload-btn");
-    self.uploadModal = $("#upload-modal");
+    this.share_btn = $("#share-btn");
+    this.uploadModal = $("#upload-modal");
 
-
-    // var skrollr = require("skrollr");
-    // skrollr.init({
-    //   forceHeight: false
-    // });
+    var skrollrModule = require("skrollr");
+    // var skrollrMenu = require("skrollr-menu");
+    var skrollr = skrollrModule.init({
+      forceHeight: false
+    });
+    // skrollrMenu.init(skrollr);
 
 
     function Loader() {
@@ -26,7 +26,7 @@ define(function(require){
       var progressrow = $("#progress-row");
       var progressUploading = $("#progress-uploading");
       var progressProcessing = $("#progress-processing");
-      var total = 1;
+      this.total = 1;
 
       this.init = function() {
         progressbar.width("0%");
@@ -34,10 +34,10 @@ define(function(require){
         progressUploading.fadeIn();
       };
 
-      this.start = function(length) { total = length; };
+      this.start = function(length) { this.total = length; };
 
       this.progress = function(progress, index) {
-        var val = Math.round((progress+index)*100) / total;
+        var val = Math.round((progress+index)*100) / this.total;
         progressbar.width(val + "%");
       };
 
@@ -54,7 +54,7 @@ define(function(require){
         progressProcessing.fadeOut();
       };
     }
-    self.loader = new Loader();
+    this.loader = new Loader();
 
 
     function Mosaic() {
@@ -62,15 +62,20 @@ define(function(require){
       var _theme = $("#img-desc");
       var overlayBtn = $("#btn-overlay");
       var overlayStock = $("#img-overlay-stock");
+      this.theme = undefined;
+      var self = this;
 
       this.changeImage = function(url, theme) {
+        this.theme = theme;
         return Q.Promise(function(resolve, reject, notify){
-          img.load(function(){
+          img.one("load", function(){
             img.fadeTo(800, 1, resolve);
-            img.unbind("load", this);
-            window.setTimeout(function(){
-              _theme.fadeTo(800, 1);
-            }, 400);
+
+            if (self.theme !== undefined) {
+              window.setTimeout(function(){
+                _theme.fadeTo(800, 1);
+              }, 400);
+            }
           });
 
           img.fadeTo(800, 0, function(){
@@ -79,11 +84,13 @@ define(function(require){
           });
 
           window.setTimeout(function(){
-            if (theme === undefined) {
-              _theme.fadeOut();
+            if (self.theme === undefined) {
+              _theme.fadeOut(800, function() {
+                _theme.children("span").html("");
+              });
             } else {
               _theme.fadeTo(800, 0, function() {
-                _theme.children("span").html(theme);
+                _theme.children("span").html(self.theme);
               });
             }
           }, 400);
@@ -106,61 +113,56 @@ define(function(require){
         overlayBtn.fadeOut();
       };
     }
-    self.mosaic = new Mosaic();
+    this.mosaic = new Mosaic();
 
-    self.stockGallery = new StockGallery(self.mosaic);
+    this.stockGallery = new StockGallery(this.mosaic);
 
 
-    function showInteractions() {
+    this.showInteractions = function() {
       require("share");
-      self.uploadBtn.fadeTo(800,1);
-      $("#share-btn").fadeTo(800, 1);
+      this.share_btn.removeClass("invisible").addClass("visible");
       $("#share-list button, #share-list .div-btn").tooltip();
       $("#share-link").val(mosaic.getViewURL());
       $("#goto-btn").attr("href", mosaic.getViewURL());
       feedback.show();
-    }
+    };
 
 
     this.submitted = function() {
-      self.mosaic.showOverlay();
-      self.uploadModal.modal("hide");
-      self.hideShareButtons();
-      self.mosaic.hideUpload();
-      self.loader.init();
+      this.mosaic.showOverlay();
+      this.uploadModal.modal("hide");
+      this.hideShareButtons();
+      this.mosaic.hideUpload();
+      this.loader.init();
+      skrollr.animateTo(0, {duration: 1000, easing: 'sqrt'});
     };
 
     this.uploading = function(length) {
-      self.loader.start(length);
+      this.loader.start(length);
     };
 
     this.progress = function(progress, index) {
-      self.loader.progress(progress, index);
+      this.loader.progress(progress, index);
     };
 
     this.processing = function() {
-      self.loader.processing();
+      this.loader.processing();
     };
 
     this.loaded = function(obj) {
-      console.log("loaded");
-      self.stockGallery.stop();
-      self.mosaic.changeImage(mosaic.getImageURLSmall())
-        .then(function(){}, function(){},
-        function() {
-          self.loader.finish();
-          self.mosaic.hideOverlay();
-          showInteractions();
-        });
+      this.stockGallery.stop();
+      this.mosaic.changeImage(mosaic.getImageURLSmall())
+        .then(function() {
+          this.loader.finish();
+          this.mosaic.hideOverlay();
+          this.showInteractions();
+        }.bind(this));
       window.history.pushState({}, document.title, mosaic.getViewURL());
     };
 
     this.hideShareButtons = function() {
-      $("#share-btn").fadeTo(800, 0);
+      this.share_btn.removeClass("visible").addClass("invisible");
     };
-
-
-    $("#cloud-btn .div-btn").tooltip();
 
     require(["backend"], function(backend){
       document.getElementById("contact-form").addEventListener("submit", function(ev){
@@ -177,6 +179,7 @@ define(function(require){
     });
 
 
+    var self = this;
     function bindEvents() {
 
       // Google Analytics triggers
@@ -186,41 +189,42 @@ define(function(require){
 
 
       require(["upload"], function(upload){
-        upload.watch.add("uploading", self.uploading);
-        upload.watch.add("progress", self.progress);
-        upload.watch.add("processing", self.processing);
-        upload.watch.add("submitted", self.submitted);
+        upload.watch.add("uploading", self, self.uploading);
+        upload.watch.add("progress", self, self.progress);
+        upload.watch.add("processing", self, self.processing);
+        upload.watch.add("submitted", self, self.submitted);
       });
 
-      mosaic.watch.add("loaded", self.loaded);
+      mosaic.watch.add("loaded", self, self.loaded);
 
       require(["dropbox"], function(dropbox){
-        dropbox.watch.add("uploading", self.uploading);
-        dropbox.watch.add("progress", self.progress);
-        dropbox.watch.add("processing", self.processing);
-        dropbox.watch.add("submitted", self.submitted);
+        dropbox.watch.add("uploading", self, self.uploading);
+        dropbox.watch.add("progress", self, self.progress);
+        dropbox.watch.add("processing", self, self.processing);
+        dropbox.watch.add("submitted", self, self.submitted);
       });
     }
 
     if (!mosaic.$loaded) {
-      self.mosaic.showOverlay();
-      self.stockGallery.start().then(function(){
-        self.mosaic.showUpload();
+      this.mosaic.showOverlay();
+      this.stockGallery.start().then(function(){
+        this.mosaic.showUpload();
         bindEvents();
-      });
+      }.bind(this));
     } else {
-      showInteractions();
+      this.showInteractions();
       bindEvents();
     }
+
+    var downArrow = document.getElementById("down-arrow");
+    function bumpArrow() { downArrow.classList.add("bump"); }
+    downArrow.addEventListener("animationend", function() {
+      downArrow.classList.remove("bump");
+      window.setTimeout(bumpArrow, 5000);
+    });
+    window.setTimeout(bumpArrow, 3000);
   }
 
-  var downArrow = document.getElementById("down-arrow");
-  function bumpArrow() { downArrow.classList.add("bump"); }
-  downArrow.addEventListener("animationend", function() {
-    downArrow.classList.remove("bump");
-    window.setTimeout(bumpArrow, 5000);
-  });
-  window.setTimeout(bumpArrow, 3000);
 
   return new UI();
 });

@@ -13,11 +13,11 @@ define([
     self.watch = new observers(["uploading","progress","processing","loaded","failed","submitted"]);
 
     self.upload = function() {
-      self.watch.notify("submitted");
       ga("send", "event", "upload", "dropbox", "open");
 
       Dropbox.choose({
         success: function(files) {
+          self.watch.notify("submitted");
           ga("send", "event", "upload", "dropbox", "upload");
           self.watch.notify("uploading", [files.length]);
 
