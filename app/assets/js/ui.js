@@ -121,6 +121,7 @@ define(function(require){
     this.showInteractions = function() {
       require("share");
       this.share_btn.removeClass("invisible").addClass("visible");
+      this.share_btn.children("button").tooltip();
       $("#share-list button, #share-list .div-btn").tooltip();
       $("#share-link").val(mosaic.getViewURL());
       $("#goto-btn").attr("href", mosaic.getViewURL());
@@ -182,6 +183,14 @@ define(function(require){
     var self = this;
     function bindEvents() {
 
+      $("#dropzone").hover(function() {
+        $("#cloud-btn").removeClass("invisible").addClass("visible");
+        $("#droptext").html("Drag or click");
+      }, function() {
+        $("#cloud-btn").removeClass("visible").addClass("invisible");
+        $("#droptext").html("Upload your photos");
+      });
+
       // Google Analytics triggers
       $(".modal").on("show.bs.modal", function(ev){ ga("send", "pageview", $(ev.target).data("content")); });
       $(".modal").on("show.bs.modal", function(ev){ ga("send", "event", "modal", $(ev.relatedTarget).data("from")); });
@@ -205,7 +214,8 @@ define(function(require){
       });
     }
 
-    if (!mosaic.$loaded) {
+    // if (!mosaic.$loaded) {
+    if (mosaic.$loaded) {
       this.mosaic.showOverlay();
       this.stockGallery.start().then(function(){
         this.mosaic.showUpload();
@@ -216,13 +226,13 @@ define(function(require){
       bindEvents();
     }
 
-    var downArrow = document.getElementById("down-arrow");
-    function bumpArrow() { downArrow.classList.add("bump"); }
-    downArrow.addEventListener("animationend", function() {
-      downArrow.classList.remove("bump");
-      window.setTimeout(bumpArrow, 5000);
-    });
-    window.setTimeout(bumpArrow, 3000);
+    // var downArrow = document.getElementById("down-arrow");
+    // function bumpArrow() { downArrow.classList.add("bump"); }
+    // downArrow.addEventListener("animationend", function() {
+    //   downArrow.classList.remove("bump");
+    //   window.setTimeout(bumpArrow, 5000);
+    // });
+    // window.setTimeout(bumpArrow, 3000);
   }
 
 

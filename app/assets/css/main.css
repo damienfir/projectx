@@ -8,27 +8,54 @@ html, body {
 
 .centered { text-align: center; }
 
+#row-ui .panel {
+  position: relative;
+}
+
+#panel-upload {
+  border-radius: 5px;
+  background-color: #2196f3;
+}
 
 #dropzone {
   color: #fff;
   /* background-color: #fff; */
-  font-size: 32px;
+  font-size: 20px;
   transition: background-color 200ms;
-  padding: 12px 0;
+  padding: 20px 0 40px 0;
+  /* margin-left: 80px; */
+  border-radius: 5px;
+  text-align: center;
 }
 #dropzone:hover { cursor: pointer; background-color: #0c7cd5; }
-.droptext { margin-bottom: 20px; }
 #dropicon { display: block; }
 #dropicon-box { margin-left: -20px; }
 #file-upload { opacity: 0; height: 0; }
+
 #cloud-btn {
-  /* margin: 10px 0; */
-  width: 100%;
+  position: absolute;
+  margin-left: -60px;
+  left: 0;
+  top: 50%;
+  transform: translate(0, -50%);
 }
+
 #cloud-btn button {
-  width: 92px;
-  height: 74px;
+  display: block;
+  width: 50px;
+  /* color: #2196f3; */
+  margin: 5px 0;
+  /* height: 74px; */
 }
+
+#col-ui {
+  padding-right: 40px;
+}
+
+#box-mosaic {
+  position: relative;
+}
+
 #section-intro {
   min-height: 100%;
 }
@@ -129,13 +156,16 @@ html, body {
   min-height: 100%;
 }
 
-.photos-collection { padding: 0 40px; }
+.photos-collection {
+  padding: 4px;
+  /* height: 280px; */
+}
 .photos-collection img {
   background-position: center center;
   background-repeat: no-repeat;
   display: block;
   float: left;
-  width: 23%;
+  width: 31%;
   padding-bottom: 21%;
   height: 0;
   margin: 1%;
@@ -144,15 +174,17 @@ html, body {
 .muted img { opacity: 0.3; }
 .photo-muted { opacity: 0.2; }
 .photos-mosaic { padding: 0 40px; }
-.photo-mosaic { width: 97%; }
+.photo-mosaic { width: 100%; }
 
 
 .intro-text {
   clear: both;
   text-align: center;
-  padding-top: 10px;
   color: #888;
+  padding-top: 0;
 }
+#col-ui .intro-text { margin-top: -10px; }
+#col-mosaic .intro-text { margin-top: 20px; }
 
 .row-intro { font-size: 1.2em; }
 /* .row-intro .col-sm-4 { height: 100%; } */
@@ -196,9 +228,18 @@ html, body {
 
 /* .products-row .more-info { margin-top: 20px; } */
 
-.arrow {
+#arrow-down {
+  display: block;
+  text-align: center;
+  margin-top: -10px;
+  margin-bottom: 10px;
+  color: #ccc;
+}
+
+#arrow-right {
   position: absolute;
-  top: 37%;
-  right: 0;
-  transform: translate(50%, 0);
+  top: 50%;
+  right: -40px;
+  transform: translate(0, -50%);
+  color: #ccc;
 }

@@ -72,6 +72,7 @@ define([
     };
 
     this.triggerClick = function(ev) {
+      console.log("ok");
       fileupload.dispatchEvent(new MouseEvent("click"));
     };
 
