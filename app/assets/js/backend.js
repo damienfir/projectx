@@ -30,8 +30,7 @@ define([
     },
 
     stock: function() {
-      var http = new Request();
-      return http.get("/stock");
+      return (new Request()).get("/stock");
     },
 
     themes: function() {

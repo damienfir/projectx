@@ -13,11 +13,11 @@ define(function(require){
     this.share_btn = $("#share-btn");
     this.uploadModal = $("#upload-modal");
 
-    var skrollrModule = require("skrollr");
+    // var skrollrModule = require("skrollr");
     // var skrollrMenu = require("skrollr-menu");
-    var skrollr = skrollrModule.init({
-      forceHeight: false
-    });
+    // var skrollr = skrollrModule.init({
+    //   forceHeight: false
+    // });
     // skrollrMenu.init(skrollr);
 
 
@@ -57,10 +57,70 @@ define(function(require){
     this.loader = new Loader();
 
 
+    function Collection() {
+      var box = document.getElementById("photos-collection");
+      this.photos = [];
+      var ratio = 1.45;
+      var min_columns = 3;
+
+      this.reset = function(length) {
+        var col = Math.max(min_columns, Math.floor(Math.sqrt(length)));
+        this.width = 100 / col;
+        var height = ((box.offsetWidth / col) / ratio) * Math.ceil(length / col);
+        box.style.height = height+"px";
+        while(box.firstChild) { box.removeChild(box.firstChild); }
+        this.photos = [];
+      };
+
+      this.addPhotos = function(urls) {
+        var self = this;
+
+        return Q.Promise(function(resolve) {
+          urls.forEach(function(url, i, array) {
+            setTimeout(function() {
+              self.addPhoto(url);
+              if (i == array.length-1) resolve();
+            }, i*100);
+            i++;
+          });
+        });
+      };
+
+      this.addPhoto = function(url) {
+        var img = document.createElement("img");
+        img.style.backgroundImage = "url("+url+")";
+        img.style.width = this.width+"%";
+        img.style.paddingBottom = (this.width/ratio)+"%";
+        box.appendChild(img);
+        // img.classList.add("photo-muted");
+        setTimeout(function(){
+          img.style.opacity = 0.1;
+        }, 0);
+        this.photos.push(img);
+      };
+
+      this.selectPhotos = function(indices) {
+        var self = this;
+
+        return Q.Promise(function(resolve) {
+          indices.forEach(function(index, i, array) {
+            setTimeout(function(){
+              self.selectPhoto(index);
+              if (i == array.length-1) resolve();
+            }, index*100);
+          });
+        });
+      };
+
+      this.selectPhoto = function(index) {
+        var img = this.photos[index].style.opacity = 0.5;
+      };
+    }
+
+
     function Mosaic() {
       var img = $('#mosaic-img');
       var _theme = $("#img-desc");
-      var overlayBtn = $("#btn-overlay");
       var overlayStock = $("#img-overlay-stock");
       this.theme = undefined;
       var self = this;
@@ -97,25 +157,14 @@ define(function(require){
         });
       };
 
-      this.showOverlay = function() {
-        overlayStock.fadeIn();
-      };
-
-      this.showUpload = function() {
-        overlayBtn.fadeIn(400);
-      };
-
-      this.hideOverlay = function() {
-        overlayStock.fadeOut();
-      };
-      
-      this.hideUpload = function() {
-        overlayBtn.fadeOut();
-      };
+      this.showOverlay = function() { overlayStock.fadeIn(); };
+      this.hideOverlay = function() { overlayStock.fadeOut(); };
     }
-    this.mosaic = new Mosaic();
 
-    this.stockGallery = new StockGallery(this.mosaic);
+
+    this.collection = new Collection();
+    this.mosaic = new Mosaic();
+    this.stockGallery = new StockGallery(this.mosaic, this.collection);
 
 
     this.showInteractions = function() {
@@ -128,14 +177,9 @@ define(function(require){
       feedback.show();
     };
 
-
     this.submitted = function() {
       this.mosaic.showOverlay();
-      this.uploadModal.modal("hide");
-      this.hideShareButtons();
-      this.mosaic.hideUpload();
       this.loader.init();
-      skrollr.animateTo(0, {duration: 1000, easing: 'sqrt'});
     };
 
     this.uploading = function(length) {
@@ -214,11 +258,11 @@ define(function(require){
       });
     }
 
-    // if (!mosaic.$loaded) {
-    if (mosaic.$loaded) {
+    if (!mosaic.$loaded) {
+    // if (mosaic.$loaded) {
       this.mosaic.showOverlay();
       this.stockGallery.start().then(function(){
-        this.mosaic.showUpload();
+        // this.mosaic.showUpload();
         bindEvents();
       }.bind(this));
     } else {

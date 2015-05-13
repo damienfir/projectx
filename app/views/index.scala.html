@@ -17,17 +17,14 @@
           <li><a href="#" data-toggle="modal" data-target="#api-modal" data-from="api-link">API</a></li>
         </ul>
       </div>
-      <div class="navbar-nav navbar-right">
-        <!-- <button id="upload-btn" class="btn btn-primary navbar-btn" data-toggle="modal" data-target="#upload-modal" data-from="add-button"><i class="fa fa-photo fa-lg"></i> <span id="add-txt">Choose other photos</span></button> -->
-      </div>
     </div>
   </div>
 
-  <div class="row" id="progress-row">
-    <div class="progress">
-      <div class="progress-bar progress-bar-striped active" id="progress-bar"></div>
-    </div>
-  </div>
+  <!-- <div class="row" id="progress-row"> -->
+  <!--   <div class="progress"> -->
+  <!--     <div class="progress-bar progress-bar-striped active" id="progress-bar"></div> -->
+  <!--   </div> -->
+  <!-- </div> -->
 
   <div class="container">
   <div class="row" id="row-ui">
@@ -53,151 +50,48 @@
       </div>
       <i class="fa fa-caret-down fa-2x hidden-xs" id="arrow-down"></i>
       <!-- </div> -->
-      <div class="panel panel-primary" id="panel-mosaic">
+      <!-- <div class="panel panel-primary" id="panel-mosaic"> -->
         <!-- <div class="panel-heading"> -->
         <!-- 	<h3 class="panel-title">2. Your collection</h3> -->
         <!-- </div> -->
-        <div class="photos-collection panel-body muted">
+        <div class="relative">
           <i class="fa fa-caret-right fa-2x hidden-xs" id="arrow-right"></i>
-          <img style="background-image: url(/assets/images/people/01.jpg)">
-          <img style="background-image: url(/assets/images/people/03.jpg)">
-          <img style="background-image: url(/assets/images/people/02.jpg)">
-          <img style="background-image: url(/assets/images/people/04.jpg)">
-          <img style="background-image: url(/assets/images/people/05.jpg)">
-          <img style="background-image: url(/assets/images/people/06.jpg)">
-          <img style="background-image: url(/assets/images/people/07.jpg)">
-          <img style="background-image: url(/assets/images/people/08.jpg)">
-          <img style="background-image: url(/assets/images/people/11.jpg)">
-          <img style="background-image: url(/assets/images/people/09.jpg)">
-          <img style="background-image: url(/assets/images/people/12.jpg)">
-          <img style="background-image: url(/assets/images/people/10.jpg)">
+          <div class="clearfix" id="photos-collection">
+            <!-- <img style="background-image: url(/assets/images/people/01.jpg)"> -->
+            <!-- <img style="background-image: url(/assets/images/people/03.jpg)"> -->
+            <!-- <img style="background-image: url(/assets/images/people/02.jpg)"> -->
+            <!-- <img style="background-image: url(/assets/images/people/04.jpg)"> -->
+            <!-- <img style="background-image: url(/assets/images/people/05.jpg)"> -->
+            <!-- <img style="background-image: url(/assets/images/people/06.jpg)"> -->
+            <!-- <img style="background-image: url(/assets/images/people/07.jpg)"> -->
+            <!-- <img style="background-image: url(/assets/images/people/08.jpg)"> -->
+            <!-- <img style="background-image: url(/assets/images/people/11.jpg)"> -->
+            <!-- <img style="background-image: url(/assets/images/people/09.jpg)"> -->
+            <!-- <img style="background-image: url(/assets/images/people/12.jpg)"> -->
+            <!-- <img style="background-image: url(/assets/images/people/10.jpg)"> -->
+          </div>
+          <div id="progress-uploading" class="overlay-element overlay-loader"><img src="/assets/images/358.GIF" /><span>Uploading...</span></div>
         </div>
-      </div>
+      <!-- </div> -->
       <p class="intro-text">Your best photos are automatically selected</p>
 
     </div>
     <div class="col-sm-8" id="col-mosaic">
       <div id="box-mosaic">
-      <img src="/assets/images/people/mosaic_small.jpg" class="photo-mosaic" id="mosaic-img" />
+      <img class="photo-mosaic" id="mosaic-img" />
       <!-- <img id="mosaic-img" class="img-responsive center-block" @if(filename) { src="/storage/generated/@{filename}_display.jpg" } /> -->
-      <div id="progress-processing" class="overlay-element overlay-loader"><img src="/assets/images/285.GIF" /><span>Processing...</span></div>
       <div class="img-overlay" id="img-overlay-stock"></div>
+      <div id="progress-processing" class="overlay-element overlay-loader"><img src="/assets/images/285.GIF" /><span>Processing...</span></div>
       </div>
-      <p class="intro-text">And placed into a pleasing mosaic</p>
+      <p class="intro-text">And arranged into a pleasing mosaic</p>
     </div>
   </div>
   </div>
 </div>
 
-  <!-- <div class="container centered"> -->
-  <!--   <div class="row" id="mosaic-row"> -->
-
-  <!--     <div class="col-xs-12"> -->
-  <!--       <img id="mosaic-img" class="img-responsive center-block" @if(filename) { src="/storage/generated/@{filename}_display.jpg" } /> -->
 
 
-  <!--       <div class="img-overlay" id="img-overlay-stock"></div> -->
 
-  <!--       <div class="overlay-element panel panel-default" id="btn-overlay"> -->
-  <!--         <div class="panel-body"> -->
-  <!--           <h5>Create your own mosaic</h5> -->
-  <!--           <a href="#intro" class="btn btn-primary navbar-btn upload-btn" ><i class="fa fa-photo fa-lg"></i> Choose your photos</a> -->
-  <!--         </div> -->
-  <!--       </div> -->
-
-  <!--       <div id="progress-uploading" class="overlay-element overlay-loader"><img src="/assets/images/358.GIF" /><span>Uploading...</span></div> -->
-
-  <!--       <div id="progress-processing" class="overlay-element overlay-loader"><img src="/assets/images/285.GIF" /><span>Processing...</span></div> -->
-
-  <!--     </div> -->
-
-  <!--     <div class="col-xs-12"> -->
-  <!--       <div id="img-desc"><span></span></div> -->
-  <!--       <div class="invisible" id="share-btn"> -->
-  <!--         <button class="btn btn-success" data-toggle="modal" data-target="#share-modal" data-from="share-button" data-toggle="tooltip" data-placement="bottom" title="Share"><i class="fa fa-share-alt fa-2x"></i></button> -->
-  <!--         <button class="btn btn-success" data-toggle="modal" data-target="#share-modal" data-from="share-button" data-toggle="tooltip" data-placement="bottom" title="Send by email"><i class="fa fa-paper-plane fa-2x"></i></button> -->
-  <!--         <button class="btn btn-success" data-toggle="modal" data-target="#share-modal" data-from="share-button" data-toggle="tooltip" data-placement="bottom" title="Download"><i class="fa fa-download fa-2x"></i></button> -->
-  <!--         <button class="btn btn-success" data-toggle="modal" data-target="#share-modal" data-from="share-button" data-toggle="tooltip" data-placement="bottom" title="Print"><i class="fa fa-print fa-2x"></i></button> -->
-  <!--       </div> -->
-  <!--     </div> -->
-
-  <!--   </div> -->
-  <!-- </div> -->
-<!-- </div> -->
-
-<!-- <div class="row row-wide first-section" id="section-intro"> -->
-  <!-- <a href="#intro" id="down-arrow" class="arrow-down"><i class="fa fa-angle-down fa-4x"></i></a> -->
-  <!-- <a name="intro"></a> -->
-  <!-- <div class="container-fluid" id="container-intro"> -->
-  <!--   <h5 class="info-phrase centered">Bigpiq chooses the best photos from your collection to create a mosaic effortlessly.</h5> -->
-  <!--   <div class="row row-intro"> -->
-  <!--     <div class="col-sm-4 photos-collection muted" data-anchor-target="#section-intro" data-bottom-top="opacity:0" data-center-top="opacity:1"> -->
-  <!--       <i class="fa fa-arrow-right fa-lg arrow hidden-xs"></i> -->
-  <!--       <img style="background-image: url(/assets/images/people/01.jpg)"> -->
-  <!--       <img style="background-image: url(/assets/images/people/02.jpg)"> -->
-  <!--       <img style="background-image: url(/assets/images/people/03.jpg)"> -->
-  <!--       <img style="background-image: url(/assets/images/people/04.jpg)"> -->
-  <!--       <img style="background-image: url(/assets/images/people/05.jpg)"> -->
-  <!--       <img style="background-image: url(/assets/images/people/06.jpg)"> -->
-  <!--       <img style="background-image: url(/assets/images/people/07.jpg)"> -->
-  <!--       <img style="background-image: url(/assets/images/people/08.jpg)"> -->
-  <!--       <img style="background-image: url(/assets/images/people/09.jpg)"> -->
-  <!--       <img style="background-image: url(/assets/images/people/10.jpg)"> -->
-  <!--       <img style="background-image: url(/assets/images/people/11.jpg)"> -->
-  <!--       <img style="background-image: url(/assets/images/people/12.jpg)"> -->
-  <!--       <p class="intro-text"> -->
-  <!--       Upload your photo collection -->
-  <!--       </p> -->
-  <!--     </div> -->
-  <!--     <div class="col-sm-4 photos-collection"> -->
-  <!--       <i class="fa fa-arrow-right fa-lg arrow hidden-xs"></i> -->
-  <!--       <img style="background-image: url(/assets/images/people/01.jpg)"> -->
-  <!--       <img style="background-image: url(/assets/images/people/03.jpg)" class="photo-muted"> -->
-  <!--       <img style="background-image: url(/assets/images/people/02.jpg)"> -->
-  <!--       <img style="background-image: url(/assets/images/people/04.jpg)" class="photo-muted"> -->
-  <!--       <img style="background-image: url(/assets/images/people/05.jpg)"> -->
-  <!--       <img style="background-image: url(/assets/images/people/06.jpg)"> -->
-  <!--       <img style="background-image: url(/assets/images/people/07.jpg)" class="photo-muted"> -->
-  <!--       <img style="background-image: url(/assets/images/people/08.jpg)"> -->
-  <!--       <img style="background-image: url(/assets/images/people/11.jpg)" class="photo-muted"> -->
-  <!--       <img style="background-image: url(/assets/images/people/09.jpg)"> -->
-  <!--       <img style="background-image: url(/assets/images/people/12.jpg)" class="photo-muted"> -->
-  <!--       <img style="background-image: url(/assets/images/people/10.jpg)"> -->
-  <!--       <p class="intro-text"> -->
-  <!--         Bigpiq chooses the best of your photos -->
-  <!--       </p> -->
-  <!--     </div> -->
-  <!--     <div class="col-sm-4 photos-mosaic"> -->
-  <!--       <img src="/assets/images/people/mosaic_small.jpg" class="photo-mosaic" /> -->
-  <!--       <p class="intro-text"> -->
-  <!--         Arranged into a pleasing mosaic -->
-  <!--       </p> -->
-  <!--     </div> -->
-  <!--   </div> -->
-  <!-- </div> -->
-  <!-- <div class="container" id="upload-row"> -->
-  <!--   <div class="row"> -->
-  <!--     <div class="col-sm-1 col-sm-offset-3 centered"> -->
-  <!--       <div class="" id="cloud-btn"> -->
-  <!--         <button class="btn btn-primary btn-block" id="dropbox-btn"><i class="fa fa-dropbox fa-3x"></i></button> -->
-  <!--         <button class="btn btn-primary btn-block" id="google-btn" disabled><i class="fa fa-google-plus fa-3x"></i></button> -->
-  <!--         <button class="btn btn-primary btn-block" id="facebook-btn" disabled><i class="fa fa-facebook fa-3x"></i></button> -->
-  <!--         <button class="btn btn-primary btn-block" id="flickr-btn" disabled><i class="fa fa-flickr fa-3x"></i></button> -->
-  <!--       </div> -->
-  <!--     </div> -->
-  <!--     <div class="col-sm-5"> -->
-  <!--       <div class="panel panel-default"> -->
-  <!--         <div class="panel-body centered bg-primary" id="dropzone"> -->
-  <!--           <p>Drop or click</p> -->
-  <!--           <i class="fa fa-3x fa-reply fa-rotate-270" id="dropicon"></i> -->
-  <!--           <i class="fa fa-inbox fa-3x" id="dropicon-box"></i> -->
-  <!--         </div> -->
-  <!--         <input type="file" name="image" id="file-upload" multiple> -->
-  <!--       </div> -->
-  <!--     </div> -->
-  <!--   </div> -->
-  <!-- </div> -->
-<!-- </div> -->
 
 <a name="products" />
 <div class="row row-wide bg-primary">

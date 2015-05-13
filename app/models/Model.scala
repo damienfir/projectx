@@ -8,6 +8,7 @@ import play.modules.reactivemongo.json.BSONFormats._
 case class User (_id: BSONObjectID, email: Option[String])
 case class Mosaic(_id: BSONObjectID, user_id: BSONObjectID, filename: Option[String], thumbnail: Option[String], images: List[String])
 
+case class Stock(_id: BSONObjectID, mosaic: String, photos: List[String], selected: List[Int])
 case class Theme(_id: BSONObjectID, filename: String, theme: String)
 case class FeedbackQuestion(_id: BSONObjectID, question: String, choices: List[String])
 case class Feedback(_id: Option[BSONObjectID], user_id: Option[BSONObjectID], question_id: BSONObjectID, choice: Int)
@@ -26,4 +27,5 @@ object JsonFormats {
   implicit val contactFeebackFormat = Json.format[ContactFeedback]
   implicit val emailFormat = Json.format[Email]
   implicit val themeFormat = Json.format[Theme]
+  implicit val stockFormat = Json.format[Stock]
 }
