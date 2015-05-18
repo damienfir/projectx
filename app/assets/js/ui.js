@@ -228,11 +228,10 @@ define(function(require){
         self.collection.reset(collection.photos.length);
 
         return self.collection.addPhotos(collection.photos).then(function(){
-          if (!this.stop_timeout)
-            return self.collection.selectPhotos(collection.selected);
-        }.bind(this)).then(function() {
-          if (!this.stop_timeout)
+          if (!this.stop_timeout) {
+            self.collection.selectPhotos(collection.selected);
             return self.mosaic.changeImage(collection.mosaic);
+          }
         }.bind(this));
       };
     }
