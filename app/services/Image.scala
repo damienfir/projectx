@@ -4,6 +4,8 @@ import play.api.libs.json._
 import play.api.libs.Files.TemporaryFile
 import play.api.Play
 import scala.util.{Try, Success, Failure}
+import scala.sys.process._
+
 import java.io._
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.codec.binary.Hex;
@@ -20,6 +22,7 @@ trait FileService {
 
 object ImageService extends FileService {
   val baseDir = Play.current.configuration.getString("px.dir_photos").get
+  val thumbDir = Play.current.configuration.getString("px.dir_thumb").get
   val stockDir = Play.current.configuration.getString("px.dir_stock").get
   
   def hashFromContent(data: Array[Byte]): String = {
@@ -28,12 +31,22 @@ object ImageService extends FileService {
     Hex.encodeHexString(digest.digest())
   }
 
+  def resize(filename: String): Try[String] = {
+    val output = s"$thumbDir/$filename"
+    val cmd = Seq("convert", fullPath(filename), "-resize", "150x150", output)
+    cmd.! match {
+      case 0 => Success(output)
+      case _ => Failure(new Exception())
+    }
+  }
+
   def save(data: Array[Byte]): Try[String] = {
     val filename = hashFromContent(data)
     val file = getFile(filename)
 
     try {
       FileUtils.writeByteArrayToFile(file, data)
+      resize(filename)
       Success(filename)
     } catch {
       case e: IOException => Failure(e)
@@ -46,6 +59,7 @@ object ImageService extends FileService {
 
     try {
       uploaded.moveTo(newFile)
+      resize(filename)
       Success(filename)
     } catch {
       case e: IOException => Failure(e)

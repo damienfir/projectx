@@ -21,7 +21,7 @@
 
 .overlay-element {
   background-color: white;
-  opacity: 0.5;
+  opacity: 0.6;
   border-radius: 5px;
   padding: 20px 20px 15px 20px;
   position: absolute;
@@ -77,7 +77,7 @@
   animation-duration: 0.5s;
   animation-name: bumping;
   /* animatino-timing-function: ease-out; */
-  /* animation-iteration-count: infinite; */
+  animation-iteration-count: infinite;
 }
 
 @keyframes bumping {
@@ -85,15 +85,7 @@
     margin-top: 0px;
   }
 
-  25% {
-    margin-top: -10px;
-  }
-
   50% {
-    margin-top: 0px;
-  }
-
-  75% {
     margin-top: -10px;
   }
 

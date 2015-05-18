@@ -4,14 +4,24 @@ define(function(require){
 
     var mosaic = require("mosaic");
     var ui = require("ui");
+    var ga = require("ga");
 
     this.submitted = function() {
-      ui.mosaic.showOverlay();
       ui.loader.init();
+      ui.gallery.stop();
+      ui.mosaic.clear();
+      ui.mosaic.hideOverlay();
     };
 
     this.uploading = function(length) {
+      ui.collection.reset(length);
       ui.loader.start(length);
+    };
+
+    this.uploaded = function(urls) {
+      if (urls.length > 0) {
+        ui.collection.addPhotos(urls);
+      }
     };
 
     this.progress = function(progress, index) {
@@ -19,16 +29,15 @@ define(function(require){
     };
 
     this.processing = function() {
+      ui.collection.selectPhotos();
       ui.loader.processing();
     };
 
     this.loaded = function(obj) {
-      ui.gallery.stop();
+      ui.loader.finish();
       ui.mosaic.changeImage(mosaic.getImageURLSmall())
         .then(function() {
-          ui.loader.finish();
-          ui.mosaic.hideOverlay();
-          ui.showInteractions();
+          // ui.showInteractions();
         });
       window.history.pushState({}, document.title, mosaic.getViewURL());
     };
@@ -36,6 +45,7 @@ define(function(require){
     var self = this;
     function bindEvents() {
       $("#dropzone").hover(ui.dropzone.enter, ui.dropzone.leave);
+      $("#box-mosaic").hover(ui.mosaic.enter, ui.mosaic.leave);
 
       // Google Analytics triggers
       $(".modal").on("show.bs.modal", function(ev){ ga("send", "pageview", $(ev.target).data("content")); });
@@ -46,6 +56,7 @@ define(function(require){
 
       require(["upload"], function(upload){
         upload.watch.add("uploading", self, self.uploading);
+        upload.watch.add("uploaded", self, self.uploaded);
         upload.watch.add("progress", self, self.progress);
         upload.watch.add("processing", self, self.processing);
         upload.watch.add("submitted", self, self.submitted);

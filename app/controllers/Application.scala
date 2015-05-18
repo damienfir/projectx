@@ -87,7 +87,11 @@ object Application extends Controller with MongoController {
 
   def upload = Action.async(parse.multipartFormData) { implicit request =>
     getMosaic flatMap { _ map { mosaic =>
-        MosaicService.addImages(request.body.files.map(_.ref).toList) flatMap { addToMosaic(mosaic, _) }
+      MosaicService.addImages(request.body.files.map(_.ref).toList) map { names =>
+          addToMosaic(mosaic, names)
+          println(names map (n => s"/storage/thumb/$n"))
+          Ok(Json.stringify(Json.arr(names map ("/storage/thumb/" + _))))
+        }
       } getOrElse(Future(BadRequest))
     }
   }

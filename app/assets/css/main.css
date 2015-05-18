@@ -15,7 +15,10 @@ html, body {
 #panel-upload {
   border-radius: 5px;
   background-color: #2196f3;
+  /* margin-right: 50%; */
 }
+
+.maxheight { height: 100%; }
 
 #dropzone {
   color: #fff;
@@ -35,17 +38,31 @@ html, body {
 #cloud-btn {
   position: absolute;
   margin-left: -60px;
+  padding-right: 60px;
   left: 0;
   top: 50%;
   transform: translate(0, -50%);
 }
-
 #cloud-btn button {
   display: block;
   width: 50px;
   /* color: #2196f3; */
   margin: 5px 0;
   /* height: 74px; */
+}
+
+#panel-share {
+  position: absolute;
+  margin-right: -60px;
+  padding-left: 60px;
+  right: 0;
+  top: 50%;
+  transform: translate(0, -50%);
+}
+#panel-share a {
+  display: block;
+  width: 50px;
+  margin: 5px 0;
 }
 
 #col-ui { padding-right: 40px; }

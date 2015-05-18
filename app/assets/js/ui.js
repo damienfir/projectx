@@ -21,35 +21,38 @@ define(function(require){
 
 
     function Loader() {
-      var progressbar = $("#progress-bar");
-      var progressrow = $("#progress-row");
+      // var progressbar = $("#progress-bar");
+      // var progressrow = $("#progress-row");
+      var arrowDown = $("#arrow-down");
+      var arrowRight = $("#arrow-right");
       var progressUploading = $("#progress-uploading");
       var progressProcessing = $("#progress-processing");
       this.total = 1;
 
       this.init = function() {
-        progressbar.width("0%");
-        progressrow.fadeTo(400, 1);
-        progressUploading.fadeIn();
+        // progressbar.width("0%");
+        // progressrow.fadeTo(400, 1);
+        progressUploading.fadeIn(300, function(){ console.log("faded in"); });
       };
 
       this.start = function(length) { this.total = length; };
 
       this.progress = function(progress, index) {
-        var val = Math.round((progress+index)*100) / this.total;
-        progressbar.width(val + "%");
+        // var val = Math.round((progress+index)*100) / this.total;
+        // progressbar.width(val + "%");
       };
 
       this.processing = function() {
-        progressbar.width("100%");
-        progressbar.addClass("progress-bar-success");
-        progressUploading.fadeOut(300, function() { progressProcessing.fadeIn(); });
+        // progressbar.width("100%");
+        // progressbar.addClass("progress-bar-success");
+        progressUploading.fadeOut();
+        progressProcessing.fadeIn();
       };
 
       this.finish = function() {
-        progressrow.fadeTo(400, 0, function() {
-          progressbar.removeClass("progress-bar-success");
-        });
+        // progressrow.fadeTo(400, 0, function() {
+        //   progressbar.removeClass("progress-bar-success");
+        // });
         progressProcessing.fadeOut();
       };
     }
@@ -112,6 +115,7 @@ define(function(require){
       };
 
       this.selectPhotos = function(indices) {
+        indices = indices || this.photos.map(function(_,i){ return i; });
         var self = this;
 
         return Q.Promise(function(resolve) {
@@ -169,16 +173,28 @@ define(function(require){
         });
       };
 
+      this.clear = function() {
+        img.attr("src", "");
+      };
+
       this.showOverlay = function() { overlayStock.fadeIn(); };
       this.hideOverlay = function() { overlayStock.fadeOut(); };
+
+      this.enter = function() {
+        $("#panel-share").removeClass("invisible").addClass("visible");
+        // $("#droptext").html("Drag or click");
+      };
+
+      this.leave = function() {
+        $("#panel-share").removeClass("visible").addClass("invisible");
+        // $("#droptext").html("Upload your photos");
+      };
     }
 
 
     function Gallery() {
-      var timeoutID = 0;
-      var stop = false;
-      var images = [];
-
+      this.timeout_id = 0;
+      this.stop_timeout = false;
 
       this.start = function() {
         return backend.stock().then(function(res){
@@ -187,9 +203,18 @@ define(function(require){
         .then(this.cycle.bind(this));
       };
 
+      this.stop = function() {
+        this.stop_timeout = true;
+        clearTimeout(this.timeout_id);
+      };
 
-      this.cycle = function(examples) {
-        this.fill(examples[1]);
+      this.cycle = function(examples, cycle_index) {
+        if (!this.stop_timeout) {
+          var index = cycle_index || 0;
+          this.fill(examples[index]).then(function() {
+            this.timeout_id = setTimeout(this.cycle.bind(this), 5000, examples, (index + 1) % examples.length);
+          }.bind(this));
+        }
       };
 
 
@@ -202,12 +227,13 @@ define(function(require){
       this.fill = function(collection) {
         self.collection.reset(collection.photos.length);
 
-        self.collection.addPhotos(collection.photos)
-          .then(function(){
-            self.collection.selectPhotos(collection.selected);
-          }).then(function() {
-            self.mosaic.changeImage(collection.mosaic);
-          });
+        return self.collection.addPhotos(collection.photos).then(function(){
+          if (!this.stop_timeout)
+            return self.collection.selectPhotos(collection.selected);
+        }.bind(this)).then(function() {
+          if (!this.stop_timeout)
+            return self.mosaic.changeImage(collection.mosaic);
+        }.bind(this));
       };
     }
 
@@ -232,6 +258,9 @@ define(function(require){
     this.hideShareButtons = function() {
       this.share_btn.removeClass("visible").addClass("invisible");
     };
+
+    $("#panel-upload .btn").tooltip();
+    $("#panel-share .btn").tooltip();
 
     require(["backend"], function(backend){
       document.getElementById("contact-form").addEventListener("submit", function(ev){

@@ -27,41 +27,46 @@
   <!-- </div> -->
 
   <div class="container">
-  <div class="row" id="row-ui">
-    <div class="col-sm-4" id="col-ui">
-      <div class="panel panel-primary" id="panel-upload">
-        <div class="panel-body" id="dropzone">
-          <div class="invisible" id="cloud-btn">
-            <button class="btn btn-primary" id="dropbox-btn"><i class="fa fa-dropbox fa-lg"></i></button>
-            <button class="btn btn-primary" id="google-btn" disabled><i class="fa fa-google-plus fa-lg"></i></button>
-            <button class="btn btn-primary" id="facebook-btn" disabled><i class="fa fa-facebook fa-lg"></i></button>
-            <button class="btn btn-primary" id="flickr-btn" disabled><i class="fa fa-flickr fa-lg"></i></button>
+    <div class="row" id="row-ui">
+      <div class="col-sm-4" id="col-ui">
+        <div class="panel panel-primary" id="panel-upload">
+          <div class="panel-body" id="dropzone">
+            <div class="invisible" id="cloud-btn">
+              <button class="btn btn-primary" id="dropbox-btn" data-toggle="tooltip" data-placement="left" title="Import from Dropbox"><i class="fa fa-dropbox fa-lg"></i></button>
+              <button class="btn btn-primary" id="google-btn" disabled><i class="fa fa-google-plus fa-lg"></i></button>
+              <button class="btn btn-primary" id="facebook-btn" disabled><i class="fa fa-facebook fa-lg"></i></button>
+              <button class="btn btn-primary" id="flickr-btn" disabled><i class="fa fa-flickr fa-lg"></i></button>
+            </div>
+            <p id="droptext">Upload your photos</p>
+            <i class="fa fa-3x fa-upload" id="dropicon"></i>
+            <!-- <i class="fa fa-inbox fa-3x" id="dropicon-box"></i> -->
+            <input type="file" name="image" id="file-upload" multiple>
           </div>
-          <p id="droptext">Upload your photos</p>
-          <i class="fa fa-3x fa-upload" id="dropicon"></i>
-          <!-- <i class="fa fa-inbox fa-3x" id="dropicon-box"></i> -->
-          <input type="file" name="image" id="file-upload" multiple>
         </div>
-      </div>
-      <i class="fa fa-caret-down fa-2x hidden-xs" id="arrow-down"></i>
+        <i class="fa fa-caret-down fa-2x hidden-xs" id="arrow-down"></i>
         <div class="relative">
           <div class="clearfix" id="photos-collection"></div>
           <i class="fa fa-caret-right fa-2x hidden-xs" id="arrow-right"></i>
           <div id="progress-uploading" class="overlay-element overlay-loader"><img src="/assets/images/358.GIF" /><span>Uploading...</span></div>
         </div>
-      <p class="intro-text">Your best photos are automatically selected</p>
-
-    </div>
-    <div class="col-sm-8" id="col-mosaic">
-      <div id="box-mosaic">
-      <img class="photo-mosaic" id="mosaic-img" />
-      <!-- <img id="mosaic-img" class="img-responsive center-block" @if(filename) { src="/storage/generated/@{filename}_display.jpg" } /> -->
-      <div class="img-overlay" id="img-overlay-stock"></div>
-      <div id="progress-processing" class="overlay-element overlay-loader"><img src="/assets/images/285.GIF" /><span>Processing...</span></div>
+        <p class="intro-text">Your best photos are automatically selected</p>
       </div>
-      <p class="intro-text">And arranged into a pleasing mosaic</p>
+      <div class="col-sm-8" id="col-mosaic">
+        <div id="box-mosaic">
+          <img class="photo-mosaic" id="mosaic-img" />
+          <!-- <img id="mosaic-img" class="img-responsive center-block" @if(filename) { src="/storage/generated/@{filename}_display.jpg" } /> -->
+          <div class="img-overlay" id="img-overlay-stock"></div>
+          <div id="progress-processing" class="overlay-element overlay-loader"><img src="/assets/images/285.GIF" /><span>Processing...</span></div>
+          <div class="invisible" id="panel-share">
+            <a data-toggle="modal" data-target="#share-modal" data-from="share-button" data-toggle="tooltip" data-placement="right" title="Share on social networks" class="btn btn-success" id="dropbox-btn"><i class="fa fa-share-alt fa-lg"></i></a>
+            <a data-toggle="modal" data-target="#send-modal" data-from="send-button" data-toggle="tooltip" data-placement="right" title="Send to a friend" class="btn btn-success" id="google-btn"><i class="fa fa-paper-plane fa-lg"></i></a>
+            <a data-toggle="modal" data-target="#download-modal" data-from="print-button" data-toggle="tooltip" data-placement="right" title="Download to print" class="btn btn-success" id="facebook-btn"><i class="fa fa-print fa-lg"></i></a>
+            <a data-toggle="modal" data-target="#download-modal" data-from="download-button" data-toggle="tooltip" data-placement="right" title="Download" class="btn btn-success" id="flickr-btn"><i class="fa fa-download fa-lg"></i></a>
+          </div>
+        </div>
+        <p class="intro-text">And arranged into a pleasing mosaic</p>
+      </div>
     </div>
-  </div>
   </div>
 </div>
 
@@ -138,55 +143,12 @@
   </div>
 </div>
 
-<div class="modal fade" id="upload-modal" tabindex="-1" data-content="/upload">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-      </div>
-      <div class="modal-body">
-        <div class="row" id="cloud-btn">
-          <!-- <div class="col-sm-4"><big>Choose from</big></div> -->
-          <div class="col-sm-12 centered">
-            <button class="btn btn-primary navbar-btn" id="dropbox-btn"><i class="fa fa-dropbox fa-lg"></i> Dropbox</button>
-            <div data-toggle="tooltip" title="Coming soon" class="div-btn"><button class="btn btn-primary navbar-btn" id="google-btn" disabled><i class="fa fa-google-plus fa-lg"></i> Google+</button></div>
-            <div data-toggle="tooltip" title="Coming soon" class="div-btn"><button class="btn btn-primary navbar-btn" id="facebook-btn" disabled><i class="fa fa-facebook fa-lg"></i> Facebook</button></div>
-              <div data-toggle="tooltip" title="Coming soon" class="div-btn"><button class="btn btn-primary navbar-btn" id="flickr-btn" disabled><i class="fa fa-flickr fa-lg"></i> Flickr</button></div>
-            <hr>
-          </div>
-        </div>
-        <div class="row" id="dropzone-wrapper">
-          <div id="dropzone">
-            <div class="droptext">Drop your photos or click here to upload</div>
-            <i class="fa fa-3x fa-photo" id="dropicon"></i>
-          </div>
-        </div>
-        <input type="file" name="image" id="file-upload" multiple>
-        <!-- <div class="row"> -->
-        <!--   <div class="col-sm-5"><big>Upload from your computer</big></div> -->
-        <!--   <div class="col-sm-7"> -->
-        <!--     <form action="/upload" method="post" enctype="multipart/form-data" class="form-inline centered" id="upload-form"> -->
-              <!-- <button type="submit" class="btn btn-primary">Upload</button> -->
-        <!--     </form> -->
-        <!--   </div> -->
-        <!-- </div> -->
-      </div>
-    </div>
-  </div>
-</div>
 
 <div class="modal fade" id="share-modal" tabindex="-1" data-content="/share">
   <div class="modal-dialog">
     <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-      </div>
-      <div class="modal-body" id="share-list">
-        <div class="row">
-          <div class="col-lg-3">
-            <h5>Share mosaic on...</h5>
-          </div>
-          <div class="col-lg-9 centered">
+      <div class="modal-body">
+          <div class="centered">
             <button id="share-facebook" class="btn btn-primary btn-lg" data-toggle="tooltip" title="Share on Facebook"><i class="fa fa-facebook"></i></button>
             <button id="share-google" class="btn btn-primary btn-lg" data-toggle="tooltip" title="Share on Google+"><i class="fa fa-google-plus"></i></button>
             <button id="share-pinterest" class="btn btn-primary btn-lg" data-toggle="tooltip" title="Share on Pinterest"><i class="fa fa-pinterest"></i></button>
@@ -194,58 +156,51 @@
             <!-- <button id="share-reddit" class="btn btn-primary btn-lg" data-toggle="tooltip" title="Share on Reddit"><i class="fa fa-reddit"></i></button> -->
             <div data-toggle="tooltip" title="Coming soon" class="div-btn"><button id="share-instagram" class="btn btn-primary btn-lg" disabled><i class="fa fa-instagram"></i></button></div>
           </div>
-        </div>
-        <hr />
-        <div class="row">
-          <form id="email-form">
-          <div class="col-lg-3"><h5>Share by email</h5></div>
-          <div class="col-lg-7">
-            <div class="input-group">
-              <span class="input-group-addon">@@</span>
-              <input class="form-control" name="from" placeholder="Your email address" />
-            </div>
-            <div class="input-group">
-              <span class="input-group-addon">@@</span>
-              <input class="form-control" name="to" placeholder="Your friend's email address" />
-            </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="send-modal" tabindex="-1" data-content="/share">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="email-form">
+        <div class="modal-body">
+          <div class="input-group">
+            <span class="input-group-addon">@@</span>
+            <input class="form-control" name="from" placeholder="Your email address" />
           </div>
-          <div class="col-lg-2">
-            <button type="submit" class="btn btn-primary center-block" id="email-btn"><i class="fa fa-send"></i></button>
-            <p class="centered text-success invisible" id="sent-label">Sent!</p>
-          </div>
-          </form>
-        </div>
-        <hr />
-        <!-- <div class="row"> -->
-        <!--   <div class="col-lg-3"><h5>Share mosaic</h5></div> -->
-        <!--   <div class="col-lg-9"> -->
-        <!--     <div class="input-group"> -->
-        <!--       <span class="input-group-addon"><i class="fa fa-link"></i></span> -->
-        <!--       <input class="form-control" id="share-link" /> -->
-        <!--     </div> -->
-        <!--   </div> -->
-        <!-- </div> -->
-        <!-- <hr /> -->
-        <form action="/download" method="post" id="download-form">
-        <div class="row">
-          <div class="col-lg-3"><h5>Download</h5></div>
-          <div class="col-lg-9">
-            <div class="form-group">
-              <div class="input-group input-group-lg">
-                <span class="input-group-addon">@@</span>
-                <input type="text" name="email" placeholder="Please enter your email address" class="form-control" id="email-input">
-              </div>
-              <p class="centered text-muted">We will send you a link to your poster to view it later.</p>
-            </div>
+          <div class="input-group">
+            <span class="input-group-addon">@@</span>
+            <input class="form-control" name="to" placeholder="Your friend's email address" />
           </div>
         </div>
-        <div class="row">
-        	<div class="col-lg-12">
-            <button type="submit" class="btn btn-success pull-right" id="download-btn" disabled><i class="fa fa-cloud-download fa-lg"></i></button>
-          </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary pull-right" id="email-btn"><i class="fa fa-send"></i> Send</button>
+          <p class="centered text-success invisible" id="sent-label">Sent!</p>
         </div>
       </form>
-      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="download-modal" tabindex="-1" data-content="/share">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form action="/download" method="post" id="download-form">
+        <div class="modal-body">
+          <div class="form-group">
+            <div class="input-group input-group-lg">
+              <span class="input-group-addon">@@</span>
+              <input type="text" name="email" placeholder="Please enter your email address" class="form-control" id="email-input">
+            </div>
+            <p class="centered text-muted">We will send you a link to your poster to view it later.</p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success pull-right" id="download-btn" disabled><i class="fa fa-cloud-download fa-lg"></i> Download</button>
+        </div>
+      </form>
     </div>
   </div>
 </div>

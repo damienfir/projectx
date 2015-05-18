@@ -17,6 +17,7 @@ tmp
 .sbtserver
 storage/photos/*
 storage/generated/*
+storage/thumb/*
 db/sessions/*
 db/users/*
 *.swp

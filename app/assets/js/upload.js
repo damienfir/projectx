@@ -9,7 +9,7 @@ define([
 
   function Add() {
     var self = this;
-    self.watch = new observers(["uploading","progress","processing","loaded","failed","submitted"]);
+    self.watch = new observers(["uploading","uploaded","progress","processing","loaded","failed","submitted"]);
 
     var dropzone = document.getElementById("dropzone");
     var dropicon = document.getElementById("dropicon");
@@ -20,12 +20,13 @@ define([
 
       backend.reset()
         .then(function() {
-          return Q.Promise(function(resolve, reject){
+          return Q.Promise(function(resolve, reject, notify){
             function chainUpload(index) {
               if (files.length > index) {
                 backend.uploadFile(files[index]).then(
                     function(res){
                       chainUpload(index+1);
+                      notify(JSON.parse(res));
                     }, reject,
                     function(progress) {
                       self.watch.notify("progress", [progress, index]);
@@ -42,6 +43,8 @@ define([
         return backend.process();
       }, function(reason) {
         console.log(reason);
+      }, function(uploaded){
+        self.watch.notify("uploaded", uploaded);
       })
       .then(function(res){
         var obj = JSON.parse(res);
