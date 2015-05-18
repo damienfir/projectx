@@ -31,6 +31,6 @@ require.config({
   }
 });
 
-require(['ga', 'ui'], function(ga){
+require(['ga', 'events'], function(ga){
   ga('send', 'pageview');
 });

@@ -4,12 +4,11 @@ define(function(require){
   var mosaic = require("mosaic");
   var Q = require("q");
   var ga = require("ga");
+  var backend = require("backend");
   var feedback = require("feedback");
   require("bootstrap");
-  var StockGallery = require("stock");
 
   function UI() {
-
     this.share_btn = $("#share-btn");
     this.uploadModal = $("#upload-modal");
 
@@ -55,6 +54,19 @@ define(function(require){
       };
     }
     this.loader = new Loader();
+
+
+    function Dropzone() {
+      this.enter = function() {
+        $("#cloud-btn").removeClass("invisible").addClass("visible");
+        $("#droptext").html("Drag or click");
+      };
+
+      this.leave = function() {
+        $("#cloud-btn").removeClass("visible").addClass("invisible");
+        $("#droptext").html("Upload your photos");
+      };
+    }
 
 
     function Collection() {
@@ -162,9 +174,48 @@ define(function(require){
     }
 
 
+    function Gallery() {
+      var timeoutID = 0;
+      var stop = false;
+      var images = [];
+
+
+      this.start = function() {
+        return backend.stock().then(function(res){
+          return JSON.parse(res);
+        })
+        .then(this.cycle.bind(this));
+      };
+
+
+      this.cycle = function(examples) {
+        this.fill(examples[1]);
+      };
+
+
+      this.addPhoto = function(url, last, resolve) {
+        self.collection.addPhoto(url);
+        if (last) resolve();
+      };
+
+
+      this.fill = function(collection) {
+        self.collection.reset(collection.photos.length);
+
+        self.collection.addPhotos(collection.photos)
+          .then(function(){
+            self.collection.selectPhotos(collection.selected);
+          }).then(function() {
+            self.mosaic.changeImage(collection.mosaic);
+          });
+      };
+    }
+
+    var self = this;
+    this.dropzone = new Dropzone();
     this.collection = new Collection();
     this.mosaic = new Mosaic();
-    this.stockGallery = new StockGallery(this.mosaic, this.collection);
+    this.gallery = new Gallery();
 
 
     this.showInteractions = function() {
@@ -177,33 +228,6 @@ define(function(require){
       feedback.show();
     };
 
-    this.submitted = function() {
-      this.mosaic.showOverlay();
-      this.loader.init();
-    };
-
-    this.uploading = function(length) {
-      this.loader.start(length);
-    };
-
-    this.progress = function(progress, index) {
-      this.loader.progress(progress, index);
-    };
-
-    this.processing = function() {
-      this.loader.processing();
-    };
-
-    this.loaded = function(obj) {
-      this.stockGallery.stop();
-      this.mosaic.changeImage(mosaic.getImageURLSmall())
-        .then(function() {
-          this.loader.finish();
-          this.mosaic.hideOverlay();
-          this.showInteractions();
-        }.bind(this));
-      window.history.pushState({}, document.title, mosaic.getViewURL());
-    };
 
     this.hideShareButtons = function() {
       this.share_btn.removeClass("visible").addClass("invisible");
@@ -224,51 +248,6 @@ define(function(require){
     });
 
 
-    var self = this;
-    function bindEvents() {
-
-      $("#dropzone").hover(function() {
-        $("#cloud-btn").removeClass("invisible").addClass("visible");
-        $("#droptext").html("Drag or click");
-      }, function() {
-        $("#cloud-btn").removeClass("visible").addClass("invisible");
-        $("#droptext").html("Upload your photos");
-      });
-
-      // Google Analytics triggers
-      $(".modal").on("show.bs.modal", function(ev){ ga("send", "pageview", $(ev.target).data("content")); });
-      $(".modal").on("show.bs.modal", function(ev){ ga("send", "event", "modal", $(ev.relatedTarget).data("from")); });
-      $(".more-info").on("click", function(ev){ ga("send", "event", "more-info", $(ev.target).data("from")); });
-
-
-      require(["upload"], function(upload){
-        upload.watch.add("uploading", self, self.uploading);
-        upload.watch.add("progress", self, self.progress);
-        upload.watch.add("processing", self, self.processing);
-        upload.watch.add("submitted", self, self.submitted);
-      });
-
-      mosaic.watch.add("loaded", self, self.loaded);
-
-      require(["dropbox"], function(dropbox){
-        dropbox.watch.add("uploading", self, self.uploading);
-        dropbox.watch.add("progress", self, self.progress);
-        dropbox.watch.add("processing", self, self.processing);
-        dropbox.watch.add("submitted", self, self.submitted);
-      });
-    }
-
-    if (!mosaic.$loaded) {
-    // if (mosaic.$loaded) {
-      this.mosaic.showOverlay();
-      this.stockGallery.start().then(function(){
-        // this.mosaic.showUpload();
-        bindEvents();
-      }.bind(this));
-    } else {
-      this.showInteractions();
-      bindEvents();
-    }
 
     // var downArrow = document.getElementById("down-arrow");
     // function bumpArrow() { downArrow.classList.add("bump"); }
