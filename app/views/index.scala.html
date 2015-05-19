@@ -9,7 +9,7 @@
         <a class="navbar-brand logo" href="/"><img src="/assets/images/logo.png"/> bigpiq</a>
         <p class="desc-text-navbar navbar-text hidden-sm hidden-md hidden-lg">Give your photos a chance.</p>
       </div>
-      <p class="desc-text-page centered-nav hidden-xs">Let your photos surprise you.<small>You shoot, we curate.</small></p>
+      <p class="desc-text-page centered-nav hidden-xs">We select, arrange and print your photo collection for you.</p>
       <div  class="collapse navbar-collapse navbar-right">
         <ul class="nav navbar-nav">
           <li><a href="#" data-toggle="modal" data-target="#about-modal" data-from="about-link">About</a></li>
@@ -20,54 +20,41 @@
     </div>
   </div>
 
-  <!-- <div class="row" id="progress-row"> -->
-  <!--   <div class="progress"> -->
-  <!--     <div class="progress-bar progress-bar-striped active" id="progress-bar"></div> -->
-  <!--   </div> -->
-  <!-- </div> -->
-
-  <div class="container">
-    <div class="row" id="row-ui">
-      <div class="col-sm-4" id="col-ui">
-        <div class="panel panel-primary" id="panel-upload">
-          <div class="panel-body" id="dropzone">
-            <div class="invisible" id="cloud-btn">
-              <button class="btn btn-primary" id="dropbox-btn" data-toggle="tooltip" data-placement="left" title="Import from Dropbox"><i class="fa fa-dropbox fa-lg"></i></button>
-              <button class="btn btn-primary" id="google-btn" disabled><i class="fa fa-google-plus fa-lg"></i></button>
-              <button class="btn btn-primary" id="facebook-btn" disabled><i class="fa fa-facebook fa-lg"></i></button>
-              <button class="btn btn-primary" id="flickr-btn" disabled><i class="fa fa-flickr fa-lg"></i></button>
-            </div>
-            <p id="droptext">Upload your photos</p>
-            <i class="fa fa-3x fa-upload" id="dropicon"></i>
-            <!-- <i class="fa fa-inbox fa-3x" id="dropicon-box"></i> -->
-            <input type="file" name="image" id="file-upload" multiple>
-          </div>
-        </div>
-        <i class="fa fa-caret-down fa-2x hidden-xs" id="arrow-down"></i>
-        <div class="relative">
-          <div class="clearfix" id="photos-collection"></div>
-          <i class="fa fa-caret-right fa-2x hidden-xs" id="arrow-right"></i>
-          <div id="progress-uploading" class="overlay-element overlay-loader"><img src="/assets/images/358.GIF" /><span>Uploading...</span></div>
-        </div>
-        <p class="intro-text">Your best photos are automatically selected</p>
+  <div class="container-fluid limited-width">
+    <div class="row row-presentation">
+      <div class="col-sm-3 maxheight">
+        <div class="clearfix shadow" id="photos-collection"></div>
+        <i class="fa fa-caret-right fa-2x hidden-xs caret-right"></i>
       </div>
-      <div class="col-sm-8" id="col-mosaic">
+      <div class="col-sm-5">
         <div id="box-mosaic">
-          <img class="photo-mosaic" id="mosaic-img" />
-          <!-- <img id="mosaic-img" class="img-responsive center-block" @if(filename) { src="/storage/generated/@{filename}_display.jpg" } /> -->
-          <div class="img-overlay" id="img-overlay-stock"></div>
-          <div id="progress-processing" class="overlay-element overlay-loader"><img src="/assets/images/285.GIF" /><span>Processing...</span></div>
-          <div class="invisible" id="panel-share">
-            <a data-toggle="modal" data-target="#share-modal" data-from="share-button" data-toggle="tooltip" data-placement="right" title="Share on social networks" class="btn btn-success" id="dropbox-btn"><i class="fa fa-share-alt fa-lg"></i></a>
-            <a data-toggle="modal" data-target="#send-modal" data-from="send-button" data-toggle="tooltip" data-placement="right" title="Send to a friend" class="btn btn-success" id="google-btn"><i class="fa fa-paper-plane fa-lg"></i></a>
-            <a data-toggle="modal" data-target="#download-modal" data-from="print-button" data-toggle="tooltip" data-placement="right" title="Download to print" class="btn btn-success" id="facebook-btn"><i class="fa fa-print fa-lg"></i></a>
-            <a data-toggle="modal" data-target="#download-modal" data-from="download-button" data-toggle="tooltip" data-placement="right" title="Download" class="btn btn-success" id="flickr-btn"><i class="fa fa-download fa-lg"></i></a>
+          <img class="photo-mosaic shadow" id="mosaic-img" />
+        </div>
+        <!-- <p class="overlay-element overlay-text shadow">Your best photos are arranged into a mosaic</p> -->
+      </div>
+      <div class="col-sm-4">
+        <div class="row">
+        	<div class="col-sm-12 btn-group-fixed btn-group centered">
+            <a href="#sharing" class="btn btn-primary btn-lg"><i class="fa fa-facebook fa-2x"></i></a>
+            <a href="#sharing" class="btn btn-primary btn-lg"><i class="fa fa-google-plus fa-2x"></i></a>
+            <a href="#sharing" class="btn btn-primary btn-lg"><i class="fa fa-pinterest fa-2x"></i></a>
+            <a href="#sharing" class="btn btn-primary btn-lg"><i class="fa fa-twitter fa-2x"></i></a>
+            <a href="#sharing" class="btn btn-primary btn-lg"><i class="fa fa-instagram fa-2x"></i></a>
           </div>
         </div>
-        <p class="intro-text">And arranged into a pleasing mosaic</p>
+        <div class="row centered">
+          <div class="col-sm-6"><i class="fa fa-book fa-4x"></i><h4>Album</h4></div>
+          <div class="col-sm-6"><i class="fa fa-photo fa-4x"></i><h4>Poster</h4></div>
+        </div>
       </div>
     </div>
+    <div class="row desc-text">
+      <div class="col-sm-3">After uploading, your best photos are automatically selected<br/><button class="btn btn-default">Learn more</button></div>
+    	<div class="col-sm-5">Your best photos are arranged into a mosaic<br/><button class="btn btn-default">Learn more</button></div>
+    	<div class="col-sm-4">You choose what to do with your mosaic<br/><button class="btn btn-default">Learn more</button></div>
+    </div>
   </div>
+
 </div>
 
 
@@ -76,7 +63,7 @@
 
 <a name="products" />
 <div class="row row-wide bg-primary">
-  <a href="#products" class="arrow-down btn btn-primary"><i class="fa fa-angle-down fa-3x"></i></a>
+  <!-- <a href="#products" class="arrow-down btn btn-primary"><i class="fa fa-angle-down fa-3x"></i></a> -->
   <div class="container">
     <h4 class="info-phrase info-products centered">Your Bigpiq can take all possible shapes.</h4>
     <div class="row products-row">

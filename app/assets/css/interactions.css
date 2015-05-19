@@ -1,18 +1,18 @@
 /* #share-btn { opacity: 0; } */
 /* #upload-btn { opacity: 0; } */
 
-.img-overlay {
+.overlay {
   background-color: white;
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  opacity: 0;
+  opacity: 0.6;
   transition: opacity 200ms;
 }
 
-#img-overlay-stock {  opacity: 0.7; }
+/* #img-overlay-stock {  opacity: 0.6; } */
 /* #img-overlay-stock:hover { opacity: 0.7; } */
 
 #img-overlay-share { display: none; opacity: 0; }
@@ -22,7 +22,7 @@
 .overlay-element {
   background-color: white;
   opacity: 0.6;
-  border-radius: 5px;
+  border-radius: 4px;
   padding: 20px 20px 15px 20px;
   position: absolute;
   top: 50%;
@@ -33,14 +33,13 @@
   text-align: center;
 }
 
-#btn-overlay {
+.overlay-text {
   opacity: 0.9;
-  display: none;
   text-align: center;
   transition: opacity 150ms;
-  /* border-radius: 15px; */
+  font-size: 16px;
 }
-#btn-overlay:hover { opacity: 1; }
+/* .overlay-text:hover { opacity: 1; } */
 
 .overlay-loader img { width: auto; height: auto; }
 .overlay-loader span { display: block; font-size: 16px; }

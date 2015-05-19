@@ -75,7 +75,7 @@ define(function(require){
     function Collection() {
       var box = document.getElementById("photos-collection");
       this.photos = [];
-      var ratio = 1.45;
+      var ratio = 1.41;
       var min_columns = 3;
 
       this.reset = function(length) {
@@ -109,7 +109,7 @@ define(function(require){
         box.appendChild(img);
         // img.classList.add("photo-muted");
         setTimeout(function(){
-          img.style.opacity = 0.1;
+          img.style.opacity = 0.3;
         }, 0);
         this.photos.push(img);
       };
@@ -129,7 +129,7 @@ define(function(require){
       };
 
       this.selectPhoto = function(index) {
-        var img = this.photos[index].style.opacity = 0.5;
+        var img = this.photos[index].style.opacity = 1;
       };
     }
 
@@ -229,10 +229,13 @@ define(function(require){
 
         return self.collection.addPhotos(collection.photos).then(function(){
           if (!this.stop_timeout) {
-            self.collection.selectPhotos(collection.selected);
+            return self.collection.selectPhotos(collection.selected);
+          }
+        }.bind(this)).then(function() {
+          if (!this.stop_timeout) {
             return self.mosaic.changeImage(collection.mosaic);
           }
-        }.bind(this));
+        });
       };
     }
 
