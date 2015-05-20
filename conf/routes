@@ -21,5 +21,6 @@ GET     /reset                      controllers.Application.reset
 POST    /contact                    controllers.Feedback.contact
 POST    /email                      controllers.Application.email
 
+GET     /ui                         controllers.Application.ui
 GET     /                           controllers.Application.index(filename: String = "")
 GET     /:filename                  controllers.Application.index(filename: String)

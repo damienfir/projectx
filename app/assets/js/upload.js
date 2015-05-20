@@ -25,8 +25,9 @@ define([
               if (files.length > index) {
                 backend.uploadFile(files[index]).then(
                     function(res){
-                      chainUpload(index+1);
                       notify(JSON.parse(res));
+                      console.log("notified for "+ index);
+                      chainUpload(index+1);
                     }, reject,
                     function(progress) {
                       self.watch.notify("progress", [progress, index]);

@@ -1,23 +1,39 @@
-@(title: String)(content: Html)
+@(content: Html)
 
 <!DOCTYPE html>
 
 <html>
     <head>
-        <title>@title</title>
+        <title>bigpiq</title>
 
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
         <link href="@routes.Assets.at("css/bootstrap.min.css")" rel="stylesheet">
         <link href="@routes.Assets.at("bower_components/font-awesome/css/font-awesome.min.css")" rel="stylesheet">
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("css/main.css")">
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("css/ui.css")">
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("css/interactions.css")">
 
         <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
 
         <link href='//fonts.googleapis.com/css?family=Raleway:400,300,700' rel='stylesheet' type='text/css'>
     </head>
-    <body id="skrollr-body">
+    <body>
+
+      <div class="navbar navbar-default navbar-static-top">
+        <div class="container-fluid">
+          <div class="navbar-header">
+            <a class="navbar-brand logo" href="/"><img src="/assets/images/logo.png"/> bigpiq</a>
+          </div>
+          <div  class="collapse navbar-collapse navbar-right">
+            <ul class="nav navbar-nav">
+              <li><a href="#" data-toggle="modal" data-target="#about-modal" data-from="about-link">About</a></li>
+              <li><a href="#" data-toggle="modal" data-target="#faq-modal" data-from="faq-link">FAQ & Terms</a></li>
+              <li><a href="#" data-toggle="modal" data-target="#api-modal" data-from="api-link">API</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
 
       @content
 
@@ -331,6 +347,7 @@ Piccordions are our unique innovation. They are accordions of photos. Simply. Yo
           </div>
         </div>
       </div>
+
 
     </body>
 </html>

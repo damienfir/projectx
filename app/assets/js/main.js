@@ -5,6 +5,7 @@ window.__ga__ = {
 };
 
 require.config({
+  baseUrl: "/assets/js/",
   shim: {
     'bootstrap': ['jquery'],
     'facebook-api' : {
@@ -31,6 +32,6 @@ require.config({
   }
 });
 
-require(['ga', 'events'], function(ga){
+require(['ga'], function(ga){
   ga('send', 'pageview');
 });
