@@ -59,16 +59,15 @@ object Application extends Controller with MongoController {
   }
 
 
-  def index(filename: String) = Action.async { implicit request =>
-    Future(Ok(views.html.index(filename))) flatMap { result =>
-      filename match {
-        case "" => Future(result)
-        case mosaic_id => getMosaicFromID(mosaic_id) map { _ map { mosaic =>
-            result.addingToSession("mosaic" -> mosaic._id.stringify)
-          } getOrElse (result)
-        }
-      }
+  def index(filename: String) = Action {
+    filename match {
+      case "" => Ok(views.html.index(""))
+      case f: String => Ok(views.html.ui(f))
     }
+  }
+
+  def ui = Action {
+    Ok(views.html.ui(""))
   }
 
 

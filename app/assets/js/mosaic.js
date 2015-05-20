@@ -19,7 +19,7 @@ define([
 
     this.loadFromURL = function() {
       var path = window.location.pathname.split('/');
-      if (path.length > 1 && path[1] !== "") {
+      if (path.length > 1 && path[1].length > 5) {
         var obj = {_id: {"$oid": path[1]}, filename: path[1]+".jpg", thumbnail: path[1]+"_display.jpg"};
         self.loaded(obj, false);
       }

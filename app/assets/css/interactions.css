@@ -1,72 +1,9 @@
 /* #share-btn { opacity: 0; } */
 /* #upload-btn { opacity: 0; } */
 
-.overlay {
-  background-color: white;
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  opacity: 0.6;
-  transition: opacity 200ms;
-}
-
-/* #img-overlay-stock {  opacity: 0.6; } */
-/* #img-overlay-stock:hover { opacity: 0.7; } */
-
-#img-overlay-share { display: none; opacity: 0; }
-#img-overlay-share:hover { opacity: 0.3; }
-
-
-.overlay-element {
-  background-color: white;
-  opacity: 0.6;
-  border-radius: 4px;
-  padding: 20px 20px 15px 20px;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  margin: 0 auto;
-  transform: translate(-50%, -50%);
-  -webkit-transform: translate(-50%, -50%);
-  text-align: center;
-}
-
-.overlay-text {
-  opacity: 0.9;
-  text-align: center;
-  transition: opacity 150ms;
-  font-size: 16px;
-}
-/* .overlay-text:hover { opacity: 1; } */
-
-.overlay-loader img { width: auto; height: auto; }
-.overlay-loader span { display: block; font-size: 16px; }
-
-#progress-uploading { display: none; }
-#progress-processing { display: none; }
-
-
-#feedback-panel {
-  width: 280px;
-  position: fixed;
-  right: 30px;
-  bottom: -205px;
-  transition: 200ms;
-  display: none;
-}
-#feedback-question { min-height: 100px; font-size: 16px; }
-#feedback-choices { vertical-align: bottom; }
-#feedback-choices button { margin: 0 10px; width: auto; }
-
 
 #droptext { vertical-align: middle; }
 .dragover { background-color: #333; }
-
-
-.invisible { opacity: 0; transition: opacity 200ms;}
-.visible { opacity: 1; transition: opacity 200ms; }
 
 #progress-row { opacity: 0; }
 .progress { margin: 0; }
