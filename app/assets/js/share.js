@@ -32,7 +32,6 @@ define([
       ev.stopPropagation();
       var fields = ev.target.elements;
       backend.email(fields.namedItem("to").value, fields.namedItem("from").value).then(function(){}, function(){}, function(){
-        console.log("ok");
         var el = document.getElementById("sent-label");
         el.classList.remove("invisible");
         el.classList.add("visible");
@@ -50,24 +49,28 @@ define([
     document.getElementById("share-facebook").addEventListener("click", function(ev){
       var url = mosaic.getViewURL();
       ga("send", "social", "facebook", "share", url);
+      ga("send", "event", "share", "facebook");
       shareURL(ev, "http://www.facebook.com/dialog/share?app_id="+facebookID+"&display=popup&href="+encodeURIComponent(url)+"&redirect_uri="+encodeURIComponent(mosaic.getViewURL()));
     });
 
     document.getElementById("share-google").addEventListener("click", function(ev){
       var url = mosaic.getViewURL();
       ga("send", "social", "google", "share", url);
+      ga("send", "event", "share", "google");
       shareURL(ev, "https://plus.google.com/share?url=" + encodeURIComponent(url));
     });
 
     document.getElementById("share-pinterest").addEventListener("click", function(ev){
       var url = mosaic.getViewURL();
       ga("send", "social", "pinterest", "share", url);
+      ga("send", "event", "share", "pinterest");
       shareURL(ev, "https://www.pinterest.com/pin/create/button/?url="+encodeURIComponent(url)+"&media="+encodeURIComponent(mosaic.getImageURL())+"&description=");
     });
 
     document.getElementById("share-twitter").addEventListener("click", function(ev){
       var url = mosaic.getViewURL();
       ga("send", "social", "twitter", "share", url);
+      ga("send", "event", "share", "twitter");
       shareURL(ev, "https://twitter.com/intent/tweet?url="+encodeURIComponent(url));
     });
 

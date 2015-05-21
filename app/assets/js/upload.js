@@ -26,7 +26,7 @@ define([
                 backend.uploadFile(files[index]).then(
                     function(res){
                       notify(JSON.parse(res));
-                      console.log("notified for "+ index);
+                      // console.log("notified for "+ index);
                       chainUpload(index+1);
                     }, reject,
                     function(progress) {
@@ -58,7 +58,7 @@ define([
     };
 
     this.dropHandler = function(ev) {
-      console.log("dropped");
+      // console.log("dropped");
       ev.stopPropagation();
       ev.preventDefault();
       self.watch.notify("submitted");
@@ -69,14 +69,14 @@ define([
     };
 
     this.dragenterHandler = function(ev) {
-      console.log("dragged");
+      // console.log("dragged");
       ev.stopPropagation();
       ev.preventDefault();
       ev.dataTransfer.dropEffect = 'copy';
     };
 
     this.triggerClick = function(ev) {
-      console.log("ok");
+      // console.log("ok");
       fileupload.dispatchEvent(new MouseEvent("click"));
     };
 

@@ -118,7 +118,7 @@ define(function(require){
 
       this.selectPhotos = function(indices) {
         indices = indices || this.photos.map(function(_,i){ return i; });
-        console.log(indices);
+        // console.log(indices);
 
         var self = this;
         return Q.Promise(function(resolve) {

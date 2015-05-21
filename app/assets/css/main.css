@@ -60,6 +60,10 @@ html, body {
   padding-right: 50px;
 }
 
+#col-selection {
+  padding: 3% 0; // vertical centering -- hack
+}
+
 .handwritten {
   font-family: Pacifico;
   text-align: left;
@@ -68,11 +72,12 @@ html, body {
 }
 
 #album-pic {
-  width: 200px;
+  width: 100%;
   height: auto;
+  padding-top: 10%;
 }
 #poster-pic {
-  width: 170px;
+  width: 100%;
   height: auto;
   box-shadow: 2px 2px 4px #ddd;
 }
@@ -85,6 +90,10 @@ html, body {
   margin-bottom: 40px;
   text-align: center;
   padding: 40px 0;
+}
+
+#col-mosaic > .desc-text {
+  margin: 10px 0;
 }
 
 .desc-text h5 {
@@ -144,7 +153,7 @@ html, body {
 .valign { display: flex; align-items: center; }
 .maxheight { height: 100%; }
 .maxwidth { width: 100%; }
-.spaced > * { margin: auto 10px; }
+.spaced > * { margin: 5px 10px; }
 .large { font-size: 16px; }
 
 

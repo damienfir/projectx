@@ -54,10 +54,6 @@ define(function(require){
       // $("#dropzone").hover(ui.dropzone.enter.bind(ui.dropzone), ui.dropzone.leave.bind(ui.dropzone));
       // $("#box-mosaic").hover(ui.mosaic.enter.bind(ui.mosaic), ui.mosaic.leave.bind(ui.mosaic));
 
-      // Google Analytics triggers
-      $(".modal").on("show.bs.modal", function(ev){ ga("send", "pageview", $(ev.target).data("content")); });
-      $(".modal").on("show.bs.modal", function(ev){ ga("send", "event", "modal", $(ev.relatedTarget).data("from")); });
-      $(".more-info").on("click", function(ev){ ga("send", "event", "more-info", $(ev.target).data("from")); });
 
       mosaic.watch.add("loaded", self, self.loaded);
 
@@ -69,12 +65,12 @@ define(function(require){
         upload.watch.add("submitted", self, self.submitted);
       });
 
-      require(["dropbox"], function(dropbox){
-        dropbox.watch.add("uploading", self, self.uploading);
-        dropbox.watch.add("progress", self, self.progress);
-        dropbox.watch.add("processing", self, self.processing);
-        dropbox.watch.add("submitted", self, self.submitted);
-      });
+      // require(["dropbox"], function(dropbox){
+      //   dropbox.watch.add("uploading", self, self.uploading);
+      //   dropbox.watch.add("progress", self, self.progress);
+      //   dropbox.watch.add("processing", self, self.processing);
+      //   dropbox.watch.add("submitted", self, self.submitted);
+      // });
     }
 
     // $("#panel-upload .btn").tooltip();

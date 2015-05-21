@@ -23,7 +23,7 @@
         <a href="/ui" class="btn btn-success btn-lg">Try it now</a>
       </div>
     </div>
-    <div class="row valign" id="row-presentation">
+    <div class="row relative" id="row-presentation">
       <div class="col-sm-3" id="col-selection">
         <div class="clearfix shadow" id="photos-collection">
           <img style="background-image: url(/assets/stock/people/01.jpg)" class=""/>
@@ -39,6 +39,9 @@
           <img style="background-image: url(/assets/stock/people/11.jpg)" class="muted"/>
           <img style="background-image: url(/assets/stock/people/12.jpg)" class="muted"/>
         </div>
+        <div class="visible-xs-block desc-text centered">
+          <h5>Only your best photos are selected.</h5>
+        </div>
       </div>
       <div class="col-sm-5" id="col-mosaic">
         <i class="fa fa-arrow-right fa-2x hidden-xs arrow-right arrow-right-left"></i>
@@ -46,17 +49,20 @@
           <img class="photo-mosaic shadow" id="mosaic-img" src="/assets/stock/people/mosaic.jpg" />
         </div>
         <i class="fa fa-arrow-right fa-2x hidden-xs arrow-right arrow-right-right"></i>
+        <div class="visible-xs-block desc-text centered">
+          <h5>They are arranged into a composition.</h5>
+        </div>
       </div>
       <div class="col-sm-4" id="col-output">
         <div class="row">
           <div class="col-sm-12 centered">
             <div class="handwritten">Share</div>
             <div class="btn-group-fixed btn-group">
-              <a href="#sharing" class="btn btn-primary btn-lg"><i class="fa fa-facebook fa-2x"></i></a>
-              <a href="#sharing" class="btn btn-primary btn-lg"><i class="fa fa-google-plus fa-2x"></i></a>
-              <a href="#sharing" class="btn btn-primary btn-lg"><i class="fa fa-pinterest fa-2x"></i></a>
-              <a href="#sharing" class="btn btn-primary btn-lg"><i class="fa fa-twitter fa-2x"></i></a>
-              <a href="#sharing" class="btn btn-primary btn-lg"><i class="fa fa-instagram fa-2x"></i></a>
+              <a href="#sharing" class="btn btn-primary btn-lg"><i class="fa fa-facebook fa-2x hidden-md visible-lg-inline"></i><i class="fa fa-facebook hidden-lg"></i></a>
+              <a href="#sharing" class="btn btn-primary btn-lg"><i class="fa fa-google-plus fa-2x visible-lg-inline"></i><i class="fa fa-google-plus hidden-lg"></i></a>
+              <a href="#sharing" class="btn btn-primary btn-lg"><i class="fa fa-pinterest fa-2x visible-lg-inline"></i><i class="fa fa-pinterest hidden-lg"></i></a>
+              <a href="#sharing" class="btn btn-primary btn-lg"><i class="fa fa-twitter fa-2x visible-lg-inline"></i><i class="fa fa-twitter hidden-lg"></i></a>
+              <a href="#sharing" class="btn btn-primary btn-lg"><i class="fa fa-instagram fa-2x visible-lg-inline"></i><i class="fa fa-instagram hidden-lg"></i></a>
             </div>
           </div>
         </div>
@@ -73,7 +79,7 @@
         </div>
       </div>
     </div>
-    <div class="row" id="row-desc">
+    <div class="row hidden-xs" id="row-desc">
       <div class="col-sm-3 desc-text">
         <h5>Only your best photos are selected.</h5>
         <a href="#selection" class="btn btn-default">About the technology</a>
@@ -97,13 +103,13 @@
   <div class="container large">
     <div class="row">
     <h4 class="info-products centered">Always get the best of your photo collection.</h4>
-    <div class="col-lg-7">
+    <div class="col-md-7">
       <p>When returning from a vacation or an event, you probably have a clutter of photos on your computer or in your smartphone, waiting for you to organize them manually.</p>
       <p>We leverage the advances in image processing and machine learning to automatically select the best of your photos with zero effort from your side.</p>
     </div>
   </div>
   <div class="row">
-    <div class="col-lg-6 col-lg-offset-6">
+    <div class="col-md-6 col-md-offset-6">
       <p>Our technology is based on recognizing the important features in photos such as colorfulness, blurriness, amount of details, presence of faces and smiles. Our solution picks the best of several similar photos according to these objectives criteria to make sure your composition will be representative of your whole photo collection.</p>
     </div>
   </div>
@@ -199,15 +205,15 @@
   <a href="#contact" class="arrow arrow-down btn btn-default"><i class="fa fa-angle-down fa-3x"></i></a>
   <div class="container">
     <div class="row">
-      <div class="col-lg-6">
+      <div class="col-md-6">
         <h3>About us</h3>
         <h5>info@@bigpiq.com</h5>
         <p>
         We consider ourselves curators of your pictures. Our mission is to help you manage your growing collection of photos and enjoy them in ways that you have not experienced before.
         </p>
       </div>
-      <div class="col-lg-1"></div>
-      <div class="col-lg-2">
+      <div class="col-md-1"></div>
+      <div class="col-md-2">
         <h4>More</h4>
         <ul class="list-unstyled">
           <li><a href="#" data-toggle="modal" data-target="#contact-modal" data-from="contact-link">Contact</a></li>
@@ -216,7 +222,7 @@
         	<li><a href="#" data-toggle="modal" data-target="#terms-modal" data-from="terms-link">Terms and Condition</a></li>
         </ul>
       </div>
-      <div class="col-lg-3">
+      <div class="col-md-3">
         <h4>Developers</h4>
         <ul class="list-unstyled">
         	<li><a href="#" data-toggle="modal" data-target="#api-modal" data-from="api-link">API</a></li>

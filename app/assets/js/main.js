@@ -32,6 +32,11 @@ require.config({
   }
 });
 
-require(['ga'], function(ga){
+
+require(['ga', 'jquery', 'bootstrap'], function(ga, $, _) {
   ga('send', 'pageview');
+
+  // Google Analytics triggers
+  $(".modal").on("show.bs.modal", function(ev){ ga("send", "pageview", $(ev.target).data("content")); });
+  $("a").on("click", function(ev){ ga("send", "pageview", $(ev.target).attr("href")); });
 });
