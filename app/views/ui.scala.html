@@ -37,10 +37,10 @@
         <div id="progress-processing" class="overlay-element overlay-loader"><img src="/assets/images/285.GIF" /><span>Processing...</span></div>
         <div class="overlay-element overlay-text shadow" id="mosaic-appear">Your mosaic will appear here</div>
         <div class="" id="panel-share">
-          <a data-toggle="modal" data-target="#share-modal" data-from="share-button" data-toggle="tooltip" data-placement="right" title="Share on social networks" class="btn btn-success" id="dropbox-btn"><i class="fa fa-share-alt fa-lg"></i></a>
-          <a data-toggle="modal" data-target="#send-modal" data-from="send-button" data-toggle="tooltip" data-placement="right" title="Send to a friend" class="btn btn-success" id="google-btn"><i class="fa fa-paper-plane fa-lg"></i></a>
-          <a data-toggle="modal" data-target="#download-modal" data-from="print-button" data-toggle="tooltip" data-placement="right" title="Download to print" class="btn btn-success" id="facebook-btn"><i class="fa fa-print fa-lg"></i></a>
-          <a data-toggle="modal" data-target="#download-modal" data-from="download-button" data-toggle="tooltip" data-placement="right" title="Download" class="btn btn-success" id="flickr-btn"><i class="fa fa-download fa-lg"></i></a>
+          <a data-toggle="modal" data-target="#share-modal" data-from="share-button" data-toggle="tooltip" data-placement="right" title="Share on social networks" class="btn btn-success"><i class="fa fa-share-alt fa-lg"></i></a>
+          <a data-toggle="modal" data-target="#send-modal" data-from="send-button" data-toggle="tooltip" data-placement="right" title="Send to a friend" class="btn btn-success"><i class="fa fa-paper-plane fa-lg"></i></a>
+          <!-- <a data-toggle="modal" data-target="#download-modal" data-from="print-button" data-toggle="tooltip" data-placement="right" title="Download to print" class="btn btn-success"><i class="fa fa-print fa-lg"></i></a> -->
+          <a data-toggle="modal" data-target="#download-modal" data-from="download-button" data-toggle="tooltip" data-placement="right" title="Download" class="btn btn-success"><i class="fa fa-download fa-lg"></i></a>
         </div>
       </div>
     </div>
@@ -57,16 +57,21 @@
 <div class="modal fade" id="share-modal" tabindex="-1" data-content="/share">
   <div class="modal-dialog">
     <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title"><i class="fa fa-share-alt"></i>&nbsp; Share on...</h4>
+      </div>
       <div class="modal-body">
           <div class="centered">
-            <button id="share-facebook" class="btn btn-primary btn-lg" data-toggle="tooltip" title="Share on Facebook"><i class="fa fa-facebook"></i></button>
-            <button id="share-google" class="btn btn-primary btn-lg" data-toggle="tooltip" title="Share on Google+"><i class="fa fa-google-plus"></i></button>
-            <button id="share-pinterest" class="btn btn-primary btn-lg" data-toggle="tooltip" title="Share on Pinterest"><i class="fa fa-pinterest"></i></button>
-            <button id="share-twitter" class="btn btn-primary btn-lg" data-toggle="tooltip" title="Share on Twitter"><i class="fa fa-twitter"></i></button>
+            <button id="share-facebook" class="btn btn-primary btn-lg" data-toggle="tooltip" title="Share on Facebook"><i class="fa fa-facebook fa-2x"></i></button>
+            <button id="share-google" class="btn btn-primary btn-lg" data-toggle="tooltip" title="Share on Google+"><i class="fa fa-google-plus fa-2x"></i></button>
+            <button id="share-pinterest" class="btn btn-primary btn-lg" data-toggle="tooltip" title="Share on Pinterest"><i class="fa fa-pinterest fa-2x"></i></button>
+            <button id="share-twitter" class="btn btn-primary btn-lg" data-toggle="tooltip" title="Share on Twitter"><i class="fa fa-twitter fa-2x"></i></button>
             <!-- <button id="share-reddit" class="btn btn-primary btn-lg" data-toggle="tooltip" title="Share on Reddit"><i class="fa fa-reddit"></i></button> -->
             <!-- <div data-toggle="tooltip" title="Coming soon" class="div-btn"><button id="share-instagram" class="btn btn-primary btn-lg" disabled><i class="fa fa-instagram"></i></button></div> -->
           </div>
       </div>
+      <div class="modal-footer"></div>
     </div>
   </div>
 </div>
@@ -75,6 +80,10 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <form id="email-form">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title"><i class="fa fa-paper-plane"></i>&nbsp; Send to...</h4>
+        </div>
         <div class="modal-body">
           <div class="input-group">
             <span class="input-group-addon">@@</span>
@@ -98,6 +107,10 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <form action="/download" method="post" id="download-form">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title"><i class="fa fa-download"></i>&nbsp; Download</h4>
+        </div>
         <div class="modal-body">
           <div class="form-group">
             <div class="input-group input-group-lg">

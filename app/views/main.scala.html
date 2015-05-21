@@ -11,8 +11,6 @@
         <link href="@routes.Assets.at("css/bootstrap.min.css")" rel="stylesheet">
         <link href="@routes.Assets.at("bower_components/font-awesome/css/font-awesome.min.css")" rel="stylesheet">
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("css/main.css")">
-        <link rel="stylesheet" media="screen" href="@routes.Assets.at("css/ui.css")">
-        <link rel="stylesheet" media="screen" href="@routes.Assets.at("css/interactions.css")">
 
         <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
 
@@ -23,13 +21,11 @@
       <div class="navbar navbar-default navbar-static-top">
         <div class="container-fluid">
           <div class="navbar-header">
-            <a class="navbar-brand logo" href="/"><img src="/assets/images/logo.png"/> bigpiq</a>
+            <a class="navbar-brand logo" href="/"><img src="/assets/images/logo.png"/> bigpiq<small>Touching memories</small></a>
           </div>
           <div  class="collapse navbar-collapse navbar-right">
             <ul class="nav navbar-nav">
-              <li><a href="#" data-toggle="modal" data-target="#about-modal" data-from="about-link">About</a></li>
-              <li><a href="#" data-toggle="modal" data-target="#faq-modal" data-from="faq-link">FAQ & Terms</a></li>
-              <li><a href="#" data-toggle="modal" data-target="#api-modal" data-from="api-link">API</a></li>
+              <li><a href="#about">About</a></li>
             </ul>
           </div>
         </div>
@@ -39,7 +35,7 @@
 
 
       <div class="modal fade" id="about-modal" tabindex="-1" data-content="/about">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -102,11 +98,11 @@
       </div>
 
       <div class="modal fade" id="faq-modal" tabindex="-1" data-content="/faq">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-              <h4 class="modal-title">FAQ & Terms</h4>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title">FAQ</h4>
             </div>
             <div class="modal-body">
 
@@ -139,6 +135,23 @@
                   </ul>
                 </div>
               </div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-primary" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <div class="modal fade" id="terms-modal" tabindex="-1" data-content="/terms">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title">Terms and Conditions</h4>
+            </div>
+            <div class="modal-body">
               <div class="panel panel-primary">
                 <div class="panel-heading">
                   <h3 class="panel-title">Copyright notice / Terms and conditions</h3>
@@ -181,7 +194,7 @@ That said, we can not be held responsible if the third parties violate your copy
       </div>
 
       <div class="modal fade" id="product-modal" tabindex="-1" data-content="/products">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -261,7 +274,7 @@ Piccordions are our unique innovation. They are accordions of photos. Simply. Yo
       </div>
 
       <div class="modal fade" id="api-modal" tabindex="-1" data-content="/api">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
