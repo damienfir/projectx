@@ -2,12 +2,24 @@
 
 @main {
 
+@if(filename) {
+<div class="container full-page">
+	<div class="row">
+		<div class="col-lg-12">
+        <img class="mosaic-generated shadow" src="/storage/generated/@{filename}_display.jpg" />
+    </div>
+	</div>
+  <a href="#intro" class="arrow arrow-bottom btn btn-primary btn-lg"><i class="fa fa-arrow-down"></i> What is this ?</a>
+</div>
+}
+
 <!-- <div class="container-fluid"> -->
   <!-- <div class="cover"></div> -->
+  <a name="intro"></a>
   <div class="container-fluid limited-width" id="container-intro">
     <div class="row" id="row-title">
       <div class="col-sm-12 centered">
-        <h3>We select, arrange and print your photo collection for you.</h3>
+        <h3>We select, arrange, and print your photo collection for you.</h3>
         <a href="/ui" class="btn btn-success btn-lg">Try it now</a>
       </div>
     </div>
@@ -80,36 +92,44 @@
 
 
 <a name="selection"></a>
-<div class="row row-wide bg-primary">
+<div class="row-wide bg-primary">
   <!-- <a href="#composition" class="arrow-down btn btn-primary"><i class="fa fa-angle-down fa-3x"></i></a> -->
-  <div class="container">
+  <div class="container large">
+    <div class="row">
     <h4 class="info-products centered">Always get the best of your photo collection.</h4>
+    <div class="col-lg-7">
+      <p>When returning from a vacation or an event, you probably have a clutter of photos on your computer or in your smartphone, waiting for you to organize them manually.</p>
+      <p>We leverage the advances in image processing and machine learning to automatically select the best of your photos with zero effort from your side.</p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-6 col-lg-offset-6">
+      <p>Our technology is based on recognizing the important features in photos such as colorfulness, blurriness, amount of details, presence of faces and smiles. Our solution picks the best of several similar photos according to these objectives criteria to make sure your composition will be representative of your whole photo collection.</p>
+    </div>
+  </div>
   </div>
 </div>
 
 
 <a name="composition"></a>
-<div class="row row-wide">
-  <!-- <a href="#composition" class="arrow-down btn btn-primary"><i class="fa fa-angle-down fa-3x"></i></a> -->
+<div class="row-wide">
+  <a href="#composition" class="arrow arrow-down btn btn-default"><i class="fa fa-angle-down fa-3x"></i></a>
   <div class="container">
-    <h4 class="info-phrase centered">The way you show your photos matters.</h4>
-  </div>
-</div>
-
-<a name="sharing"></a>
-<div class="row row-wide">
-  <!-- <a href="#selection" class="arrow-down btn btn-primary"><i class="fa fa-angle-down fa-3x"></i></a> -->
-  <div class="container">
-    <h4 class="info-phrase centered">Your photos are worth sharing.</h4>
+    <div class="row">
+      <h4 class="info-phrase centered">The way you show your photos matters.</h4>
+    	<div class="col-lg-6">
+        
+      </div>
+    </div>
   </div>
 </div>
 
 <a name="products"></a>
-<div class="row row-wide bg-primary">
-  <!-- <a href="#products" class="arrow-down btn btn-primary"><i class="fa fa-angle-down fa-3x"></i></a> -->
+<div class="row-wide bg-primary">
+  <a href="#products" class="arrow arrow-down btn btn-primary"><i class="fa fa-angle-down fa-3x"></i></a>
   <div class="container">
-    <h4 class="info-products centered">Your photos can take all possible shapes.</h4>
     <div class="row products-row">
+      <h4 class="info-products centered">Your photos can take all possible shapes.</h4>
       <div class="col-md-3">
         <i class="fa fa-picture-o fa-5x"></i>
         <h4>Poster</h4>
@@ -154,20 +174,53 @@
         <button class="btn btn-primary btn-sm pull-right more-info" data-from="product-books" data-toggle="modal" data-target="#contact-modal" data-dismiss="modal"><i class="fa fa-info-circle"></i> More info</button>
       </div>
     </div>
+    <a name="sharing"></a>
+    <div class="row row-sharing centered">
+      <h4 class="info-products">They are worth sharing.</h4>
+      <div class="col-lg-12 spaced">
+        <i class="fa fa-facebook-official fa-5x"></i>
+        <i class="fa fa-google-plus fa-5x"></i>
+        <i class="fa fa-twitter fa-5x"></i>
+        <i class="fa fa-pinterest fa-5x"></i>
+        <i class="fa fa-instagram fa-5x"></i>
+        <i class="fa fa-reddit fa-5x"></i>
+        <i class="fa fa-deviantart fa-5x"></i>
+        <i class="fa fa-digg fa-5x"></i>
+        <i class="fa fa-stumbleupon fa-5x"></i>
+        <i class="fa fa-tumblr fa-5x"></i>
+      </div>
+      <div class="col-lg-8"></div>
+    </div>
   </div>
 </div>
 
-<a name="contact" />
-<div class="row row-wide">
-  <a href="#contact" class="arrow-down btn btn-primary"><i class="fa fa-angle-down fa-3x"></i></a>
+<a name="about" />
+<div class="row-wide">
+  <a href="#contact" class="arrow arrow-down btn btn-default"><i class="fa fa-angle-down fa-3x"></i></a>
   <div class="container">
     <div class="row">
-      <div class="col-lg-8">
+      <div class="col-lg-6">
         <h3>About us</h3>
         <h5>info@@bigpiq.com</h5>
         <p>
         We consider ourselves curators of your pictures. Our mission is to help you manage your growing collection of photos and enjoy them in ways that you have not experienced before.
         </p>
+      </div>
+      <div class="col-lg-1"></div>
+      <div class="col-lg-2">
+        <h4>More</h4>
+        <ul class="list-unstyled">
+          <li><a href="#" data-toggle="modal" data-target="#contact-modal" data-from="contact-link">Contact</a></li>
+          <li><a href="#" data-toggle="modal" data-target="#jobs-modal" data-from="jobs-link">Jobs</a></li>
+          <li><a href="#" data-toggle="modal" data-target="#faq-modal" data-from="faq-link">FAQ</a></li>
+        	<li><a href="#" data-toggle="modal" data-target="#terms-modal" data-from="terms-link">Terms and Condition</a></li>
+        </ul>
+      </div>
+      <div class="col-lg-3">
+        <h4>Developers</h4>
+        <ul class="list-unstyled">
+        	<li><a href="#" data-toggle="modal" data-target="#api-modal" data-from="api-link">API</a></li>
+        </ul>
       </div>
     </div>
   </div>

@@ -11,8 +11,6 @@
         <link href="@routes.Assets.at("css/bootstrap.min.css")" rel="stylesheet">
         <link href="@routes.Assets.at("bower_components/font-awesome/css/font-awesome.min.css")" rel="stylesheet">
         <link rel="stylesheet" media="screen" href="@routes.Assets.at("css/main.css")">
-        <link rel="stylesheet" media="screen" href="@routes.Assets.at("css/ui.css")">
-        <link rel="stylesheet" media="screen" href="@routes.Assets.at("css/interactions.css")">
 
         <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
 
@@ -23,13 +21,11 @@
       <div class="navbar navbar-default navbar-static-top">
         <div class="container-fluid">
           <div class="navbar-header">
-            <a class="navbar-brand logo" href="/"><img src="/assets/images/logo.png"/> bigpiq</a>
+            <a class="navbar-brand logo" href="/"><img src="/assets/images/logo.png"/> bigpiq<small>Touching memories</small></a>
           </div>
           <div  class="collapse navbar-collapse navbar-right">
             <ul class="nav navbar-nav">
-              <li><a href="#" data-toggle="modal" data-target="#about-modal" data-from="about-link">About</a></li>
-              <li><a href="#" data-toggle="modal" data-target="#faq-modal" data-from="faq-link">FAQ & Terms</a></li>
-              <li><a href="#" data-toggle="modal" data-target="#api-modal" data-from="api-link">API</a></li>
+              <li><a href="#about">About</a></li>
             </ul>
           </div>
         </div>
@@ -39,7 +35,7 @@
 
 
       <div class="modal fade" id="about-modal" tabindex="-1" data-content="/about">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -102,11 +98,11 @@
       </div>
 
       <div class="modal fade" id="faq-modal" tabindex="-1" data-content="/faq">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-              <h4 class="modal-title">FAQ & Terms</h4>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title">FAQ</h4>
             </div>
             <div class="modal-body">
 
@@ -139,39 +135,48 @@
                   </ul>
                 </div>
               </div>
-              <div class="panel panel-primary">
-                <div class="panel-heading">
-                  <h3 class="panel-title">Copyright notice / Terms and conditions</h3>
-                </div>
-                <div class="panel-body">
-                  <p>
-                  The copyright of the pictures you upload remains with you. We do not display, sell, or redistribute your pictures to anyone in any form without your prior consent. By using our service you agree to the following:
-                  </p>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-primary" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
 
-                  <ol>
-                    <li>
-                      You only give us the rights to process your pictures so that we can we create posters or other forms of  summaries for you. You also give us the right to store the prepared summaries so that we may be able to provide them to you for in the future.
-                    </li>
 
-                    <li>
-                      When you pass an order to print the posters, we provide temporary rights to third party printing services in order to be able to print your summaries. They too do not own the copyright of your pictures or the summaries prepared from them.
-                    </li>
-                  </ol>
+      <div class="modal fade" id="terms-modal" tabindex="-1" data-content="/terms">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title">Terms and Conditions</h4>
+            </div>
+            <div class="modal-body">
+              <p>
+              The copyright of the pictures you upload remains with you. We do not display, sell, or redistribute your pictures to anyone in any form without your prior consent. By using our service you agree to the following:
+              </p>
 
-                  <p>
-                  Neither us nor the third party services we may engage with would re-distribute or sell your pictures in any form without your prior consent.
-                  </p>
+              <ol>
+                <li>
+                  You only give us the rights to process your pictures so that we can we create posters or other forms of  summaries for you. You also give us the right to store the prepared summaries so that we may be able to provide them to you for in the future.
+                </li>
 
-                  <p>
-That said, we can not be held responsible if the third parties violate your copyright or if any damages arise. Also, please note that if you are seriously concerned about the privacy of you photos, you may be advised that it may be best not to upload your photos on any internet service, including ours, despite the utmost care taken to protect the privacy of the photos.
-                  </p>
+                <li>
+                  When you pass an order to print the posters, we provide temporary rights to third party printing services in order to be able to print your summaries. They too do not own the copyright of your pictures or the summaries prepared from them.
+                </li>
+              </ol>
 
-                  <p>
-                  The service is provided on an “as-is” “where-is” basis. It is intended to automate the process of managing pictures, which is otherwise quite tedious manually. We can in no way be held responsible for any kind of damages arising out of the use of this service either directly or indirectly under any circumstances.
-                  </p>
-                </div>
-              </div>
+              <p>
+              Neither us nor the third party services we may engage with would re-distribute or sell your pictures in any form without your prior consent.
+              </p>
 
+              <p>
+              That said, we can not be held responsible if the third parties violate your copyright or if any damages arise. Also, please note that if you are seriously concerned about the privacy of you photos, you may be advised that it may be best not to upload your photos on any internet service, including ours, despite the utmost care taken to protect the privacy of the photos.
+              </p>
+
+              <p>
+              The service is provided on an “as-is” “where-is” basis. It is intended to automate the process of managing pictures, which is otherwise quite tedious manually. We can in no way be held responsible for any kind of damages arising out of the use of this service either directly or indirectly under any circumstances.
+              </p>
             </div>
             <div class="modal-footer">
               <button class="btn btn-primary" data-dismiss="modal">Close</button>
@@ -181,7 +186,7 @@ That said, we can not be held responsible if the third parties violate your copy
       </div>
 
       <div class="modal fade" id="product-modal" tabindex="-1" data-content="/products">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -261,7 +266,7 @@ Piccordions are our unique innovation. They are accordions of photos. Simply. Yo
       </div>
 
       <div class="modal fade" id="api-modal" tabindex="-1" data-content="/api">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -315,6 +320,34 @@ Piccordions are our unique innovation. They are accordions of photos. Simply. Yo
               </div>
 
               We also provide the complete package of automatic summary creating to be run on standalone photobooths, printing kiosks, and photo printing websites.
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-primary" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal fade" id="jobs-modal" tabindex="-1" data-content="/jobs">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+              <h4 class="modal-title">Job openings</h4>
+            </div>
+            <div class="modal-body">
+              <h5>Engineering</h5>
+              <dl>
+              	<dt>Frontend Engineer</dt>
+                <dd>HTML/CSS/javascript</dd>
+                <dt>Backend Engineer</dt>
+                <dd>Scala/Play + MongoDB</dd>
+                <dt>Image processing engineer</dt>
+                <dd>Halide/C++</dd>
+              </dl>
+
+              <p>Our offices are located in Lausanne, Switzerland. We are willing to consider employing remotely.</p>
+              <p>If you are interested, please send your CV to <a href="mailto:jobs@@bigpiq.com" target="_blank">jobs@@bigpiq.com</a>.</p>
             </div>
             <div class="modal-footer">
               <button class="btn btn-primary" data-dismiss="modal">Close</button>
