@@ -2,8 +2,20 @@
 
 @main {
 
+@if(filename) {
+<div class="container full-page">
+	<div class="row">
+		<div class="col-lg-12">
+        <img class="mosaic-generated shadow" src="/storage/generated/@{filename}_display.jpg" />
+    </div>
+	</div>
+  <a href="#intro" class="arrow arrow-bottom btn btn-primary btn-lg"><i class="fa fa-arrow-down"></i> What is this ?</a>
+</div>
+}
+
 <!-- <div class="container-fluid"> -->
   <!-- <div class="cover"></div> -->
+  <a name="intro"></a>
   <div class="container-fluid limited-width" id="container-intro">
     <div class="row" id="row-title">
       <div class="col-sm-12 centered">
@@ -101,7 +113,7 @@
 
 <a name="composition"></a>
 <div class="row-wide">
-  <a href="#composition" class="arrow-down btn btn-default"><i class="fa fa-angle-down fa-3x"></i></a>
+  <a href="#composition" class="arrow arrow-down btn btn-default"><i class="fa fa-angle-down fa-3x"></i></a>
   <div class="container">
     <div class="row">
       <h4 class="info-phrase centered">The way you show your photos matters.</h4>
@@ -114,7 +126,7 @@
 
 <a name="products"></a>
 <div class="row-wide bg-primary">
-  <a href="#products" class="arrow-down btn btn-primary"><i class="fa fa-angle-down fa-3x"></i></a>
+  <a href="#products" class="arrow arrow-down btn btn-primary"><i class="fa fa-angle-down fa-3x"></i></a>
   <div class="container">
     <div class="row products-row">
       <h4 class="info-products centered">Your photos can take all possible shapes.</h4>
@@ -184,7 +196,7 @@
 
 <a name="about" />
 <div class="row-wide">
-  <a href="#contact" class="arrow-down btn btn-default"><i class="fa fa-angle-down fa-3x"></i></a>
+  <a href="#contact" class="arrow arrow-down btn btn-default"><i class="fa fa-angle-down fa-3x"></i></a>
   <div class="container">
     <div class="row">
       <div class="col-lg-6">
@@ -194,7 +206,8 @@
         We consider ourselves curators of your pictures. Our mission is to help you manage your growing collection of photos and enjoy them in ways that you have not experienced before.
         </p>
       </div>
-      <div class="col-lg-3">
+      <div class="col-lg-1"></div>
+      <div class="col-lg-2">
         <h4>More</h4>
         <ul class="list-unstyled">
           <li><a href="#" data-toggle="modal" data-target="#contact-modal" data-from="contact-link">Contact</a></li>

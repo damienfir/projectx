@@ -62,7 +62,7 @@ object Application extends Controller with MongoController {
   def index(filename: String) = Action {
     filename match {
       case "" => Ok(views.html.index(""))
-      case f: String => Ok(views.html.ui(f))
+      case f: String => Ok(views.html.index(f))
     }
   }
 

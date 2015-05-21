@@ -18,6 +18,8 @@ define(function(require){
       var progressUploading = $("#progress-uploading");
       var progressProcessing = $("#progress-processing");
       var tryagain = $("#tryagain");
+      var share_panel = $("#panel-share");
+      var overlay = $("#overlay-collection");
       this.total = 1;
 
       this.init = function() {
@@ -25,6 +27,8 @@ define(function(require){
         // progressrow.fadeTo(400, 1);
         progressUploading.fadeIn();
         tryagain.fadeOut();
+        share_panel.fadeOut();
+        overlay.fadeOut();
       };
 
       this.start = function(length) { this.total = length; };
@@ -45,8 +49,12 @@ define(function(require){
         // progressrow.fadeTo(400, 0, function() {
         //   progressbar.removeClass("progress-bar-success");
         // });
-        progressProcessing.fadeOut();
-        tryagain.fadeIn();
+        progressProcessing.fadeOut(400, function(){
+          overlay.fadeIn(400, function(){
+            tryagain.fadeIn();
+          });
+        });
+        share_panel.fadeIn();
       };
     }
     this.loader = new Loader();
@@ -133,8 +141,6 @@ define(function(require){
       var img = $('#mosaic-img');
       var _theme = $("#img-desc");
       var appear = $("#mosaic-appear");
-      var share_panel = $("#panel-share");
-      this.example = false;
       
       this.changeImage = function(url) {
         return Q.Promise(function(resolve, reject, notify){
@@ -153,16 +159,6 @@ define(function(require){
         img.attr("src", "");
       };
 
-      this.enter = function() {
-        if (!this.example) {
-          share_panel.removeClass("invisible").addClass("visible");
-        }
-      };
-
-      this.leave = function() {
-        share_panel.removeClass("visible").addClass("invisible");
-      };
-
       this.showExample = function() {
         img.one("load", function() {
           img.fadeTo(300, 0.2);
@@ -170,13 +166,10 @@ define(function(require){
         img.fadeTo(0,0);
         img.attr("src", "/assets/stock/people/mosaic.jpg");
         appear.fadeIn();
-        this.example = true;
       };
 
       this.hideExample = function() {
         appear.fadeOut();
-        this.example = false;
-        share_panel.fadeIn();
       };
     }
 

@@ -5,6 +5,7 @@
 <div class="container-fluid limited-width">
   <div class="row " id="row-ui">
     <div class="col-sm-3 centered" id="col-ui">
+      <a href="/" class="btn btn-link center-block"><i class="fa fa-arrow-left"></i> Back to homepage</a>
       <div class="panel panel-primary">
         <div class="panel-body" id="photos-collection">
 
@@ -25,23 +26,23 @@
 
             <input type="file" name="image" id="file-upload" multiple>
           </div>
-          <!-- <div class="overlay" id="overlay-collection"></div> -->
         </div>
+        <div class="overlay" id="overlay-collection"></div>
+        <a class="btn btn-default overlay-element" id="tryagain" href="/ui"><i class="fa fa-refresh"></i> Try again</a>
         <div id="progress-uploading" class="overlay-element overlay-loader"><img src="/assets/images/358.GIF" /><span>Uploading...</span></div>
       </div>
-      <a class="btn btn-success" id="tryagain" href="/ui">Try again</a>
+      <div class="" id="panel-share">
+        <a data-toggle="modal" data-target="#share-modal" data-from="share-button" data-toggle="tooltip" data-placement="top" title="Share on social networks" class="btn btn-success"><i class="fa fa-share-alt fa-lg"></i> Share</a>
+        <a data-toggle="modal" data-target="#send-modal" data-from="send-button" data-toggle="tooltip" data-placement="top" title="Send to a friend" class="btn btn-success"><i class="fa fa-paper-plane fa-lg"></i> Send</a>
+        <!-- <a data-toggle="modal" data-target="#download-modal" data-from="print-button" data-toggle="tooltip" data-placement="right" title="Download to print" class="btn btn-success"><i class="fa fa-print fa-lg"></i></a> -->
+        <a data-toggle="modal" data-target="#download-modal" data-from="download-button" data-toggle="tooltip" data-placement="top" title="Download" class="btn btn-success"><i class="fa fa-download fa-lg"></i> Download</a>
+      </div>
     </div>
     <div class="col-sm-9" id="col-mosaic">
       <div class="relative" id="box-mosaic">
-        <img class="ui-mosaic shadow" id="mosaic-img" @if(filename) {src="/storage/generated/@{filename}_display.jpg" } />
+        <img class="ui-mosaic shadow" id="mosaic-img" />
         <div id="progress-processing" class="overlay-element overlay-loader"><img src="/assets/images/285.GIF" /><span>Processing...</span></div>
-        <div class="overlay-element overlay-text shadow" id="mosaic-appear">Your mosaic will appear here</div>
-        <div class="" id="panel-share">
-          <a data-toggle="modal" data-target="#share-modal" data-from="share-button" data-toggle="tooltip" data-placement="right" title="Share on social networks" class="btn btn-success"><i class="fa fa-share-alt fa-lg"></i></a>
-          <a data-toggle="modal" data-target="#send-modal" data-from="send-button" data-toggle="tooltip" data-placement="right" title="Send to a friend" class="btn btn-success"><i class="fa fa-paper-plane fa-lg"></i></a>
-          <!-- <a data-toggle="modal" data-target="#download-modal" data-from="print-button" data-toggle="tooltip" data-placement="right" title="Download to print" class="btn btn-success"><i class="fa fa-print fa-lg"></i></a> -->
-          <a data-toggle="modal" data-target="#download-modal" data-from="download-button" data-toggle="tooltip" data-placement="right" title="Download" class="btn btn-success"><i class="fa fa-download fa-lg"></i></a>
-        </div>
+        <div class="overlay-element overlay-text shadow" id="mosaic-appear">Your composition will appear here</div>
       </div>
     </div>
     <!-- <div class="col-sm-2 col-output centered btn-group-vertical"> -->

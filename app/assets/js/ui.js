@@ -79,6 +79,7 @@ define(function(require){
 
     // $("#panel-upload .btn").tooltip();
     $("#panel-share .btn").tooltip();
+    $("#tryagain").tooltip();
 
     require(["backend"], function(backend){
       document.getElementById("contact-form").addEventListener("submit", function(ev){
@@ -94,11 +95,7 @@ define(function(require){
       });
     });
 
-    if (!mosaic.$loaded) {
-      ui.mosaic.showExample();
-    } else {
-      ui.mosaic.hideExample();
-    }
+    ui.mosaic.showExample();
 
     bindEvents();
   }
