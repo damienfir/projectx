@@ -9,10 +9,10 @@ import scala.concurrent.Future
 import models._
 import services._
 
-import play.api.libs.json.Json
+import play.api.libs.json._
 
-import reactivemongo.api._
-import reactivemongo.bson._
+// import reactivemongo.api._
+// import reactivemongo.bson._
 import play.modules.reactivemongo.MongoController
 import play.modules.reactivemongo.json.collection._
 
@@ -40,7 +40,7 @@ object Application extends Controller with MongoController {
   private def getOrCreateUser(implicit request: Request[_]): Future[User] = getUser flatMap {
     case Some(user) => Future(user)
     case None => {
-      val user = User(BSONObjectID.generate, None)
+      val user = User(Some(BSONObjectID.generate), None)
       userCollection.insert(user) map { _ =>
         user
       }
@@ -74,9 +74,9 @@ object Application extends Controller with MongoController {
   def reset = Action.async { implicit request =>
     getOrCreateUser flatMap {  user =>
       val id = BSONObjectID.generate
-      mosaicCollection.insert(Mosaic(id, user._id, None, None, List())) map { _ =>
+      mosaicCollection.insert(Mosaic(Some(id), user._id.get, None, None, List())) map { _ =>
         Ok.withSession(
-          "user" -> user._id.stringify,
+          "user" -> user._id.get.stringify,
           "mosaic" -> id.stringify
         )
       }
@@ -129,7 +129,7 @@ object Application extends Controller with MongoController {
       }
       getMosaic map {
         case Some(mosaic) =>
-          EmailService.sendToSelf(email, mosaic._id.stringify)
+          EmailService.sendToSelf(email, mosaic._id.get.stringify)
           mosaic.filename map { fname =>
             Ok.sendFile(MosaicService.getFile(fname))
           } getOrElse(BadRequest)
@@ -144,7 +144,7 @@ object Application extends Controller with MongoController {
     }
     getMosaic map {
       case Some(mosaic) =>
-        EmailService.sendToFriend(req.to, req.from, mosaic._id.stringify)
+        EmailService.sendToFriend(req.to, req.from, mosaic._id.get.stringify)
         Ok
       case None => BadRequest
     }
@@ -200,4 +200,100 @@ object Feedback extends Controller with MongoController {
       Ok
     }
   }
+}
+
+
+abstract class CRUDController[T <: IDModel[T]] extends Controller with MongoController {
+
+  def collection: JSONCollection
+  implicit val format: Format[T]
+
+  def makeID(id: String) = Json.obj("_id" -> Json.obj("$oid" -> id))
+
+  def create = Action.async(parse.json) { request =>
+    collection.save(request.body.as[T]) map { lastError =>
+      Ok
+    }
+  }
+
+  def list = Action.async {
+    collection.find(Json.obj()).cursor[T].collect[List]() map { list =>
+      Ok(Json.toJson(list))
+    }
+  }
+
+  def get(id: String) = Action.async {
+    collection.find(makeID(id)).one[T] map { item =>
+      Ok(Json.toJson(item))
+    }
+  }
+
+  def update(id: String) = Action.async(parse.json) { request =>
+    collection.save(request.body.as[T].withID(id)) map { lastError =>
+      Ok
+    }
+  }
+
+  def delete(id: String) = Action.async {
+    collection.remove(makeID(id)) map { lastError =>
+      Ok
+    }
+  }
+}
+
+
+object Users extends CRUDController[User] {
+  implicit val format = Json.format[User]
+  def collection = db.collection[JSONCollection]("users")
+}
+
+
+object Collections extends CRUDController[Collection] {
+  implicit val format = Json.format[Collection]
+  def collection = db.collection[JSONCollection]("collections")
+
+  def addUser(id: String, user_id: String) = Action.async {
+    collection.update(makeID(id), Json.obj("$addToSet" -> Json.obj("users" -> makeID(user_id)))) map { lastError =>
+      Ok
+    }
+  }
+
+  def removeUser(id: String, user_id: String) = Action.async {
+    collection.update(makeID(id), Json.obj("$pull" -> Json.obj("users" -> makeID(user_id)))) map { lastError =>
+      Ok
+    }
+  }
+
+  def fromUser(id: String) = Action.async {
+    collection.find(Json.obj("users" -> Json.obj("$elemMatch" -> BSONObjectID(id)))).cursor[Collection].collect[List]() map {
+      list => Ok(Json.toJson(list))
+    }
+  }
+
+  def addPhotos(id: String) = Action.async(parse.multipartFormData) { request =>
+    MosaicService.saveImages(request.body.files.map(_.ref).toList) map { names =>
+      collection.update(BSONObjectID(id), Json.obj("$addToSet" -> Json.obj("photos" -> names)))
+      Ok(Json.stringify(Json.arr(names map ("/storage/thumb/" + _))))
+    }
+  }
+
+  def createMosaic(id: String) = Action.async {
+    
+        MosaicService.process(mosaic) flatMap {
+          case Success(processed) =>
+            mosaicCollection.save(processed) map { lastError =>
+              Ok(Json.toJson(processed).toString)
+            }
+          case Failure(e) => Future(InternalServerError)
+        }
+  }
+}
+
+
+object Mosaics extends CRUDController[Mosaic] {
+
+}
+
+
+object Subsets extends CRUDController[Subset] {
 }

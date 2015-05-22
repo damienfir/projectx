@@ -4,9 +4,26 @@ import play.api.libs.json._
 import reactivemongo.bson._
 import play.modules.reactivemongo.json.BSONFormats._
 
+abstract class IDModel[T] {
+  def _id: Option[BSONObjectID]
+  def withID(id: String): T
+}
 
-case class User (_id: BSONObjectID, email: Option[String])
-case class Mosaic(_id: BSONObjectID, user_id: BSONObjectID, filename: Option[String], thumbnail: Option[String], images: List[String])
+case class User (_id: Option[BSONObjectID], email: Option[String]) extends IDModel[User] {
+  def withID(id: String) = copy(_id = Some(BSONObjectID(id)))
+}
+
+case class Collection (_id: Option[BSONObjectID], users: List[BSONObjectID], photos: List[String]) extends IDModel[Collection] {
+  def withID(id: String) = copy(_id = Some(BSONObjectID(id)))
+}
+
+case class Mosaic(_id: Option[BSONObjectID], user_id: BSONObjectID, filename: Option[String], thumbnail: Option[String], images: List[String], subset: BSONObjectID) extends IDModel[Mosaic] {
+  def withID(id: String) = copy(_id = Some(BSONObjectID(id)))
+}
+
+case class Subset(_id: Option[BSONObjectID], photos: List[String]) extends IDModel[Subset] {
+  def withID(id: String) = copy(_id = Some(BSONObjectID(id)))
+}
 
 case class Stock(_id: BSONObjectID, mosaic: String, photos: List[String], selected: List[Int])
 case class Theme(_id: BSONObjectID, filename: String, theme: String)
