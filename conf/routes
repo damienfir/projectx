@@ -2,9 +2,9 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-POST    /upload                     controllers.Application.upload
-GET     /process                    controllers.Application.process
-POST    /download                   controllers.Application.download
+# POST    /upload                     controllers.Application.upload
+# GET     /process                    controllers.Application.process
+# POST    /download                   controllers.Application.download
 GET     /stock                      controllers.Application.stock
 GET     /themes                     controllers.Application.themes
 
@@ -12,35 +12,38 @@ GET     /storage/*file              controllers.ExternalAssets.at(path="storage"
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
 
 
-POST    /dropbox                    controllers.Application.dropbox
+# POST    /dropbox                    controllers.Application.dropbox
 
 GET     /questions                  controllers.Feedback.questions
 POST    /feedback                   controllers.Feedback.feedback
 POST    /textfeedback               controllers.Feedback.textFeedback
-GET     /reset                      controllers.Application.reset
+# GET     /reset                      controllers.Application.reset
 POST    /contact                    controllers.Feedback.contact
-POST    /email                      controllers.Application.email
-
-GET     /ui                         controllers.Application.ui
-GET     /                           controllers.Application.index(filename: String = "")
-GET     /:filename                  controllers.Application.index(filename: String)
+# POST    /email                      controllers.Application.email
 
 
-GET     /users                      controllers.Users.list
+
+# GET     /users                      controllers.Users.list
 POST    /users                      controllers.Users.create
 GET     /users/:id                  controllers.Users.get(id)
 POST    /users/:id                  controllers.Users.update(id)
 DELETE  /users/:id                  controllers.Users.delete(id)
 GET     /users/:id/collections      controllers.Collections.fromUser(id)
+POST    /users/:id/collections      controllers.Collections.withUser(id)
 
 GET     /collections                controllers.Collections.list
 POST    /collections                controllers.Collections.create
 GET     /collections/:id            controllers.Collections.get(id)
 DELETE  /collections/:id            controllers.Collections.delete(id)
 POST    /collections/:id/users/:user_id  controllers.Collections.addUser(id, user_id)
-DELETE  /collections/:id/users/:user_id controllers.Collections.removeUser(id, user_id)
-# GET     /collections/:id/photos     controller.Collections.getPhotos(id)
+DELETE  /collections/:id/users/:user_id  controllers.Collections.removeUser(id, user_id)
 POST    /collections/:id/photos     controllers.Collections.addPhotos(id)
 # GET     /collections/:id/photos/:photo_id controllers.Collections.getPhoto(id, photo_id)
 # DELETE  /collections/:id/photos/:photos_id  controllers.Collections.removePhoto(id, photo_id)
-POST    /collections/:id/mosaics    controllers.Collections.createMosaic(id)
+POST    /collections/:id/mosaics    controllers.Mosaics.generate(id)
+
+
+
+GET     /ui                         controllers.Application.ui
+GET     /                           controllers.Application.index(filename: String = "")
+GET     /:filename                  controllers.Application.index(filename: String)
