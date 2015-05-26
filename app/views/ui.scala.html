@@ -3,15 +3,15 @@
 @main {
 
 <div class="container-fluid limited-width">
-  <div class="row " id="row-ui">
+  <div class="row " id="row-ui" ng-controller="InterfaceController">
     <div class="col-sm-3 centered" id="col-ui">
       <a href="/" class="btn btn-link center-block"><i class="fa fa-arrow-left"></i> Back to homepage</a>
       <div class="panel panel-primary">
-        <div class="panel-body" id="photos-collection">
+        <div class="panel-body" id="photos-collection" bq-collection>
 
-          <div class="upload-box" id="dropzone">
+          <div class="upload-box" id="dropzone" bq-dropzone ng-controller="UploadController">
             <!-- <i class="fa fa-inbox fa-3x" id="dropicon-box"></i> -->
-            <button class="btn btn-primary"><i class="fa fa-upload"></i>&nbsp; Click here to upload </button>
+            <button class="btn btn-primary" ng-click="triggerUpload()"><i class="fa fa-upload"></i>&nbsp; Click here to upload </button>
 
             <!-- <div class="cloud-btn"> -->
             <!--   <button class="btn btn-primary" id="dropbox-btn" data-toggle="tooltip" data-placement="left" title="Import from Dropbox"><i class="fa fa-dropbox fa-lg"></i></button> -->
@@ -24,7 +24,7 @@
 
             <i class="fa fa-4x fa-download" id="dropicon"></i>
 
-            <input type="file" name="image" id="file-upload" multiple>
+            <input type="file" name="image" id="file-upload" ng-bind="fileupload" ng-click="upload()" multiple>
           </div>
         </div>
         <div class="overlay" id="overlay-collection"></div>
@@ -39,7 +39,7 @@
       </div>
     </div>
     <div class="col-sm-9" id="col-mosaic">
-      <div class="relative" id="box-mosaic">
+      <div class="relative" id="box-mosaic" bq-mosaic>
         <img class="ui-mosaic shadow" id="mosaic-img" />
         <div id="progress-processing" class="overlay-element overlay-loader"><img src="/assets/images/285.GIF" /><span>Processing...</span></div>
         <div class="overlay-element overlay-text shadow" id="mosaic-appear">Your composition will appear here</div>
@@ -145,7 +145,7 @@
 <script src="@routes.Assets.at("bower_components/requirejs/require.js")" type="text/javascript"></script>
 <script type="text/javascript" charset="utf-8">
 require(['/assets/js/main.js'], function(){
-  require(['ui']);
+  require(['app']);
 });
 </script>
 }
