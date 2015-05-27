@@ -55,6 +55,30 @@ define([
   });
 
 
+  bq.directive("bqUpload", ["UploadService", function(UploadService){
+    return {
+      link: function($scope, $element) {
+        var fileupload = angular.element(document.getElementById("file-upload"));
+
+        $scope.triggerUpload = function(ev) {
+          fileupload.trigger("click");
+        };
+
+        this.upload = function(ev) {
+          ev.preventDefault();
+          UploadService.upload(ev.target.files);
+        };
+
+        fileupload.on("change", this.upload.bind(this));
+
+        $scope.$on("uploading", function() {
+          $element.hide();
+        });
+      }
+    };
+  }]);
+
+
   bq.directive("bqCollection", ["$q", function($q){
     return {
       controller: function($scope, $element) {
@@ -66,7 +90,7 @@ define([
         this.reset = function(length) {
           var col = Math.max(min_columns, Math.floor( 0.7 * Math.sqrt(length)));
           this.width = 100 / col;
-          var height = (($element.attr("offsetWidth") / col) / ratio) * Math.ceil(length / col);
+          var height = (($element.outerWidth() / col) / ratio) * Math.ceil(length / col);
           $element.css("height", height+"px");
           $element.empty();
           this.photos = [];
@@ -326,30 +350,6 @@ define([
 
 
   bq.controller("InterfaceController", ["$scope", function($scope){
-  }]);
-
-
-  bq.directive("bqUpload", ["UploadService", function(UploadService){
-    return {
-      link: function($scope, $element) {
-        var fileupload = angular.element(document.getElementById("file-upload"));
-
-        $scope.triggerUpload = function(ev) {
-          fileupload.trigger("click");
-        };
-
-        this.upload = function(ev) {
-          ev.preventDefault();
-          UploadService.upload(ev.target.files);
-        };
-
-        fileupload.on("change", this.upload.bind(this));
-
-        $scope.$on("uploading", function() {
-          $element.fadeOut();
-        });
-      }
-    };
   }]);
 
   var $html = angular.element(document.getElementsByTagName('html')[0]);
