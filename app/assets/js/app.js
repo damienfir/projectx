@@ -23,8 +23,8 @@ define([
 
   bq.directive("bqCollection", ["$q", function($q){
     return {
-      controller: function($scope) {
-        var box = document.getElementById("photos-collection");
+      controller: function($scope, $element) {
+        console.log($element);
         this.photos = [];
         var ratio = 1.41;
         var min_columns = 3;
@@ -33,9 +33,9 @@ define([
         this.reset = function(length) {
           var col = Math.max(min_columns, Math.floor( 0.7 * Math.sqrt(length)));
           this.width = 100 / col;
-          var height = ((box.offsetWidth / col) / ratio) * Math.ceil(length / col);
-          box.style.height = height+"px";
-          while(box.firstChild) { box.removeChild(box.firstChild); }
+          var height = (($element.attr("offsetWidth") / col) / ratio) * Math.ceil(length / col);
+          $element.css("height", height+"px");
+          $element.empty();
           this.photos = [];
         };
 
@@ -58,7 +58,7 @@ define([
           img.style.backgroundImage = "url("+url+")";
           img.style.width = this.width+"%";
           img.style.paddingBottom = (this.width/ratio)+"%";
-          box.appendChild(img);
+          $element.append(img);
           // img.classList.add("photo-muted");
           setTimeout(function(){
             img.style.opacity = 0.3;
@@ -102,13 +102,51 @@ define([
     };
   }]);
 
-  bq.directive("bqMosaic", function() {
+  bq.directive("bqMosaic", ["$q", function($q) {
     return {
       controller: function($scope) {
-        // change image
+        var img = $('#mosaic-img');
+        var _theme = $("#img-desc");
+        var appear = $("#mosaic-appear");
+
+        this.changeImage = function(url) {
+          return $q(function(resolve, reject, notify){
+            img.one("load", function(){
+              img.fadeTo(800, 1, resolve);
+            });
+
+            img.fadeTo(800, 0, function(){
+              img.attr("src", url);
+              // notify();
+            });
+          });
+        };
+
+        this.clear = function() {
+          img.attr("src", "");
+        };
+
+        this.showExample = function() {
+          img.one("load", function() {
+            img.fadeTo(300, 0.2);
+          });
+          img.fadeTo(0,0);
+          img.attr("src", "/assets/stock/people/mosaic.jpg");
+          appear.fadeIn();
+        };
+
+        this.hideExample = function() {
+          appear.fadeOut();
+        };
+      },
+
+      link: function($scope, $element, $attr, ctrl) {
+        $scope.$on("processed", function(ev, mosaic) {
+          ctrl.changeImage(mosaic.thumbnail);
+        });
       }
     };
-  });
+  }]);
 
 
   bq.directive("bqDropzone", function(){
@@ -162,7 +200,7 @@ define([
           $rootScope.$broadcast("uploaded", uploaded);
         })
         .then(function(obj) {
-          $rootScope.$broadcast("processed", obj);
+          return MosaicService.loaded(obj);
         }, function(reason) {
           $rootScope.$broadcast("processing-failed", reason);
         });
@@ -172,11 +210,63 @@ define([
   }]);
 
 
-  bq.service("MosaicService", ["Collection", function(Collection) {
+  bq.service("MosaicService", ["Collection", "$rootScope", function(Collection, $rootScope) {
 
     this.process = function(collection){
       return Collection.generateMosaic({id: collection._id.$oid}, {}).$promise;
     };
+
+
+    this.hostURL = window.location.protocol + "//" + window.location.hostname;
+    if (window.location.port !== "") this.hostURL += ":" + window.location.port;
+    this.hostURL += "/";
+
+    this.baseURL = this.hostURL + "storage/generated/";
+
+    this.hash = undefined;
+    this.filename = undefined;
+    this.filename_small = undefined;
+
+    this.loadFromURL = function() {
+      var path = window.location.pathname.split('/');
+      if (path.length > 1 && path[1].length > 5) {
+        var obj = {_id: {"$oid": path[1]}, filename: path[1]+".jpg", thumbnail: path[1]+"_display.jpg"};
+        this.loaded(obj, false);
+      }
+    };
+
+    this.loaded = function(obj, notify) {
+      // this.setHash(obj._id.$oid);
+      // this.filename = obj.filename;
+      // this.filename_small = obj.thumbnail;
+      obj.filename = this.baseURL + obj.filename;
+      obj.thumbnail = this.baseURL + obj.thumbnail;
+      if (notify === undefined || notify) {
+        $rootScope.$broadcast("processed", obj);
+      }
+    };
+
+    // this.setHash = function(hash) {
+    //   this.hash = hash;
+    // };
+
+    // this.getHash = function() {
+    //   return this.hash;
+    // };
+
+    // this.getViewURL = function() {
+    //   return this.hostURL + this.hash;
+    // };
+
+    // this.getImageURL = function() {
+    //   return this.baseURL + this.filename;
+    // };
+
+    // this.getImageURLSmall = function() {
+    //   return this.baseURL + this.filename_small;
+    // };
+    
+    this.loadFromURL();
 
   }]);
 
