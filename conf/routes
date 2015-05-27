@@ -23,7 +23,7 @@ POST    /contact                    controllers.Feedback.contact
 
 
 
-# GET     /users                      controllers.Users.list
+GET     /users                      controllers.Users.list
 POST    /users                      controllers.Users.create
 GET     /users/:id                  controllers.Users.get(id)
 POST    /users/:id                  controllers.Users.update(id)

@@ -34,9 +34,9 @@ require.config({
     "ga": "//www.google-analytics.com/analytics",
     "skrollr": "../bower_components/skrollr/dist/skrollr.min",
     "skrollr-menu": "../bower_components/skrollr-menu/dist/skrollr.menu.min",
-    "angular": "../bower_components/angular/angular.min",
-    "angular-resource": "../bower_components/angular-resource/angular-resource.min",
-    "angular-cookies": "../bower_components/angular-cookies/angular-cookies.min"
+    "angular": "../bower_components/angular/angular",
+    "angular-resource": "../bower_components/angular-resource/angular-resource",
+    "angular-cookies": "../bower_components/angular-cookies/angular-cookies"
   }
 });
 

@@ -208,8 +208,6 @@ abstract class CRUDController[T <: IDModel[T]] extends Controller with MongoCont
   def collection: JSONCollection
   implicit val format: Format[T]
 
-  def makeID(id: String) = Json.obj("_id" -> Json.obj("$oid" -> id))
-
   object DBA {
     def create(item: T) = {
       val created = item.withID(BSONObjectID.generate)
@@ -301,9 +299,10 @@ object Collections extends CRUDController[Collection] {
 
   def addPhotos(id: String) = Action.async(parse.multipartFormData) { request =>
     MosaicService.saveImages(request.body.files.map(_.ref).toList) map { names =>
+      println(names)
       collection.update(Json.obj("_id" -> BSONObjectID(id)),
         Json.obj("$addToSet" -> Json.obj("photos" -> Json.obj("$each" -> names))))
-      Ok(Json.stringify(Json.arr(names map ("/storage/thumb/" + _))))
+      Ok(Json.toJson(Json.obj("filenames" -> names.map("/storage/thumb/" + _))))
     }
   }
 }

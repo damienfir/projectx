@@ -24,7 +24,7 @@
 
             <i class="fa fa-4x fa-download" id="dropicon"></i>
 
-            <input type="file" name="image" id="file-upload" ng-bind="fileupload" ng-click="upload()" multiple>
+            <input type="file" name="image" id="file-upload" ng-bind="fileupload" ng-model="files" ng-change="upload()" multiple>
           </div>
         </div>
         <div class="overlay" id="overlay-collection"></div>
