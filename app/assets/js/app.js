@@ -8,7 +8,7 @@ define([
 
   bq.factory("User", ["$resource", function($resource){
     return $resource("/users/:id", {}, {
-      "newCollection": {url: "/users/:id/collections", method: "POST"}
+      newCollection: {url: "/users/:id/collections", method: "POST"}
     });
   }]);
 
@@ -21,10 +21,43 @@ define([
   }]);
 
 
+  bq.directive("bqInterface", function() {
+    return {
+      link: function($scope, $element, $attr) {
+        var progressUploading = $("#progress-uploading");
+        var progressProcessing = $("#progress-processing");
+        var tryagain = $("#tryagain");
+        var share_panel = $("#panel-share");
+        var overlay = $("#overlay-collection");
+
+        $scope.$on("uploading", function() {
+          progressUploading.fadeIn();
+          tryagain.fadeOut();
+          share_panel.fadeOut();
+          overlay.fadeOut();
+        });
+
+        $scope.$on("processed", function(ev) {
+          progressProcessing.fadeOut(400, function(){
+            overlay.fadeIn(400, function(){
+              tryagain.fadeIn();
+            });
+          });
+          share_panel.fadeIn();
+        });
+
+        $scope.$on("processing", function() {
+          progressUploading.fadeOut();
+          progressProcessing.fadeIn();
+        });
+      }
+    };
+  });
+
+
   bq.directive("bqCollection", ["$q", function($q){
     return {
       controller: function($scope, $element) {
-        console.log($element);
         this.photos = [];
         var ratio = 1.41;
         var min_columns = 3;
@@ -148,14 +181,6 @@ define([
     };
   }]);
 
-
-  bq.directive("bqDropzone", function(){
-    return {
-      link: function(scope, element, attr) {
-      
-      }
-    };
-  });
 
 
   bq.service("UploadService", ["$q", "$http", "$rootScope", "UserService", "CollectionService", "Collection", "MosaicService", function($q, $http, $rootScope, UserService, CollectionService, Collection, MosaicService) {
@@ -303,19 +328,28 @@ define([
   bq.controller("InterfaceController", ["$scope", function($scope){
   }]);
 
-  bq.controller("UploadController", ["$scope", "$rootScope", "UploadService", function($scope, $rootScope, UploadService){
-    var fileupload = document.getElementById("file-upload");
 
-    $scope.triggerUpload = function(ev) {
-      fileupload.dispatchEvent(new MouseEvent("click"));
+  bq.directive("bqUpload", ["UploadService", function(UploadService){
+    return {
+      link: function($scope, $element) {
+        var fileupload = angular.element(document.getElementById("file-upload"));
+
+        $scope.triggerUpload = function(ev) {
+          fileupload.trigger("click");
+        };
+
+        this.upload = function(ev) {
+          ev.preventDefault();
+          UploadService.upload(ev.target.files);
+        };
+
+        fileupload.on("change", this.upload.bind(this));
+
+        $scope.$on("uploading", function() {
+          $element.fadeOut();
+        });
+      }
     };
-
-    this.upload = function(ev) {
-      ev.preventDefault();
-      UploadService.upload(ev.target.files);
-    };
-
-    fileupload.addEventListener("change", this.upload.bind(this));
   }]);
 
   var $html = angular.element(document.getElementsByTagName('html')[0]);
