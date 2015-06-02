@@ -8,22 +8,23 @@ html, body {
 /* NAVBAR */
 .navbar { box-shadow: none; border: 0; }
 .navbar-header > .navbar-brand {
-  font-size: 36px;
+  font-size: 32px;
   font-family: "Maven Pro";
   color: #2196f3;
-  width: auto;
-  vertical-align: top;
+  /* width: auto; */
+  vertical-align: middle;
+  margin-top: -7px;
 }
 .navbar-header > .navbar-brand:hover { color: #0c7cd5; }
 .navbar-brand > img {
   display: inline;
-  padding-top: 0px;
+  width: 30px;
 }
 .navbar-brand > small {
   font-size: 12px;
   display: block;
-  margin-left: 65px;
-  margin-top: -18px;
+  margin-left: 15px;
+  margin-top: -3px;
   color: #999;
 }
 
@@ -218,7 +219,7 @@ html, body {
   /* right: 0; */
   /* top: 50%; */
   /* transform: translate(0, -50%); */
-  display: none;
+  /* display: none; */
 }
 #panel-share a {
   /* display: block; */

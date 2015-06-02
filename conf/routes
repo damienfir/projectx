@@ -19,7 +19,6 @@ POST    /feedback                   controllers.Feedback.feedback
 POST    /textfeedback               controllers.Feedback.textFeedback
 # GET     /reset                      controllers.Application.reset
 POST    /contact                    controllers.Feedback.contact
-# POST    /email                      controllers.Application.email
 
 
 
@@ -30,9 +29,11 @@ POST    /users/:id                  controllers.Users.update(id)
 DELETE  /users/:id                  controllers.Users.delete(id)
 GET     /users/:id/collections      controllers.Collections.fromUser(id)
 POST    /users/:id/collections      controllers.Collections.withUser(id)
+POST    /users/:id/send/:mid        controllers.Users.send(id, mid)
+POST    /users/:id/download/:mid    controllers.Users.download(id, mid)
 
-GET     /collections                controllers.Collections.list
-POST    /collections                controllers.Collections.create
+# GET     /collections                controllers.Collections.list
+# POST    /collections                controllers.Collections.create
 GET     /collections/:id            controllers.Collections.get(id)
 DELETE  /collections/:id            controllers.Collections.delete(id)
 POST    /collections/:id/users/:user_id  controllers.Collections.addUser(id, user_id)

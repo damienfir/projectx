@@ -2,58 +2,105 @@
 
 @main {
 
-<div class="container-fluid limited-width">
-  <div class="row " id="row-ui" bq-interface>
-    <div class="col-sm-3 centered" id="col-ui">
-      <a href="/" class="btn btn-link center-block"><i class="fa fa-arrow-left"></i> Back to homepage</a>
-      <div class="panel panel-primary">
-        <div class="panel-body" id="photos-collection" bq-collection></div>
-        <div class="upload-box" id="dropzone" bq-upload>
-          <!-- <i class="fa fa-inbox fa-3x" id="dropicon-box"></i> -->
-          <button class="btn btn-primary" ng-click="triggerUpload()"><i class="fa fa-upload"></i>&nbsp; Click here to upload </button>
+<link rel="stylesheet" media="screen" href="@routes.Assets.at("css/ui.css")">
+<link rel="stylesheet" media="screen" href="@routes.Assets.at("css/animations.css")">
 
-          <!-- <div class="cloud-btn"> -->
-          <!--   <button class="btn btn-primary" id="dropbox-btn" data-toggle="tooltip" data-placement="left" title="Import from Dropbox"><i class="fa fa-dropbox fa-lg"></i></button> -->
-          <!--   <button class="btn btn-primary" id="google-btn" disabled><i class="fa fa-google-plus fa-lg"></i></button> -->
-          <!--   <button class="btn btn-primary" id="facebook-btn" disabled><i class="fa fa-facebook fa-lg"></i></button> -->
-          <!--   <button class="btn btn-primary" id="flickr-btn" disabled><i class="fa fa-flickr fa-lg"></i></button> -->
-          <!-- </div> -->
+}{
 
-          <h4>or drop photos here</h4>
+<div class="container-fluid full-page" bq-interface>
 
-          <i class="fa fa-4x fa-download" id="dropicon"></i>
+  <div class="navbar navbar-default navbar-fixed-top">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <a class="navbar-brand logo" href="/"><img src="/assets/images/logo.png"/> bigpiq</a>
+      </div>
+      <div class="collapse navbar-collapse navbar-right">
+        <ul class="nav navbar-nav">
+          <li> <a href="/" class="btn btn-link"><i class="fa fa-arrow-left"></i> Back to homepage</a> </li>
+          <!-- <li><a class="btn btn-link" ng-click="toggleCollection()"><i class="fa fa-th"></i> {{ collection.$editing ? "View mosaic" : "View collection" }}</a></li> -->
+        </ul>
+      </div>
+    </div>
+  </div>
 
-          <input type="file" name="image" id="file-upload" ng-bind="fileupload" ng-model="files" ng-change="upload()" multiple>
+
+  <!-- <div class="clearfix left-align" id="photos-collection" bq-collection> -->
+  <!--   <img ng-repeat="photo in collection.thumbs" src="{{ photo.src }}" class="fade-partial" ng-class="{selected: photo.selected, muted: !photo.selected}"> -->
+  <!--   <div class="overlay fade" id="overlay-collection" ng-show="mosaic.$loaded && !collection.$editing"></div> -->
+  <!-- </div> -->
+  <div id="progress-uploading" class="overlay-element overlay-loader fade" ng-show="collection.$loading"><img src="/assets/images/358.GIF" /><span>Uploading...</span></div>
+  <div id="progress-processing" class="overlay-element overlay-loader fade" ng-show="collection.$loaded && !mosaic.$loaded"><img src="/assets/images/285.GIF" /><span>Processing...</span></div>
+
+  <div class="container-fluid limited-width" id="container-ui">
+    <div class="row">
+      <div class="col-md-2 col-buttons centered">
+        <div ng-show="mosaic.$loaded">
+        <button class="btn btn-link btn-lg" ng-click="reset()"><i class="fa fa-th-large fa-3x"></i><br/>New mosaic</button>
+        <button class="btn btn-link btn-lg" ng-click="add()"><i class="fa fa-plus-square-o fa-3x"></i><br/>Add photos</button>
+        <button class="btn btn-link btn-lg" ng-click="shuffle()"><i class="fa fa-refresh fa-3x"></i><br/>Shuffle</button>
         </div>
-        <div class="overlay" id="overlay-collection"></div>
-        <a class="btn btn-default overlay-element" id="tryagain" href="/ui"><i class="fa fa-refresh"></i> Make another one</a>
-        <div id="progress-uploading" class="overlay-element overlay-loader"><img src="/assets/images/358.GIF" /><span>Uploading...</span></div>
       </div>
-      <div class="" id="panel-share">
-        <a data-toggle="modal" data-target="#share-modal" data-from="share-button" data-toggle="tooltip" data-placement="top" title="Share on social networks" class="btn btn-success"><i class="fa fa-share-alt fa-lg"></i> Share</a>
-        <a data-toggle="modal" data-target="#send-modal" data-from="send-button" data-toggle="tooltip" data-placement="top" title="Send to a friend" class="btn btn-success"><i class="fa fa-paper-plane fa-lg"></i> Send</a>
-        <!-- <a data-toggle="modal" data-target="#download-modal" data-from="print-button" data-toggle="tooltip" data-placement="right" title="Download to print" class="btn btn-success"><i class="fa fa-print fa-lg"></i></a> -->
-        <a data-toggle="modal" data-target="#download-modal" data-from="download-button" data-toggle="tooltip" data-placement="top" title="Download" class="btn btn-success"><i class="fa fa-download fa-lg"></i> Download</a>
+      <div class="col-md-8">
+
+
+        <div id="box-mosaic" class="fade" ng-hide="collection.$editing || collection.$loading || mosaic.$processing">
+
+          <img class="ui-mosaic shadow img-responsive center-block" id="mosaic-img" ng-src="" bq-mosaic />
+
+          <div class="overlay fade" id="overlay-mosaic" ng-hide="mosaic.$loaded"></div>
+
+          <div class="panel panel-primary center" id="upload-box" ng-show="!collection.$loaded && !mosaic.$loaded" bq-upload>
+            <div id="dropzone">
+              <button class="btn btn-primary btn-lg" ng-click="triggerUpload()"><i class="fa fa-upload"></i>&nbsp; Upload photos </button>
+              <!-- <div class="cloud-btn"> -->
+              <!--   <button class="btn btn-primary" id="dropbox-btn" data-toggle="tooltip" data-placement="left" title="Import from Dropbox"><i class="fa fa-dropbox fa-lg"></i></button> -->
+              <!--   <button class="btn btn-primary" id="google-btn" disabled><i class="fa fa-google-plus fa-lg"></i></button> -->
+              <!--   <button class="btn btn-primary" id="facebook-btn" disabled><i class="fa fa-facebook fa-lg"></i></button> -->
+              <!--   <button class="btn btn-primary" id="flickr-btn" disabled><i class="fa fa-flickr fa-lg"></i></button> -->
+              <!-- </div> -->
+              <h4>or drop here</h4>
+              <i class="fa fa-4x fa-download" id="dropicon"></i>
+              <input type="file" name="image" id="file-upload" ng-bind="fileupload" ng-model="files" ng-change="upload()" multiple>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <div class="col-md-2 col-buttons centered">
+        <div ng-show="mosaic.$loaded">
+        <button class="btn btn-link btn-block btn-lg"><i class="fa fa-photo fa-3x"></i><br/>Print poster</button>
+        <button class="btn btn-link btn-block btn-lg" data-toggle="modal" data-target="#share-modal" data-from="share-button" data-toggle="tooltip" data-placement="top" title="Share on social networks"><i class="fa fa-share-alt fa-3x"></i><br/>Share</button>
+        <button class="btn btn-link btn-block btn-lg" data-toggle="modal" data-target="#send-modal" data-from="send-button" data-toggle="tooltip" data-placement="top" title="Send to a friend"><i class="fa fa-paper-plane-o fa-3x"></i><br/>Send</button>
+        <button class="btn btn-link btn-block btn-lg" data-toggle="modal" data-target="#download-modal" data-from="download-button" data-toggle="tooltip" data-placement="top" title="Download"><i class="fa fa-download fa-3x"></i><br/>Download</button>
+        </div>
       </div>
     </div>
-    <div class="col-sm-9" id="col-mosaic">
-      <div class="relative" id="box-mosaic" bq-mosaic>
-        <img class="ui-mosaic shadow" id="mosaic-img" />
-        <div id="progress-processing" class="overlay-element overlay-loader"><img src="/assets/images/285.GIF" /><span>Processing...</span></div>
-        <div class="overlay-element overlay-text shadow" id="mosaic-appear">Your composition will appear here</div>
-      </div>
-    </div>
+  </div>
+
     <!-- <div class="col-sm-2 col-output centered btn-group-vertical"> -->
     <!--   <i class="fa fa-caret-right fa-2x hidden-xs caret-right"></i> -->
     <!--   <div class="btn btn-default btn-block"><i class="fa fa-share-alt fa-3x"></i><h4>Share</h4></div> -->
     <!--   <div class="btn btn-default btn-block"> <i class="fa fa-book fa-3x"></i><h4>Photo Album</h4></div> -->
     <!--   <div class="btn btn-default btn-block"><i class="fa fa-photo fa-3x"></i><h4>Poster</h4></div> -->
     <!-- </div> -->
+
+  <div id="feedback-panel" class="hidden-xs" ng-show="mosaic.$loaded" bq-feedback>
+    <div class="panel panel-primary">
+      <div class="panel-heading">
+        <h3 class="panel-title">Feedback</h3>
+      </div>
+      <div class="panel-body centered">
+        <div id="feedback-question"></div>
+        <div class="form-group" id="feedback-choices">
+        </div>
+      </div>
+    </div>
   </div>
-</div>
+
+<!-- </div> -->
 
 
-<div class="modal fade" id="share-modal" tabindex="-1" data-content="/share">
+<div class="modal fade" id="share-modal" tabindex="-1" data-content="/share" bq-share>
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
@@ -62,10 +109,10 @@
       </div>
       <div class="modal-body">
           <div class="centered">
-            <button id="share-facebook" class="btn btn-primary btn-lg" data-toggle="tooltip" title="Share on Facebook"><i class="fa fa-facebook fa-2x"></i></button>
-            <button id="share-google" class="btn btn-primary btn-lg" data-toggle="tooltip" title="Share on Google+"><i class="fa fa-google-plus fa-2x"></i></button>
-            <button id="share-pinterest" class="btn btn-primary btn-lg" data-toggle="tooltip" title="Share on Pinterest"><i class="fa fa-pinterest fa-2x"></i></button>
-            <button id="share-twitter" class="btn btn-primary btn-lg" data-toggle="tooltip" title="Share on Twitter"><i class="fa fa-twitter fa-2x"></i></button>
+            <button id="share-facebook" ng-click="shareFacebook()" class="btn btn-primary btn-lg" data-toggle="tooltip" title="Share on Facebook"><i class="fa fa-facebook fa-2x"></i></button>
+            <button id="share-google" ng-click="shareGoogle()" class="btn btn-primary btn-lg" data-toggle="tooltip" title="Share on Google+"><i class="fa fa-google-plus fa-2x"></i></button>
+            <button id="share-pinterest" ng-click="sharePinterest()" class="btn btn-primary btn-lg" data-toggle="tooltip" title="Share on Pinterest"><i class="fa fa-pinterest fa-2x"></i></button>
+            <button id="share-twitter" ng-click="shareTwitter()" class="btn btn-primary btn-lg" data-toggle="tooltip" title="Share on Twitter"><i class="fa fa-twitter fa-2x"></i></button>
             <!-- <button id="share-reddit" class="btn btn-primary btn-lg" data-toggle="tooltip" title="Share on Reddit"><i class="fa fa-reddit"></i></button> -->
             <!-- <div data-toggle="tooltip" title="Coming soon" class="div-btn"><button id="share-instagram" class="btn btn-primary btn-lg" disabled><i class="fa fa-instagram"></i></button></div> -->
           </div>
@@ -75,10 +122,10 @@
   </div>
 </div>
 
-<div class="modal fade" id="send-modal" tabindex="-1" data-content="/share">
+<div class="modal fade" id="send-modal" tabindex="-1" data-content="/share" bq-send>
   <div class="modal-dialog">
     <div class="modal-content">
-      <form id="email-form">
+      <form id="email-form" ng-submit="send($event)">
         <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
           <h4 class="modal-title"><i class="fa fa-paper-plane"></i>&nbsp; Send to...</h4>
@@ -105,7 +152,7 @@
 <div class="modal fade" id="download-modal" tabindex="-1" data-content="/share">
   <div class="modal-dialog">
     <div class="modal-content">
-      <form action="/download" method="post" id="download-form">
+      <form method="post" id="download-form" ng-submit="download($event)" bq-download>
         <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
           <h4 class="modal-title"><i class="fa fa-download"></i>&nbsp; Download</h4>
@@ -127,23 +174,17 @@
   </div>
 </div>
 
-<div id="feedback-panel" class="hidden-xs">
-  <div class="panel panel-primary">
-    <div class="panel-heading">
-      <h3 class="panel-title">Feedback</h3>
-    </div>
-    <div class="panel-body centered">
-      <div id="feedback-question"></div>
-      <div class="form-group" id="feedback-choices">
-      </div>
-    </div>
-  </div>
 </div>
 
 <script src="@routes.Assets.at("bower_components/requirejs/require.js")" type="text/javascript"></script>
 <script type="text/javascript" charset="utf-8">
-require(['/assets/js/main.js'], function(){
-  require(['app']);
+require(['/assets/js/config.js'], function(){
+  require(['app', 'directives', 'resources', 'services', 'controllers'], function(bq) {
+    var $html = angular.element(document.getElementsByTagName('html')[0]);
+    angular.element().ready(function() {
+      angular.bootstrap(document, ['bq']);
+    });
+  });
 });
 </script>
 }
