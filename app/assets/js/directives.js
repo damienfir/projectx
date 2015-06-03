@@ -15,34 +15,58 @@ define([
           $scope.user = {_id: {$oid: ""}};
         }
 
+
         this.upload = function(files) {
           $scope.collection.length = files.length;
           $scope.collection.$loading = true;
 
           return CollectionService.upload(files)
-            .then(function(collection) {
-              $scope.collection.$loading = false;
-              $scope.collection.$loaded = true;
-              $scope.mosaic.$processing = true;
-              return MosaicService.process(collection);
-            }, function(){}, function(uploaded) {
-              $scope.collection.thumbs = $scope.collection.thumbs.concat(uploaded.filenames.map(function(x){
-                return {src: x, selected: false};
-              }));
-            })
-          .then(function(mosaic) {
-            $scope.mosaic = angular.extend(mosaic, {$processed: true, $processing: false});
-            UserService.getUser().then(function(user){
-              $scope.user = user;
+            .then(
+                processCollection,
+                function(){},
+                addToCollection
+            )
+            .then(function(mosaic) {
+              displayMosaic(mosaic);
+              updateUser();
             });
-          });
         };
+
+        function addToCollection(uploaded) {
+          $scope.collection.thumbs = $scope.collection.thumbs.concat(uploaded.filenames.map(function(x){
+            return {src: x, selected: false};
+          }));
+        }
+
+        function processCollection(collection) {
+          $scope.collection = angular.extend(collection, {
+            $loading: false,
+            $loaded: true
+          });
+          $scope.mosaic.$processing = true;
+          return MosaicService.process(collection);
+        }
+
+        function displayMosaic(mosaic) {
+          $scope.mosaic = angular.extend(mosaic, {
+            $processed: true,
+            $processing: false
+          });
+        }
+
+        function updateUser() {
+          UserService.getUser().then(function(user){
+            $scope.user = user;
+          });
+        }
 
         $scope.toggleCollection = function() {
           $scope.collection.$editing = !$scope.collection.$editing;
         };
 
-        $scope.shuffle = function() {};
+        $scope.shuffle = function() {
+          processCollection($scope.collection).then(displayMosaic);
+        };
 
         $scope.reset = init;
 
