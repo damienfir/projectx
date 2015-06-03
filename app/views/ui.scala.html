@@ -35,6 +35,11 @@ require(['/assets/js/config.js'], function(){
     </div>
   </div>
 
+  <div class="progress fade-in" ng-show="collection.$loading || mosaic.$processing">
+    <div class="progress-bar" role="progressbar" style="width: {{100*collection.size/collection.thumbs.length}}%;"></div>
+    <!-- <div class="progress-bar" role="progressbar" style="width: 100%;"></div> -->
+  </div>
+
 
   <!-- <div class="clearfix left-align" id="photos-collection" bq-collection> -->
   <!--   <img ng-repeat="photo in collection.thumbs" src="{{ photo.src }}" class="fade-partial" ng-class="{selected: photo.selected, muted: !photo.selected}"> -->

@@ -31,9 +31,13 @@ define([
         this.upload = function(files) {
           $scope.collection.$loaded = false;
           $scope.collection.$loading = true;
+          $scope.collection.size = files.length;
 
           return uploadCollection(files)
-            .then(processCollection)
+            .then(
+              processCollection, undefined,
+              addToCollection
+            )
             .then(displayMosaic);
         };
 

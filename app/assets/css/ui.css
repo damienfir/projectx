@@ -11,7 +11,7 @@ html, body {
 }
 
 body {
-  /* padding-top: 65px; */
+  padding-top: 65px;
   /* background-color: #F9F9F9; */
   background-color: #FFF;
 }
@@ -131,12 +131,13 @@ body {
 }
 #mosaic-img {
   width: auto;
+  opacity: 1;
   /* max-height: 100%; */
   /* max-width: 100%; */
 }
 
 #container-ui {
-  padding-top: 100px;
+  padding-top: 35px;
 }
 
 .col-output {
