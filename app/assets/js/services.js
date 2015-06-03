@@ -4,12 +4,15 @@ define([
 
   bq.service("CollectionService", ["$q", "$http", "UserService", "User", function($q, $http, UserService, User) {
 
-    this.upload = function(files) {
-
+    this.create = function() {
       return UserService.getUser().then(function(user){
         return User.newCollection({id: user._id.$oid}, {}).$promise;
-      })
-      .then(function(collection){
+      });
+    };
+
+    this.upload = function(files, collection) {
+
+        console.log(collection);
         var defer = $q.defer();
 
         function chainUpload(index) {
@@ -31,7 +34,6 @@ define([
         chainUpload(0);
 
         return defer.promise;
-      });
     };
 
   }]);

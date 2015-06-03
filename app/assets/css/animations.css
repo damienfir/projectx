@@ -4,7 +4,7 @@
 .fade-in-out.ng-leave.ng-leave-active { opacity: 0; }
 .fade-in-out.ng-animate, .fade-in-out.ng-inline-animate { transition: opacity 0.5s; }
 
-.fade { opacity: 1; }
+/* .fade { opacity: 1; } */
 .fade.ng-hide { opacity: 0; }
 .fade.ng-animate { transition: opacity 0.5s; }
 

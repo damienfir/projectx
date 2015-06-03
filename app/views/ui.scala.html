@@ -28,28 +28,29 @@
   <!--   <img ng-repeat="photo in collection.thumbs" src="{{ photo.src }}" class="fade-partial" ng-class="{selected: photo.selected, muted: !photo.selected}"> -->
   <!--   <div class="overlay fade" id="overlay-collection" ng-show="mosaic.$loaded && !collection.$editing"></div> -->
   <!-- </div> -->
-  <div id="progress-uploading" class="overlay-element overlay-loader fade" ng-show="collection.$loading"><img src="/assets/images/358.GIF" /><span>Uploading...</span></div>
-  <div id="progress-processing" class="overlay-element overlay-loader fade" ng-show="mosaic.$processing"><img src="/assets/images/285.GIF" /><span>Processing...</span></div>
+  <div class="overlay-element overlay-loader fade" ng-show="collection.$loading"><img src="/assets/images/358.GIF" /><span>Uploading...</span></div>
+  <div class="overlay-element overlay-loader fade" ng-show="mosaic.$processing && !mosaic.$shuffling"><img src="/assets/images/285.GIF" /><span>Processing...</span></div>
 
   <div class="container-fluid limited-width" id="container-ui">
     <div class="row">
       <div class="col-md-2 col-buttons centered">
         <div ng-show="mosaic.$loaded">
         <button class="btn btn-link btn-lg" ng-click="reset()"><i class="fa fa-th-large fa-3x"></i><br/>New mosaic</button>
-        <button class="btn btn-link btn-lg" ng-click="add()"><i class="fa fa-plus-square-o fa-3x"></i><br/>Add photos</button>
+        <button class="btn btn-link btn-lg" ng-click="triggerUpload()" bq-upload><i class="fa fa-plus-square-o fa-3x"></i><br/>Add photos</button>
         <button class="btn btn-link btn-lg" ng-click="shuffle()"><i class="fa fa-refresh fa-3x"></i><br/>Shuffle</button>
         </div>
       </div>
       <div class="col-md-8">
 
+        <div id="box-mosaic">
 
-        <div id="box-mosaic" class="fade" ng-hide="collection.$editing || collection.$loading || mosaic.$processing">
+          <img class="ui-mosaic shadow img-responsive center-block fade" id="mosaic-img" ng-src="{{mosaic.thumbnail}}" ng-hide="(collection.$loading || mosaic.$processing) && !mosaic.$shuffling" bq-mosaic />
 
-          <img class="ui-mosaic shadow img-responsive center-block" id="mosaic-img" ng-src="" bq-mosaic />
+          <div class="overlay fade" id="overlay-mosaic" ng-show="(!collection.$loaded && !mosaic.$loaded) || mosaic.$shuffling"></div>
+          
+          <div class="overlay-element overlay-loader fade" ng-show="mosaic.$shuffling"><img src="/assets/images/285.GIF" /><span>Shuffling...</span></div>
 
-          <div class="overlay fade" id="overlay-mosaic" ng-hide="mosaic.$loaded"></div>
-
-          <div class="panel panel-primary center" id="upload-box" ng-show="!collection.$loaded && !mosaic.$loaded" bq-upload>
+          <div class="panel panel-primary center" id="upload-box" ng-show="!collection.$loading && !collection.$loaded && !mosaic.$loaded" bq-upload>
             <div id="dropzone">
               <button class="btn btn-primary btn-lg" ng-click="triggerUpload()"><i class="fa fa-upload"></i>&nbsp; Upload photos </button>
               <!-- <div class="cloud-btn"> -->
@@ -60,7 +61,6 @@
               <!-- </div> -->
               <h4>or drop here</h4>
               <i class="fa fa-4x fa-download" id="dropicon"></i>
-              <input type="file" name="image" id="file-upload" ng-bind="fileupload" ng-model="files" ng-change="upload()" multiple>
             </div>
           </div>
 
@@ -75,6 +75,8 @@
         </div>
       </div>
     </div>
+    
+    <input type="file" name="image" id="file-upload" ng-bind="fileupload" ng-model="files" multiple>
   </div>
 
     <!-- <div class="col-sm-2 col-output centered btn-group-vertical"> -->

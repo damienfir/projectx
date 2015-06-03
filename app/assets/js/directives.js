@@ -10,26 +10,31 @@ define([
       controller: function($scope) {
 
         function init() {
-          $scope.collection = {$loaded: false, $loading: false, $editing: false, thumbs: []};
-          $scope.mosaic = {$processed: false, $loaded: false, $processing: false, thumbnail: '/assets/stock/people/mosaic.jpg'};
+          $scope.collection = {$loaded: false, $loading: false, thumbs: []};
+          $scope.mosaic = {$processed: false, $loaded: false, $shuffling: false, $processing: false, thumbnail: '/assets/stock/people/mosaic.jpg'};
           $scope.user = {_id: {$oid: ""}};
         }
 
+        function uploadCollection(files) {
+          if (!$scope.collection.$loaded) {
+            var collection = CollectionService.create();
+            updateUser();
+            return collection.then(function(col) {
+              $scope.collection = angular.extend(col, $scope.collection);
+              return CollectionService.upload(files, col);
+            });
+          } else {
+            return CollectionService.upload(files, $scope.collection);
+          }
+        }
 
         this.upload = function(files) {
-          $scope.collection.length = files.length;
+          $scope.collection.$loaded = false;
           $scope.collection.$loading = true;
 
-          return CollectionService.upload(files)
-            .then(
-                processCollection,
-                function(){},
-                addToCollection
-            )
-            .then(function(mosaic) {
-              displayMosaic(mosaic);
-              updateUser();
-            });
+          return uploadCollection(files)
+            .then(processCollection)
+            .then(displayMosaic);
         };
 
         function addToCollection(uploaded) {
@@ -60,11 +65,8 @@ define([
           });
         }
 
-        $scope.toggleCollection = function() {
-          $scope.collection.$editing = !$scope.collection.$editing;
-        };
-
         $scope.shuffle = function() {
+          $scope.mosaic.$shuffling = true;
           processCollection($scope.collection).then(displayMosaic);
         };
 
@@ -87,8 +89,9 @@ define([
 
         fileupload.on("change", function(ev) {
           ev.preventDefault();
-          console.log(ev);
-          ctrl.upload(ev.target.files);
+          if (!$scope.collection.$loading) {
+            ctrl.upload(ev.target.files);
+          }
         });
       }
     };
@@ -123,19 +126,19 @@ define([
     return {
       link: function($scope, $element, $attr, ctrl) {
 
-        $element.on("load", function(){
-          // $animate.removeClass($element, "invisible").then(function(){
-            if ($scope.mosaic.$processed) {
-              $scope.$loaded = true;
-            }
-          // });
-        });
+        // $element.on("load", function(){
+        //   // $animate.removeClass($element, "invisible").then(function(){
+        //     if ($scope.mosaic.$processed) {
+        //       $scope.$loaded = true;
+        //     }
+        //   // });
+        // });
 
-        $scope.$watch("mosaic.thumbnail", function(val, old) {
-          // $animate.addClass($element, "invisible").then(function() {
-            $attr.$set("ngSrc", val);
-          // });
-        });
+        // $scope.$watch("mosaic.thumbnail", function(val, old) {
+        //   // $animate.addClass($element, "invisible").then(function() {
+        //     $attr.$set("ngSrc", val);
+        //   // });
+        // });
       }
     };
   }]);
