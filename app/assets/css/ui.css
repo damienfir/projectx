@@ -1,5 +1,9 @@
 @import url(http://fonts.googleapis.com/css?family=Open+Sans|Maven+Pro|Pacifico);
 
+[ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
+  display: none !important;
+}
+
 html, body {
   font-family: 'Open Sans', sans-serif;
   height: 100%;
@@ -62,6 +66,7 @@ body {
 .col-buttons button {
   color: #999;
   margin-bottom: 30px;
+  padding: 0 20px;
 }
 
 .col-buttons button > i {
