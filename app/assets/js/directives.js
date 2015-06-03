@@ -229,4 +229,23 @@ define([
     };
   }]);
 
+  bq.directive("bqForm", [function(){
+    return {
+      restrict: "A",
+      link: function($scope, $element, $attr) {
+        $element.on("submit", function(ev) {
+          ev.preventDefault();
+          $http({
+            method: "POST",
+            url: $attr.bqForm,
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            data: $element.serialize()
+          });
+        });
+      }
+    };
+  }]);
+
 });

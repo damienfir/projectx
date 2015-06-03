@@ -274,6 +274,10 @@ object Users extends CRUDController[User] {
       }
     } getOrElse(Future(BadRequest))
   }
+
+  def order(user_id: String, mosaic_id: String) = Action(parse.urlFormEncoded) { implicit request =>
+    Ok
+  }
 }
 
 

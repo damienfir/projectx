@@ -40,13 +40,13 @@ require(['/assets/js/config.js'], function(){
   <!--   <img ng-repeat="photo in collection.thumbs" src="{{ photo.src }}" class="fade-partial" ng-class="{selected: photo.selected, muted: !photo.selected}"> -->
   <!--   <div class="overlay fade" id="overlay-collection" ng-show="mosaic.$loaded && !collection.$editing"></div> -->
   <!-- </div> -->
-  <div class="overlay-element overlay-loader fade" ng-show="collection.$loading"><img src="/assets/images/358.GIF" /><span>Uploading...</span></div>
-  <div class="overlay-element overlay-loader fade" ng-show="mosaic.$processing && !mosaic.$shuffling"><img src="/assets/images/285.GIF" /><span>Processing...</span></div>
+  <div class="overlay-element overlay-loader fade-in" ng-show="collection.$loading"><img src="/assets/images/358.GIF" /><span>Uploading...</span></div>
+  <div class="overlay-element overlay-loader fade-in" ng-show="mosaic.$processing && !mosaic.$shuffling"><img src="/assets/images/285.GIF" /><span>Processing...</span></div>
 
   <div class="container-fluid limited-width" id="container-ui">
     <div class="row">
       <div class="col-md-2 col-buttons centered">
-        <div ng-show="!mosaic.$loaded">
+        <div ng-show="mosaic.$loaded">
         <button class="btn btn-link btn-lg" ng-click="reset()"><i class="fa fa-th-large fa-3x"></i><br/>New</button>
         <button class="btn btn-link btn-lg" ng-click="triggerUpload()" bq-upload><i class="fa fa-plus-square-o fa-3x"></i><br/>Add photos</button>
         <button class="btn btn-link btn-lg" ng-click="shuffle()"><i class="fa fa-refresh fa-3x"></i><br/>Shuffle</button>
@@ -56,11 +56,11 @@ require(['/assets/js/config.js'], function(){
 
         <div id="box-mosaic">
 
-          <img class="ui-mosaic shadow img-responsive center-block fade" id="mosaic-img" ng-src="{{mosaic.thumbnail}}" ng-hide="(collection.$loading || mosaic.$processing) && !mosaic.$shuffling" bq-mosaic />
+          <img class="ui-mosaic shadow img-responsive center-block fade-in" id="mosaic-img" ng-src="{{mosaic.thumbnail}}" ng-hide="(collection.$loading || mosaic.$processing) && !mosaic.$shuffling" />
 
-          <div class="overlay fade" id="overlay-mosaic" ng-show="(!collection.$loaded && !mosaic.$loaded) || mosaic.$shuffling"></div>
+          <div class="overlay fade-in" id="overlay-mosaic" ng-show="(!collection.$loaded && !mosaic.$loaded) || mosaic.$shuffling"></div>
           
-          <div class="overlay-element overlay-loader fade" ng-show="mosaic.$shuffling"><img src="/assets/images/285.GIF" /><span>Shuffling...</span></div>
+          <div class="overlay-element overlay-loader fade-in" ng-show="mosaic.$shuffling"><img src="/assets/images/285.GIF" /><span>Shuffling...</span></div>
 
           <div class="panel panel-primary center" id="upload-box" ng-show="!collection.$loading && !collection.$loaded && !mosaic.$loaded" bq-upload>
             <div id="dropzone">
@@ -79,8 +79,8 @@ require(['/assets/js/config.js'], function(){
         </div>
       </div>
       <div class="col-md-2 col-buttons centered">
-        <div ng-show="!mosaic.$loaded">
-        <button class="btn btn-link btn-block btn-lg"><i class="fa fa-shopping-cart fa-3x"></i><br/>Order a Print</button>
+        <div ng-show="mosaic.$loaded">
+        <button class="btn btn-link btn-block btn-lg" data-toggle="modal" data-target="#order-modal"><i class="fa fa-shopping-cart fa-3x"></i><br/>Order a poster</button>
         <button class="btn btn-link btn-block btn-lg" data-toggle="modal" data-target="#share-modal" data-from="share-button" data-toggle="tooltip" data-placement="top" title="Share on social networks"><i class="fa fa-share-alt fa-3x"></i><br/>Share</button>
         <button class="btn btn-link btn-block btn-lg" data-toggle="modal" data-target="#send-modal" data-from="send-button" data-toggle="tooltip" data-placement="top" title="Send to a friend"><i class="fa fa-at fa-3x"></i><br/>Send</button>
         <button class="btn btn-link btn-block btn-lg" data-toggle="modal" data-target="#download-modal" data-from="download-button" data-toggle="tooltip" data-placement="top" title="Download"><i class="fa fa-download fa-3x"></i><br/>Download</button>
@@ -182,6 +182,34 @@ require(['/assets/js/config.js'], function(){
         </div>
         <div class="modal-footer">
           <button type="submit" class="btn btn-success pull-right" id="download-btn" disabled><i class="fa fa-cloud-download fa-lg"></i> Download</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="order-modal" tabindex="-1" data-content="/order">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="post" bq-form="/users/{{user._id.$oid}}/order/{{mosaic.id}}">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title"><i class="fa fa-shopping-cart"></i>&nbsp; Order a poster</h4>
+        </div>
+        <div class="modal-body">
+          <p>
+            Thank you for being interested in ordering a poster. We are working on making this feature available as soon as possible.
+          </p>
+          <p>
+            If you leave us your email address we will notify you when it is available.
+          </p>
+            <div class="input-group input-group-lg">
+              <span class="input-group-addon">@@</span>
+              <input type="text" value="" name="email" placeholder="Please enter your email address" class="form-control"/>
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success pull-right"><i class="fa fa-paper-plane fa-lg"></i> Order</button>
         </div>
       </form>
     </div>

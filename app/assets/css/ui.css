@@ -65,8 +65,8 @@ body {
 
 .col-buttons button {
   color: #999;
+  margin: 0 20px;
   margin-bottom: 30px;
-  padding: 0 20px;
 }
 
 .col-buttons button > i {
@@ -131,7 +131,6 @@ body {
 }
 #mosaic-img {
   width: auto;
-  opacity: 1;
   /* max-height: 100%; */
   /* max-width: 100%; */
 }

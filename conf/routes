@@ -31,6 +31,7 @@ GET     /users/:id/collections      controllers.Collections.fromUser(id)
 POST    /users/:id/collections      controllers.Collections.withUser(id)
 POST    /users/:id/send/:mid        controllers.Users.send(id, mid)
 POST    /users/:id/download/:mid    controllers.Users.download(id, mid)
+POST    /users/:id/order/:mid       controllers.Users.order(id, mid)
 
 # GET     /collections                controllers.Collections.list
 # POST    /collections                controllers.Collections.create
