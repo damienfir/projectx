@@ -233,7 +233,7 @@ define([
     };
   }]);
 
-  bq.directive("bqForm", [function(){
+  bq.directive("bqForm", ["$http", function($http){
     return {
       restrict: "A",
       link: function($scope, $element, $attr) {
@@ -246,8 +246,65 @@ define([
               'Content-Type': 'application/x-www-form-urlencoded'
             },
             data: $element.serialize()
+          })
+          .success(function(data, status){
+            $scope.httpStatus = status;
+          })
+          .error(function(data, status){
+            $scope.httpStatus = status;
           });
         });
+      }
+    };
+  }]);
+
+
+  bq.directive("bqFeedback", ["$http", function($http){
+    return {
+      controller: function($scope, $element) {
+        this.pullUp = function() {
+          $element.css("bottom", "-10px");
+          ga("send", "event", "feedback", "opened-panel");
+        };
+
+        this.pullDown = function() {
+          $element.css("bottom", "-"+($element.height()-35)+"px");
+          ga("send", "event", "feedback", "opened-panel");
+        };
+
+        this.getQuestions = function() {
+          $http.get("/questions").success(function(data){
+            console.log(data);
+            $scope.questions = data;
+            $scope.nextQuestion();
+          });
+        };
+      },
+      link: function($scope, $element, $attr, ctrl) {
+        $scope.choose = function(question_id, choice_id) {
+          $http.post("/feedback", {
+            "user_id": $scope.user._id.$oid,
+            "question_id": question_id,
+            "choice": choice_id
+          }).success(function(){
+            $scope.nextQuestion();
+          });
+          ga("send", "event", "feedback", "answered-question");
+        };
+
+        $scope.submitText = function() {
+          ctrl.pullDown();
+        };
+
+        $scope.nextQuestion = function() {
+          $scope.question = $scope.questions.length ? $scope.questions.shift() : {};
+        };
+
+
+        ctrl.getQuestions();
+
+        $element.on("mouseenter", ctrl.pullUp.bind(ctrl));
+        $element.on("mouseleave", ctrl.pullDown.bind(ctrl));
       }
     };
   }]);

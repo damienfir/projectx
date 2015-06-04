@@ -35,7 +35,7 @@ require(['/assets/js/config.js'], function(){
     </div>
   </div>
 
-  <div class="progress fade-in" ng-show="collection.$loading || mosaic.$processing">
+  <div class="progress fade-in" ng-show="collection.$loading">
     <div class="progress-bar" role="progressbar" style="width: {{100*collection.size/collection.thumbs.length}}%;"></div>
     <!-- <div class="progress-bar" role="progressbar" style="width: 100%;"></div> -->
   </div>
@@ -103,14 +103,24 @@ require(['/assets/js/config.js'], function(){
     <!--   <div class="btn btn-default btn-block"><i class="fa fa-photo fa-3x"></i><h4>Poster</h4></div> -->
     <!-- </div> -->
 
-  <div id="feedback-panel" class="hidden-xs" ng-show="mosaic.$loaded" bq-feedback>
-    <div class="panel panel-primary">
+  <div id="feedback-panel" class="hidden-xs" ng-show="!mosaic.$loaded" bq-feedback>
+    <div class="panel panel-primary" ng-class="{'panel-primary': questions.length, 'panel-success': !questions.length}">
       <div class="panel-heading">
-        <h3 class="panel-title">Feedback</h3>
+        <h3 class="panel-title">{{ questions.length ? "Feedback" : "Thank you!" }}</h3>
       </div>
       <div class="panel-body centered">
-        <div id="feedback-question"></div>
-        <div class="form-group" id="feedback-choices">
+        <div id="feedback-question">
+          {{ question.question || "Thank you for your feedback" }}
+          <form class="form-group" ng-if="!questions.length" bq-form="/contact">
+            <input type="hidden" value="{{user._id.$oid}}" name="user_id"/>
+            <input type="hidden" value="{{mosaic.id}}" name="mosaic_id"/>
+            <textarea class='form-control' name="feedback" placeholder='Let us know if you have anything else to add'></textarea>
+            <button class="btn btn-primary btn-block" type="submit" ng-click="submitText()" ng-disabled="questions.length"><i class="fa fa-paper-plane"></i> {{ httpStatus ? "Thank you!" : "Send" }}</button>
+          </div>
+        </div>
+        <div id="feedback-choices" ng-if="questions.length">
+          <button class="btn btn-primary" ng-click="choose(question._id.$oid, $index)" ng-repeat="choice in question.choices">{{ choice }}</button>
+          <button class="btn btn-primary" ng-click="nextQuestion()">Skip</button>
         </div>
       </div>
     </div>
@@ -196,7 +206,7 @@ require(['/assets/js/config.js'], function(){
 <div class="modal fade" id="order-modal" tabindex="-1" data-content="/order">
   <div class="modal-dialog">
     <div class="modal-content">
-      <form method="post" bq-form="/users/{{user._id.$oid}}/order/{{mosaic.id}}">
+      <form method="post" bq-form="/contact">
         <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
           <h4 class="modal-title"><i class="fa fa-shopping-cart"></i>&nbsp; Order a poster</h4>
@@ -210,11 +220,16 @@ require(['/assets/js/config.js'], function(){
           </p>
             <div class="input-group input-group-lg">
               <span class="input-group-addon">@@</span>
+              <input type="hidden" value="order" name="type"/>
+              <input type="hidden" value="{{user._id.$oid}}" name="user_id"/>
+              <input type="hidden" value="{{mosaic.id}}" name="mosaic_id"/>
               <input type="text" value="" name="email" placeholder="Please enter your email address" class="form-control"/>
             </div>
         </div>
         <div class="modal-footer">
-          <button type="submit" class="btn btn-success pull-right"><i class="fa fa-paper-plane fa-lg"></i> Order</button>
+          <button type="submit" class="btn btn-success pull-right" ng-disabled="httpStatus">
+            <i class="fa fa-paper-plane fa-lg"></i> {{ httpStatus ? "Thank you !" : "Order" }}
+          </button>
         </div>
       </form>
     </div>

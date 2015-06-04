@@ -168,22 +168,27 @@ object Feedback extends Controller with MongoController {
   }
 
   def feedback = Action.async(parse.json) { request =>
-    val user_id = request.session.get("user") map (BSONObjectID(_))
-    feedbackCollection.save(request.body.as[Feedback].copy(user_id = user_id)) map { lastError =>
+    feedbackCollection.save(Json.toJson(request.body)) map { lastError =>
       Ok
     }
   }
 
-  def textFeedback = Action.async(parse.json) { request =>
-    val user_id = request.session.get("user") map (BSONObjectID(_))
-    feedbackCollection.save(request.body.as[TextFeedback].copy(user_id = user_id)) map { lastError =>
-      Ok
-    }
-  }
+  // def textFeedback = Action.async(parse.json) { request =>
+  //   val user_id = request.session.get("user") map (BSONObjectID(_))
+  //   feedbackCollection.save(request.body.as[TextFeedback].copy(user_id = user_id)) map { lastError =>
+  //     Ok
+  //   }
+  // }
 
-  def contact = Action.async(parse.json) { request =>
-    val user_id = request.session.get("user") map (BSONObjectID(_))
-    contactCollection.save(request.body.as[ContactFeedback].copy(user_id=user_id)) map { lastError =>
+  // def contact = Action.async(parse.json) { request =>
+  //   val user_id = request.session.get("user") map (BSONObjectID(_))
+  //   contactCollection.save(request.body.as[ContactFeedback].copy(user_id=user_id)) map { lastError =>
+  //     Ok
+  //   }
+  // }
+
+  def contact = Action.async(parse.urlFormEncoded) { request =>
+    contactCollection.save(Json.toJson(request.body)) map { lastError =>
       Ok
     }
   }
