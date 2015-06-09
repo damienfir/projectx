@@ -1,11 +1,9 @@
-define(function(require){
+require(['config'], function(){
+  require(['interface', 'backend'], function(ui, backend){
 
   function Front(){
-    var ui = require("interface");
 
     function Gallery() {
-      var backend = require("backend");
-
       this.timeout_id = 0;
       this.stop_timeout = false;
 
@@ -59,4 +57,6 @@ define(function(require){
   }
 
   Front();
+
+  });
 });
