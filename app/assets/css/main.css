@@ -329,8 +329,3 @@ html, body {
 .muted { opacity: 0.2; }
 
 .limited-width { max-width: 1600px; }
-
-#tryagain {
-  opacity: 0.9;
-  display: none;
-}
