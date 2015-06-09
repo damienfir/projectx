@@ -1,0 +1,11 @@
+.fade-in-out.ng-enter { opacity: 0; }
+.fade-in-out.ng-enter.ng-enter-active { opacity: 1; }
+.fade-in-out.ng-leave { opacity: 1; }
+.fade-in-out.ng-leave.ng-leave-active { opacity: 0; }
+.fade-in-out.ng-animate, .fade-in-out.ng-inline-animate { transition: opacity 0.5s; }
+
+.fade-in { opacity: 1; transition: opacity 0.5s; }
+.fade-in.ng-hide { opacity: 0; }
+.fade-in.ng-animate { transition: opacity 0.5s; }
+
+.fade-partial.ng-hide { opacity: 0; }

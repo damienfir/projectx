@@ -2,6 +2,24 @@
 
 @main {
 
+<link rel="stylesheet" media="screen" href="@routes.Assets.at("css/main.css")">
+
+}{
+
+<div class="navbar navbar-default navbar-static-top">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <a class="navbar-brand logo" href="/"><img src="/assets/images/logo.png"/> bigpiq<small>Touching memories</small></a>
+    </div>
+    <div  class="collapse navbar-collapse navbar-right">
+      <ul class="nav navbar-nav">
+        <li><a href="#about">About</a></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+
 @if(filename) {
 <div class="container full-page">
 	<div class="row">
@@ -82,53 +100,53 @@
     <div class="row hidden-xs" id="row-desc">
       <div class="col-sm-3 desc-text">
         <h5>Only your best photos are selected.</h5>
-        <a href="#selection" class="btn btn-default">About the technology</a>
+        <!-- <a href="#selection" class="btn btn-default">About the technology</a> -->
       </div>
       <div class="col-sm-5 desc-text">
         <h5>They are arranged into a composition.</h5>
-        <a href="#composition" class="btn btn-default">Learn more</a>
+        <!-- <a href="#composition" class="btn btn-default">Learn more</a> -->
       </div>
       <div class="col-sm-4 desc-text">
-        <h5>You choose what to do with your it.</h5>
-        <a href="#products" class="btn btn-default">Explore the possibilities</a>
+        <h5>You choose what to do with it.</h5>
+        <!-- <a href="#products" class="btn btn-default">Explore the possibilities</a> -->
       </div>
     </div>
   </div>
 <!-- </div> -->
 
 
-<a name="selection"></a>
-<div class="row-wide bg-primary">
+<!-- <a name="selection"></a> -->
+<!-- <div class="row-wide bg-primary"> -->
   <!-- <a href="#composition" class="arrow-down btn btn-primary"><i class="fa fa-angle-down fa-3x"></i></a> -->
-  <div class="container large">
-    <div class="row">
-    <h4 class="info-products centered">Always get the best of your photo collection.</h4>
-    <div class="col-md-7">
-      <p>When returning from a vacation or an event, you probably have a clutter of photos on your computer or in your smartphone, waiting for you to organize them manually.</p>
-      <p>We leverage the advances in image processing and machine learning to automatically select the best of your photos with zero effort from your side.</p>
-    </div>
-  </div>
-  <div class="row">
-    <div class="col-md-6 col-md-offset-6">
-      <p>Our technology is based on recognizing the important features in photos such as colorfulness, blurriness, amount of details, presence of faces and smiles. Our solution picks the best of several similar photos according to these objectives criteria to make sure your composition will be representative of your whole photo collection.</p>
-    </div>
-  </div>
-  </div>
-</div>
+<!--   <div class="container large"> -->
+<!--     <div class="row"> -->
+<!--     <h4 class="info-products centered">Always get the best of your photo collection.</h4> -->
+<!--     <div class="col-md-7"> -->
+<!--       <p>When returning from a vacation or an event, you probably have a clutter of photos on your computer or in your smartphone, waiting for you to organize them manually.</p> -->
+<!--       <p>We leverage the advances in image processing and machine learning to automatically select the best of your photos with zero effort from your side.</p> -->
+<!--     </div> -->
+<!--   </div> -->
+<!--   <div class="row"> -->
+<!--     <div class="col-md-6 col-md-offset-6"> -->
+<!--       <p>Our technology is based on recognizing the important features in photos such as colorfulness, blurriness, amount of details, presence of faces and smiles. Our solution picks the best of several similar photos according to these objectives criteria to make sure your composition will be representative of your whole photo collection.</p> -->
+<!--     </div> -->
+<!--   </div> -->
+<!--   </div> -->
+<!-- </div> -->
 
 
-<a name="composition"></a>
-<div class="row-wide">
-  <a href="#composition" class="arrow arrow-down btn btn-default"><i class="fa fa-angle-down fa-3x"></i></a>
-  <div class="container">
-    <div class="row">
-      <h4 class="info-phrase centered">The way you show your photos matters.</h4>
-    	<div class="col-lg-6">
+<!-- <a name="composition"></a> -->
+<!-- <div class="row-wide"> -->
+<!--   <a href="#composition" class="arrow arrow-down btn btn-default"><i class="fa fa-angle-down fa-3x"></i></a> -->
+<!--   <div class="container"> -->
+<!--     <div class="row"> -->
+<!--       <h4 class="info-phrase centered">The way you show your photos matters.</h4> -->
+<!--     	<div class="col-lg-6"> -->
         
-      </div>
-    </div>
-  </div>
-</div>
+<!--       </div> -->
+<!--     </div> -->
+<!--   </div> -->
+<!-- </div> -->
 
 <a name="products"></a>
 <div class="row-wide bg-primary">
@@ -136,49 +154,48 @@
   <div class="container">
     <div class="row products-row">
       <h4 class="info-products centered">Your photos can take all possible shapes.</h4>
-      <div class="col-md-3">
-        <i class="fa fa-picture-o fa-5x"></i>
+      <div class="col-md-4 col-md-offset-2">
+        <!-- <i class="fa fa-picture-o fa-5x"></i> -->
         <h4>Poster</h4>
         <p>
         A great way to cherish your Bigpiq creation is to have a life-size mount on your wall. Seriously, try it. Create your Bigpiq mosaic and have it delivered to your doorstep.
         </p>
       </div>
-      <div class="col-md-3">
-        <i class="fa fa-picture-o fa-5x"></i>
-        <i class="fa fa-picture-o fa-5x"></i>
+      <div class="col-md-4">
+        <!-- <i class="fa fa-book fa-5x"></i> -->
         <h4>Album</h4>
         <p>
-        Bigpic albums make great coffee table books. Your last holiday photos can be on you coffee table with just a few clicks. Bigpic albums have unparallelled quality and user experience.
+        Bigpiq albums make great coffee table books. Your last holiday photos can be on you coffee table with just a few clicks. Bigpic albums have unparallelled quality and user experience.
         </p>
       </div>
-      <div class="col-md-3">
-        <i class="fa fa-bars fa-5x"></i>
-        <h4>Piccordion</h4>
-        <p>
-        Piccordions are our unique creation. They are foldable accordions of photos that can go into your wallet, on your bookshelf, or on your office table
-        </p>
-      </div>
-      <div class="col-md-3">
-        <i class="fa fa-book fa-5x"></i>
-        <h4>Pop-out book</h4>
-        <p>
-        We can never stop loving pop-out books. Bigpic pop-outs are one of the coolest ways of showing-off your holiday pictures or explain your childhood to your grandchildren.
-        </p>
-      </div>
+      <!-- <div class="col-md-3"> -->
+      <!--   <i class="fa fa-bars fa-5x"></i> -->
+      <!--   <h4>Piccordion</h4> -->
+      <!--   <p> -->
+      <!--   Piccordions are our unique creation. They are foldable accordions of photos that can go into your wallet, on your bookshelf, or on your office table -->
+      <!--   </p> -->
+      <!-- </div> -->
+      <!-- <div class="col-md-3"> -->
+      <!--   <i class="fa fa-book fa-5x"></i> -->
+      <!--   <h4>Pop-out book</h4> -->
+      <!--   <p> -->
+      <!--   We can never stop loving pop-out books. Bigpiq pop-outs are one of the coolest ways of showing-off your holiday pictures or explain your childhood to your grandchildren. -->
+      <!--   </p> -->
+      <!-- </div> -->
     </div>
     <div class="row hidden-xs hidden-sm">
-    	<div class="col-md-3">
+    	<div class="col-md-4 col-md-offset-2">
         <button class="btn btn-primary btn-sm pull-right more-info" data-from="product-poster" data-toggle="modal" data-target="#contact-modal" data-dismiss="modal"><i class="fa fa-info-circle"></i> More info</button>
       </div>
-    	<div class="col-md-3">
+    	<div class="col-md-4">
         <button class="btn btn-primary btn-sm pull-right more-info" data-from="product-album" data-toggle="modal" data-target="#contact-modal" data-dismiss="modal"><i class="fa fa-info-circle"></i> More info</button>
       </div>
-    	<div class="col-md-3">
-        <button class="btn btn-primary btn-sm pull-right more-info" data-from="product-piccordion" data-toggle="modal" data-target="#contact-modal" data-dismiss="modal"><i class="fa fa-info-circle"></i> More info</button>
-      </div>
-    	<div class="col-md-3">
-        <button class="btn btn-primary btn-sm pull-right more-info" data-from="product-books" data-toggle="modal" data-target="#contact-modal" data-dismiss="modal"><i class="fa fa-info-circle"></i> More info</button>
-      </div>
+    	<!-- <div class="col-md-3"> -->
+        <!-- <button class="btn btn-primary btn-sm pull-right more-info" data-from="product-piccordion" data-toggle="modal" data-target="#contact-modal" data-dismiss="modal"><i class="fa fa-info-circle"></i> More info</button> -->
+      <!-- </div> -->
+    	<!-- <div class="col-md-3"> -->
+        <!-- <button class="btn btn-primary btn-sm pull-right more-info" data-from="product-books" data-toggle="modal" data-target="#contact-modal" data-dismiss="modal"><i class="fa fa-info-circle"></i> More info</button> -->
+      <!-- </div> -->
     </div>
     <a name="sharing"></a>
     <div class="row row-sharing centered">
@@ -232,9 +249,357 @@
   </div>
 </div>
 
+
+<div class="modal fade" id="about-modal" tabindex="-1" data-content="/about">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">About</h4>
+      </div>
+      <div class="modal-body">
+        <p>
+        We consider ourselves curators of your pictures. Our mission is to help you manage your growing collection of photos and enjoy them in ways that you have not experienced before.
+        </p>
+
+        <p>
+        For instance, we make beautiful picture summaries for you automatically. Done manually, this takes hours or even days of effort. We use our expertise in the field of computer vision, machine learning, image processing, and artificial intelligence to create algorithms that understand the content of your pictures and create aesthetically pleasing presentations in just a few seconds.
+        </p>
+
+        <div class="panel panel-primary">
+          <div class="panel-heading">
+            <h3 class="panel-title"><i class="fa fa-picture-o"></i> Creating a poster</h3>
+          </div>
+          <div class="panel-body">
+            <p>
+            You may either upload a set of pictures from your computer or you may import your pictures from Dropbox, Facebook and other cloud providers. After the upload is over, we create the summary and display it on your screen.
+            </p>
+
+            <button class="btn btn-success btn-sm pull-right more-info" data-from="about-creation" data-toggle="modal" data-target="#contact-modal" data-dismiss="modal"><i class="fa fa-info-circle"></i> More info</button>
+          </div>
+        </div>
+
+        <div class="panel panel-primary">
+          <div class="panel-heading">
+            <h3 class="panel-title"><i class="fa fa-share-alt"></i> Sharing</h3>
+          </div>
+          <div class="panel-body">
+            <p>
+            You can click on ‘Share’ to download the poster in full resolution for emailing or printing, or share it directly on Facebook, Google+, and more.
+            </p>
+
+            <button class="btn btn-success btn-sm pull-right more-info" data-from="about-sharing" data-toggle="modal" data-target="#contact-modal" data-dismiss="modal"><i class="fa fa-info-circle"></i> More info</button>
+          </div>
+        </div>
+
+        <div class="panel panel-primary">
+          <div class="panel-heading">
+            <h3 class="panel-title"><i class="fa fa-th-large"></i> Automatic picture management</h3>
+          </div>
+          <div class="panel-body">
+            <p>
+            People spend a great deal of time organizing their photos after a trip or some such event. We make sure you never have to go through the painstaking process of organizing your photos again. We choose the best of them, and automatically create eye-catching summaries in the form of posters and albums. You can print them, email them, or share them on social media. You can also let us print your posters and albums for you so you may mount them on your walls or place them on your coffee tables, and cherish them, over and over. 
+            </p>
+
+            <button class="btn btn-success btn-sm pull-right more-info" data-from="about-management" data-toggle="modal" data-target="#contact-modal" data-dismiss="modal"><i class="fa fa-info-circle"></i> More info</button>
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="faq-modal" tabindex="-1" data-content="/faq">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">FAQ</h4>
+      </div>
+      <div class="modal-body">
+
+        <div class="panel panel-primary">
+          <div class="panel-heading">
+            <h3 class="panel-title">Who owns the copyright to my photos?</h3>
+          </div>
+          <div class="panel-body">
+            You do. By uploading the pictures you only give us the right to process them and store the processed summaries so that we may be able to provide them to you in the future. You also give us the right to pass them to third party service who may print them for you in some form.
+          </div>
+        </div>
+        <div class="panel panel-primary">
+          <div class="panel-heading">
+            <h3 class="panel-title">Sometimes my images are cropped incorrectly. Why?</h3>
+          </div>
+          <div class="panel-body">
+            Our algorithms can make mistakes. It is not our intention. We are constantly working to improve them.
+          </div>
+        </div>
+        <div class="panel panel-primary">
+          <div class="panel-heading">
+            <h3 class="panel-title">Why does the upload take so much time?</h3>
+          </div>
+          <div class="panel-body">
+            The cause is likely to be be one or more of the following:
+            <ul>
+              <li>The internet connection is slow</li>
+              <li>You are uploading many pictures (more than a hundred)</li>
+              <li>The photos are very large (greater than 5 MB each)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" id="terms-modal" tabindex="-1" data-content="/terms">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Terms and Conditions</h4>
+      </div>
+      <div class="modal-body">
+        <p>
+        The copyright of the pictures you upload remains with you. We do not display, sell, or redistribute your pictures to anyone in any form without your prior consent. By using our service you agree to the following:
+        </p>
+
+        <ol>
+          <li>
+            You only give us the rights to process your pictures so that we can we create posters or other forms of  summaries for you. You also give us the right to store the prepared summaries so that we may be able to provide them to you for in the future.
+          </li>
+
+          <li>
+            When you pass an order to print the posters, we provide temporary rights to third party printing services in order to be able to print your summaries. They too do not own the copyright of your pictures or the summaries prepared from them.
+          </li>
+        </ol>
+
+        <p>
+        Neither us nor the third party services we may engage with would re-distribute or sell your pictures in any form without your prior consent.
+        </p>
+
+        <p>
+        That said, we can not be held responsible if the third parties violate your copyright or if any damages arise. Also, please note that if you are seriously concerned about the privacy of you photos, you may be advised that it may be best not to upload your photos on any internet service, including ours, despite the utmost care taken to protect the privacy of the photos.
+        </p>
+
+        <p>
+        The service is provided on an “as-is” “where-is” basis. It is intended to automate the process of managing pictures, which is otherwise quite tedious manually. We can in no way be held responsible for any kind of damages arising out of the use of this service either directly or indirectly under any circumstances.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="product-modal" tabindex="-1" data-content="/products">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Products</h4>
+      </div>
+      <div class="modal-body">
+        <p>
+        We use our technology to understand your photos create unique ways of savouring the moments you capture.
+        </p>
+
+        <p>
+        We automatically choose your best photos, rank them in order of attractiveness, find faces in them, and arrange them in aesthetically appealing patterns. The result is often stunning. Each such creation is unique. Unlike some other services, and there aren’t many to speak of, the patterns are not fixed, they depend on what photos you upload.
+        </p>
+
+        <div class="panel panel-primary">
+          <div class="panel-heading">
+            <h3 class="panel-title">Posters and wall mounts</h3>
+          </div>
+          <div class="panel-body">
+
+            <p>
+            If you want a majestic wall mounting to display the pictures of the last five years of your children, you want to build a poster. Just upload your pictures and wait for the magic. You may choose to download and print the poster yourself (this is free) or you may request a print with us. We will have your wall mounting printed on the material of your choice with utmost care and precision and sent to you.
+            </p>
+
+            <button class="btn btn-success btn-sm pull-right more-info" data-from="product-posters" data-toggle="modal" data-target="#contact-modal" data-dismiss="modal"><i class="fa fa-info-circle"></i> More info</button>
+          </div>
+        </div>
+
+        <div class="panel panel-primary">
+          <div class="panel-heading">
+            <h3 class="panel-title">Albums</h3>
+          </div>
+          <div class="panel-body">
+
+            <p>
+            If you want a majestic wall mounting to display the pictures of the last five years of your children, you want to build a poster. Just upload your pictures and wait for the magic. You may choose to download and print the poster yourself (this is free) or you may request a print with us. We will have your wall mounting printed on the material of your choice with utmost care and precision and sent to you.
+            </p>
+
+            <button class="btn btn-success btn-sm pull-right more-info" data-from="product-albums" data-toggle="modal" data-target="#contact-modal" data-dismiss="modal"><i class="fa fa-info-circle"></i> More info</button>
+          </div>
+        </div>
+
+        <div class="panel panel-primary">
+          <div class="panel-heading">
+            <h3 class="panel-title">Pop-out books</h3>
+          </div>
+          <div class="panel-body">
+
+            <p>
+            We make really cool pop-out books from your uploaded pictures. There is no way to download them and have them printed elsewhere. They can printed exclusively with us. The material and finishing is bound to amaze you. You will surprise yourself and others, when you would open up one of our pop-out books, which may otherwise appear to be simple albums.
+            </p>
+
+            <button class="btn btn-success btn-sm pull-right more-info" data-from="product-books"><i class="fa fa-info-circle"></i> More info</button>
+          </div>
+        </div>
+
+
+        <div class="panel panel-primary">
+          <div class="panel-heading">
+            <h3 class="panel-title">Piccordions</h3>
+          </div>
+          <div class="panel-body">
+
+            <p>
+            Piccordions are our unique innovation. They are accordions of photos. Simply. You can order them to fit into your wallet, your bookshelf, or your coffee table. You can hang them on the wall by a nail, or put them on your office desk. Why accordions of photos? Well, depending on how you like to enjoy your photos, they are actually more convenient and expressive than books, yet more compact and portable than posters. You must try them to discover how much fun they are.
+            </p>
+
+            <button class="btn btn-success btn-sm pull-right more-info" data-from="product-piccordions" data-toggle="modal" data-target="#contact-modal" data-dismiss="modal"><i class="fa fa-info-circle"></i> More info</button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="api-modal" tabindex="-1" data-content="/api">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">API</h4>
+      </div>
+      <div class="modal-body">
+        <p>
+        We provide APIs for our following core technologies:
+        </p>
+
+        <div class="panel panel-primary">
+          <div class="panel-heading">
+            <h3 class="panel-title">Image collections</h3>
+          </div>
+          <div class="panel-body">
+            <ul>
+              <li><strong>Image selection</strong>
+                <p> Choosing the best subset of images from several images.  </p>
+              </li>
+              <li><strong>Image attractiveness</strong>
+                <p> Image attractiveness score computation.  </p>
+              </li>
+            </ul>
+
+            <button class="btn btn-success btn-sm pull-right more-info" data-from="api-collections" data-toggle="modal" data-target="#contact-modal" data-dismiss="modal"><i class="fa fa-info-circle"></i> More info</button>
+          </div>
+        </div>
+
+        <div class="panel panel-primary">
+          <div class="panel-heading">
+            <h3 class="panel-title">Image operations</h3>
+          </div>
+          <div class="panel-body">
+            <ul>
+              <li><strong>Cropping</strong>
+                <p>Automatic image cropping and resizing to fit any aspect ratio and any required resolution.</p>
+              </li>
+              <li><strong>Dominant colors</strong>
+                <p> Compute dominant colors in an image </p>
+              </li>
+              <li><strong>Enhancement</strong>
+                <p> Automatic image correction and enhancement.  </p>
+              </li>
+              <li><strong>Face detection</strong>
+                <p> Given a photo, our API detects if one or more faces are present, as well as their location in the image and size.  </p>
+              </li>
+            </ul>
+
+            <button class="btn btn-success btn-sm pull-right more-info" data-from="api-single-image" data-toggle="modal" data-target="#contact-modal" data-dismiss="modal"><i class="fa fa-info-circle"></i> More info</button>
+          </div>
+        </div>
+
+        We also provide the complete package of automatic summary creating to be run on standalone photobooths, printing kiosks, and photo printing websites.
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="jobs-modal" tabindex="-1" data-content="/jobs">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Job openings</h4>
+      </div>
+      <div class="modal-body">
+        <h5>Engineering</h5>
+        <dl>
+          <dt>Frontend Engineer</dt>
+          <dd>HTML/CSS/javascript</dd>
+          <dt>Backend Engineer</dt>
+          <dd>Scala/Play + MongoDB</dd>
+          <dt>Image processing engineer</dt>
+          <dd>Halide/C++</dd>
+        </dl>
+
+        <p>Our offices are located in Lausanne, Switzerland. We are willing to consider employing remotely.</p>
+        <p>If you are interested, please send your CV to <a href="mailto:jobs@@bigpiq.com" target="_blank">jobs@@bigpiq.com</a>.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="contact-modal" tabindex="-1" data-content="/contact">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Contact</h4>
+      </div>
+      <div class="modal-body">
+        <p>Thank you for your interest in our products. We are still developing them, but we can notify your once they are ready.</p>
+
+        <p>Please enter your email to be up to date, and drop us a message if you feel like it.</p>
+
+        <form action="/contact" method="post" id="contact-form">
+          <div class="form-group"><input type="text" class="form-control" placeholder="Your email address" name="email" required></div>
+          <div class="form-group"><textarea name="message" class="form-control" placeholder="Your message (optional)" rows="5"></textarea></div>
+          <button class="btn btn-success" type="submit" id="contact-submit-btn"><i class="fa fa-send"></i> Send</button>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="@routes.Assets.at("bower_components/requirejs/require.js")" type="text/javascript"></script>
 <script type="text/javascript" charset="utf-8">
-require(["/assets/js/main.js"], function(){
+require(["/assets/js/config.js"], function(){
   require(["front"]);
 });
 </script>

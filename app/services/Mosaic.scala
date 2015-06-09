@@ -17,7 +17,7 @@ object MosaicService extends FileService {
 
   val baseDir = Play.current.configuration.getString("px.dir_generated").get
 
-  def addImages(newImages: List[TemporaryFile]): Future[List[String]] = Future {
+  def saveImages(newImages: List[TemporaryFile]): Future[List[String]] = Future {
     newImages
       .filter(_.file.length > 4)
       .map(ImageService.save(_))
@@ -25,13 +25,13 @@ object MosaicService extends FileService {
       .map(_.get)
   }
 
-  def process(mosaic: Mosaic): Future[Try[Mosaic]] = Future {
-    val id = mosaic._id.stringify
+  def process(mosaic: Mosaic, subset: Subset): Future[Try[Mosaic]] = Future {
+    val id = mosaic._id.get.stringify
     val image = id + ".jpg"
     val image_display = id + "_display.jpg"
     val outputLocation = fullPath(image)
     val binary = Play.current.configuration.getString("px.binary").get
-    val paths = mosaic.images.map(ImageService.fullPath(_))
+    val paths = subset.photos.map(ImageService.fullPath(_))
     val cmd = binary +: "-platform" +: "offscreen" +: paths :+ outputLocation
     cmd.! match {
       case 0 => Success(mosaic.copy(filename=Some(image), thumbnail=Some(image_display)))
