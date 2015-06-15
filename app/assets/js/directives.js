@@ -2,8 +2,13 @@ define([
     "app",
     "jquery",
     "services",
-    "ga"
-], function(bq, $, services, ga) {
+    "analytics"
+], function(
+  bq,
+  $,
+  services,
+  analytics
+  ) {
 
   bq.directive("bqInterface", ["CollectionService", "MosaicService", "UserService", function(CollectionService, MosaicService, UserService){
     return {
@@ -12,6 +17,7 @@ define([
         function init() {
           $scope.collection = {$loaded: false, $loading: false, thumbs: []};
           $scope.mosaic = {$processed: false, $loaded: false, $shuffling: false, $processing: false, thumbnail: '/assets/stock/people/mosaic.jpg'};
+          $scope.subset = {};
           $scope.user = {_id: {$oid: ""}};
         }
 
@@ -35,9 +41,11 @@ define([
 
           return uploadCollection(files)
             .then(
-              processCollection, undefined,
+              newSubset,
+              undefined,
               addToCollection
             )
+            .then(generateMosaic)
             .then(displayMosaic);
         };
 
@@ -47,13 +55,20 @@ define([
           }));
         }
 
-        function processCollection(collection) {
+        function newSubset(collection) {
           $scope.collection = angular.extend(collection, {
             $loading: false,
             $loaded: true
           });
+          return CollectionService.subset(collection).then(function(subset){
+            $scope.subset = angular.extend($scope.subset, subset);
+            return subset;
+          });
+        }
+
+        function generateMosaic(subset) {
           $scope.mosaic.$processing = true;
-          return MosaicService.process(collection);
+          return MosaicService.generate(subset);
         }
 
         function displayMosaic(mosaic) {
@@ -71,7 +86,9 @@ define([
 
         $scope.shuffle = function() {
           $scope.mosaic.$shuffling = true;
-          processCollection($scope.collection).then(displayMosaic);
+          generateMosaic($scope.subset).then(displayMosaic).then(function(){
+            $scope.mosaic.$shuffling = false;
+          });
         };
 
         $scope.reset = init;
@@ -160,30 +177,28 @@ define([
         $scope.shareFacebook = function() {
           console.log("fb");
           var url = $scope.mosaic.url;
-          console.log(url);
-          ga("send", "social", "facebook", "share", url);
-          ga("send", "event", "share", "facebook");
+          analytics.share("facebook", url);
           shareURL("http://www.facebook.com/dialog/share?app_id="+facebookID+"&display=popup&href="+encodeURIComponent(url)+"&redirect_uri="+encodeURIComponent(url));
         };
 
         $scope.shareGoogle = function() {
           var url = $scope.mosaic.url;
-          ga("send", "social", "google", "share", url);
-          ga("send", "event", "share", "google");
+          // ga("send", "social", "google", "share", url);
+          // ga("send", "event", "share", "google");
           shareURL("https://plus.google.com/share?url=" + encodeURIComponent(url));
         };
 
         $scope.sharePinterest = function() {
           var url = $scope.mosaic.url;
-          ga("send", "social", "pinterest", "share", url);
-          ga("send", "event", "share", "pinterest");
+          // ga("send", "social", "pinterest", "share", url);
+          // ga("send", "event", "share", "pinterest");
           shareURL("https://www.pinterest.com/pin/create/button/?url="+encodeURIComponent(url)+"&media="+encodeURIComponent($scope.mosaic.thumbnail)+"&description=");
         };
 
         $scope.shareTwitter = function() {
           var url = $scope.mosaic.url;
-          ga("send", "social", "twitter", "share", url);
-          ga("send", "event", "share", "twitter");
+          // ga("send", "social", "twitter", "share", url);
+          // ga("send", "event", "share", "twitter");
           shareURL("https://twitter.com/intent/tweet?url="+encodeURIComponent(url));
         };
       },
@@ -264,17 +279,16 @@ define([
       controller: function($scope, $element) {
         this.pullUp = function() {
           $element.css("bottom", "-10px");
-          ga("send", "event", "feedback", "opened-panel");
+          analytics.event("feedback", "opened-panel");
         };
 
         this.pullDown = function() {
           $element.css("bottom", "-"+($element.height()-35)+"px");
-          ga("send", "event", "feedback", "opened-panel");
+          analytics.event("feedback", "closed-panel");
         };
 
         this.getQuestions = function() {
           $http.get("/questions").success(function(data){
-            console.log(data);
             $scope.questions = data;
             $scope.nextQuestion();
           });
@@ -289,7 +303,7 @@ define([
           }).success(function(){
             $scope.nextQuestion();
           });
-          ga("send", "event", "feedback", "answered-question");
+          // ga("send", "event", "feedback", "answered-question");
         };
 
         $scope.submitText = function() {

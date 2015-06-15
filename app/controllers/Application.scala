@@ -274,7 +274,7 @@ object Users extends CRUDController[User] {
         case Some(mosaic) =>
           EmailService.sendToSelf(email, mosaic._id.get.stringify)
           mosaic.filename map { fname =>
-            Ok.sendFile(MosaicService.getFile(fname))
+            Ok.sendFile(MosaicService.getMosaicFile(fname))
           } getOrElse(BadRequest)
       }
     } getOrElse(Future(BadRequest))
@@ -319,9 +319,10 @@ object Collections extends CRUDController[Collection] {
   }
 
   def addPhotos(id: String) = Action.async(parse.multipartFormData) { request =>
-    MosaicService.saveImages(request.body.files.map(_.ref).toList) map { names =>
+    Future(ImageService.saveImages(request.body.files.map(_.ref).toList)) map { names =>
       collection.update(Json.obj("_id" -> BSONObjectID(id)),
         Json.obj("$addToSet" -> Json.obj("photos" -> Json.obj("$each" -> names))))
+      MosaicService.preprocess(names)
       Ok(Json.toJson(Json.obj("filenames" -> names.map(baseDir + _))))
     }
   }
@@ -334,15 +335,15 @@ object Mosaics extends CRUDController[Mosaic] {
 
   val baseDir = "/storage/generated/"
 
-  def generate(id: String) = Action.async {
-    Subsets.createFromCollection(id) flatMap { subset =>
-      DBA.create(new Mosaic(subset)) flatMap { mosaic =>
-        MosaicService.process(mosaic, subset) flatMap {
-          case Success(processed) =>
+  def generateFromSubset(id: String) = Action.async {
+    Subsets.DBA.get(BSONObjectID(id)) flatMap { subset =>
+      DBA.create(new Mosaic(subset.get)) flatMap { mosaic =>
+        MosaicService.generateMosaic(mosaic, subset.get) flatMap {
+          case Some(processed) =>
             collection.save(processed) map { lastError =>
               Ok(Json.toJson(processed))
             }
-          case Failure(e) => Future(InternalServerError)
+          case None => Future(InternalServerError)
         }
       }
     }
@@ -354,9 +355,15 @@ object Subsets extends CRUDController[Subset] {
   implicit val format = Json.format[Subset]
   def collection = db.collection[JSONCollection]("subsets")
 
-  def createFromCollection(id: String) = {
-    Collections.DBA.get(BSONObjectID(id)) flatMap { col =>
-      DBA.create(Subset(None, col.get.photos))
+  def createFromCollection(id: String) = Action.async {
+    println(id)
+    Collections.DBA.get(BSONObjectID(id)) map { col =>
+      println(col)
+      MosaicService.cluster(col.get.photos, id) map { cluster =>
+        println(cluster)
+        DBA.create(Subset(None, cluster.sorted map (cluster.gists(_))))
+        Ok
+      } getOrElse (InternalServerError)
     }
   }
 }

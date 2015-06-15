@@ -5,9 +5,6 @@
 <link rel="stylesheet" media="screen" href="@routes.Assets.at("css/ui.css")">
 <link rel="stylesheet" media="screen" href="@routes.Assets.at("css/animations.css")">
 
-<script src="@routes.Assets.at("bower_components/requirejs/require.js")" data-main="/assets/js/boot"></script>
-</script>
-
 }{
 
 <div class="container-fluid full-page" ng-cloak bq-interface>
@@ -94,7 +91,7 @@
     <!--   <div class="btn btn-default btn-block"><i class="fa fa-photo fa-3x"></i><h4>Poster</h4></div> -->
     <!-- </div> -->
 
-  <div id="feedback-panel" class="hidden-xs" ng-show="!mosaic.$loaded" bq-feedback>
+  <div id="feedback-panel" class="hidden-xs" ng-show="mosaic.$loaded" bq-feedback>
     <div class="panel panel-primary" ng-class="{'panel-primary': questions.length, 'panel-success': !questions.length}">
       <div class="panel-heading">
         <h3 class="panel-title">{{ questions.length ? "Feedback" : "Thank you!" }}</h3>
@@ -228,4 +225,6 @@
 </div>
 
 </div>
+
+<script src="@routes.Assets.at("bower_components/requirejs/require.js")" data-main="/assets/js/boot"></script>
 }

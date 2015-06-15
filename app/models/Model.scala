@@ -9,23 +9,39 @@ abstract class IDModel[T] {
   def withID(id: BSONObjectID): T
 }
 
-case class User (_id: Option[BSONObjectID], email: Option[String]) extends IDModel[User] {
+case class User (
+  _id: Option[BSONObjectID],
+  email: Option[String]
+) extends IDModel[User] {
   def withID(id: BSONObjectID) = copy(_id = Some(id))
 }
 
-case class Collection (_id: Option[BSONObjectID], users: List[BSONObjectID], photos: List[String]) extends IDModel[Collection] {
+case class Collection (
+  _id: Option[BSONObjectID],
+  users: List[BSONObjectID],
+  photos: List[String]
+) extends IDModel[Collection] {
   def withID(id: BSONObjectID) = copy(_id = Some(id))
   def this(users: List[BSONObjectID]) = this(None, users, List())
 }
 
-case class Mosaic(_id: Option[BSONObjectID], filename: Option[String], thumbnail: Option[String], subset: BSONObjectID) extends IDModel[Mosaic] {
+case class Mosaic(
+  _id: Option[BSONObjectID],
+  filename: Option[String],
+  thumbnail: Option[String],
+  subset: BSONObjectID
+) extends IDModel[Mosaic] {
   def withID(id: BSONObjectID) = copy(_id = Some(id))
   def this(subset: Subset) = this(None, None, None, subset._id.get)
 }
 
-case class Subset(_id: Option[BSONObjectID], photos: List[String]) extends IDModel[Subset] {
+case class Subset(
+  _id: Option[BSONObjectID],
+  photos: List[String]
+) extends IDModel[Subset] {
   def withID(id: BSONObjectID) = copy(_id = Some(id))
 }
+
 
 case class Stock(_id: BSONObjectID, mosaic: String, photos: List[String], selected: List[Int])
 case class Theme(_id: BSONObjectID, filename: String, theme: String)

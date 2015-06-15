@@ -66,6 +66,14 @@ object ImageService extends FileService {
     }
   }
 
+  def saveImages(newImages: List[TemporaryFile]): List[String] = {
+    newImages
+      .filter(_.file.length > 4)
+      .map(save)
+      .filter(_.isSuccess)
+      .map(_.get)
+  }
+
   def listStock = {
     val stockFileDir = new File(stockDir)
     FileUtils.listFiles(stockFileDir, Array("jpeg"), false).map(_.getName())

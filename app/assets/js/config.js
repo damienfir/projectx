@@ -43,10 +43,9 @@ require.config({
 });
 
 
-require(['ga', 'jquery', 'bootstrap'], function(ga, $, _) {
-  // ga('send', 'pageview');
+require(['analytics', 'jquery', 'bootstrap'], function(analytics, $, _) {
 
   // Google Analytics triggers
-  $(".modal").on("show.bs.modal", function(ev){ ga("send", "pageview", $(ev.target).data("content")); });
-  $("a").on("click", function(ev){ ga("send", "pageview", $(ev.target).attr("href")); });
+  $(".modal").on("show.bs.modal", function(ev){ analytics.page($(ev.target).data("content")); });
+  $("a").on("click", function(ev){ analytics.page($(ev.target).attr("href")); });
 });

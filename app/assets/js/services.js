@@ -2,7 +2,7 @@ define([
     'app'
 ], function(bq) {
 
-  bq.service("CollectionService", ["$q", "$http", "UserService", "User", function($q, $http, UserService, User) {
+  bq.service("CollectionService", ["$q", "$http", "UserService", "User", "Collection", function($q, $http, UserService, User, Collection) {
 
     this.create = function() {
       return UserService.getUser().then(function(user){
@@ -36,17 +36,21 @@ define([
         return defer.promise;
     };
 
+    this.subset = function(collection) {
+      return Collection.newSubset({id: collection._id.$oid}, {}).$promise;
+    };
+
   }]);
 
 
-  bq.service("MosaicService", ["Collection", "$location", function(Collection, $location) {
+  bq.service("MosaicService", ["Subset", "$location", function(Subset, $location) {
 
     var hostURL = $location.protocol() + "://" + $location.host();
     if ($location.port() !== 80) hostURL += ":" + $location.port();
     baseURL = hostURL + "/storage/generated/";
 
-    this.process = function(collection){
-      return Collection.generateMosaic({id: collection._id.$oid}, {}).$promise
+    this.generate = function(subset){
+      return Subset.generateMosaic({id: subset._id.$oid}, {}).$promise
         .then(this.loaded.bind(this));
     };
 
