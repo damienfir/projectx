@@ -24,7 +24,7 @@
   </div>
 
   <div class="progress fade-in" ng-show="collection.$loading">
-    <div class="progress-bar" role="progressbar" style="width: {{100*collection.size/collection.thumbs.length}}%;"></div>
+    <div class="progress-bar" role="progressbar" style="width: {{100*collection.thumbs.length/collection.size}}%;"></div>
     <!-- <div class="progress-bar" role="progressbar" style="width: 100%;"></div> -->
   </div>
 
@@ -142,19 +142,17 @@
 <div class="modal fade" id="send-modal" tabindex="-1" data-content="/share" bq-send>
   <div class="modal-dialog">
     <div class="modal-content">
-      <form id="email-form" ng-submit="send($event)">
+      <form id="email-form" ng-submit="sendTo($event)">
         <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
           <h4 class="modal-title"><i class="fa fa-paper-plane"></i>&nbsp; Send to...</h4>
         </div>
         <div class="modal-body">
           <div class="input-group">
-            <span class="input-group-addon">@@</span>
-            <input class="form-control" name="from" placeholder="Your email address" />
+            <input class="form-control" ng-bind="from" name="from" placeholder="Your email address" />
           </div>
           <div class="input-group">
-            <span class="input-group-addon">@@</span>
-            <input class="form-control" name="to" placeholder="Your friend's email address" />
+            <input class="form-control" ng-bind="to" name="to" placeholder="Your friend's email address" />
           </div>
         </div>
         <div class="modal-footer">
@@ -166,18 +164,17 @@
   </div>
 </div>
 
-<div class="modal fade" id="download-modal" tabindex="-1" data-content="/share">
+<div class="modal fade" id="download-modal" tabindex="-1" data-content="/share" bq-download>
   <div class="modal-dialog">
     <div class="modal-content">
-      <form method="post" id="download-form" ng-submit="download($event)" bq-download>
+      <form method="post" id="download-form" action="{{'/users/' + user._id.$oid + '/download/' + mosaic.id}}">
         <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
           <h4 class="modal-title"><i class="fa fa-download"></i>&nbsp; Download</h4>
         </div>
         <div class="modal-body">
           <div class="form-group">
-            <div class="input-group input-group-lg">
-              <span class="input-group-addon">@@</span>
+            <div class="input-group">
               <input type="text" name="email" placeholder="Please enter your email address" class="form-control" id="email-input">
             </div>
             <p class="centered text-muted">We will send you a link to your poster to view it later.</p>

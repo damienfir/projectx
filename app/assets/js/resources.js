@@ -11,7 +11,7 @@ define([
 
   bq.factory("Subset", ["$resource", function($resource) {
     return $resource("/subsets/:id", {}, {
-      generateMosaic: {url: "/subset/:id/mosaics", method: "POST"}
+      generateMosaic: {url: "/subsets/:id/mosaics", method: "POST"}
     });
   }]);
 

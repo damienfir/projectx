@@ -39,8 +39,8 @@ object MosaicService {
 
   def preprocess(filenames: List[String]) = filenames map { filename =>
     val cmd = Seq(binary, "--preprocess", photoFile(filename), gistFile(filename))
+    cmd.!
     println(cmd)
-    cmd !
   }
 
   def cluster(gists: List[String], id: String): Option[Cluster] = {
@@ -65,8 +65,8 @@ object MosaicService {
     cmd !
   }
 
-  def generate(cluster: String, match_id: String, output: String) = {
-    val cmd = Seq(binary, "--generate", "1.414", clusterFile(cluster), matchFile(match_id), mosaicFile(output))
+  def generate(tile: String, cluster: String, match_id: String, output: String) = {
+    val cmd = Seq(binary, "--generate", "1.414", tileFile(tile), clusterFile(cluster), matchFile(match_id), mosaicFile(output))
     println(cmd)
     cmd !
   }
@@ -79,7 +79,7 @@ object MosaicService {
 
     tiles(mosaic_id)
     assign(mosaic_id, subset_id, mosaic_id)
-    generate(subset_id, mosaic_id, image)
+    generate(mosaic_id, subset_id, mosaic_id, image)
 
     Some(mosaic.copy(filename=Some(image), thumbnail=Some(image_display)))
   }

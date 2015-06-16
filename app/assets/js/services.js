@@ -12,7 +12,6 @@ define([
 
     this.upload = function(files, collection) {
 
-        console.log(collection);
         var defer = $q.defer();
 
         function chainUpload(index) {

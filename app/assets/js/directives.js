@@ -56,6 +56,7 @@ define([
         }
 
         function newSubset(collection) {
+          $scope.mosaic.$processing = true;
           $scope.collection = angular.extend(collection, {
             $loading: false,
             $loaded: true
@@ -67,7 +68,6 @@ define([
         }
 
         function generateMosaic(subset) {
-          $scope.mosaic.$processing = true;
           return MosaicService.generate(subset);
         }
 
@@ -211,33 +211,35 @@ define([
   bq.directive("bqSend", ["$http", function($http) {
     return {
       controller: function($scope) {
-        $scope.send = function(ev) {
-          var fields = ev.target.elements;
-          $http.post("/users/"+$scope.user._id.$oid+"/send/"+$scope.mosaic.id, {
-            to: fields.namedItem("to").value,
-            from: fields.namedItem("from").value
-          }).then(function(){
-            var el = document.getElementById("sent-label");
-            el.classList.remove("invisible");
-            el.classList.add("visible");
-          });
+        $scope.sendTo = function(ev) {
+          console.log("sending");
+          // $http.post("/users/"+$scope.user._id.$oid+"/send/"+$scope.mosaic.id, {
+          //   to: $scope.to,
+          //   from: $scope.from
+          // }).then(function(){
+          //   console.log("sent");
+          //   var el = document.getElementById("sent-label");
+          //   el.classList.remove("invisible");
+          //   el.classList.add("visible");
+          // });
         };
       }
     };
   }]);
 
-  bq.directive("bqDownload", [function(){
+  bq.directive("bqDownload", ["$http", function($http){
     return {
-      controller: function($scope) {
-        $scope.download = function(ev) {
-          $http.post("/users"+$scope.user._id.$oid+"/download"+$scope.mosaic.id, {
-          });
-        };
-      },
-      link: function($scope, $element) {
+      // controller: function($scope) {
+      //   $scope.download = function(ev) {
+      //     $http.post("/users"+$scope.user._id.$oid+"/download"+$scope.mosaic.id, {
+      //     });
+      //   };
+      // },
+      link: function($scope) {
         var emailRegex = /[^@]+@[^\.]+\..+/;
-        var download = $element.children("#download-btn");
-        $element.children("#email-input").on("input", function(ev){
+        var form = angular.element(document.getElementById("download-form"));
+        var download = angular.element(document.getElementById("download-btn"));
+        angular.element(document.getElementById("email-input")).on("input", function(ev){
           if (emailRegex.test(ev.target.value)) {
             download.attr("disabled", false);
           } else {
