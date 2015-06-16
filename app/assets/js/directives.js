@@ -211,17 +211,18 @@ define([
   bq.directive("bqSend", ["$http", function($http) {
     return {
       controller: function($scope) {
-        $scope.sendTo = function(ev) {
+        $scope.sendTo = function() {
           console.log("sending");
-          // $http.post("/users/"+$scope.user._id.$oid+"/send/"+$scope.mosaic.id, {
-          //   to: $scope.to,
-          //   from: $scope.from
-          // }).then(function(){
-          //   console.log("sent");
-          //   var el = document.getElementById("sent-label");
-          //   el.classList.remove("invisible");
-          //   el.classList.add("visible");
-          // });
+          console.log($scope.to);
+          $http.post("/users/"+$scope.user._id.$oid+"/send/"+$scope.mosaic.id, {
+            to: $scope.to,
+            from: $scope.from
+          }).then(function(){
+            console.log("sent");
+            var el = document.getElementById("sent-label");
+            el.classList.remove("invisible");
+            el.classList.add("visible");
+          });
         };
       }
     };

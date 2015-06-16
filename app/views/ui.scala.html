@@ -142,21 +142,21 @@
 <div class="modal fade" id="send-modal" tabindex="-1" data-content="/share" bq-send>
   <div class="modal-dialog">
     <div class="modal-content">
-      <form id="email-form" ng-submit="sendTo($event)">
+      <form id="email-form">
         <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
           <h4 class="modal-title"><i class="fa fa-paper-plane"></i>&nbsp; Send to...</h4>
         </div>
         <div class="modal-body">
-          <div class="input-group">
-            <input class="form-control" ng-bind="from" name="from" placeholder="Your email address" />
+          <div class="form-group">
+            <input class="form-control" ng-model="from" name="from" placeholder="Your email address" />
           </div>
-          <div class="input-group">
-            <input class="form-control" ng-bind="to" name="to" placeholder="Your friend's email address" />
+          <div class="form-group">
+            <input class="form-control" ng-model="to" name="to" placeholder="Your friend's email address" />
           </div>
         </div>
         <div class="modal-footer">
-          <button type="submit" class="btn btn-primary pull-right" id="email-btn"><i class="fa fa-send"></i> Send</button>
+          <button type="submit" class="btn btn-primary pull-right" id="email-btn" ng-click="sendTo()"><i class="fa fa-send"></i> Send</button>
           <p class="centered text-success invisible" id="sent-label">Sent!</p>
         </div>
       </form>
@@ -174,9 +174,7 @@
         </div>
         <div class="modal-body">
           <div class="form-group">
-            <div class="input-group">
-              <input type="text" name="email" placeholder="Please enter your email address" class="form-control" id="email-input">
-            </div>
+            <input type="text" name="email" placeholder="Please enter your email address" class="form-control" id="email-input">
             <p class="centered text-muted">We will send you a link to your poster to view it later.</p>
           </div>
         </div>
