@@ -16,7 +16,7 @@ define([
 
         function init() {
           $scope.collection = {$loaded: false, $loading: false, thumbs: []};
-          $scope.mosaic = {$processed: false, $loaded: false, $shuffling: false, $processing: false, thumbnail: '/assets/stock/people/mosaic.jpg'};
+          $scope.mosaic = {$processed: false, $loaded: false, $shuffling: false, $processing: false, filename: '/assets/stock/people/mosaic.jpg'};
           $scope.subset = {};
           $scope.user = {_id: {$oid: ""}};
         }

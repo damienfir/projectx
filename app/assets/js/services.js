@@ -57,7 +57,7 @@ define([
       var path = $location.path().split('/');
       var obj;
       if (path.length > 1 && path[1].length > 5) {
-        obj = {_id: {"$oid": path[1]}, filename: path[1]+".jpg", thumbnail: path[1]+"_display.jpg"};
+        obj = {_id: {"$oid": path[1]}, filename: path[1]+".jpg"};
       }
       return this.loaded(obj);
     };
@@ -68,7 +68,6 @@ define([
       } else {
         obj.id = obj._id.$oid;
         obj.filename = baseURL + obj.filename;
-        obj.thumbnail = baseURL + obj.thumbnail;
         obj.url = hostURL + "/" + obj.id;
         obj.$loaded = true;
         return obj;

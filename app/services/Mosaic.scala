@@ -54,19 +54,19 @@ object MosaicService {
   }
 
   def assign(tiles: String, clusters: String, id: String) = {
-    val cmd = Seq(binary, "--assign", "6", tileFile(tiles), clusterFile(clusters), matchFile(id));
+    val cmd = Seq(binary, "--assign", "11", "1.414", "1024", clusterFile(clusters), matchFile(id), tileFile(tiles));
     println(cmd)
     cmd !
   }
 
   def tiles(id: String) = {
-    val cmd = Seq(binary, "--tiles", "1.414", "6", tileFile(id))
+    val cmd = Seq(binary, "--tiles", "1.414", "11", tileFile(id))
     println(cmd)
     cmd !
   }
 
   def generate(tile: String, cluster: String, match_id: String, output: String) = {
-    val cmd = Seq(binary, "--generate", "1.414", tileFile(tile), clusterFile(cluster), matchFile(match_id), mosaicFile(output))
+    val cmd = Seq(binary, "--generate", "1.414", "1024", tileFile(tile), clusterFile(cluster), matchFile(match_id), mosaicFile(output))
     println(cmd)
     cmd !
   }
@@ -75,12 +75,12 @@ object MosaicService {
     val mosaic_id = mosaic._id.get.stringify
     val subset_id = subset._id.get.stringify
     val image = mosaic_id + ".jpg"
-    val image_display = mosaic_id + "_display.jpg"
+    // val image_display = mosaic_id + "_display.jpg"
 
-    tiles(mosaic_id)
+    // tiles(mosaic_id)
     assign(mosaic_id, subset_id, mosaic_id)
     generate(mosaic_id, subset_id, mosaic_id, image)
 
-    Some(mosaic.copy(filename=Some(image), thumbnail=Some(image_display)))
+    Some(mosaic.copy(filename=Some(image)))
   }
 }

@@ -49,7 +49,7 @@
 
         <div id="box-mosaic">
 
-          <img class="ui-mosaic shadow img-responsive center-block fade-in" id="mosaic-img" ng-src="{{mosaic.thumbnail}}" ng-hide="(collection.$loading || mosaic.$processing) && !mosaic.$shuffling" />
+          <img class="ui-mosaic shadow img-responsive center-block fade-in" id="mosaic-img" ng-src="{{mosaic.filename}}" ng-hide="(collection.$loading || mosaic.$processing) && !mosaic.$shuffling" />
 
           <div class="overlay fade-in" id="overlay-mosaic" ng-show="(!collection.$loaded && !mosaic.$loaded) || mosaic.$shuffling"></div>
           

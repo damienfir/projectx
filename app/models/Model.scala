@@ -28,11 +28,10 @@ case class Collection (
 case class Mosaic(
   _id: Option[BSONObjectID],
   filename: Option[String],
-  thumbnail: Option[String],
   subset: BSONObjectID
 ) extends IDModel[Mosaic] {
   def withID(id: BSONObjectID) = copy(_id = Some(id))
-  def this(subset: Subset) = this(None, None, None, subset._id.get)
+  def this(subset: Subset) = this(None, None, subset._id.get)
 }
 
 case class Subset(
