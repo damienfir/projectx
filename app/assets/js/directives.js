@@ -10,6 +10,8 @@ define([
   analytics
   ) {
 
+  var valid_formats = ['image/jpeg', 'image/png'];
+
   bq.directive("bqInterface", ["CollectionService", "MosaicService", "UserService", function(CollectionService, MosaicService, UserService){
     return {
       controller: function($scope) {
@@ -21,16 +23,26 @@ define([
           $scope.user = {_id: {$oid: ""}};
         }
 
+        function validateFileType(file) {
+          return valid_formats.indexOf(file.type) != -1;
+        }
+
         function uploadCollection(files) {
+          var valid_files = [];
+          for (var i = 0; i < files.length; i++) {
+            if(validateFileType(files[i])) valid_files.push(files[i]);
+          }
+          console.log(valid_files);
+
           if (!$scope.collection.$loaded) {
             var collection = CollectionService.create();
             updateUser();
             return collection.then(function(col) {
               $scope.collection = angular.extend(col, $scope.collection);
-              return CollectionService.upload(files, col);
+              return CollectionService.upload(valid_files, col);
             });
           } else {
-            return CollectionService.upload(files, $scope.collection);
+            return CollectionService.upload(valid_files, $scope.collection);
           }
         }
 
