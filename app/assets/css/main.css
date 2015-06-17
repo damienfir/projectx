@@ -18,7 +18,7 @@ html, body {
 .navbar-header > .navbar-brand:hover { color: #0c7cd5; }
 .navbar-brand > img {
   display: inline;
-  width: 30px;
+  /* width: 30px; */
 }
 .navbar-brand > small {
   font-size: 12px;

@@ -12,7 +12,7 @@
   <div class="navbar navbar-default navbar-fixed-top">
     <div class="container-fluid">
       <div class="navbar-header">
-        <a class="navbar-brand logo" href="/"><img src="/assets/images/logo.png"/> bigpiq</a>
+        <a class="navbar-brand logo" href="/"><img src="/assets/images/logo.png"/></a>
       </div>
       <div class="collapse navbar-collapse navbar-right">
         <ul class="nav navbar-nav">
@@ -142,22 +142,22 @@
 <div class="modal fade" id="send-modal" tabindex="-1" data-content="/share" bq-send>
   <div class="modal-dialog">
     <div class="modal-content">
-      <form id="email-form">
+      <form id="email-form" name="emailForm">
         <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
           <h4 class="modal-title"><i class="fa fa-paper-plane"></i>&nbsp; Send to...</h4>
         </div>
         <div class="modal-body">
           <div class="form-group">
-            <input class="form-control" ng-model="from" name="from" placeholder="Your email address" />
+            <input class="form-control" type="email" ng-model="from" name="from" placeholder="Your email address" />
           </div>
           <div class="form-group">
-            <input class="form-control" ng-model="to" name="to" placeholder="Your friend's email address" />
+            <input class="form-control" type="email" ng-model="to" name="to" placeholder="Your friend's email address" />
           </div>
         </div>
         <div class="modal-footer">
-          <button type="submit" class="btn btn-primary pull-right" id="email-btn" ng-click="sendTo()"><i class="fa fa-send"></i> Send</button>
-          <p class="centered text-success invisible" id="sent-label">Sent!</p>
+          <button type="submit" class="btn btn-primary pull-right" id="email-btn" ng-disabled="sent" ng-click="sendTo()"><i class="fa fa-send"></i> Send</button>
+          <p class="centered text-success" ng-show="sent" id="sent-label">Sent!</p>
         </div>
       </form>
     </div>
@@ -174,7 +174,7 @@
         </div>
         <div class="modal-body">
           <div class="form-group">
-            <input type="text" name="email" placeholder="Please enter your email address" class="form-control" id="email-input">
+            <input type="email" name="email" placeholder="Please enter your email address" class="form-control" id="email-input">
             <p class="centered text-muted">We will send you a link to your poster to view it later.</p>
           </div>
         </div>

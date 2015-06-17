@@ -45,7 +45,7 @@ object MosaicService {
 
   def cluster(gists: List[String], id: String): Option[Cluster] = {
     val out = clusterFile(id)
-    val cmd = binary +: "--cluster" +: "6" +: gists.map(gistFile) :+ out
+    val cmd = binary +: "--cluster" +: gists.length.toString +: gists.map(gistFile) :+ out
     println(cmd)
     cmd ! match {
       case 0 => Some(Json.parse(Source.fromFile(out).mkString).as[Cluster])
@@ -54,16 +54,16 @@ object MosaicService {
   }
 
   def assign(tiles: String, clusters: String, id: String) = {
-    val cmd = Seq(binary, "--assign", "11", "1.414", "1024", clusterFile(clusters), matchFile(id), tileFile(tiles));
+    val cmd = Seq(binary, "--assign", "1.414", "1024", clusterFile(clusters), matchFile(id), tileFile(tiles));
     println(cmd)
     cmd !
   }
 
-  def tiles(id: String) = {
-    val cmd = Seq(binary, "--tiles", "1.414", "11", tileFile(id))
-    println(cmd)
-    cmd !
-  }
+  // def tiles(id: String) = {
+  //   val cmd = Seq(binary, "--tiles", "1.414", "11", tileFile(id))
+  //   println(cmd)
+  //   cmd !
+  // }
 
   def generate(tile: String, cluster: String, match_id: String, output: String) = {
     val cmd = Seq(binary, "--generate", "1.414", "1024", tileFile(tile), clusterFile(cluster), matchFile(match_id), mosaicFile(output))

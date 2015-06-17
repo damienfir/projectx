@@ -114,6 +114,19 @@ define([
             ctrl.upload(ev.target.files);
           }
         });
+
+        var dropzone = document.getElementById("dropzone");
+        dropzone.addEventListener("dragover", function(ev){
+          ev.stopPropagation();
+          ev.preventDefault();
+          ev.dataTransfer.dropEffect = 'copy';
+        });
+
+        dropzone.addEventListener("drop", function(ev){
+          ev.stopPropagation();
+          ev.preventDefault();
+          ctrl.upload(ev.dataTransfer.files);
+        });
       }
     };
   }]);
@@ -208,20 +221,20 @@ define([
     };
   }]);
 
-  bq.directive("bqSend", ["$http", function($http) {
+  bq.directive("bqSend", ["$http", "$window", function($http, $window) {
     return {
       controller: function($scope) {
+        function reset(){
+          $scope.sent = false;
+        }
+
         $scope.sendTo = function() {
-          console.log("sending");
-          console.log($scope.to);
           $http.post("/users/"+$scope.user._id.$oid+"/send/"+$scope.mosaic.id, {
             to: $scope.to,
             from: $scope.from
           }).then(function(){
-            console.log("sent");
-            var el = document.getElementById("sent-label");
-            el.classList.remove("invisible");
-            el.classList.add("visible");
+            $scope.sent = true;
+            $window.setTimeout(reset, 2000);
           });
         };
       }
