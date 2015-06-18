@@ -88,6 +88,7 @@ define([
             $processed: true,
             $processing: false
           });
+          analytics.event("display-mosaic", mosaic.id);
         }
 
         function updateUser() {
@@ -101,9 +102,13 @@ define([
           generateMosaic($scope.subset).then(displayMosaic).then(function(){
             $scope.mosaic.$shuffling = false;
           });
+          analytics.event("shuffle", "");
         };
 
-        $scope.reset = init;
+        $scope.reset = function(){ 
+          init();
+          analytics.event("reset", "");
+        };
 
         init();
       }
@@ -125,6 +130,7 @@ define([
           if (!$scope.collection.$loading) {
             ctrl.upload(ev.target.files);
           }
+          analytics.event("upload-photos", ev.target.files.length);
         });
 
         var dropzone = document.getElementById("dropzone");
@@ -138,6 +144,7 @@ define([
           ev.stopPropagation();
           ev.preventDefault();
           ctrl.upload(ev.dataTransfer.files);
+          analytics.event("drop-photos", ev.dataTransfer.files.length);
         });
       }
     };

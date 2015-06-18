@@ -4,11 +4,15 @@ define([
   return {
     'page': function(content) {
       if (ga !== undefined)
-        ga('send', 'pageview', content);
+        if (content === undefined) {
+          ga('send', 'pageview');
+        } else {
+          ga('send', 'pageview', content);
+        }
     },
     'event': function(evt, name) {
       if (ga !== undefined)
-        ga("send", "event", "share", "facebook");
+        ga("send", "event", evt, name);
     },
     'share': function(network, url) {
       if (ga !== undefined)

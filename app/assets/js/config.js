@@ -45,7 +45,8 @@ require.config({
 
 require(['analytics', 'jquery', 'bootstrap'], function(analytics, $, _) {
 
-  // Google Analytics triggers
+  analytics.page();
+
   $(".modal").on("show.bs.modal", function(ev){ analytics.page($(ev.target).data("content")); });
   $("a").on("click", function(ev){ analytics.page($(ev.target).attr("href")); });
 });
