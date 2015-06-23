@@ -1,0 +1,28 @@
+@(filename: String)
+
+@main {
+
+<link rel="stylesheet" media="screen" href="@routes.Assets.at("css/interactive.css")">
+
+}{
+
+<div class="navbar navbar-default navbar-fixed-top">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <a class="navbar-brand logo" href="/"><img src="/assets/images/logo.png"/></a>
+    </div>
+  </div>
+</div>
+
+
+<div ui-composition class="ui-composition shadow">
+
+  <div ui-tile class="ui-tile" ng-repeat="tile in tiles">
+
+    <img ng-src="/storage/photos/{{ clusters.gists[tile.imgindex] }}"/>
+  </div>
+</div>
+
+
+<script src="@routes.Assets.at("bower_components/requirejs/require.js")" data-main="/assets/js/interactive"></script>
+}

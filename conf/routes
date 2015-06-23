@@ -48,6 +48,7 @@ POST    /collections/:id/subsets    controllers.Subsets.createFromCollection(id)
 POST    /subsets/:id/mosaics        controllers.Mosaics.generateFromSubset(id)
 
 
+GET     /interactive                controllers.Application.interactive
 GET     /ui                         controllers.Application.ui
 GET     /                           controllers.Application.index(filename: String = "")
 GET     /:filename                  controllers.Application.index(filename: String)
