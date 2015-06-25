@@ -31,34 +31,6 @@ object Application extends Controller with MongoController {
   def stockCollection = db.collection[JSONCollection]("stocks")
 
 
-  private def getUser(implicit request: Request[_]): Future[Option[User]] = request.session.get("user") match {
-    case Some(user_id) => userCollection.find(Json.obj("_id" -> Json.obj("$oid" -> user_id))).one[User]
-    case None => Future(None)
-  }
-
-
-  private def getOrCreateUser(implicit request: Request[_]): Future[User] = getUser flatMap {
-    case Some(user) => Future(user)
-    case None => {
-      val user = User(Some(BSONObjectID.generate), None)
-      userCollection.insert(user) map { _ =>
-        user
-      }
-    }
-  }
-
-  // private def getMosaicFromID(id: String): Future[Option[Mosaic]] = {
-  //   mosaicCollection.find(Json.obj("_id" -> Json.obj("$oid" -> id))).one[Mosaic]
-  // }
-
-  // private def getMosaic(implicit request: Request[_]): Future[Option[Mosaic]] = {
-  //   request.session.get("mosaic") match {
-  //     case Some(mosaic_id) => getMosaicFromID(mosaic_id)
-  //     case None => Future(None)
-  //   }
-  // }
-
-
   def index(filename: String) = Action {
     filename match {
       case "" => Ok(views.html.index(""))
@@ -75,71 +47,11 @@ object Application extends Controller with MongoController {
     Ok(views.html.interactive(""))
   }
 
-
-  // def reset = Action.async { implicit request =>
-  //   getOrCreateUser flatMap {  user =>
-  //     val id = BSONObjectID.generate
-  //     mosaicCollection.insert(Mosaic(Some(id), user._id.get, None, None, List())) map { _ =>
-  //       Ok.withSession(
-  //         "user" -> user._id.get.stringify,
-  //         "mosaic" -> id.stringify
-  //       )
-  //     }
-  //   }
-  // }
-
-
-  // def upload = Action.async(parse.multipartFormData) { implicit request =>
-  //   getMosaic flatMap { _ map { mosaic =>
-  //     MosaicService.saveImages(request.body.files.map(_.ref).toList) map { names =>
-  //         addToMosaic(mosaic, names)
-  //         println(names map (n => s"/storage/thumb/$n"))
-  //         Ok(Json.stringify(Json.arr(names map ("/storage/thumb/" + _))))
-  //       }
-  //     } getOrElse(Future(BadRequest))
-  //   }
-  // }
-
-
-  // def process = Action.async { implicit request =>
-  //   getMosaic flatMap { _ map { mosaic =>
-  //       MosaicService.process(mosaic) flatMap {
-  //         case Success(processed) =>
-  //           mosaicCollection.save(processed) map { lastError =>
-  //             Ok(Json.toJson(processed).toString)
-  //           }
-  //         case Failure(e) => Future(InternalServerError)
-  //       }
-  //     } getOrElse(Future(BadRequest))
-  //   }
-  // }
-
-
   // def dropbox = Action.async(parse.json) { implicit request =>
   //   getMosaic flatMap { _ map { mosaic =>
   //       Dropbox.download(request.body) flatMap { addToMosaic(mosaic, _) }
   //     } getOrElse(Future(BadRequest))
   //   }
-  // }
-
-
-  // private def addToMosaic(mosaic: Mosaic, names: List[String]): Future[Result] = {
-  //   mosaicCollection.save(mosaic.copy(images = mosaic.images ++ names)) map { _ => Ok }
-  // }
-
-  // def download = Action.async(parse.urlFormEncoded) { implicit request =>
-  //   request.body.get("email") map(_.head) map { email =>
-  //     getUser map {
-  //       case Some(user) => userCollection.save(user.copy(email = Some(email)))
-  //     }
-  //     getMosaic map {
-  //       case Some(mosaic) =>
-  //         EmailService.sendToSelf(email, mosaic._id.get.stringify)
-  //         mosaic.filename map { fname =>
-  //           Ok.sendFile(MosaicService.getFile(fname))
-  //         } getOrElse(BadRequest)
-  //     }
-  //   } getOrElse(Future(BadRequest))
   // }
 
 
@@ -202,27 +114,27 @@ object Feedback extends Controller with MongoController {
 
 abstract class CRUDController[T <: IDModel[T]] extends Controller with MongoController {
 
-  def collection: JSONCollection
+  def _collection: JSONCollection
   implicit val format: Format[T]
 
   object DBA {
     def create(item: T) = {
       val created = item.withID(BSONObjectID.generate)
-      collection.save(created) map { lastError =>
+      _collection.save(created) map { lastError =>
         created
       }
     }
 
     def update(id: BSONObjectID, item: T) = {
       val updated = item.withID(id)
-      collection.save(updated) map { lastError =>
+      _collection.save(updated) map { lastError =>
         updated
       }
     }
 
-    def list = collection.find(Json.obj()).cursor[T].collect[List]()
-    def get(id: BSONObjectID) = collection.find(Json.obj("_id" -> id)).one[T]
-    def delete(id: BSONObjectID) = collection.remove(Json.obj("_id" -> id))
+    def list = _collection.find(Json.obj()).cursor[T].collect[List]()
+    def get(id: BSONObjectID) = _collection.find(Json.obj("_id" -> id)).one[T]
+    def delete(id: BSONObjectID) = _collection.remove(Json.obj("_id" -> id))
   }
 
 
@@ -260,27 +172,27 @@ abstract class CRUDController[T <: IDModel[T]] extends Controller with MongoCont
 
 object Users extends CRUDController[User] {
   implicit val format = Json.format[User]
-  def collection = db.collection[JSONCollection]("users")
+  def _collection = db.collection[JSONCollection]("users")
 
   def send(user_id: String, mosaic_id: String) = Action(parse.json) { implicit request =>
     implicit val emailFormat = Json.format[Email]
 
     val req = request.body.as[Email]
 
-    collection.update(Json.obj("_id" -> BSONObjectID(user_id)), Json.obj("$set" -> Json.obj("email" -> req.from)))
+    _collection.update(Json.obj("_id" -> BSONObjectID(user_id)), Json.obj("$set" -> Json.obj("email" -> req.from)))
     EmailService.sendToFriend(req.to, req.from, mosaic_id)
     Ok
   }
 
   def download(user_id: String, mosaic_id: String) = Action.async(parse.urlFormEncoded) { implicit request =>
     request.body.get("email") map(_.head) map { email =>
-      collection.update(Json.obj("_id" -> BSONObjectID(user_id)), Json.obj("$set" -> Json.obj("email" -> email)))
+      _collection.update(Json.obj("_id" -> BSONObjectID(user_id)), Json.obj("$set" -> Json.obj("email" -> email)))
       Mosaics.DBA.get(BSONObjectID(mosaic_id)) map {
         case Some(mosaic) =>
+          MosaicService.renderMosaic(mosaic) map { filename =>
           EmailService.sendToSelf(email, mosaic._id.get.stringify)
-          mosaic.filename map { fname =>
-            Ok.sendFile(MosaicService.getMosaicFile(fname))
-          } getOrElse(BadRequest)
+          Ok.sendFile(MosaicService.getMosaicFile(filename))
+        } getOrElse(BadRequest)
       }
     } getOrElse(Future(BadRequest))
   }
@@ -293,26 +205,26 @@ object Users extends CRUDController[User] {
 
 object Collections extends CRUDController[Collection] {
   implicit val format = Json.format[Collection]
-  def collection = db.collection[JSONCollection]("collections")
+  def _collection = db.collection[JSONCollection]("collections")
 
   val baseDir = "/storage/thumb/"
 
   def addUser(id: String, user_id: String) = Action.async {
-    collection.update(Json.obj("_id" -> BSONObjectID(id)),
+    _collection.update(Json.obj("_id" -> BSONObjectID(id)),
       Json.obj("$addToSet" -> Json.obj("users" -> BSONObjectID(user_id)))) map { lastError =>
         Ok
     }
   }
 
   def removeUser(id: String, user_id: String) = Action.async {
-    collection.update( Json.obj("_id" -> BSONObjectID(id)),
+    _collection.update( Json.obj("_id" -> BSONObjectID(id)),
       Json.obj("$pull" -> Json.obj("users" -> BSONObjectID(user_id)))) map { lastError =>
         Ok
     }
   }
 
   def fromUser(id: String) = Action.async {
-    collection.find(Json.obj("users" -> BSONObjectID(id))).cursor[Collection].collect[List]() map {
+    _collection.find(Json.obj("users" -> BSONObjectID(id))).cursor[Collection].collect[List]() map {
       list => Ok(Json.toJson(list))
     }
   }
@@ -325,7 +237,7 @@ object Collections extends CRUDController[Collection] {
 
   def addPhotos(id: String) = Action.async(parse.multipartFormData) { request =>
     Future(ImageService.saveImages(request.body.files.map(_.ref).toList)) map { names =>
-      collection.update(Json.obj("_id" -> BSONObjectID(id)),
+      _collection.update(Json.obj("_id" -> BSONObjectID(id)),
         Json.obj("$addToSet" -> Json.obj("photos" -> Json.obj("$each" -> names))))
       MosaicService.preprocess(names)
       Ok(Json.toJson(Json.obj("filenames" -> names.map(baseDir + _))))
@@ -335,39 +247,36 @@ object Collections extends CRUDController[Collection] {
 
 
 object Mosaics extends CRUDController[Mosaic] {
+  implicit val tileformat = Json.format[Tile]
   implicit val format = Json.format[Mosaic]
-  def collection = db.collection[JSONCollection]("mosaics")
+  def _collection = db.collection[JSONCollection]("mosaics")
 
-  val baseDir = "/storage/generated/"
-
-  def generateFromSubset(id: String) = Action.async {
-    Subsets.DBA.get(BSONObjectID(id)) flatMap { subset =>
-      DBA.create(new Mosaic(subset.get)) flatMap { mosaic =>
-        MosaicService.generateMosaic(mosaic, subset.get) flatMap {
-          case Some(processed) =>
-            collection.save(processed) map { lastError =>
-              Ok(Json.toJson(processed))
-            }
-          case None => Future(InternalServerError)
+  def generateFromCollection(id: String) = Action.async {
+    Collections.DBA.get(BSONObjectID(id)) flatMap {
+      _ flatMap { col =>
+        MosaicService.generateMosaic(new Mosaic(col), col.photos)
+      } map { mosaic =>
+        _collection.save(mosaic) map { lastError =>
+          Ok(Json.toJson(mosaic))
         }
-      }
+      } getOrElse(Future(InternalServerError))
     }
   }
 }
 
 
-object Subsets extends CRUDController[Subset] {
-  implicit val format = Json.format[Subset]
-  def collection = db.collection[JSONCollection]("subsets")
+// object Subsets extends CRUDController[Subset] {
+//   implicit val format = Json.format[Subset]
+//   def _collection = db.collection[JSONCollection]("subsets")
 
-  def createFromCollection(id: String) = Action.async {
-    Collections.DBA.get(BSONObjectID(id)) flatMap { col =>
-      val subset_id = BSONObjectID.generate
-      MosaicService.cluster(col.get.photos, subset_id.stringify) map { cluster =>
-        DBA.update(subset_id, Subset(None, cluster.sorted map (cluster.gists(_)))) map { c =>
-          Ok(Json.toJson(c))
-        }
-      } getOrElse (Future(InternalServerError))
-    }
-  }
-}
+//   def createFromCollection(id: String) = Action.async {
+//     Collections.DBA.get(BSONObjectID(id)) flatMap { col =>
+//       val subset_id = BSONObjectID.generate
+//       MosaicService.cluster(col.get.photos, subset_id.stringify) map { cluster =>
+//         DBA.update(subset_id, Subset(None, cluster.sorted map (cluster.gists(_)))) map { c =>
+//           Ok(Json.toJson(c))
+//         }
+//       } getOrElse (Future(InternalServerError))
+//     }
+//   }
+// }

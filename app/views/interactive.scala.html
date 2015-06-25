@@ -29,9 +29,7 @@
         <div id="box-mosaic">
 
           <div ui-composition class="ui-composition shadow">
-
             <div ui-tile class="ui-tile" ng-repeat="tile in tiles">
-
               <img ng-src="/storage/photos/{{ clusters.gists[tile.imgindex] }}"/>
             </div>
           </div>
@@ -68,7 +66,6 @@
     
     <input type="file" name="image" id="file-upload" ng-bind="fileupload" ng-model="files" multiple>
   </div>
-
 
 
 <script src="@routes.Assets.at("bower_components/requirejs/require.js")" data-main="/assets/js/interactive"></script>

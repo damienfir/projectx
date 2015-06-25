@@ -27,19 +27,35 @@ case class Collection (
 
 case class Mosaic(
   _id: Option[BSONObjectID],
-  filename: Option[String],
-  subset: BSONObjectID
+  // filename: Option[String],
+  collection: BSONObjectID,
+  photos: List[String],
+  tiles: List[Tile]
 ) extends IDModel[Mosaic] {
   def withID(id: BSONObjectID) = copy(_id = Some(id))
-  def this(subset: Subset) = this(None, None, subset._id.get)
+  def this(collection: Collection) = this(Some(BSONObjectID.generate), collection._id.get, List(), List())
 }
 
-case class Subset(
-  _id: Option[BSONObjectID],
-  photos: List[String]
-) extends IDModel[Subset] {
-  def withID(id: BSONObjectID) = copy(_id = Some(id))
-}
+
+case class Tile(
+  tileindex: Int,
+  imgindex: Int,
+  cx1: Float,
+  cx2: Float,
+  cy1: Float,
+  cy2: Float,
+  tx1: Float,
+  tx2: Float,
+  ty1: Float,
+  ty2: Float
+)
+
+// case class Subset(
+//   _id: Option[BSONObjectID],
+//   photos: List[String]
+// ) extends IDModel[Subset] {
+//   def withID(id: BSONObjectID) = copy(_id = Some(id))
+// }
 
 
 case class Stock(_id: BSONObjectID, mosaic: String, photos: List[String], selected: List[Int])
@@ -52,8 +68,8 @@ case class Email(to: String, from: String)
 
 
 object JsonFormats {
-  implicit val userFormat = Json.format[User]
-  implicit val mosaicFormat = Json.format[Mosaic]
+  // implicit val userFormat = Json.format[User]
+  // implicit val mosaicFormat = Json.format[Mosaic]
   implicit val feebackQuestionFormat = Json.format[FeedbackQuestion]
   implicit val feebackFormat = Json.format[Feedback]
   implicit val contactFeebackFormat = Json.format[ContactFeedback]

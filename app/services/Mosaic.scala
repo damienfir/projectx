@@ -18,9 +18,9 @@ case class Cluster(
   sorted: List[Int]
 )
 
-
 object MosaicService {
   implicit val clusterFormat = Json.format[Cluster]
+  implicit val tileFormat = Json.format[Tile]
 
   val binary = Play.current.configuration.getString("px.binary").get
 
@@ -53,10 +53,14 @@ object MosaicService {
     }
   }
 
-  def assign(tiles: String, clusters: String, id: String) = {
-    val cmd = Seq(binary, "--assign", "1.414", "1024", clusterFile(clusters), matchFile(id), tileFile(tiles));
+  def assign(tiles: String, clusters: String, id: String): Option[List[Tile]] = {
+    val out = matchFile(id) 
+    val cmd = Seq(binary, "--assign", "1.414", "1024", clusterFile(clusters), out, tileFile(tiles));
     println(cmd)
-    cmd !
+    cmd ! match {
+      case 0 => Some(Json.parse(Source.fromFile(out).mkString).as[List[Tile]])
+      case _ => None
+    }
   }
 
   // def tiles(id: String) = {
@@ -65,22 +69,26 @@ object MosaicService {
   //   cmd !
   // }
 
-  def generate(tile: String, cluster: String, match_id: String, output: String) = {
+  def generate(tile: String, cluster: String, match_id: String, output: String): Option[String] = {
     val cmd = Seq(binary, "--generate", "1.414", "1024", tileFile(tile), clusterFile(cluster), matchFile(match_id), mosaicFile(output))
     println(cmd)
-    cmd !
+    cmd ! match {
+      case 0 => Some(output)
+      case _ => None
+    }
   }
 
-  def generateMosaic(mosaic: Mosaic, subset: Subset): Future[Option[Mosaic]] = Future {
+  def generateMosaic(mosaic: Mosaic, photos: List[String]): Option[Mosaic] = {
     val mosaic_id = mosaic._id.get.stringify
-    val subset_id = subset._id.get.stringify
-    val image = mosaic_id + ".jpg"
-    // val image_display = mosaic_id + "_display.jpg"
 
-    // tiles(mosaic_id)
-    assign(mosaic_id, subset_id, mosaic_id)
-    generate(mosaic_id, subset_id, mosaic_id, image)
+    for {
+      sorted <- cluster(photos, mosaic_id)
+      tiles <- assign(mosaic_id, mosaic_id, mosaic_id)
+    } yield Some(mosaic.copy(photos = sorted.gists, tiles = tiles))
+  }
 
-    Some(mosaic.copy(filename=Some(image)))
+  def renderMosaic(mosaic: Mosaic): Option[String] = {
+    val mosaic_id = mosaic._id.get.stringify
+    generate(mosaic_id, mosaic_id, mosaic_id, mosaic_id + ".jpg")
   }
 }
