@@ -84,7 +84,7 @@ object MosaicService {
     for {
       sorted <- cluster(photos, mosaic_id)
       tiles <- assign(mosaic_id, mosaic_id, mosaic_id)
-    } yield Some(mosaic.copy(photos = sorted.gists, tiles = tiles))
+    } yield mosaic.copy(photos = sorted.gists, tiles = tiles)
   }
 
   def renderMosaic(mosaic: Mosaic): Option[String] = {

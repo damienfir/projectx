@@ -263,20 +263,3 @@ object Mosaics extends CRUDController[Mosaic] {
     }
   }
 }
-
-
-// object Subsets extends CRUDController[Subset] {
-//   implicit val format = Json.format[Subset]
-//   def _collection = db.collection[JSONCollection]("subsets")
-
-//   def createFromCollection(id: String) = Action.async {
-//     Collections.DBA.get(BSONObjectID(id)) flatMap { col =>
-//       val subset_id = BSONObjectID.generate
-//       MosaicService.cluster(col.get.photos, subset_id.stringify) map { cluster =>
-//         DBA.update(subset_id, Subset(None, cluster.sorted map (cluster.gists(_)))) map { c =>
-//           Ok(Json.toJson(c))
-//         }
-//       } getOrElse (Future(InternalServerError))
-//     }
-//   }
-// }

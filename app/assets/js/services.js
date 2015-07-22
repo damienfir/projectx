@@ -2,7 +2,7 @@ define([
     'app'
 ], function(bq) {
 
-  bq.service("CollectionService", ["$q", "$http", "UserService", "User", "Collection", function($q, $http, UserService, User, Collection) {
+  app.service("CollectionService", ["$q", "$http", "UserService", "User", "Collection", function($q, $http, UserService, User, Collection) {
 
     this.create = function() {
       return UserService.getUser().then(function(user){
@@ -42,7 +42,7 @@ define([
   }]);
 
 
-  bq.service("MosaicService", ["Subset", "$location", function(Subset, $location) {
+  app.service("MosaicService", ["Subset", "$location", function(Subset, $location) {
 
     var hostURL = $location.protocol() + "://" + $location.host();
     if ($location.port() !== 80) hostURL += ":" + $location.port();
@@ -76,7 +76,7 @@ define([
   }]);
 
 
-  bq.service("UserService", ["$cookies", "$q", "User", function($cookies, $q, User){
+  app.service("UserService", ["$cookies", "$q", "User", function($cookies, $q, User){
 
     this.user = undefined;
 

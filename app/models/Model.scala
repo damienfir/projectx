@@ -25,6 +25,7 @@ case class Collection (
   def this(users: List[BSONObjectID]) = this(None, users, List())
 }
 
+// aka Composition in frontend
 case class Mosaic(
   _id: Option[BSONObjectID],
   // filename: Option[String],
