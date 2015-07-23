@@ -9,9 +9,11 @@ var valid_formats = ['image/jpeg', 'image/png'];
 app.directive("uiInterface", ["Collection", "Composition", "User", function(Collection, Composition, User){
   return {
     controller: function($scope) {
+      
 
       function init() {
-        $scope.collection = {};
+        $scope.state = 0;
+        $scope.collection = {photos: []};
         $scope.composition = {};
         $scope.user = {_id: {$oid: ""}};
       }
@@ -26,46 +28,40 @@ app.directive("uiInterface", ["Collection", "Composition", "User", function(Coll
           if(validateFileType(files[i])) valid_files.push(files[i]);
         }
 
-        // if (!$scope.collection.$loaded) {
+        if ($scope.collection.photos.length === 0) {
+          $scope.state = 1;
           var collection = Collection.create();
           updateUser();
           return collection.then(function(col) {
             $scope.collection = angular.extend(col, $scope.collection);
             return Collection.upload(valid_files, col);
           });
-        // } else {
-        //   return Collection.upload(valid_files, $scope.collection);
-        // }
+        } else {
+          $scope.state = 5;
+          return Collection.upload(valid_files, $scope.collection);
+        }
       }
 
       this.upload = function(files) {
-        // $scope.collection.$loaded = false;
-        // $scope.collection.$loading = true;
-        $scope.collection.size = files.length;
-
         return uploadCollection(files)
-          .then(
-              generateComposition
-              )
+          .then(generateComposition)
           .then(displayComposition);
       };
 
-      function addToCollection(uploaded) {
-        $scope.collection.thumbs = $scope.collection.thumbs.concat(uploaded.filenames.map(function(x){
-          return {src: x, selected: false};
-        }));
-      }
+      // function addToCollection(uploaded) {
+      //   $scope.collection.thumbs = $scope.collection.thumbs.concat(uploaded.filenames.map(function(x){
+      //     return {src: x, selected: false};
+      //   }));
+      // }
 
       function generateComposition(collection) {
+        $scope.state = 2;
         return Composition.generate(collection);
       }
 
       function displayComposition(composition) {
+        $scope.state = 3;
         $scope.composition = composition;
-        // $scope.mosaic = angular.extend(mosaic, {
-        //   $processed: true,
-        //   $processing: false
-        // });
       }
 
       function updateUser() {
@@ -75,13 +71,12 @@ app.directive("uiInterface", ["Collection", "Composition", "User", function(Coll
       }
 
       $scope.shuffle = function() {
-        // $scope.mosaic.$shuffling = true;
-        generateComposition($scope.subset).then(displayComposition).then(function(){
-          // $scope.mosaic.$shuffling = false;
-        });
+        generateComposition($scope.collection)
+          .then(displayComposition);
       };
 
       $scope.reset = init;
+      $scope.isEmpty = function(obj) { for (var p in obj) {return false;} return true; };
 
       init();
     }
@@ -126,7 +121,7 @@ app.directive('uiComposition', [function(){
     require: "^uiInterface",
     controller: function($scope, $element) {
       // console.log($scope);
-      $scope.composition = testData;
+      // $scope.composition = testData;
     },
     link: function($scope, $element) {
 
@@ -272,10 +267,8 @@ app.directive('uiTile', [function(){
         $element.on("mousemove", function(ev){
           ev.stopPropagation();
           ev.preventDefault();
-
           move(ev.originalEvent.movementY / img.height, 'cy1', 'cy2');
           move(ev.originalEvent.movementX / img.width, 'cx1', 'cx2');
-
           $scope.$digest();
         });
       });
@@ -402,6 +395,169 @@ app.factory("Compositions", ["$resource", function($resource){
   return $resource("/mosaics/:id", {}, {
     generate: {url: "/collections/:id/mosaics", method: "POST"}
   });
+}]);
+
+
+app.directive("bqShare", ["$window", function($window) {
+  return {
+    controller: function($scope) {
+
+      var facebookID = "1580376645513631";
+
+      function shareURL(url) {
+        $window.open(url, 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=600,width=600');
+      }
+
+      $scope.shareFacebook = function() {
+        console.log("fb");
+        var url = $scope.mosaic.url;
+        analytics.share("facebook", url);
+        shareURL("http://www.facebook.com/dialog/share?app_id="+facebookID+"&display=popup&href="+encodeURIComponent(url)+"&redirect_uri="+encodeURIComponent(url));
+      };
+
+      $scope.shareGoogle = function() {
+        var url = $scope.mosaic.url;
+        // ga("send", "social", "google", "share", url);
+        // ga("send", "event", "share", "google");
+        shareURL("https://plus.google.com/share?url=" + encodeURIComponent(url));
+      };
+
+      $scope.sharePinterest = function() {
+        var url = $scope.mosaic.url;
+        // ga("send", "social", "pinterest", "share", url);
+        // ga("send", "event", "share", "pinterest");
+        shareURL("https://www.pinterest.com/pin/create/button/?url="+encodeURIComponent(url)+"&media="+encodeURIComponent($scope.mosaic.thumbnail)+"&description=");
+      };
+
+      $scope.shareTwitter = function() {
+        var url = $scope.mosaic.url;
+        // ga("send", "social", "twitter", "share", url);
+        // ga("send", "event", "share", "twitter");
+        shareURL("https://twitter.com/intent/tweet?url="+encodeURIComponent(url));
+      };
+    },
+    link: function($scope, $element) {
+      $element.children(".modal-body button").tooltip();
+    }
+  };
+}]);
+
+app.directive("bqSend", ["$http", "$window", function($http, $window) {
+  return {
+    controller: function($scope) {
+      function reset(){
+        $scope.sent = false;
+      }
+
+      $scope.sendTo = function() {
+        $http.post("/users/"+$scope.user._id.$oid+"/send/"+$scope.mosaic.id, {
+          to: $scope.to,
+          from: $scope.from
+        }).then(function(){
+          $scope.sent = true;
+          $window.setTimeout(reset, 2000);
+        });
+      };
+    }
+  };
+}]);
+
+app.directive("bqDownload", ["$http", function($http){
+  return {
+    // controller: function($scope) {
+    //   $scope.download = function(ev) {
+    //     $http.post("/users"+$scope.user._id.$oid+"/download"+$scope.mosaic.id, {
+    //     });
+    //   };
+    // },
+    link: function($scope) {
+      var emailRegex = /[^@]+@[^\.]+\..+/;
+      var form = angular.element(document.getElementById("download-form"));
+      var download = angular.element(document.getElementById("download-btn"));
+      angular.element(document.getElementById("email-input")).on("input", function(ev){
+        if (emailRegex.test(ev.target.value)) {
+          download.attr("disabled", false);
+        } else {
+          download.attr("disabled", true);
+        }
+      });
+    }
+  };
+}]);
+
+app.directive("bqForm", ["$http", function($http){
+  return {
+    restrict: "A",
+    link: function($scope, $element, $attr) {
+      $element.on("submit", function(ev) {
+        ev.preventDefault();
+        $http({
+          method: "POST",
+          url: $attr.bqForm,
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          data: $element.serialize()
+        })
+        .success(function(data, status){
+          $scope.httpStatus = status;
+        })
+        .error(function(data, status){
+          $scope.httpStatus = status;
+        });
+      });
+    }
+  };
+}]);
+
+
+app.directive("bqFeedback", ["$http", function($http){
+  return {
+    controller: function($scope, $element) {
+      this.pullUp = function() {
+        $element.css("bottom", "-10px");
+        analytics.event("feedback", "opened-panel");
+      };
+
+      this.pullDown = function() {
+        $element.css("bottom", "-"+($element.height()-35)+"px");
+        analytics.event("feedback", "closed-panel");
+      };
+
+      this.getQuestions = function() {
+        $http.get("/questions").success(function(data){
+          $scope.questions = data;
+          $scope.nextQuestion();
+        });
+      };
+    },
+    link: function($scope, $element, $attr, ctrl) {
+      $scope.choose = function(question_id, choice_id) {
+        $http.post("/feedback", {
+          "user_id": $scope.user._id.$oid,
+          "question_id": question_id,
+          "choice": choice_id
+        }).success(function(){
+          $scope.nextQuestion();
+        });
+        // ga("send", "event", "feedback", "answered-question");
+      };
+
+      $scope.submitText = function() {
+        ctrl.pullDown();
+      };
+
+      $scope.nextQuestion = function() {
+        $scope.question = $scope.questions.length ? $scope.questions.shift() : {};
+      };
+
+
+      ctrl.getQuestions();
+
+      $element.on("mouseenter", ctrl.pullUp.bind(ctrl));
+      $element.on("mouseleave", ctrl.pullDown.bind(ctrl));
+    }
+  };
 }]);
 
 angular.element().ready(function() {
