@@ -120,98 +120,153 @@ app.directive('uiComposition', [function(){
   return {
     require: "^uiInterface",
     controller: function($scope, $element) {
-      // console.log($scope);
       // $scope.composition = testData;
+      // $scope.state = 3;
+      $scope.currently_moving = undefined;
+
+      this.moving = function(idx) {
+        $scope.currently_moving = idx;
+      };
+
+      function centerTile(tile) {
+        var ar = (tile.tx2-tile.tx1)/(tile.ty2-tile.ty1);
+        var center = [tile.cx1+(tile.cx2-tile.cx1)/2, tile.cy1+(tile.cy2-tile.cy1)/2];
+        tile.cx1 = 0;
+        tile.cy1 = 0;
+        if (ar > 1) {
+          tile.cx2 = 1;
+          tile.cy2 = 1/ar;
+          var dy = tile.cy2/2 - center[1];
+          tile.cy1 = Math.max(0,tile.cy1-dy);
+          tile.cy2 = Math.min(1,tile.cy2-dy);
+        } else {
+          tile.cx2 = 1*ar;
+          tile.cy2 = 1;
+          var dx = tile.cx2/2 - center[0];
+          tile.cx1 = Math.max(0,tile.cx1-dx);
+          tile.cx2 = Math.min(1,tile.cx2-dx);
+        }
+      }
+
+      this.swap = function(idx1, idx2) {
+        var tile1 = $scope.composition.tiles[idx1];
+        var tile2 = $scope.composition.tiles[idx2];
+        var tmp = angular.copy(tile1);
+
+        tile1.tx1 = tile2.tx1;
+        tile1.ty1 = tile2.ty1;
+        tile1.tx2 = tile2.tx2;
+        tile1.ty2 = tile2.ty2;
+
+        tile2.tx1 = tmp.tx1;
+        tile2.ty1 = tmp.ty1;
+        tile2.tx2 = tmp.tx2;
+        tile2.ty2 = tmp.ty2;
+
+        centerTile(tile1);
+        centerTile(tile2);
+
+        $scope.$digest();
+        $scope.$broadcast("stopmoving");
+      };
+
+      $scope.moveTiles = function(targets, orientation, dx, dy) {
+          var i;
+
+          targets.topleft.forEach(function(idx){
+            var tile = $scope.composition.tiles[idx];
+            tile.tx1 += dx * orientation[0];
+            tile.ty1 += dy * orientation[1];
+            centerTile(tile);
+          });
+
+          targets.bottomright.forEach(function(idx) {
+            var tile = $scope.composition.tiles[idx];
+            tile.tx2 += dx * orientation[0];
+            tile.ty2 += dy * orientation[1];
+            centerTile(tile);
+          });
+      };
     },
     link: function($scope, $element) {
+      function getOrientation(tiles, prop) {
+        return tiles.map(function(idx) {
+          return $scope.composition.tiles[idx][prop];
+        }).reduce(function(prev, curr) {
+          return (prev === curr) ? prev : false;
+        }) ? [1,0] : [0,1];
+      }
 
-      // function getOrientation(tiles, prop) {
-      //   return tiles.map(function(idx) {
-      //     return $scope.composition.tiles[idx][prop];
-      //   }).reduce(function(prev, curr) {
-      //     return (prev === curr) ? prev : false;
-      //   }) ? [1,0] : [0,1];
-      // }
+      function findOrientation(tl, br) {
+        if (tl.length >= br.length) {
+          return getOrientation(tl, 'tx1');
+        } else {
+          return getOrientation(br, 'tx2');
+        }
+      }
 
-      // function findOrientation(tl, br) {
-      //   if (tl.length >= br.length) {
-      //     return getOrientation(tl, 'tx1');
-      //   } else {
-      //     return getOrientation(br, 'tx2');
-      //   }
-      // }
+      function findTargets(xn, yn) {
+        var tl_targets = [];
+        var br_targets = [];
+        var tiles = $scope.composition.tiles;
+        var best1 = Infinity,
+        best2 = Infinity;
 
-      // function findTargets(xn, yn) {
-      //   var tl_targets = [];
-      //   var br_targets = [];
-      //   var tiles = $scope.composition.tiles;
-      //   var best1 = Infinity,
-      //   best2 = Infinity;
+        for (var i = 0; i < tiles.length; i++) {
+          var dy1 = Math.abs(yn - tiles[i].ty1);
+          var dx1 = Math.abs(xn - tiles[i].tx1);
+          var dy2 = Math.abs(yn - tiles[i].ty2);
+          var dx2 = Math.abs(xn - tiles[i].tx2);
+          var min1 = Math.min(dy1, dx1);
+          var min2 = Math.min(dy2, dx2);
 
-      //   for (var i = 0; i < tiles.length; i++) {
-      //     var dy1 = Math.abs(yn - tiles[i].ty1);
-      //     var dx1 = Math.abs(xn - tiles[i].tx1);
-      //     var dy2 = Math.abs(yn - tiles[i].ty2);
-      //     var dx2 = Math.abs(xn - tiles[i].tx2);
-      //     var min1 = Math.min(dy1, dx1);
-      //     var min2 = Math.min(dy2, dx2);
+          if (min1 < min2) {
+            if (min1 < best1) {
+              tl_targets = [];
+              best1 = min1;
+            }
+            if (min1 == best1) {
+              tl_targets.push(i);
+            }
+          } else {
+            if (min2 < best2) {
+              br_targets = [];
+              best2 = min2;
+            }
+            if (min2 == best2) {
+              br_targets.push(i);
+            }
+          }
+        }
 
-      //     if (min1 < min2) {
-      //       if (min1 < best1) {
-      //         tl_targets = [];
-      //         best1 = min1;
-      //       }
-      //       if (min1 == best1) {
-      //         tl_targets.push(i);
-      //       }
-      //     } else {
-      //       if (min2 < best2) {
-      //         br_targets = [];
-      //         best2 = min2;
-      //       }
-      //       if (min2 == best2) {
-      //         br_targets.push(i);
-      //       }
-      //     }
-      //   }
+        return {
+          'topleft': tl_targets,
+          'bottomright': br_targets,
+        };
+      }
 
-      //   return {
-      //     'topleft': tl_targets,
-      //     'bottomright': br_targets,
-      //   };
-      // }
+      $element.on("mousedown", function(ev){
+        // console.log(ev);
+        ev.stopPropagation();
+        ev.preventDefault();
+        var targets = findTargets(ev.offsetX/$element.width(), ev.offsetY/$element.height());
+        var orientation = findOrientation(targets.topleft, targets.bottomright);
 
-      // $element.on("mousedown", function(ev){
-      //   // console.log(ev);
-      //   ev.stopPropagation();
-      //   ev.preventDefault();
-      //   var targets = findTargets(ev.offsetX/$element.width(), ev.offsetY/$element.height());
-      //   var orientation = findOrientation(targets.topleft, targets.bottomright);
+        $element.on("mousemove", function(moveev){
+          moveev.stopPropagation();
+          moveev.preventDefault();
+          var dx = moveev.originalEvent.movementX / $element.width();
+          var dy = moveev.originalEvent.movementY / $element.height();
 
-      //   $element.on("mousemove", function(moveev){
-      //     moveev.stopPropagation();
-      //     moveev.preventDefault();
-      //     var dx = moveev.originalEvent.movementX / $element.width();
-      //     var dy = moveev.originalEvent.movementY / $element.height();
-      //     var i;
+          $scope.moveTiles(targets, orientation, dx, dy);
 
-      //     targets.topleft.forEach(function(idx){
-      //       $scope.composition.tiles[idx].tx1 += dx * orientation[0];
-      //       $scope.composition.tiles[idx].ty1 += dy * orientation[1];
-      //     });
+          $scope.$digest();
+        });
+      });
 
-      //     targets.bottomright.forEach(function(idx) {
-      //       $scope.composition.tiles[idx].tx2 += dx * orientation[0];
-      //       $scope.composition.tiles[idx].ty2 += dy * orientation[1];
-      //     });
-
-      //     $scope.$digest();
-      //   });
-      // });
-
-      // $element.on("mouseup", function() {
-      //   $element.off("mousemove");
-      // });
+      $element.on("mouseup", function() {
+        $element.off("mousemove");
+      });
     }
   };
 }]);
@@ -225,7 +280,7 @@ app.directive('uiTile', [function(){
         return path.split('/').pop();
       };
     },
-    link: function($scope, $element) {
+    link: function($scope, $element, $attr, $ctrl) {
       var tile = $element[0];
       var img = $element.children()[0];
 
@@ -258,11 +313,18 @@ app.directive('uiTile', [function(){
         return true;
       }
 
+      function stopMoving() {
+        $element.off("mousemove");
+        $ctrl.moving(undefined);
+      }
+
       $scope.$watchCollection("tile", render);
 
       $element.on("mousedown", function(downev){
         downev.stopPropagation();
         downev.preventDefault();
+
+        $ctrl.moving($scope.$index);
 
         $element.on("mousemove", function(ev){
           ev.stopPropagation();
@@ -273,8 +335,20 @@ app.directive('uiTile', [function(){
         });
       });
 
-      $element.on("mouseup mouseleave", function(){
-        $element.off("mousemove");
+      // $scope.$on("stopmoving", function(){ stopMoving(); });
+
+      $element.on("mouseup", function(){
+        if ($scope.currently_moving === $scope.$index) {
+          stopMoving();
+        }
+      });
+
+      $element.on("mouseenter", function(ev) {
+        if (!angular.isUndefined($scope.currently_moving) && $scope.currently_moving !== $scope.$index) {
+          // $element.one("mouseup", function(upev) {
+            $ctrl.swap($scope.$index, $scope.currently_moving);
+          // });
+        }
       });
     }
   };
