@@ -189,10 +189,8 @@ object Users extends CRUDController[User] {
       _collection.update(Json.obj("_id" -> BSONObjectID(user_id)), Json.obj("$set" -> Json.obj("email" -> email)))
       Mosaics.DBA.get(BSONObjectID(mosaic_id)) map {
         case Some(mosaic) =>
-          MosaicService.renderMosaic(mosaic) map { filename =>
           EmailService.sendToSelf(email, mosaic._id.get.stringify)
-          Ok.sendFile(MosaicService.getMosaicFile(filename))
-        } getOrElse(BadRequest)
+          Ok.sendFile(MosaicService.getMosaicFile(mosaic_id + ".jpg"))
       }
     } getOrElse(Future(BadRequest))
   }
@@ -261,5 +259,11 @@ object Mosaics extends CRUDController[Mosaic] {
         }
       } getOrElse(Future(InternalServerError))
     }
+  }
+
+  def generate = Action(parse.json) { request =>
+    val mosaic = request.body.as[Mosaic]
+    MosaicService.replaceMosaic(mosaic)
+    MosaicService.renderMosaic(mosaic) map (_ => Ok) getOrElse (InternalServerError)
   }
 }

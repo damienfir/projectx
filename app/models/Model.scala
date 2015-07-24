@@ -69,8 +69,6 @@ case class Email(to: String, from: String)
 
 
 object JsonFormats {
-  // implicit val userFormat = Json.format[User]
-  // implicit val mosaicFormat = Json.format[Mosaic]
   implicit val feebackQuestionFormat = Json.format[FeedbackQuestion]
   implicit val feebackFormat = Json.format[Feedback]
   implicit val contactFeebackFormat = Json.format[ContactFeedback]

@@ -8,7 +8,8 @@ import scala.sys.process._
 import play.api.libs.json._
 import play.api.Play
 import play.api.libs.Files.TemporaryFile
-import java.io.File
+import java.io._
+import play.modules.reactivemongo.json.BSONFormats._
 
 import models._
 
@@ -21,6 +22,7 @@ case class Cluster(
 object MosaicService {
   implicit val clusterFormat = Json.format[Cluster]
   implicit val tileFormat = Json.format[Tile]
+  implicit val mosaicFormat = Json.format[Mosaic]
 
   val binary = Play.current.configuration.getString("px.binary").get
 
@@ -40,13 +42,11 @@ object MosaicService {
   def preprocess(filenames: List[String]) = filenames map { filename =>
     val cmd = Seq(binary, "--preprocess", photoFile(filename), gistFile(filename))
     cmd.!
-    println(cmd)
   }
 
   def cluster(gists: List[String], id: String): Option[Cluster] = {
     val out = clusterFile(id)
     val cmd = binary +: "--cluster" +: gists.length.toString +: gists.map(gistFile) :+ out
-    println(cmd)
     cmd ! match {
       case 0 => Some(Json.parse(Source.fromFile(out).mkString).as[Cluster])
       case _ => None
@@ -56,7 +56,6 @@ object MosaicService {
   def assign(tiles: String, clusters: String, id: String): Option[List[Tile]] = {
     val out = matchFile(id) 
     val cmd = Seq(binary, "--assign", "1.414", "1024", clusterFile(clusters), out, tileFile(tiles));
-    println(cmd)
     cmd ! match {
       case 0 => Some(Json.parse(Source.fromFile(out).mkString).as[List[Tile]])
       case _ => None
@@ -71,7 +70,6 @@ object MosaicService {
 
   def generate(tile: String, cluster: String, match_id: String, output: String): Option[String] = {
     val cmd = Seq(binary, "--generate", "1.414", "1024", tileFile(tile), clusterFile(cluster), matchFile(match_id), mosaicFile(output))
-    println(cmd)
     cmd ! match {
       case 0 => Some(output)
       case _ => None
@@ -90,5 +88,12 @@ object MosaicService {
   def renderMosaic(mosaic: Mosaic): Option[String] = {
     val mosaic_id = mosaic._id.get.stringify
     generate(mosaic_id, mosaic_id, mosaic_id, mosaic_id + ".jpg")
+  }
+
+  def replaceMosaic(mosaic: Mosaic) = {
+    val file = new File(matchFile(mosaic._id.get.stringify))
+    val writer = new PrintWriter(file);
+    writer.write(Json.toJson(mosaic.tiles).toString)
+    writer.close()
   }
 }
