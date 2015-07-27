@@ -120,15 +120,14 @@ app.directive('uiComposition', [function(){
   return {
     require: "^uiInterface",
     controller: function($scope, $element) {
-      $scope.composition = testData;
-      $scope.state = 3;
+      // $scope.composition = testData;
+      // $scope.state = 3;
 
       this.moving = function(idx) {
         $scope.currently_moving = idx;
       };
 
       this.swapped = function(idx) {
-        console.log("swapped "+ idx);
         $scope.last_swapped = idx;
       };
 
@@ -153,8 +152,6 @@ app.directive('uiComposition', [function(){
       }
 
       this.swap = function(idx1, idx2) {
-        console.log(idx1);
-        console.log(idx2);
         var tile1 = $scope.composition.tiles[idx1];
         var tile2 = $scope.composition.tiles[idx2];
         var tmp = angular.copy(tile1);
@@ -173,7 +170,6 @@ app.directive('uiComposition', [function(){
         centerTile(tile2);
 
         $scope.$digest();
-        $scope.$broadcast("stopmoving");
       };
 
       $scope.moveTiles = function(targets, orientation, dx, dy) {
@@ -204,6 +200,7 @@ app.directive('uiComposition', [function(){
       }
 
       function findOrientation(tl, br) {
+        if (Math.min(tl.length, br.length) === 0) return [0,0];
         if (tl.length === br.length && tl.length === 1) {
           var tile_tl = $scope.composition.tiles[tl[0]];
           var tile_br = $scope.composition.tiles[br[0]];
@@ -258,7 +255,6 @@ app.directive('uiComposition', [function(){
       }
 
       $element.on("mousedown", function(ev){
-        // console.log(ev);
         ev.stopPropagation();
         ev.preventDefault();
         var targets = findTargets(ev.offsetX/$element.width(), ev.offsetY/$element.height());
@@ -278,6 +274,11 @@ app.directive('uiComposition', [function(){
 
       $element.on("mouseup", function() {
         $element.off("mousemove");
+      });
+
+      $element.on("mouseleave", function(){
+        $scope.$broadcast("stopmoving");
+        $scope.last_swapped = undefined;
       });
     }
   };
@@ -347,20 +348,19 @@ app.directive('uiTile', [function(){
         });
       });
 
-      // $scope.$on("stopmoving", function(){ stopMoving(); });
+      $scope.$on("stopmoving", function(){ stopMoving(); });
 
       $element.on("mouseup", function(){
         if ($scope.currently_moving === $scope.$index) {
           stopMoving();
-          $ctrl.swapped(undefined);
         }
+        $ctrl.swapped(undefined);
       });
 
       $element.on("mouseenter", function(ev) {
         if (!angular.isUndefined($scope.currently_moving) && $scope.currently_moving !== $scope.$index) {
           $ctrl.swap($scope.currently_moving, $scope.$index);
           if (!angular.isUndefined($scope.last_swapped)) {
-            // console.log($scope.last_swapped);
             $ctrl.swap($scope.$index, $scope.last_swapped);
           }
           $ctrl.swapped($scope.$index);
@@ -540,32 +540,27 @@ app.directive("bqSend", ["$http", "$window", function($http, $window) {
       }
 
       $scope.sendTo = function() {
-        $http.post("/users/"+$scope.user._id.$oid+"/send/"+$scope.mosaic.id, {
-          to: $scope.to,
-          from: $scope.from,
-          composition: $scope.composition
-        }).then(function(){
-          $scope.sent = true;
-          $window.setTimeout(reset, 2000);
+        $http.post("/mosaics/generate", $scope.composition).then(function() {
+          $http.post("/users/"+$scope.user._id.$oid+"/send/"+$scope.mosaic.id, {
+            to: $scope.to,
+            from: $scope.from,
+            composition: $scope.composition
+          }).then(function(){
+            $scope.sent = true;
+            $window.setTimeout(reset, 2000);
+          });
         });
       };
     }
   };
 }]);
 
-app.directive("bqDownload", ["$http", function($http){
+app.directive("bqDownload", ["$http", "$window", function($http, $window){
   return {
     controller: function($scope) {
       $scope.download = function() {
         $http.post("/mosaics/generate", $scope.composition).then(function() {
-          console.log("/users/"+$scope.user._id.$oid+"/download/"+$scope.composition._id.$oid);
-          $.ajax({
-            type: "POST",
-            url: "/users/"+$scope.user._id.$oid+"/download/"+$scope.composition._id.$oid,
-            data: {email: $scope.email},
-            async: false,
-            dataType: "json"
-          });
+          $window.location.href = "/users/"+$scope.user._id.$oid+"/download/"+$scope.composition._id.$oid+"?email="+encodeURIComponent($scope.email);
         });
       };
     },

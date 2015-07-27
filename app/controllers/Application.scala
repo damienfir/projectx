@@ -184,8 +184,8 @@ object Users extends CRUDController[User] {
     Ok
   }
 
-  def download(user_id: String, mosaic_id: String) = Action.async(parse.urlFormEncoded) { implicit request =>
-    request.body.get("email") map(_.head) map { email =>
+  def download(user_id: String, mosaic_id: String, email: String) = Action.async { implicit request =>
+    request.queryString.get("email") map(_.head) map { email =>
       _collection.update(Json.obj("_id" -> BSONObjectID(user_id)), Json.obj("$set" -> Json.obj("email" -> email)))
       Mosaics.DBA.get(BSONObjectID(mosaic_id)) map {
         case Some(mosaic) =>
