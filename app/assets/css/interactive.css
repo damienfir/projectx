@@ -54,6 +54,10 @@ body {
   position: absolute;
 }
 
+.ui-tile img:hover {
+  opacity: 0.85;
+}
+
 .col-buttons button {
   color: #999;
   margin: 0 20px;
