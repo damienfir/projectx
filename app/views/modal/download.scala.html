@@ -1,0 +1,22 @@
+<div class="modal fade" id="download-modal" tabindex="-1" data-content="/share" bq-download>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="post" id="download-form" ng-submit="download()">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title"><i class="fa fa-download"></i>&nbsp; Download</h4>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <input type="email" name="email" ng-model="email" placeholder="Please enter your email address" class="form-control" id="email-input">
+            <p class="centered text-muted">We will send you a link to your poster to view it later.</p>
+          </div>
+        </div>
+        <input type="text" value="{{angular.toJson($scope.composition)}}" name="composition"/>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success pull-right" id="download-btn" disabled><i class="fa fa-cloud-download fa-lg"></i> Download</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

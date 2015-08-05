@@ -41,12 +41,14 @@ object MosaicService {
 
   def preprocess(filenames: List[String]) = filenames map { filename =>
     val cmd = Seq(binary, "--preprocess", photoFile(filename), gistFile(filename))
+    println(cmd)
     cmd.!
   }
 
   def cluster(gists: List[String], id: String): Option[Cluster] = {
     val out = clusterFile(id)
     val cmd = binary +: "--cluster" +: gists.length.toString +: gists.map(gistFile) :+ out
+    println(cmd)
     cmd ! match {
       case 0 => Some(Json.parse(Source.fromFile(out).mkString).as[Cluster])
       case _ => None
@@ -56,6 +58,7 @@ object MosaicService {
   def assign(tiles: String, clusters: String, id: String): Option[List[Tile]] = {
     val out = matchFile(id) 
     val cmd = Seq(binary, "--assign", "1.414", "1024", clusterFile(clusters), out, tileFile(tiles));
+    println(cmd)
     cmd ! match {
       case 0 => Some(Json.parse(Source.fromFile(out).mkString).as[List[Tile]])
       case _ => None
@@ -70,6 +73,7 @@ object MosaicService {
 
   def generate(tile: String, cluster: String, match_id: String, output: String): Option[String] = {
     val cmd = Seq(binary, "--generate", "1.414", "1024", tileFile(tile), clusterFile(cluster), matchFile(match_id), mosaicFile(output))
+    println(cmd)
     cmd ! match {
       case 0 => Some(output)
       case _ => None
@@ -78,6 +82,7 @@ object MosaicService {
 
   def generateMosaic(mosaic: Mosaic, photos: List[String]): Option[Mosaic] = {
     val mosaic_id = mosaic._id.get.stringify
+    println(mosaic)
 
     for {
       sorted <- cluster(photos, mosaic_id)

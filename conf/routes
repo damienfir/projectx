@@ -5,8 +5,8 @@
 # POST    /upload                     controllers.Application.upload
 # GET     /process                    controllers.Application.process
 # POST    /download                   controllers.Application.download
-GET     /stock                      controllers.Application.stock
-GET     /themes                     controllers.Application.themes
+# GET     /stock                      controllers.Application.stock
+# GET     /themes                     controllers.Application.themes
 
 GET     /storage/*file              controllers.ExternalAssets.at(path="storage", file)
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
@@ -14,11 +14,11 @@ GET     /assets/*file               controllers.Assets.at(path="/public", file)
 
 # POST    /dropbox                    controllers.Application.dropbox
 
-GET     /questions                  controllers.Feedback.questions
-POST    /feedback                   controllers.Feedback.feedback
+GET     /questions                  controllers.Application.questions
+POST    /feedback                   controllers.Application.feedback
 # POST    /textfeedback               controllers.Feedback.textFeedback
 # GET     /reset                      controllers.Application.reset
-POST    /contact                    controllers.Feedback.contact
+POST    /contact                    controllers.Application.contact
 
 
 
@@ -50,7 +50,6 @@ POST    /mosaics/generate           controllers.Mosaics.generate
 # POST    /subsets/:id/mosaics        controllers.Mosaics.generateFromSubset(id)
 
 
-GET     /interactive                controllers.Application.interactive
 GET     /ui                         controllers.Application.ui
 GET     /                           controllers.Application.index(filename: String = "")
 GET     /:filename                  controllers.Application.index(filename: String)

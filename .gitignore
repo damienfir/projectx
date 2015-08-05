@@ -21,3 +21,4 @@ storage/thumb/*
 db/sessions/*
 db/users/*
 *.swp
+node_modules

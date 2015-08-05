@@ -1,4 +1,4 @@
-@(filename: String)
+@()
 
 @main {
 
@@ -76,111 +76,13 @@
   </div>
 
 
-<div class="modal fade" id="share-modal" tabindex="-1" data-content="/share" bq-share>
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title"><i class="fa fa-share-alt"></i>&nbsp; Share on...</h4>
-      </div>
-      <div class="modal-body">
-          <div class="centered">
-            <button id="share-facebook" ng-click="shareFacebook()" class="btn btn-primary btn-lg" data-toggle="tooltip" title="Share on Facebook"><i class="fa fa-facebook fa-2x"></i></button>
-            <button id="share-google" ng-click="shareGoogle()" class="btn btn-primary btn-lg" data-toggle="tooltip" title="Share on Google+"><i class="fa fa-google-plus fa-2x"></i></button>
-            <button id="share-pinterest" ng-click="sharePinterest()" class="btn btn-primary btn-lg" data-toggle="tooltip" title="Share on Pinterest"><i class="fa fa-pinterest fa-2x"></i></button>
-            <button id="share-twitter" ng-click="shareTwitter()" class="btn btn-primary btn-lg" data-toggle="tooltip" title="Share on Twitter"><i class="fa fa-twitter fa-2x"></i></button>
-            <!-- <button id="share-reddit" class="btn btn-primary btn-lg" data-toggle="tooltip" title="Share on Reddit"><i class="fa fa-reddit"></i></button> -->
-            <!-- <div data-toggle="tooltip" title="Coming soon" class="div-btn"><button id="share-instagram" class="btn btn-primary btn-lg" disabled><i class="fa fa-instagram"></i></button></div> -->
-          </div>
-      </div>
-      <div class="modal-footer"></div>
-    </div>
-  </div>
+@modal.share()
+@modal.send()
+@modal.download()
+@modal.order()
+
 </div>
 
-<div class="modal fade" id="send-modal" tabindex="-1" data-content="/share" bq-send>
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <form id="email-form" name="emailForm">
-        <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-          <h4 class="modal-title"><i class="fa fa-paper-plane"></i>&nbsp; Send to...</h4>
-        </div>
-        <div class="modal-body">
-          <div class="form-group">
-            <input class="form-control" type="email" ng-model="from" name="from" placeholder="Your email address" />
-          </div>
-          <div class="form-group">
-            <input class="form-control" type="email" ng-model="to" name="to" placeholder="Your friend's email address" />
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="submit" class="btn btn-primary pull-right" id="email-btn" ng-disabled="sent" ng-click="sendTo()"><i class="fa fa-send"></i> Send</button>
-          <p class="centered text-success" ng-show="sent" id="sent-label">Sent!</p>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-
-<div class="modal fade" id="download-modal" tabindex="-1" data-content="/share" bq-download>
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <form method="post" id="download-form" ng-submit="download()">
-        <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-          <h4 class="modal-title"><i class="fa fa-download"></i>&nbsp; Download</h4>
-        </div>
-        <div class="modal-body">
-          <div class="form-group">
-            <input type="email" name="email" ng-model="email" placeholder="Please enter your email address" class="form-control" id="email-input">
-            <p class="centered text-muted">We will send you a link to your poster to view it later.</p>
-          </div>
-        </div>
-        <input type="text" value="{{angular.toJson($scope.composition)}}" name="composition"/>
-        <div class="modal-footer">
-          <button type="submit" class="btn btn-success pull-right" id="download-btn" disabled><i class="fa fa-cloud-download fa-lg"></i> Download</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-
-<div class="modal fade" id="order-modal" tabindex="-1" data-content="/order">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <form method="post" bq-form="/contact">
-        <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-          <h4 class="modal-title"><i class="fa fa-shopping-cart"></i>&nbsp; Order a poster</h4>
-        </div>
-        <div class="modal-body">
-          <p>
-            Thank you for being interested in ordering a poster. We are working on making this feature available as soon as possible.
-          </p>
-          <p>
-            If you leave us your email address we will notify you when it is available.
-          </p>
-            <div class="input-group input-group-lg">
-              <span class="input-group-addon">@@</span>
-              <input type="hidden" value="order" name="type"/>
-              <input type="hidden" value="{{user._id.$oid}}" name="user_id"/>
-              <input type="hidden" value="{{mosaic.id}}" name="mosaic_id"/>
-              <input type="text" value="" name="email" placeholder="Please enter your email address" class="form-control"/>
-            </div>
-        </div>
-        <div class="modal-footer">
-          <button type="submit" class="btn btn-success pull-right" ng-disabled="httpStatus">
-            <i class="fa fa-paper-plane fa-lg"></i> {{ httpStatus ? "Thank you !" : "Order" }}
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-</div>
-
-<!-- <script src="@routes.Assets.at("bower_components/requirejs/require.js")" data-main="/assets/js/interactive"></script> -->
 <script src="@routes.Assets.at("bower_components/jquery/dist/jquery.min.js")"></script>
 <script src="@routes.Assets.at("bower_components/angular/angular.js")"></script>
 <script src="@routes.Assets.at("bower_components/angular-resource/angular-resource.js")"></script>
@@ -188,5 +90,10 @@
 <script src="@routes.Assets.at("bower_components/bootstrap/dist/js/bootstrap.min.js")"></script>
 
 <script src="@routes.Assets.at("js/test-data.js")"></script>
-<script src="@routes.Assets.at("js/interactive.js")"></script>
+<script src="@routes.Assets.at("js/app.js")"></script>
+<script src="@routes.Assets.at("js/ui.js")"></script>
+<script src="@routes.Assets.at("js/helpers.js")"></script>
+<script src="@routes.Assets.at("js/services.js")"></script>
+<script src="@routes.Assets.at("js/resources.js")"></script>
+<script src="@routes.Assets.at("js/modal.js")"></script>
 }

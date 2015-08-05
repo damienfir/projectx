@@ -1,10 +1,11 @@
 package models
 
 import play.api.libs.json._
-import reactivemongo.bson._
 import play.modules.reactivemongo.json.BSONFormats._
+import reactivemongo.bson._
 
-abstract class IDModel[T] {
+
+trait IDModel[T] {
   def _id: Option[BSONObjectID]
   def withID(id: BSONObjectID): T
 }
@@ -75,4 +76,5 @@ object JsonFormats {
   implicit val emailFormat = Json.format[Email]
   implicit val themeFormat = Json.format[Theme]
   implicit val stockFormat = Json.format[Stock]
+  implicit val tileformat = Json.format[Tile]
 }

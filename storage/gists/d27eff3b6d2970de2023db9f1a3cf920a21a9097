@@ -1,0 +1,52 @@
+{
+  "fy1vec": [],
+  "orientation": -1,
+  "filepath": "./storage/photos/d27eff3b6d2970de2023db9f1a3cf920a21a9097",
+  "salx": 296,
+  "width": 640,
+  "twd": 40,
+  "numfacerects": 0,
+  "height": 426,
+  "tht": 30,
+  "rwd": 640,
+  "facescore": 0.0,
+  "rht": 426,
+  "rbvec": {
+    "filename": "./storage/gists/d27eff3b6d2970de2023db9f1a3cf920a21a9097_rbvec",
+    "size": 272640
+  },
+  "saly": 268,
+  "clusterid": 6768624,
+  "fx1vec": [],
+  "islandscape": true,
+  "fy2vec": [],
+  "fx2vec": [],
+  "datetimevec": [
+    -1,
+    -1,
+    -1,
+    -1,
+    -1,
+    -1
+  ],
+  "rimg": {
+    "filename": "./storage/gists/d27eff3b6d2970de2023db9f1a3cf920a21a9097_rimg",
+    "size": 272640
+  },
+  "thumbnail": {
+    "filename": "./storage/gists/d27eff3b6d2970de2023db9f1a3cf920a21a9097_thumbnail",
+    "size": 1200
+  },
+  "ravec": {
+    "filename": "./storage/gists/d27eff3b6d2970de2023db9f1a3cf920a21a9097_ravec",
+    "size": 272640
+  },
+  "rlvec": {
+    "filename": "./storage/gists/d27eff3b6d2970de2023db9f1a3cf920a21a9097_rlvec",
+    "size": 272640
+  },
+  "facemap": {
+    "filename": "./storage/gists/d27eff3b6d2970de2023db9f1a3cf920a21a9097_facemap",
+    "size": 272640
+  }
+}
