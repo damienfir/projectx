@@ -13,3 +13,6 @@ function getValidFiles(files) {
 }
 
 function isEmpty(obj) { for (var p in obj) {return false;} return true; }
+
+function compare_min(a,b) { return a-b; }
+function compare_max(a,b) { return b-a; }

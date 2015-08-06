@@ -6,6 +6,7 @@ angular.module("ui")
   .factory("Collections", Collections)
   .factory("Compositions", Compositions);
 
+
 function Users($resource){
   return $resource("/users/:id", {}, {
     newCollection: {url: "/users/:id/collections", method: "POST"}

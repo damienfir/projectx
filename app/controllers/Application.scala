@@ -92,7 +92,7 @@ abstract class CRUDController[T <: IDModel[T]] extends Controller {
   }
 
 
-  def create = Action.async(parse.json) { request =>
+  def create = Action.async(parse.json) { implicit request =>
     DBA.create(request.body.as[T]) map { item =>
       Ok(Json.toJson(item))
     }
@@ -105,8 +105,9 @@ abstract class CRUDController[T <: IDModel[T]] extends Controller {
   }
 
   def get(id: String) = Action.async {
-    DBA.get(id) map { item =>
-      Ok(Json.toJson(item))
+    DBA.get(id) map {
+      case Some(item) => Ok(Json.toJson(item))
+      case None => NotFound
     }
   }
 
@@ -128,15 +129,14 @@ object Users extends CRUDController[User] {
   import play.modules.reactivemongo.json.BSONFormats._
   def _collection = db.collection[JSONCollection]("users")
   implicit val format = Json.format[User]
+  implicit val emailFormat = Json.format[Email]
 
   def send(user_id: String, mosaic_id: String) = Action(parse.json) { implicit request =>
-    implicit val emailFormat = Json.format[Email]
-
-    val req = request.body.as[Email]
-
-    _collection.update(Json.obj("_id" -> user_id), Json.obj("$set" -> Json.obj("email" -> req.from)))
-    EmailService.sendToFriend(req.to, req.from, mosaic_id)
-    Ok
+    request.body.asOpt[Email] map { req =>
+      _collection.update(Json.obj("_id" -> user_id), Json.obj("$set" -> Json.obj("email" -> req.from)))
+      EmailService.sendToFriend(req.to, req.from, mosaic_id)
+      Ok
+    } getOrElse(InternalServerError)
   }
 
   def download(user_id: String, mosaic_id: String, email: String) = Action.async { implicit request =>
@@ -164,9 +164,12 @@ object Collections extends CRUDController[Collection] {
   val baseDir = "/storage/thumb/"
 
   def addUser(id: String, user_id: String) = Action.async {
-    _collection.update(Json.obj("_id" -> BSONObjectID(id)),
-      Json.obj("$addToSet" -> Json.obj("users" -> user_id))) map { lastError =>
-        Ok
+    Users.DBA.get(user_id) flatMap {
+      case Some(user) => _collection.update(Json.obj("_id" -> BSONObjectID(id)),
+        Json.obj("$addToSet" -> Json.obj("users" -> user._id))) map { lastError =>
+          Ok
+        }
+      case None => Future(NotFound)
     }
   }
 

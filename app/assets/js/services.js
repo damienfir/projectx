@@ -101,6 +101,7 @@ function User($cookies, $q, Users){
         this.user = Users.get({id: user_id});
       }
     }
+    console.log(this.user);
 
     return this.user.$promise;
   };

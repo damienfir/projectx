@@ -1,0 +1,11 @@
+# interface
+- prevent user from dragging lines too far
+- enforce constant equal spacing
+- show user that he can drag edges
+  - highlight background on hover ? [no]
+  - change cursor
+
+# backend
+- improve error reporting for DB errors
+- add access level management
+  - only owners can modify a composition
