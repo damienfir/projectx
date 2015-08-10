@@ -149,10 +149,6 @@ object Users extends CRUDController[User] {
       }
     } getOrElse(Future(BadRequest))
   }
-
-  def order(user_id: String, mosaic_id: String) = Action(parse.urlFormEncoded) { implicit request =>
-    Ok
-  }
 }
 
 
@@ -224,6 +220,6 @@ object Mosaics extends CRUDController[Mosaic] {
   def generate = Action(parse.json) { request =>
     val mosaic = request.body.as[Mosaic]
     MosaicService.replaceMosaic(mosaic)
-    MosaicService.renderMosaic(mosaic) map (_ => Ok) getOrElse (InternalServerError)
+    MosaicService.renderMosaic(mosaic) map (_ => Ok(Json.toJson(mosaic))) getOrElse (InternalServerError)
   }
 }

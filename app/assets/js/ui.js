@@ -11,10 +11,10 @@ angular.module("ui")
 /* @ngInject */
 function uiInterface(Collection, Composition, User){
   return {
-    controller: Controller
+    controller: InterfaceController
   };
 
-  function Controller($scope) {
+  function InterfaceController($scope) {
 
     this.upload = upload;
     $scope.reset = init;
@@ -29,18 +29,15 @@ function uiInterface(Collection, Composition, User){
     }
 
     function uploadCollection(files) {
-      var valid_files = getValidFiles(files);
-
       if ($scope.collection.photos === undefined) {
         $scope.state = 1;
-        var collection = Collection.create();
-        return collection.then(function(col) {
-          $scope.collection = angular.extend(col, $scope.collection);
-          return Collection.upload(valid_files, col);
+        return User.newCollection().then(function(col) {
+          $scope.collection = col;
+          return Collection.upload(files, col);
         });
       } else {
         $scope.state = 5;
-        return Collection.upload(valid_files, $scope.collection);
+        return Collection.upload(files, $scope.collection);
       }
     }
 
@@ -79,10 +76,10 @@ function uiInterface(Collection, Composition, User){
 function uiUpload(){
   return {
     require: "^uiInterface",
-    link: Link
+    link: UploadLink
   };
 
-  function Link($scope, $element, $attr, uictrl) {
+  function UploadLink($scope, $element, $attr, uictrl) {
       var fileupload = angular.element(document.getElementById("file-upload"));
 
       $scope.triggerUpload = function(ev) {
@@ -119,8 +116,8 @@ function uiComposition(){
   };
 
   function Controller($scope, $element) {
-    // $scope.composition = testData;
-    // $scope.state = 3;
+    $scope.composition = testData;
+    $scope.state = 3;
 
     this.moving = function(idx) {
       $scope.currently_moving = idx;
@@ -199,7 +196,6 @@ function uiComposition(){
         return res || current;
       });
 
-      console.log(is_out);
       if (!is_out) {
         tile_tl.forEach(function(tile, i){
           tile.tx1 = newcoord_tl[i][0];

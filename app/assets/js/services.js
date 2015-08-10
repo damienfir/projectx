@@ -8,15 +8,13 @@ angular.module("ui")
 
 
 /* @ngInject */
-function Collection($q, $http, User, Users, Collections) {
-
-  this.create = function() {
-    return User.getUser().then(function(user){
-      return Users.newCollection({id: user._id.$oid}, {}).$promise;
-    });
-  };
+function Collection($q, $http, $resource, User) {
+  this.resource = $resource("/collections/:id", {}, {
+    addPhoto: {url: "/collections/:id/photos", method: "POST"},
+  });
 
   this.upload = function(files, collection) {
+    files = getValidFiles(files);
 
     var defer = $q.defer();
 
@@ -42,51 +40,37 @@ function Collection($q, $http, User, Users, Collections) {
   };
 
   this.subset = function(collection) {
-    return Collections.newSubset({id: collection._id.$oid}, {}).$promise;
+    return this.resource.newSubset({id: collection._id.$oid}, {}).$promise;
   };
 
 }
 
 
 /* @ngInject */
-function Composition(Compositions, $location) {
-
-  var hostURL = $location.protocol() + "://" + $location.host();
-  if ($location.port() !== 80) hostURL += ":" + $location.port();
-  var baseURL = hostURL + "/storage/generated/";
+function Composition($resource) {
+  this.resource = $resource("/mosaics/:id", {}, {
+    generate: {url: "/collections/:id/mosaics", method: "POST"}
+  });
 
   this.generate = function(collection){
-    return Compositions.generate({id: collection._id.$oid}, {}).$promise
-      .then(this.loaded.bind(this));
-  };
-
-  this.loadFromURL = function() {
-    var path = $location.path().split('/');
-    var obj;
-    if (path.length > 1 && path[1].length > 5) {
-      obj = {_id: {"$oid": path[1]}};
-    }
-    return this.loaded(obj);
-  };
-
-  this.loaded = function(obj) {
-    if (obj === undefined) {
-      return {$loaded: false};
-    } else {
-      // obj.id = obj._id.$oid;
-      // obj.filename = baseURL + obj.filename;
-      // obj.url = hostURL + "/" + obj.id;
-      obj.$loaded = true;
-      return obj;
-    }
+    return this.resource.generate({id: collection._id.$oid}, {}).$promise;
   };
 }
 
 
 /* @ngInject */
-function User($cookies, $q, Users){
+function User($cookies, $resource){
+  var self = this;
 
-  this.user = undefined;
+  this.resource = $resource("/users/:id", {}, {
+    newCollection: {url: "/users/:id/collections", method: "POST"}
+  });
+
+  this.newCollection = function() {
+    return this.getUser().then(function(){
+      return self.resource.newCollection({id: self.user._id.$oid}, {}).$promise;
+    });
+  };
 
   this.getUser = function() {
     if (this.user === undefined) {
@@ -94,14 +78,13 @@ function User($cookies, $q, Users){
       var user_id = $cookies.bquser;
 
       if (user_id === undefined) {
-        this.user = Users.save({}, function(res) {
+        this.user = this.resource.save({}, function(res) {
           $cookies.bquser = res._id.$oid;
         });
       } else {
-        this.user = Users.get({id: user_id});
+        this.user = this.resource.get({id: user_id});
       }
     }
-    console.log(this.user);
 
     return this.user.$promise;
   };

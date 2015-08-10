@@ -12,7 +12,7 @@
             <p class="centered text-muted">We will send you a link to your poster to view it later.</p>
           </div>
         </div>
-        <input type="text" value="{{angular.toJson($scope.composition)}}" name="composition"/>
+        <input type="hidden" value="{{angular.toJson($scope.composition)}}" name="composition"/>
         <div class="modal-footer">
           <button type="submit" class="btn btn-success pull-right" id="download-btn" disabled><i class="fa fa-cloud-download fa-lg"></i> Download</button>
         </div>
