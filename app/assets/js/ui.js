@@ -116,8 +116,8 @@ function uiComposition(){
   };
 
   function Controller($scope, $element) {
-    $scope.composition = testData;
-    $scope.state = 3;
+    // $scope.composition = testData;
+    // $scope.state = 3;
 
     this.moving = function(idx) {
       $scope.currently_moving = idx;
