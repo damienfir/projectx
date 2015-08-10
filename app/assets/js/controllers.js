@@ -1,6 +1,0 @@
-define([
-    'app'
-], function(bq){
-
-
-});

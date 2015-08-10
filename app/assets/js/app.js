@@ -1,13 +1,8 @@
-define([
-    "angular",
-    "angular-resource",
-    "angular-cookies",
-    "angular-animate"
-], function(angular){
+angular.module("ui", [
+    'ngResource',
+    'ngCookies'
+]);
 
-  return angular.module("bq", [
-      "ngResource",
-      "ngCookies",
-      "ngAnimate"
-  ]);
+angular.element().ready(function() {
+  angular.bootstrap(document, ['ui']);
 });

@@ -1,0 +1,32 @@
+<div class="modal fade" id="order-modal" tabindex="-1" data-content="/order">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="post" bq-form="/contact">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title"><i class="fa fa-shopping-cart"></i>&nbsp; Order a poster</h4>
+        </div>
+        <div class="modal-body">
+          <p>
+            Thank you for being interested in ordering a poster. We are working on making this feature available as soon as possible.
+          </p>
+          <p>
+            If you leave us your email address we will notify you when it is available.
+          </p>
+            <div class="input-group input-group-lg">
+              <span class="input-group-addon">@@</span>
+              <input type="hidden" value="order" name="type"/>
+              <input type="hidden" value="{{user._id.$oid}}" name="user_id"/>
+              <input type="hidden" value="{{composition._id.$oid}}" name="mosaic_id"/>
+              <input type="text" value="" name="email" placeholder="Please enter your email address" class="form-control"/>
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success pull-right" ng-disabled="httpStatus">
+            <i class="fa fa-paper-plane fa-lg"></i> {{ httpStatus ? "Thank you !" : "Place order" }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

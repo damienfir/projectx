@@ -1,0 +1,25 @@
+
+<div class="modal fade" id="send-modal" tabindex="-1" data-content="/share" bq-send>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="email-form" name="emailForm">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title"><i class="fa fa-paper-plane"></i>&nbsp; Send to...</h4>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <input class="form-control" type="email" ng-model="from" name="from" placeholder="Your email address" />
+          </div>
+          <div class="form-group">
+            <input class="form-control" type="email" ng-model="to" name="to" placeholder="Your friend's email address" />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary pull-right" id="email-btn" ng-disabled="sent" ng-click="sendTo()"><i class="fa fa-send"></i> Send</button>
+          <p class="centered text-success" ng-show="sent" id="sent-label">Sent!</p>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

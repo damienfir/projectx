@@ -5,8 +5,8 @@
 # POST    /upload                     controllers.Application.upload
 # GET     /process                    controllers.Application.process
 # POST    /download                   controllers.Application.download
-GET     /stock                      controllers.Application.stock
-GET     /themes                     controllers.Application.themes
+# GET     /stock                      controllers.Application.stock
+# GET     /themes                     controllers.Application.themes
 
 GET     /storage/*file              controllers.ExternalAssets.at(path="storage", file)
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
@@ -14,11 +14,11 @@ GET     /assets/*file               controllers.Assets.at(path="/public", file)
 
 # POST    /dropbox                    controllers.Application.dropbox
 
-GET     /questions                  controllers.Feedback.questions
-POST    /feedback                   controllers.Feedback.feedback
+GET     /questions                  controllers.Application.questions
+POST    /feedback                   controllers.Application.feedback
 # POST    /textfeedback               controllers.Feedback.textFeedback
 # GET     /reset                      controllers.Application.reset
-POST    /contact                    controllers.Feedback.contact
+POST    /contact                    controllers.Application.contact
 
 
 
@@ -30,8 +30,7 @@ DELETE  /users/:id                  controllers.Users.delete(id)
 GET     /users/:id/collections      controllers.Collections.fromUser(id)
 POST    /users/:id/collections      controllers.Collections.withUser(id)
 POST    /users/:id/send/:mid        controllers.Users.send(id, mid)
-POST    /users/:id/download/:mid    controllers.Users.download(id, mid)
-POST    /users/:id/order/:mid       controllers.Users.order(id, mid)
+GET     /users/:id/download/:mid    controllers.Users.download(id, mid, email)
 
 # GET     /collections                controllers.Collections.list
 # POST    /collections                controllers.Collections.create
@@ -43,9 +42,11 @@ POST    /collections/:id/photos     controllers.Collections.addPhotos(id)
 # GET     /collections/:id/photos/:photo_id controllers.Collections.getPhoto(id, photo_id)
 # DELETE  /collections/:id/photos/:photos_id  controllers.Collections.removePhoto(id, photo_id)
 
-POST    /collections/:id/subsets    controllers.Subsets.createFromCollection(id)
+POST    /collections/:id/mosaics    controllers.Mosaics.generateFromCollection(id)
+POST    /mosaics/generate           controllers.Mosaics.generate
 
-POST    /subsets/:id/mosaics        controllers.Mosaics.generateFromSubset(id)
+# POST    /collections/:id/subsets    controllers.Subsets.createFromCollection(id)
+# POST    /subsets/:id/mosaics        controllers.Mosaics.generateFromSubset(id)
 
 
 GET     /ui                         controllers.Application.ui

@@ -15,9 +15,8 @@ tmp
 /RUNNING_PID
 /.settings
 .sbtserver
-storage/photos/*
-storage/generated/*
-storage/thumb/*
+storage
 db/sessions/*
 db/users/*
 *.swp
+node_modules
