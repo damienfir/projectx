@@ -1,0 +1,34 @@
+<md-dialog>
+  <form method="post" bq-form="/contact">
+    <md-toolbar>
+      <div class="md-toolbar-tools">
+        <i class="fa fa-shopping-cart"></i>&nbsp; Order a poster
+      </div>
+    </md-toolbar>
+    <md-dialog-content>
+      <div>
+        <p>
+        Thank you for being interested in ordering a poster. We are working on making this feature available as soon as possible.
+        </p>
+        <p>
+        If you leave us your email address we will notify you when it is available.
+        </p>
+
+        <input type="hidden" value="order" name="type"/>
+        <input type="hidden" value="{{user._id.$oid}}" name="user_id"/>
+        <input type="hidden" value="{{composition._id.$oid}}" name="mosaic_id"/>
+
+        <md-input-container md-no-float>
+          <md-icon class="fa fa-at"></md-icon>
+          <input type="text" value="" name="email" placeholder="Please enter your email address"/>
+        </md-input-container>
+
+      </div>
+    </md-dialog-content>
+    <div class="md-actions">
+      <md-button type="submit" class="md-raised md-primary" ng-disabled="httpStatus">
+        <i class="fa fa-paper-plane fa-lg"></i> {{ httpStatus ? "Thank you !" : "Place order" }}
+      </md-button>
+    </div>
+  </form>
+</md-dialog>

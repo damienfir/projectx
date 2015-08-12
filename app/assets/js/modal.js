@@ -48,7 +48,7 @@ function bqShare($window) {
       };
     },
     link: function($scope, $element) {
-      $element.children(".modal-body button").tooltip();
+      // $element.children(".modal-body button").tooltip();
     }
   };
 }

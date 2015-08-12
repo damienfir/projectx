@@ -1,0 +1,25 @@
+<md-dialog>
+  <form id="email-form" name="emailForm">
+
+    <md-toolbar>
+      <div class="md-toolbar-tools">
+        <i class="fa fa-paper-plane"></i>&nbsp; Send to...
+        </div>
+    </md-toolbar>
+
+    <md-dialog-content>
+      <md-input-container md-no-float>
+        <input type="email" ng-model="from" name="from" placeholder="Your email address" />
+      </md-input-container>
+      <md-input-container md-no-float>
+        <input type="email" ng-model="to" name="to" placeholder="Your friend's email address" />
+      </md-input-container>
+    </md-dialog-content>
+
+    <div class="md-actions">
+      <md-button type="submit" class="md-raised md-primary" id="email-btn" ng-disabled="sent" ng-click="sendTo()"><i class="fa fa-send"></i> Send</md-button>
+      <p class="centered text-success" ng-show="sent" id="sent-label">Sent!</p>
+    </div>
+
+  </form>
+</md-dialog>
