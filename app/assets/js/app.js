@@ -1,6 +1,7 @@
 angular.module("ui", [
     'ngResource',
-    'ngCookies'
+    'ngCookies',
+    'ngMaterial'
 ]);
 
 angular.element().ready(function() {

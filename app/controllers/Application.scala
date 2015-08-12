@@ -157,7 +157,7 @@ object Collections extends CRUDController[Collection] {
   def _collection = db.collection[JSONCollection]("collections")
   implicit val format = Json.format[Collection]
 
-  val baseDir = "/storage/thumb/"
+  // val baseDir = "/storage/thumb/"
 
   def addUser(id: String, user_id: String) = Action.async {
     Users.DBA.get(user_id) flatMap {
@@ -189,11 +189,11 @@ object Collections extends CRUDController[Collection] {
   }
 
   def addPhotos(id: String) = Action.async(parse.multipartFormData) { request =>
-    Future(ImageService.saveImages(request.body.files.map(_.ref).toList)) flatMap { names =>
+    Future(ImageService.saveImages(request.body.files.map(_.ref))) flatMap { names =>
       _collection.update(Json.obj("_id" -> BSONObjectID(id)),
         Json.obj("$addToSet" -> Json.obj("photos" -> Json.obj("$each" -> names)))) map { wr =>
           MosaicService.preprocess(names)
-          Ok(Json.toJson(Json.obj("filenames" -> names.map(baseDir + _))))
+          Ok(Json.toJson(Json.obj("filenames" -> names)))
         }
     }
   }

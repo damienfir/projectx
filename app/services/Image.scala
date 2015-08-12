@@ -46,7 +46,7 @@ object ImageService extends FileService {
 
     try {
       FileUtils.writeByteArrayToFile(file, data)
-      resize(filename)
+      // resize(filename)
       Success(filename)
     } catch {
       case e: IOException => Failure(e)
@@ -59,14 +59,16 @@ object ImageService extends FileService {
 
     try {
       uploaded.moveTo(newFile)
-      resize(filename)
+      // resize(filename)
       Success(filename)
     } catch {
-      case e: IOException => Failure(e)
+      case e: IOException =>
+        println(e)
+        Failure(e)
     }
   }
 
-  def saveImages(newImages: List[TemporaryFile]): List[String] = {
+  def saveImages(newImages: Seq[TemporaryFile]): Seq[String] = {
     newImages
       .filter(_.file.length > 4)
       .map(save)

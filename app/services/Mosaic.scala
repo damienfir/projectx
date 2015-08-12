@@ -39,7 +39,7 @@ object MosaicService {
   def tileFile(id: String) = Play.current.configuration.getString("px.dir_tile").get + s"/$id"
 
 
-  def preprocess(filenames: List[String]) = filenames map { filename =>
+  def preprocess(filenames: Seq[String]) = filenames map { filename =>
     val cmd = Seq(binary, "--preprocess", photoFile(filename), gistFile(filename))
     println(cmd)
     cmd.!
