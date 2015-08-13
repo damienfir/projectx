@@ -1,7 +1,10 @@
+(function(angular){
+  'use strict';
+
+
 angular.module("ui", [
-    'ngResource',
-    'ngCookies',
-    'ngMaterial'
+    'ngMaterial',
+    'ui.collection'
 ])
 .config(function($mdThemingProvider, $mdIconProvider) {
   $mdThemingProvider.theme('default')
@@ -10,6 +13,5 @@ angular.module("ui", [
   $mdIconProvider.fontSet('fa', 'fontawesome');
 });
 
-// angular.element().ready(function() {
-//   angular.bootstrap(document, ['ui']);
-// });
+
+})(angular);

@@ -1,0 +1,14 @@
+<md-whiteframe class="md-whiteframe-z2 center upload-box">
+  <md-button class="md-raised md-primary" ng-click="triggerUpload()"><i class="fa fa-upload"></i>&nbsp; Upload photos </md-button>
+  <!-- <div id="dropzone"> -->
+    <!-- <div class="cloud-btn"> -->
+    <!--   <button class="btn btn-primary" id="dropbox-btn" data-toggle="tooltip" data-placement="left" title="Import from Dropbox"><i class="fa fa-dropbox fa-lg"></i></button> -->
+    <!--   <button class="btn btn-primary" id="google-btn" disabled><i class="fa fa-google-plus fa-lg"></i></button> -->
+    <!--   <button class="btn btn-primary" id="facebook-btn" disabled><i class="fa fa-facebook fa-lg"></i></button> -->
+    <!--   <button class="btn btn-primary" id="flickr-btn" disabled><i class="fa fa-flickr fa-lg"></i></button> -->
+    <!-- </div> -->
+    <!-- <h4>or drop here</h4> -->
+    <!-- <i class="fa fa-4x fa-download" id="dropicon"></i> -->
+  <!-- </div> -->
+  <input type="file" name="image" id="file-upload" ng-bind="fileupload" ng-model="files" multiple>
+</md-whiteframe>

@@ -1,0 +1,5 @@
+<div class="ui-composition shadow">
+  <div ui-tile class="ui-tile" ng-repeat="tile in composition.tiles">
+    <img ng-src="/storage/photos/{{ filename(composition.photos[tile.imgindex]) }}" draggable="false"/>
+  </div>
+</div>
