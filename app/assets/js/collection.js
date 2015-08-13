@@ -144,10 +144,10 @@ function uiController(Collection) {
   };
 
   function Controller($scope) {
-    var fileListFromUpload = $scope.$asEventStream("ui-upload")
+    var uploadStream = $scope.$asEventStream("ui-upload")
       .map(getStream);
 
-    fileListFromUpload.flatMap(function(files){
+    var responseStream = uploadStream.flatMap(function(files){
       var collection;
       if ($scope.collection === undefined) {
         collection = Bacon.fromPromise(Collection.newFromUser());
@@ -158,8 +158,17 @@ function uiController(Collection) {
         $scope.collection = col;
         return Collection.upload(col, Bacon.fromArray(toArray(files)));
       });
-    })
-    .onValue(function(v){ console.log(v);});
+    });
+
+    uploadStream.onValue(function(files) {
+      $scope.nFiles = files.length;
+    });
+
+    responseStream
+      .scan(0, function(acc, curr){ return acc+1;})
+      .onValue(function(v) {
+        $scope.uploadedFiles = v;
+      });
   }
 }
 
