@@ -234,18 +234,18 @@ function uiUpload(){
   }
 
   function Link($scope) {
-    // var dropzone = document.getElementById("dropzone");
-    // dropzone.addEventListener("dragover", function(ev){
-    //   ev.stopPropagation();
-    //   ev.preventDefault();
-    //   ev.dataTransfer.dropEffect = 'copy';
-    // });
+    var dropzone = document.getElementById("dropzone");
+    dropzone.addEventListener("dragover", function(ev){
+      ev.stopPropagation();
+      ev.preventDefault();
+      ev.dataTransfer.dropEffect = 'copy';
+    });
 
-    // dropzone.addEventListener("drop", function(ev){
-    //   ev.stopPropagation();
-    //   ev.preventDefault();
-    //   uictrl.upload(ev.dataTransfer.files);
-    // });
+    dropzone.addEventListener("drop", function(ev){
+      ev.stopPropagation();
+      ev.preventDefault();
+      $scope.$emit("ui-upload", ev.dataTransfer.files);
+    });
   }
 }
 
