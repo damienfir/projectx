@@ -20,7 +20,7 @@
 
   <md-toolbar>
     <div class="md-toolbar-tools" ui-controls>
-      <md-button href="/"><img src="/assets/images/logo.png"/></md-button>
+      <md-button href="/"><img src="/assets/images/logo-white.png"/></md-button>
     </div>
   </md-toolbar>
 
@@ -36,9 +36,11 @@
 
 
     <div id="box-mosaic" flex="66">
-      <md-progress-linear md-mode="determinate" ng-value="100 * uploadedFiles / nFiles" ng-show="nFiles" class="md-primary"></md-progress-linear>
       <ui-composition composition="composition" ng-show="composition"></ui-composition>
-      <ui-upload ng-show="!composition || uploadMore"></ui-upload>
+      <div class="overlay" ng-show="generating || uploadMore || !collection"></div>
+      <ui-upload ng-show="!collection || uploadMore"></ui-upload>
+      <md-progress-linear md-mode="determinate" ng-value="100 * uploadedFiles / nFiles" ng-show="nFiles" class="md-primary"></md-progress-linear>
+      <md-progress-circular md-mode="indeterminate" ng-show="(collection && !composition) || generating" class="center"></md-progress-circular>
     </div>
 
     <div class="col-buttons centered" ng-show="composition" flex>

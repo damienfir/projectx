@@ -138,18 +138,30 @@ function uiController(Collection, Composition) {
 
     this.shuffleStream = new Bacon.Bus();
 
-    $scope.reset = function() {
+    $scope.reset = reset;
+    $scope.more = more;
+    $scope.shuffle = shuffle;
+
+    function reset() {
       $scope.collection = undefined;
       $scope.composition = undefined;
-    };
+      resetProgress();
+    }
 
-    $scope.more = function() {
+    function resetProgress() {
+      $scope.nFiles = undefined;
+      $scope.uploadedFiles = 0;
+      $scope.uploadMore = false;
+      $scope.generating = undefined;
+    }
+
+    function more() {
       $scope.uploadMore = true;
-    };
+    }
 
-    $scope.shuffle = function() {
+    function shuffle() {
       self.shuffleStream.push($scope.collection);
-    };
+    }
 
     function getCollectionAsStream() {
       if ($scope.collection === undefined) {
@@ -162,22 +174,31 @@ function uiController(Collection, Composition) {
     var uploadStream = $scope.$asEventStream("ui-upload").map(getStream);
 
     var collectionStream = uploadStream.flatMap(getCollectionAsStream);
-    collectionStream.digest($scope, "collection");
 
     var responseStream = uploadStream.zip(collectionStream).flatMap(function(val) {
       return Collection.upload(val[1], Bacon.fromArray(toArray(val[0])))
         .mapEnd(val[1]);
     });
 
-    var compositionStream = responseStream
+    var uploadedStream = responseStream
       .filter(".$resolved")
-      .merge(this.shuffleStream)
+      .merge(this.shuffleStream);
+
+    var compositionStream = uploadedStream
       .flatMap(Composition.generateFromCollection);
 
+    uploadedStream.digest($scope, "collection");
+    uploadedStream.onValue(function() {
+      resetProgress();
+      $scope.generating = true;
+    });
+
     compositionStream.digest($scope, "composition");
-    compositionStream.onValue(function() {
-      $scope.nFiles = undefined;
-      $scope.uploadMore = false;
+    compositionStream.onValue(function(){
+      $scope.generating = false;
+    });
+    compositionStream.onError(function() {
+      console.log("error while processing");
     });
 
     uploadStream.map(".length").digest($scope, "nFiles");

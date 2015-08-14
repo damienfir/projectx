@@ -205,15 +205,15 @@ function uiComposition() {
     $element.on("mousedown", function(ev){
       ev.stopPropagation();
       ev.preventDefault();
-      var targets = findTargets(ev.offsetX/$element.width(), ev.offsetY/$element.height());
+      var targets = findTargets(ev.offsetX/ev.target.offsetWidth, ev.offsetY/ev.target.offsetHeight);
       var orientation = findOrientation(targets.topleft, targets.bottomright);
       var bounds = findBounds(targets.topleft, targets.bottomright, orientation);
 
       $element.on("mousemove", function(moveev){
         moveev.stopPropagation();
         moveev.preventDefault();
-        var dx = moveev.originalEvent.movementX / $element.width();
-        var dy = moveev.originalEvent.movementY / $element.height();
+        var dx = moveev.originalEvent.movementX / ev.target.offsetWidth;
+        var dy = moveev.originalEvent.movementY / ev.target.offsetHeight;
         $scope.moveTiles(targets, orientation, bounds, dx, dy);
         $scope.$digest();
       });
