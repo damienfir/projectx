@@ -16,3 +16,13 @@ function isEmpty(obj) { for (var p in obj) {return false;} return true; }
 
 function compare_min(a,b) { return a-b; }
 function compare_max(a,b) { return b-a; }
+
+function getStream(ev) {
+  return ev.args[0];
+}
+
+function toArray(filelist) {
+  var list = [];
+  for (var i = 0; i < filelist.length; i++) list.push(filelist[i]);
+  return list;
+}

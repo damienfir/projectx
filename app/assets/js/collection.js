@@ -128,47 +128,63 @@ function uiInterface(Collection, Composition, User){
 }
 
 
-function getStream(ev) {
-  return ev.args[0];
-}
-
-function toArray(filelist) {
-  var list = [];
-  for (var i = 0; i < filelist.length; i++) list.push(filelist[i]);
-  return list;
-}
-
-function uiController(Collection) {
+function uiController(Collection, Composition) {
   return {
     controller: Controller
   };
 
   function Controller($scope) {
-    var uploadStream = $scope.$asEventStream("ui-upload")
-      .map(getStream);
+    var self = this;
 
-    var responseStream = uploadStream.flatMap(function(files){
-      var collection;
+    this.shuffleStream = new Bacon.Bus();
+
+    $scope.reset = function() {
+      $scope.collection = undefined;
+      $scope.composition = undefined;
+    };
+
+    $scope.more = function() {
+      $scope.uploadMore = true;
+    };
+
+    $scope.shuffle = function() {
+      self.shuffleStream.push($scope.collection);
+    };
+
+    function getCollectionAsStream() {
       if ($scope.collection === undefined) {
-        collection = Bacon.fromPromise(Collection.newFromUser());
+        return Bacon.fromPromise(Collection.newFromUser());
       } else {
-        collection = Bacon.once($scope.collection);
+        return Bacon.once($scope.collection);
       }
-      return collection.flatMap(function(col) {
-        $scope.collection = col;
-        return Collection.upload(col, Bacon.fromArray(toArray(files)));
-      });
+    }
+
+    var uploadStream = $scope.$asEventStream("ui-upload").map(getStream);
+
+    var collectionStream = uploadStream.flatMap(getCollectionAsStream);
+    collectionStream.digest($scope, "collection");
+
+    var responseStream = uploadStream.zip(collectionStream).flatMap(function(val) {
+      return Collection.upload(val[1], Bacon.fromArray(toArray(val[0])))
+        .mapEnd(val[1]);
     });
 
-    uploadStream.onValue(function(files) {
-      $scope.nFiles = files.length;
+    var compositionStream = responseStream
+      .filter(".$resolved")
+      .merge(this.shuffleStream)
+      .flatMap(Composition.generateFromCollection);
+
+    compositionStream.digest($scope, "composition");
+    compositionStream.onValue(function() {
+      $scope.nFiles = undefined;
+      $scope.uploadMore = false;
     });
 
+    uploadStream.map(".length").digest($scope, "nFiles");
     responseStream
+      .filter(".status")
       .scan(0, function(acc, curr){ return acc+1;})
-      .onValue(function(v) {
-        $scope.uploadedFiles = v;
-      });
+      .digest($scope, "uploadedFiles");
   }
 }
 

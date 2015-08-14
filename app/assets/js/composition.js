@@ -11,12 +11,14 @@ angular.module("ui.composition", [
 
 /* @ngInject */
 function Composition($resource) {
+  var self = this;
+
   this.resource = $resource("/mosaics/:id", {}, {
     generateFromCollection: {url: "/collections/:id/mosaics", method: "POST"}
   });
 
   this.generateFromCollection = function(collection){
-    return this.resource.generateFromCollection({id: collection._id.$oid}, {}).$promise;
+    return Bacon.fromPromise(self.resource.generateFromCollection({id: collection._id.$oid}, {}).$promise);
   };
 }
 
