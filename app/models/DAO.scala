@@ -18,6 +18,7 @@ object Queries {
   implicit class QueryExtensions(val q: Query[Users, User, Seq]) {
     def one(id: Long) = q.filter(_.id === id)
   }
+
 }
 
 
@@ -39,12 +40,10 @@ class CollectionDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProv
 
   def withUser(id: Long): Future[Option[Collection]] =
     db.run(users.one(id).result) map (_.headOption) flatMap {
-      _ match {
-        case Some(u) => db.run((collections returning collections) += Collection(None, None)) flatMap { c =>
-          db.run(usercollectionrelations += (u.id.get, c.id.get)) map (_ => Some(c))
-        }
-        case None => Future(None)
+      case Some(u) => db.run((collections returning collections) += Collection(None, None)) flatMap { c =>
+        db.run(usercollectionrelations += (u.id.get, c.id.get)) map (_ => Some(c))
       }
+      case None => Future(None)
     }
 
   def fromUserQuery(id: Long) = for {
@@ -54,4 +53,14 @@ class CollectionDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProv
 
 
   def fromUser(id: Long) = db.run(fromUserQuery(id).result)
+}
+
+
+@Singleton
+class PhotoDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvider, collectionDAO: CollectionDAO) extends HasDatabaseConfigProvider[JdbcProfile] {
+  def addToCollection(id: Long, hash: Seq[String]) =
+    db.run(collections.filter(_.id === id).result).map(_.headOption) flatMap {
+      case Some(col: Collection) => db.run((photos returning photos) ++= hash.map(Photo(None, col.id.get, _))) map (Some(_))
+      case None => Future(None)
+    }
 }

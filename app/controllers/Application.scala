@@ -170,28 +170,8 @@ class Users @Inject()(usersDAO: UsersDAO) extends Controller with CRUDActions[DB
 
 
 class Collections @Inject()(collectionDAO: CollectionDAO) extends Controller {
-//   import play.modules.reactivemongo.json.BSONFormats._
-//   def _collection = db.collection[JSONCollection]("collections")
   implicit val format = Json.format[DB.Collection]
 
-//   // val baseDir = "/storage/thumb/"
-
-//   def addUser(id: String, user_id: String) = Action.async {
-//     Users.DBA.get(user_id) flatMap {
-//       case Some(user) => _collection.update(Json.obj("_id" -> BSONObjectID(id)),
-//         Json.obj("$addToSet" -> Json.obj("users" -> user._id))) map { lastError =>
-//           Ok
-//         }
-//       case None => Future(NotFound)
-//     }
-//   }
-
-//   def removeUser(id: String, user_id: String) = Action.async {
-//     _collection.update(Json.obj("_id" -> BSONObjectID(id)),
-//       Json.obj("$pull" -> Json.obj("users" -> user_id))) map { lastError =>
-//         Ok
-//     }
-//   }
 
   def fromUser(id: Long) = Action.async {
     collectionDAO.fromUser(id) map (items => Ok(Json.toJson(items)))
@@ -203,23 +183,25 @@ class Collections @Inject()(collectionDAO: CollectionDAO) extends Controller {
       case None => NotFound
     }
   }
-
-//   def addPhotos(id: String) = Action.async(parse.multipartFormData) { request =>
-//     Future(ImageService.saveImages(request.body.files.map(_.ref))) flatMap { names =>
-//       _collection.update(Json.obj("_id" -> BSONObjectID(id)),
-//         Json.obj("$addToSet" -> Json.obj("photos" -> Json.obj("$each" -> names)))) map { wr =>
-//           MosaicService.preprocess(names)
-//           Ok(Json.toJson(Json.obj("filenames" -> names)))
-//         }
-//     }
-//   }
 }
 
 
-// object Mosaics extends CRUDController[Mosaic] {
-//   import play.modules.reactivemongo.json.BSONFormats._
-//   def _collection = db.collection[JSONCollection]("mosaics")
-//   implicit val format = Json.format[Mosaic]
+class Photos @Inject()(photoDAO: PhotoDAO) extends Controller {
+  implicit val format = Json.format[DB.Photo]
+
+  def addToCollection(id: Long) = Action.async(parse.multipartFormData) { request =>
+    val list = for {
+      names <- Future(ImageService.saveImages(request.body.files.map(_.ref)))
+      photos <- photoDAO.addToCollection(id, names)
+      processed <- Future(MosaicService.preprocess(names))
+    } yield photos
+    list map (items => Ok(Json.toJson(items)))
+  }
+}
+
+
+class Compositions @Inject()(compositionDAO: CompositionDAO) extends CRUDController[Mosaic] {
+  implicit val format = Json.format[Composition]
 
 //   def generateFromCollection(id: String) = Action.async {
 //     Collections.DBA.get(id) flatMap {
@@ -238,4 +220,4 @@ class Collections @Inject()(collectionDAO: CollectionDAO) extends Controller {
 //     MosaicService.replaceMosaic(mosaic)
 //     MosaicService.renderMosaic(mosaic) map (_ => Ok(Json.toJson(mosaic))) getOrElse (InternalServerError)
 //   }
-// }
+}
