@@ -9,20 +9,14 @@ import play.api.libs.json._
 import play.api.Play
 import play.api.libs.Files.TemporaryFile
 import java.io._
-import play.modules.reactivemongo.json.BSONFormats._
 
 import models._
+import Backend._
 
-
-case class Cluster(
-  gists: List[String],
-  sorted: List[Int]
-)
 
 object MosaicService {
   implicit val clusterFormat = Json.format[Cluster]
   implicit val tileFormat = Json.format[Tile]
-  implicit val mosaicFormat = Json.format[Mosaic]
 
   val binary = Play.current.configuration.getString("px.binary").get
 
@@ -80,25 +74,24 @@ object MosaicService {
     }
   }
 
-  def generateMosaic(mosaic: Mosaic, photos: List[String]): Option[Mosaic] = {
-    val mosaic_id = mosaic._id.get.stringify
-    println(mosaic)
+  // def generateComposition(mosaic: Mosaic, photos: List[String]): Option[Mosaic] = {
+  //   val mosaic_id = mosaic._id.get.stringify
+  //   println(mosaic)
 
-    for {
-      sorted <- cluster(photos, mosaic_id)
-      tiles <- assign(mosaic_id, mosaic_id, mosaic_id)
-    } yield mosaic.copy(photos = sorted.gists, tiles = tiles)
+  //   for {
+  //     sorted <- cluster(photos, mosaic_id)
+  //     tiles <- assign(mosaic_id, mosaic_id, mosaic_id)
+  //   } yield mosaic.copy(photos = sorted.gists, tiles = tiles)
+  // }
+
+  def renderComposition(id: String): Option[String] = {
+    generate(id, id, id, id + ".jpg")
   }
 
-  def renderMosaic(mosaic: Mosaic): Option[String] = {
-    val mosaic_id = mosaic._id.get.stringify
-    generate(mosaic_id, mosaic_id, mosaic_id, mosaic_id + ".jpg")
-  }
-
-  def replaceMosaic(mosaic: Mosaic) = {
-    val file = new File(matchFile(mosaic._id.get.stringify))
+  def replaceComposition(id: String, tiles: Seq[Tile]) = {
+    val file = new File(matchFile(id))
     val writer = new PrintWriter(file);
-    writer.write(Json.toJson(mosaic.tiles).toString)
+    writer.write(Json.toJson(tiles).toString)
     writer.close()
   }
 }
