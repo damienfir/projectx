@@ -26,8 +26,8 @@ GET     /users                      @controllers.Users.list
 POST    /users                      @controllers.Users.save
 GET     /users/:id                  @controllers.Users.get(id: Long)
 DELETE  /users/:id                  @controllers.Users.delete(id: Long)
-# GET     /users/:id/collections      controllers.Collections.fromUser(id)
-# POST    /users/:id/collections      controllers.Collections.withUser(id)
+GET     /users/:id/collections      controllers.Collections.fromUser(id: Long)
+POST    /users/:id/collections      controllers.Collections.withUser(id: Long)
 # POST    /users/:id/send/:mid        controllers.Users.send(id, mid)
 # GET     /users/:id/download/:mid    controllers.Users.download(id, mid, email)
 

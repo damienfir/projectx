@@ -31,3 +31,27 @@ class UsersDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
   def insert(item: User) = db.run((users returning users) += item)
   def delete(id: Long) = dbConfig.db.run(users.one(id).delete)
 }
+
+
+@Singleton
+class CollectionDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvider) extends HasDatabaseConfigProvider[JdbcProfile] {
+  import Queries._
+
+  def withUser(id: Long): Future[Option[Collection]] =
+    db.run(users.one(id).result) map (_.headOption) flatMap {
+      _ match {
+        case Some(u) => db.run((collections returning collections) += Collection(None, None)) flatMap { c =>
+          db.run(usercollectionrelations += (u.id.get, c.id.get)) map (_ => Some(c))
+        }
+        case None => Future(None)
+      }
+    }
+
+  def fromUserQuery(id: Long) = for {
+    r <- usercollectionrelations.filter(_.userID === id)
+    c <- collections if c.id === r.collectionID
+  } yield (c)
+
+
+  def fromUser(id: Long) = db.run(fromUserQuery(id).result)
+}

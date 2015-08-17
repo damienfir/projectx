@@ -113,13 +113,13 @@ trait CRUDActions[T <: DB.HasID] extends Controller {
     }
   }
 
-  def saveAction(insertQuery: T => Future[T], updateQuery: T => Future[Try[T]]) = Action.async(parse.json) { request =>
+  def saveAction(insertQuery: T => Future[T], updateQuery: T => Future[Try[_]]) = Action.async(parse.json) { request =>
     val item = request.body.as[T]
     (item.id match {
       case Some(id) => updateQuery(item)
-      case None => Success(insertQuery(item))
-    }).map {
-      case Success(item) => Ok(Json.toJson(item))
+      case None => insertQuery(item) map (Success(_))
+    }) map {
+      case Success(_) => Ok(Json.toJson(item))
       case Failure(_) => BadRequest
     }
   }
@@ -169,10 +169,10 @@ class Users @Inject()(usersDAO: UsersDAO) extends Controller with CRUDActions[DB
 }
 
 
-// object Collections extends CRUDController[Collection] {
+class Collections @Inject()(collectionDAO: CollectionDAO) extends Controller {
 //   import play.modules.reactivemongo.json.BSONFormats._
 //   def _collection = db.collection[JSONCollection]("collections")
-//   implicit val format = Json.format[Collection]
+  implicit val format = Json.format[DB.Collection]
 
 //   // val baseDir = "/storage/thumb/"
 
@@ -193,17 +193,16 @@ class Users @Inject()(usersDAO: UsersDAO) extends Controller with CRUDActions[DB
 //     }
 //   }
 
-//   def fromUser(id: String) = Action.async {
-//     _collection.find(Json.obj("users" -> BSONObjectID(id))).cursor[Collection].collect[List]() map {
-//       list => Ok(Json.toJson(list))
-//     }
-//   }
+  def fromUser(id: Long) = Action.async {
+    collectionDAO.fromUser(id) map (items => Ok(Json.toJson(items)))
+  }
 
-//   def withUser(id: String) = Action.async {
-//     DBA.create(new Collection(List(BSONObjectID(id)))) map { item =>
-//       Ok(Json.toJson(item))
-//     }
-//   }
+  def withUser(id: Long) = Action.async {
+    collectionDAO.withUser(id) map {
+      case Some(item) => Ok(Json.toJson(item))
+      case None => NotFound
+    }
+  }
 
 //   def addPhotos(id: String) = Action.async(parse.multipartFormData) { request =>
 //     Future(ImageService.saveImages(request.body.files.map(_.ref))) flatMap { names =>
@@ -214,7 +213,7 @@ class Users @Inject()(usersDAO: UsersDAO) extends Controller with CRUDActions[DB
 //         }
 //     }
 //   }
-// }
+}
 
 
 // object Mosaics extends CRUDController[Mosaic] {

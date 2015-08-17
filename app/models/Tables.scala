@@ -51,5 +51,7 @@ object Tables {
     def collectionID = column[Long]("collection_id")
     def * = (userID, collectionID)
     def user = foreignKey("user_fk", userID, users)(_.id)
+    def collection = foreignKey("collection_fk", collectionID, collections)(_.id)
   }
+  val usercollectionrelations = TableQuery[UserCollectionRelations]
 }
