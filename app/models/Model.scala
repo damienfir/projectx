@@ -27,23 +27,22 @@ object DB {
   case class Composition (
     id: Option[Long],
     collectionID: Long,
-    tiles: List[Tile]
+    photos: List[String],
+    tiles: List[Backend.Tile]
   )
 
-  case class Tile(
-    photoID: Long,
-    tileindex: Int,
-    cx1: Float,
-    cx2: Float,
-    cy1: Float,
-    cy2: Float,
-    tx1: Float,
-    tx2: Float,
-    ty1: Float,
-    ty2: Float
-  )
-
-  implicit val tileformat = Json.format[Tile]
+  // case class Tile(
+  //   imgindex: Int,
+  //   tileindex: Int,
+  //   cx1: Float,
+  //   cx2: Float,
+  //   cy1: Float,
+  //   cy2: Float,
+  //   tx1: Float,
+  //   tx2: Float,
+  //   ty1: Float,
+  //   ty2: Float
+  // )
 }
 
 object Backend {
@@ -65,6 +64,8 @@ object Backend {
     ty1: Float,
     ty2: Float
   )
+
+  implicit val tileformat = Json.format[Tile]
 }
 
 // case class Subset(

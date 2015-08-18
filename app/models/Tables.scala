@@ -4,6 +4,7 @@ import slick.driver.PostgresDriver.api._
 import play.api.libs.json._
 
 import DB._
+import Backend._
 
 
 object Tables {
@@ -11,6 +12,11 @@ object Tables {
   implicit val tilesColumnType = MappedColumnType.base[List[Tile], String] (
     { item => Json.stringify(Json.toJson(item))},
     { json => Json.parse(json).as[List[Tile]]}
+  )
+
+  implicit val listColumnType = MappedColumnType.base[List[String], String] (
+    { items => Json.stringify(Json.toJson(items))},
+    { json => Json.parse(json).as[List[String]]}
   )
 
   class Users(tag: Tag) extends Table[User](tag, "users") {
@@ -41,9 +47,11 @@ object Tables {
   class Compositions(tag: Tag) extends Table[Composition](tag, "compositions") {
     def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
     def collectionID = column[Long]("collection_id")
+    def photos = column[List[String]]("photos")
     def tiles = column[List[Tile]]("tiles")
-    def * = (id.?, collectionID, tiles) <> (Composition.tupled, Composition.unapply)
+    def * = (id.?, collectionID, photos, tiles) <> (Composition.tupled, Composition.unapply)
   }
+  val compositions = TableQuery[Compositions]
 
 
   class UserCollectionRelations(tag: Tag) extends Table[(Long,Long)](tag, "usercollectionrelations") {

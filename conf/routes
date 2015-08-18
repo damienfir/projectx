@@ -41,8 +41,8 @@ POST    /collections/:id/photos     @controllers.Photos.addToCollection(id: Long
 # GET     /collections/:id/photos/:photo_id controllers.Collections.getPhoto(id, photo_id)
 # DELETE  /collections/:id/photos/:photos_id  controllers.Collections.removePhoto(id, photo_id)
 
-# POST    /collections/:id/mosaics    controllers.Mosaics.generateFromCollection(id)
-# POST    /mosaics/generate           controllers.Mosaics.generate
+POST    /collections/:id/mosaics    @controllers.Compositions.generateFromCollection(id: Long)
+POST    /mosaics/generate           @controllers.Compositions.generate
 
 # POST    /collections/:id/subsets    controllers.Subsets.createFromCollection(id)
 # POST    /subsets/:id/mosaics        controllers.Mosaics.generateFromSubset(id)

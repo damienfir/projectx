@@ -1,6 +1,7 @@
 package services
 
 import scala.util.{Try, Success, Failure}
+import scala.util.control.Exception
 import scala.concurrent.Future
 import scala.io.Source
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
@@ -16,7 +17,6 @@ import Backend._
 
 object MosaicService {
   implicit val clusterFormat = Json.format[Cluster]
-  implicit val tileFormat = Json.format[Tile]
 
   val binary = Play.current.configuration.getString("px.binary").get
 
@@ -33,29 +33,35 @@ object MosaicService {
   def tileFile(id: String) = Play.current.configuration.getString("px.dir_tile").get + s"/$id"
 
 
-  def preprocess(filenames: Seq[String]) = filenames map { filename =>
-    val cmd = Seq(binary, "--preprocess", photoFile(filename), gistFile(filename))
-    println(cmd)
-    cmd.!
+  def preprocess(filenames: Seq[String]): Future[Seq[String]] = Future {
+    filenames map { filename =>
+      val out = gistFile(filename)
+      val cmd = Seq(binary, "--preprocess", photoFile(filename), out)
+      println(cmd)
+      cmd.! match {
+        case 0 => out
+        case _ => throw new Exception
+      }
+    }
   }
 
-  def cluster(gists: List[String], id: String): Option[Cluster] = {
+  def cluster(gists: Seq[String], id: String): Future[Cluster] = Future {
     val out = clusterFile(id)
     val cmd = binary +: "--cluster" +: gists.length.toString +: gists.map(gistFile) :+ out
     println(cmd)
     cmd ! match {
-      case 0 => Some(Json.parse(Source.fromFile(out).mkString).as[Cluster])
-      case _ => None
+      case 0 => Json.parse(Source.fromFile(out).mkString).as[Cluster]
+      case _ => throw new Exception
     }
   }
 
-  def assign(tiles: String, clusters: String, id: String): Option[List[Tile]] = {
+  def assign(tiles: String, clusters: String, id: String): Future[List[Tile]] = Future {
     val out = matchFile(id) 
     val cmd = Seq(binary, "--assign", "1.414", "1024", clusterFile(clusters), out, tileFile(tiles));
     println(cmd)
     cmd ! match {
-      case 0 => Some(Json.parse(Source.fromFile(out).mkString).as[List[Tile]])
-      case _ => None
+      case 0 => Json.parse(Source.fromFile(out).mkString).as[List[Tile]]
+      case _ => throw new Exception
     }
   }
 
@@ -65,33 +71,32 @@ object MosaicService {
   //   cmd !
   // }
 
-  def generate(tile: String, cluster: String, match_id: String, output: String): Option[String] = {
+  def generateComposition(composition_id: Long, photos: Seq[String]): Future[(List[String], List[Tile])] = {
+    val id = composition_id.toString
+    for {
+      clu <- cluster(photos, id)
+      tiles <- assign(id, id, id)
+    } yield (clu.gists, tiles)
+  }
+
+  def render(tile: String, cluster: String, match_id: String, output: String): Future[String] = Future {
     val cmd = Seq(binary, "--generate", "1.414", "1024", tileFile(tile), clusterFile(cluster), matchFile(match_id), mosaicFile(output))
     println(cmd)
     cmd ! match {
-      case 0 => Some(output)
-      case _ => None
+      case 0 => output
+      case _ => throw new Exception
     }
   }
 
-  // def generateComposition(mosaic: Mosaic, photos: List[String]): Option[Mosaic] = {
-  //   val mosaic_id = mosaic._id.get.stringify
-  //   println(mosaic)
-
-  //   for {
-  //     sorted <- cluster(photos, mosaic_id)
-  //     tiles <- assign(mosaic_id, mosaic_id, mosaic_id)
-  //   } yield mosaic.copy(photos = sorted.gists, tiles = tiles)
-  // }
-
-  def renderComposition(id: String): Option[String] = {
-    generate(id, id, id, id + ".jpg")
+  def renderComposition(id: String): Future[String] = {
+    render(id, id, id, id + ".jpg")
   }
 
-  def replaceComposition(id: String, tiles: Seq[Tile]) = {
+  def renderOtherComposition(id: String, tiles: Seq[Tile]): Future[String] = {
     val file = new File(matchFile(id))
     val writer = new PrintWriter(file);
     writer.write(Json.toJson(tiles).toString)
     writer.close()
+    renderComposition(id)
   }
 }

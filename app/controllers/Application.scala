@@ -42,67 +42,6 @@ class Application extends Controller {
 }
 
 
-// abstract class CRUDController[T <: IDModel[T]] extends Controller {
-
-//   import play.modules.reactivemongo.json.BSONFormats._
-//   lazy val db = Play.current.injector.instanceOf[ReactiveMongoApi].db
-//   def _collection: JSONCollection
-//   implicit val format: Format[T]
-
-//   object DBA {
-//     def create(item: T) = {
-//       val created = item.withID(BSONObjectID.generate)
-//       _collection.save(created) map { wr =>
-//         created
-//       }
-//     }
-
-//     def update(id: String, item: T) = {
-//       val updated = item.withID(BSONObjectID(id))
-//       _collection.save(updated) map { lastError =>
-//         updated
-//       }
-//     }
-
-//     def list = _collection.find(Json.obj()).cursor[T].collect[List]()
-//     def get(id: String) = _collection.find(Json.obj("_id" -> BSONObjectID(id))).one[T]
-//     def delete(id: String) = _collection.remove(Json.obj("_id" -> BSONObjectID(id)))
-//   }
-
-
-//   def create = Action.async(parse.json) { implicit request =>
-//     DBA.create(request.body.as[T]) map { item =>
-//       Ok(Json.toJson(item))
-//     }
-//   }
-
-//   def list = Action.async {
-//     DBA.list map { list =>
-//       Ok(Json.toJson(list))
-//     }
-//   }
-
-//   def get(id: String) = Action.async {
-//     DBA.get(id) map {
-//       case Some(item) => Ok(Json.toJson(item))
-//       case None => NotFound
-//     }
-//   }
-
-//   def update(id: String) = Action.async(parse.json) { request =>
-//     DBA.update(id, request.body.as[T]) map { item =>
-//       Ok(Json.toJson(item))
-//     }
-//   }
-
-//   def delete(id: String) = Action.async {
-//     DBA.delete(id) map { lastError =>
-//       Ok
-//     }
-//   }
-// }
-
-
 trait CRUDActions[T <: DB.HasID] extends Controller {
   implicit val format: Format[T]
 
@@ -200,24 +139,25 @@ class Photos @Inject()(photoDAO: PhotoDAO) extends Controller {
 }
 
 
-class Compositions @Inject()(compositionDAO: CompositionDAO) extends CRUDController[Mosaic] {
-  implicit val format = Json.format[Composition]
+class Compositions @Inject()(compositionDAO: CompositionDAO, collectionDAO: CollectionDAO, photoDAO: PhotoDAO) extends Controller {
+  implicit val format = Json.format[DB.Composition]
 
-//   def generateFromCollection(id: String) = Action.async {
-//     Collections.DBA.get(id) flatMap {
-//       _ flatMap { col =>
-//         MosaicService.generateMosaic(new Mosaic(col), col.photos)
-//       } map { mosaic =>
-//         _collection.save(mosaic) map { lastError =>
-//           Ok(Json.toJson(mosaic))
-//         }
-//       } getOrElse(Future(InternalServerError))
-//     }
-//   }
+  def generateFromCollection(id: Long) = Action.async {
+    val composition = for {
+      comp <- compositionDAO.addWithCollection(id)
+      photos <- photoDAO.allFromCollection(id)
+      (subset, tiles) <- MosaicService.generateComposition(comp.id.get, photos map (_.hash))
+      c <- compositionDAO.update(comp.copy(photos = subset, tiles = tiles))
+    } yield c
+    composition map (c => Ok(Json.toJson(c)))
+  }
 
-//   def generate = Action(parse.json) { request =>
-//     val mosaic = request.body.as[Mosaic]
-//     MosaicService.replaceMosaic(mosaic)
-//     MosaicService.renderMosaic(mosaic) map (_ => Ok(Json.toJson(mosaic))) getOrElse (InternalServerError)
-//   }
+  def generate = Action.async(parse.json) { request =>
+    val composition = request.body.as[DB.Composition]
+    val out = for {
+      c <- compositionDAO.update(composition)
+      a <- MosaicService.renderOtherComposition(c.id.get.toString, c.tiles)
+    } yield a
+    out map (_ => Ok)
+  }
 }
