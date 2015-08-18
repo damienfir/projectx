@@ -44,9 +44,6 @@ POST    /collections/:id/photos     @controllers.Photos.addToCollection(id: Long
 POST    /collections/:id/mosaics    @controllers.Compositions.generateFromCollection(id: Long)
 POST    /mosaics/generate           @controllers.Compositions.generate
 
-# POST    /collections/:id/subsets    controllers.Subsets.createFromCollection(id)
-# POST    /subsets/:id/mosaics        controllers.Mosaics.generateFromSubset(id)
-
 
 GET     /ui                         @controllers.Application.ui
 GET     /                           @controllers.Application.index(filename: String = "")

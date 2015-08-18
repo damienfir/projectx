@@ -22,7 +22,7 @@ trait FileService {
 
 object ImageService extends FileService {
   val baseDir = Play.current.configuration.getString("px.dir_photos").get
-  val thumbDir = Play.current.configuration.getString("px.dir_thumb").get
+  // val thumbDir = Play.current.configuration.getString("px.dir_thumb").get
   val stockDir = Play.current.configuration.getString("px.dir_stock").get
   
   def hashFromContent(data: Array[Byte]): String = {
@@ -31,14 +31,14 @@ object ImageService extends FileService {
     Hex.encodeHexString(digest.digest())
   }
 
-  def resize(filename: String): Try[String] = {
-    val output = s"$thumbDir/$filename"
-    val cmd = Seq("convert", fullPath(filename), "-resize", "150x150", output)
-    cmd.! match {
-      case 0 => Success(output)
-      case _ => Failure(new Exception())
-    }
-  }
+  // def resize(filename: String): Try[String] = {
+  //   val output = s"$thumbDir/$filename"
+  //   val cmd = Seq("convert", fullPath(filename), "-resize", "150x150", output)
+  //   cmd.! match {
+  //     case 0 => Success(output)
+  //     case _ => Failure(new Exception())
+  //   }
+  // }
 
   def save(data: Array[Byte]): Try[String] = {
     val filename = hashFromContent(data)

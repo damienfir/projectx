@@ -1,23 +1,36 @@
 package models
 
-import slick.driver.PostgresDriver.api._
+import com.github.tminglei.slickpg._
+import slick.driver.PostgresDriver
 import play.api.libs.json._
 
 import DB._
 import Backend._
 
 
+trait PostgresDriverExt extends PostgresDriver with PgPlayJsonSupport {
+  override val api = APIExt
+  def pgjson = "jsonb"
+
+  object APIExt extends API with JsonImplicits {
+
+    implicit val tilesColumnType = MappedColumnType.base[List[Tile], JsValue] (
+      { item => Json.toJson(item)},
+      { json => json.as[List[Tile]]}
+    )
+
+    implicit val listColumnType = MappedColumnType.base[List[String], JsValue] (
+      { items => Json.toJson(items)},
+      { json => json.as[List[String]]}
+    )
+  }
+}
+
+object PostgresDriverExt extends PostgresDriverExt
+
+
 object Tables {
-
-  implicit val tilesColumnType = MappedColumnType.base[List[Tile], String] (
-    { item => Json.stringify(Json.toJson(item))},
-    { json => Json.parse(json).as[List[Tile]]}
-  )
-
-  implicit val listColumnType = MappedColumnType.base[List[String], String] (
-    { items => Json.stringify(Json.toJson(items))},
-    { json => Json.parse(json).as[List[String]]}
-  )
+  import PostgresDriverExt.api._
 
   class Users(tag: Tag) extends Table[User](tag, "users") {
     def id = column[Long]("id", O.PrimaryKey, O.AutoInc)

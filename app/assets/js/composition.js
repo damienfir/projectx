@@ -18,7 +18,7 @@ function Composition($resource) {
   });
 
   this.generateFromCollection = function(collection){
-    return Bacon.fromPromise(self.resource.generateFromCollection({id: collection._id.$oid}, {}).$promise);
+    return Bacon.fromPromise(self.resource.generateFromCollection({id: collection.id}, {}).$promise);
   };
 }
 

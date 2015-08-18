@@ -58,6 +58,7 @@ trait CRUDActions[T <: DB.HasID] extends Controller {
       case Some(id) => updateQuery(item)
       case None => insertQuery(item) map (Success(_))
     }) map {
+      case Success(newItem: T) => Ok(Json.toJson(newItem))
       case Success(_) => Ok(Json.toJson(item))
       case Failure(_) => BadRequest
     }
@@ -111,7 +112,6 @@ class Users @Inject()(usersDAO: UsersDAO) extends Controller with CRUDActions[DB
 class Collections @Inject()(collectionDAO: CollectionDAO) extends Controller {
   implicit val format = Json.format[DB.Collection]
 
-
   def fromUser(id: Long) = Action.async {
     collectionDAO.fromUser(id) map (items => Ok(Json.toJson(items)))
   }
@@ -134,6 +134,7 @@ class Photos @Inject()(photoDAO: PhotoDAO) extends Controller {
       photos <- photoDAO.addToCollection(id, names)
       processed <- Future(MosaicService.preprocess(names))
     } yield photos
+    list onComplete (println(_))
     list map (items => Ok(Json.toJson(items)))
   }
 }
@@ -149,7 +150,7 @@ class Compositions @Inject()(compositionDAO: CompositionDAO, collectionDAO: Coll
       (subset, tiles) <- MosaicService.generateComposition(comp.id.get, photos map (_.hash))
       c <- compositionDAO.update(comp.copy(photos = subset, tiles = tiles))
     } yield c
-    composition map (c => Ok(Json.toJson(c)))
+    composition map (c => Ok(Json.toJson(c))) fallbackTo (Future(Ok))
   }
 
   def generate = Action.async(parse.json) { request =>

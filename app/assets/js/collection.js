@@ -24,14 +24,15 @@ function Collection($q, $http, $resource, User) {
 
   this.newFromUser = function() {
     return User.getUser().then(function(user){
-      return self.resource.newFromUser({id: user._id.$oid}, {}).$promise;
+      console.log(user);
+      return self.resource.newFromUser({id: user.id}, {}).$promise;
     });
   };
 
   this.addPhoto = function(file, collection) {
     var fd = new FormData();
     fd.append("image", file);
-    return $http.post("/collections/"+collection._id.$oid+"/photos", fd, {
+    return $http.post("/collections/"+collection.id+"/photos", fd, {
       transformRequest: angular.identity,
       headers: {'Content-Type': undefined}
     });

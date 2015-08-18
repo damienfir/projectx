@@ -22,11 +22,12 @@ function User($cookies, $resource){
 
       if (user_id === undefined) {
         this.user = this.resource.save({}, function(res) {
-          $cookies.put(self.cookie, res._id.$oid);
+          $cookies.put(self.cookie, res.id);
         });
       } else {
         this.user = this.resource.get({id: user_id});
         this.user.$promise.catch(function(){
+          console.log("catch");
           self.user = undefined;
           $cookies.remove(self.cookie);
           self.getUser();

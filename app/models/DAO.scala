@@ -7,9 +7,9 @@ import play.api.db.slick.DatabaseConfigProvider
 import play.api.db.slick.HasDatabaseConfigProvider
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import slick.driver.JdbcProfile
-import slick.driver.PostgresDriver.api._
 import slick.backend.DatabaseConfig
 
+import PostgresDriverExt.api._
 import DB._
 import Tables._
 
@@ -49,10 +49,9 @@ class CollectionDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProv
     }
 
   def fromUserQuery(id: Long) = for {
-    r <- usercollectionrelations.filter(_.userID === id)
+    r <- usercollectionrelations.filter(_.userID === id) if users.one(id).exists
     c <- collections if c.id === r.collectionID
   } yield (c)
-
 
   def fromUser(id: Long) = db.run(fromUserQuery(id).result)
 }

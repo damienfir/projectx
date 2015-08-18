@@ -28,7 +28,8 @@ CREATE TABLE compositions
 (
   id serial NOT NULL,
   collection_id integer,
-  tiles json,
+  tiles jsonb,
+  photos jsonb,
   CONSTRAINT compositions_pkey PRIMARY KEY (id),
   CONSTRAINT compositions_collection_id_fkey FOREIGN KEY (collection_id)
     REFERENCES collections (id)
