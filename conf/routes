@@ -22,10 +22,10 @@ GET     /assets/*file               @controllers.Assets.at(path="/public", file)
 
 
 
-GET     /users                      @controllers.Users.list
+# GET     /users                      @controllers.Users.list
 POST    /users                      @controllers.Users.save
 GET     /users/:id                  @controllers.Users.get(id: Long)
-DELETE  /users/:id                  @controllers.Users.delete(id: Long)
+# DELETE  /users/:id                  @controllers.Users.delete(id: Long)
 GET     /users/:id/collections      controllers.Collections.fromUser(id: Long)
 POST    /users/:id/collections      controllers.Collections.withUser(id: Long)
 # POST    /users/:id/send/:mid        controllers.Users.send(id, mid)

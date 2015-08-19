@@ -4,7 +4,6 @@ import javax.inject.Inject
 
 import play.api._
 import play.api.mvc._
-import scala.util.{Try, Success, Failure}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.concurrent.Future
 
@@ -15,10 +14,6 @@ import play.api.libs.json._
 
 
 class Application extends Controller {
-
-  // def feedbackCollection = db.collection[JSONCollection]("feedbacks")
-  // def contactCollection = db.collection[JSONCollection]("contacts")
-
 
   def index(filename: String) = Action {
     Ok(views.html.index(filename))
@@ -42,50 +37,13 @@ class Application extends Controller {
 }
 
 
-trait CRUDActions[T <: DB.HasID] extends Controller {
-  implicit val format: Format[T]
-
-  def getAction(query: Future[Option[T]]) = Action.async {
-    query map {
-      case Some(item) => Ok(Json.toJson(item))
-      case None => NotFound
-    }
-  }
-
-  def saveAction(insertQuery: T => Future[T], updateQuery: T => Future[Try[_]]) = Action.async(parse.json) { request =>
-    val item = request.body.as[T]
-    (item.id match {
-      case Some(id) => updateQuery(item)
-      case None => insertQuery(item) map (Success(_))
-    }) map {
-      case Success(newItem: T) => Ok(Json.toJson(newItem))
-      case Success(_) => Ok(Json.toJson(item))
-      case Failure(_) => BadRequest
-    }
-  }
-
-  def listAction(query: Future[Seq[T]]) = Action.async {
-    query map { items =>
-      Ok(Json.toJson(items))
-    }
-  }
-
-  def deleteAction(query: Future[Int]) = Action.async {
-    query map {
-      case 1 => Ok
-      case 0 => NotFound
-    }
-  }
-}
-
-
 class Users @Inject()(usersDAO: UsersDAO) extends Controller with CRUDActions[DB.User] {
   implicit val format = Json.format[DB.User]
   
   def get(id: Long) = getAction(usersDAO.get(id))
   def save = saveAction(usersDAO.insert, usersDAO.update)
-  def list = listAction(usersDAO.list)
-  def delete(id: Long) = deleteAction(usersDAO.delete(id))
+  // def list = listAction(usersDAO.list)
+  // def delete(id: Long) = deleteAction(usersDAO.delete(id))
 
 
 //   def send(user_id: String, mosaic_id: String) = Action(parse.json) { implicit request =>
@@ -130,11 +88,10 @@ class Photos @Inject()(photoDAO: PhotoDAO) extends Controller {
 
   def addToCollection(id: Long) = Action.async(parse.multipartFormData) { request =>
     val list = for {
-      names <- Future(ImageService.saveImages(request.body.files.map(_.ref)))
+      names <- ImageService.saveImages(request.body.files.map(_.ref))
       photos <- photoDAO.addToCollection(id, names)
-      processed <- Future(MosaicService.preprocess(names))
+      processed <- MosaicService.preprocessAll(names)
     } yield photos
-    list onComplete (println(_))
     list map (items => Ok(Json.toJson(items)))
   }
 }

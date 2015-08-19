@@ -2,49 +2,50 @@
   'use strict';
 
 angular.module("ui")
-  .directive("bqShare", bqShare)
-  .directive("bqSend", bqSend)
-  .directive("bqDownload", bqDownload)
-  .directive("bqForm", bqForm)
+  // .directive("bqShare", bqShare)
+  // .directive("bqSend", bqSend)
+  // .directive("bqDownload", bqDownload)
+  // .directive("bqForm", bqForm)
   .directive("bqFeedback", bqFeedback)
   .directive("uiControls", uiControls);
 
 
+/* @ngInject */
 function uiControls($mdDialog) {
   return {
-    'controller': function($scope) {
-        function makeDialog(ev, controller, template) {
-          return {
-            controller: controller,
-            templateUrl: template,
-            parent: angular.element(document.body),
-            targetEvent: ev,
-            clickOutsideToClose: true
-          };
-        }
-
-      $scope.showOrder = function(ev) {
-        $mdDialog.show(makeDialog(ev, OrderController, "/assets/templates/order.html"));
-      };
+    controller: function($scope) {
+      // $scope.showOrder = function(ev) {
+      //   $mdDialog.show(makeDialog(ev, OrderController, "/assets/templates/order.html"));
+      // };
 
       $scope.showDownload = function(ev) {
-        $mdDialog.show(makeDialog(ev, OrderController, "/assets/templates/download.html"));
+        $mdDialog.show({
+          controller: DownloadController,
+          templateUrl: "/assets/templates/download.html",
+          scope: $scope
+        });
       };
 
-      $scope.showSend = function(ev) {
-        $mdDialog.show(makeDialog(ev, OrderController, "/assets/templates/send.html"));
-      };
+      // $scope.showSend = function(ev) {
+      //   $mdDialog.show(makeDialog(ev, OrderController, "/assets/templates/send.html"));
+      // };
 
-      $scope.showShare = function(ev) {
-        $mdDialog.show(makeDialog(ev, OrderController, "/assets/templates/share.html"));
-      };
+      // $scope.showShare = function(ev) {
+      //   $mdDialog.show(makeDialog(ev, OrderController, "/assets/templates/share.html"));
+      // };
     }
   };
 }
 
 
-function OrderController($scope, $mdDialog) {
-
+/* @ngInject */
+function DownloadController($scope, $mdDialog, $http) {
+  $scope.download = function() {
+    $mdDialog.hide();
+    $http.post("/mosaics/generate", $scope.composition).then(function() {
+      $window.location.href = "/users/"+$scope.user.id+"/download/"+$scope.composition.id+"?email="+encodeURIComponent($scope.email);
+    });
+  };
 }
 
 
@@ -118,30 +119,6 @@ function bqSend($http, $window) {
   };
 }
 
-/* @ngInject */
-function bqDownload($http, $window){
-  return {
-    controller: function($scope) {
-      $scope.download = function() {
-        $http.post("/mosaics/generate", $scope.composition).then(function() {
-          $window.location.href = "/users/"+$scope.user._id.$oid+"/download/"+$scope.composition._id.$oid+"?email="+encodeURIComponent($scope.email);
-        });
-      };
-    },
-    link: function($scope, $element) {
-      var emailRegex = /[^@]+@[^\.]+\..+/;
-      var form = angular.element(document.getElementById("download-form"));
-      var download = angular.element(document.getElementById("download-btn"));
-      angular.element(document.getElementById("email-input")).on("input", function(ev){
-        download.attr("disabled", !emailRegex.test(ev.target.value));
-      });
-
-      // form.on("submit", function() {
-      //   form.
-      // })
-    }
-  };
-}
 
 /* @ngInject */
 function bqForm($http){

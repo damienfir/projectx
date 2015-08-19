@@ -19,7 +19,7 @@
   
 
   <md-toolbar>
-    <div class="md-toolbar-tools" ui-controls>
+    <div class="md-toolbar-tools">
       <md-button href="/"><img src="/assets/images/logo-white.png"/></md-button>
     </div>
   </md-toolbar>
@@ -43,12 +43,12 @@
       <md-progress-circular md-mode="indeterminate" ng-show="(collection && !composition) || generating" class="center"></md-progress-circular>
     </div>
 
-    <div class="col-buttons centered" ng-show="composition" flex>
+    <div class="col-buttons centered" ng-show="composition" ui-controls flex>
       <div layout="column">
-        <md-button class="md-icon" ng-click="showSend($event)" data-toggle="modal" data-target="#send-modal"><i class="fa fa-paper-plane fa-3x"></i><br/>Send</md-button>
-        <md-button class="md-icon" ng-click="showDownload($event)" data-toggle="modal" data-target="#download-modal"><i class="fa fa-download fa-3x"></i><br/>Download</md-button>
-        <md-button class="md-icon" ng-click="showShare($event)" data-toggle="modal" data-target="#share-modal"><i class="fa fa-share-alt fa-3x"></i><br/>Share</md-button>
-        <md-button class="md-icon" ng-click="showOrder($event)" data-toggle="modal" data-target="#order-modal"><i class="fa fa-shopping-cart fa-3x"></i><br/>Order</md-button>
+        <!-- <md-button class="md-icon" ng-click="showSend($event)" data-toggle="modal" data-target="#send-modal"><i class="fa fa-paper-plane fa-3x"></i><br/>Send</md-button> -->
+        <md-button class="md-icon" ng-click="showDownload($event)"><i class="fa fa-download fa-3x"></i><br/>Download</md-button>
+        <!-- <md-button class="md-icon" ng-click="showShare($event)" data-toggle="modal" data-target="#share-modal"><i class="fa fa-share-alt fa-3x"></i><br/>Share</md-button> -->
+        <!-- <md-button class="md-icon" ng-click="showOrder($event)" data-toggle="modal" data-target="#order-modal"><i class="fa fa-shopping-cart fa-3x"></i><br/>Order</md-button> -->
       </div>
     </div>
   </div>

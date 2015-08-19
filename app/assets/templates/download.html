@@ -1,20 +1,19 @@
-<md-dialog md-theme="default" bq-download>
-  <form method="post" id="download-form" ng-submit="download()">
+<md-dialog md-theme="default">
+  <form method="post" ng-submit="download()" name="downloadForm">
     <md-toolbar>
       <div class="md-toolbar-tools">
-          <h4 class="modal-title"><i class="fa fa-download"></i>&nbsp; Download</h4>
+          <i class="fa fa-download"></i>&nbsp; Download
       </div>
     </md-toolbar>
     <md-dialog-content>
-      <md-input-container md-no-float>
-        <input type="email" name="email" ng-model="email" placeholder="Please enter your email address" id="email-input">
+      <md-input-container>
+        <label>Email address</label>
+        <input type="email" ng-model="email" required>
       </md-input-container>
-
-      <p class="centered text-muted">We will send you a link to your poster to view it later.</p>
-      <input type="hidden" value="{{angular.toJson($scope.composition)}}" name="composition"/>
+      <p class="text-muted">We will send you a link to your poster to view it later.</p>
     </md-dialog-content>
     <div class="md-actions">
-      <md-button type="submit" class="md-raised md-primary" id="download-btn" disabled><i class="fa fa-cloud-download fa-lg"></i> Download</md-button>
+      <md-button type="submit" class="md-raised md-primary" ng-disabled="!downloadForm.$valid"><i class="fa fa-cloud-download fa-lg"></i> Download</md-button>
     </div>
   </form>
 </md-dialog>

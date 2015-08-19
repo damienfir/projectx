@@ -33,8 +33,7 @@ object MosaicService {
   def tileFile(id: String) = Play.current.configuration.getString("px.dir_tile").get + s"/$id"
 
 
-  def preprocess(filenames: Seq[String]): Future[Seq[String]] = Future {
-    filenames map { filename =>
+  def preprocess(filename: String): String =  {
       val out = gistFile(filename)
       val cmd = Seq(binary, "--preprocess", photoFile(filename), out)
       println(cmd)
@@ -42,7 +41,10 @@ object MosaicService {
         case 0 => out
         case _ => throw new Exception
       }
-    }
+  }
+
+  def preprocessAll(filenames: Seq[String]): Future[Seq[String]] = Future {
+    filenames.map(preprocess)
   }
 
   def cluster(gists: Seq[String], id: String): Future[Cluster] = Future {

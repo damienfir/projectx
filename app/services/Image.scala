@@ -4,6 +4,8 @@ import play.api.libs.json._
 import play.api.libs.Files.TemporaryFile
 import play.api.Play
 import scala.util.{Try, Success, Failure}
+import scala.concurrent.Future
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.sys.process._
 
 import java.io._
@@ -40,40 +42,32 @@ object ImageService extends FileService {
   //   }
   // }
 
-  def save(data: Array[Byte]): Try[String] = {
+  def save(data: Array[Byte]): String = {
     val filename = hashFromContent(data)
     val file = getFile(filename)
 
-    try {
-      FileUtils.writeByteArrayToFile(file, data)
-      // resize(filename)
-      Success(filename)
-    } catch {
-      case e: IOException => Failure(e)
-    }
+    FileUtils.writeByteArrayToFile(file, data)
+    // resize(filename)
+    // Success(filename)
+    filename
   }
 
-  def save(uploaded: TemporaryFile): Try[String] = {
+  def save(uploaded: TemporaryFile): String = {
     val filename = hashFromContent(FileUtils.readFileToByteArray(uploaded.file))
     val newFile = getFile(filename)
 
-    try {
-      uploaded.moveTo(newFile)
-      // resize(filename)
-      Success(filename)
-    } catch {
-      case e: IOException =>
-        println(e)
-        Failure(e)
-    }
+    uploaded.moveTo(newFile)
+    // resize(filename)
+    // Success(filename)
+    filename
   }
 
-  def saveImages(newImages: Seq[TemporaryFile]): Seq[String] = {
+  def saveImages(newImages: Seq[TemporaryFile]): Future[Seq[String]] = Future {
     newImages
       .filter(_.file.length > 4)
       .map(save)
-      .filter(_.isSuccess)
-      .map(_.get)
+      // .filter(_.isSuccess)
+      // .map(_.get)
   }
 
   def listStock = {
