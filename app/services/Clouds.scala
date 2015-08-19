@@ -11,9 +11,9 @@ case class DropboxFile(name: String, link: String, icon: String, bytes: Int, thu
 object Dropbox {
   implicit val dropboxForm = Json.format[DropboxFile]
 
-  def download(files: JsValue): Future[List[String]] = Future {
-    files.as[List[DropboxFile]] map { f =>
-      ImageService.save(Http(f.link).asBytes.body)
-    } filter(_.isSuccess) map (_.get)
-  }
+  // def download(files: JsValue): Future[List[String]] = Future {
+  //   files.as[List[DropboxFile]] map { f =>
+  //     ImageService.save(Http(f.link).asBytes.body)
+  //   } filter(_.isSuccess) map (_.get)
+  // }
 }

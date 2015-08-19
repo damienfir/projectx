@@ -20,3 +20,5 @@ db/sessions/*
 db/users/*
 *.swp
 node_modules
+public/photos/*
+public/generated/*

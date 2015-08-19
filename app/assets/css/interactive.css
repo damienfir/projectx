@@ -11,15 +11,15 @@ html, body {
 }
 
 body {
-  padding-top: 65px;
-  /* background-color: #F9F9F9; */
-  background-color: #FFF;
+  /* padding-top: 65px; */
+  /* background-color: #FFF; */
 }
 
-.navbar { box-shadow: none; border: 0; }
-
-#container-ui {
-  padding-top: 35px;
+.container-ui {
+  padding-top: 64px;
+  margin-top: -64px;
+  height: 100%;
+  overflow: hidden;
 }
 
 #box-mosaic {
@@ -71,13 +71,14 @@ body {
 
 #file-upload { opacity: 0; height: 0; }
 
-#upload-box {
+.upload-box {
   text-align: center;
   padding: 70px;
-  color: #666;
+  background-color: white;
+  /* color: #666; */
 }
-#upload-box button { margin-bottom: 10px; }
-#upload-box h4 { padding-top: 10px; color: #666; }
+/* .upload-box button { margin-bottom: 10px; } */
+.upload-box h4 { padding-top: 10px; color: #666; }
 
 #overlay-mosaic { opacity: 0.7; }
 

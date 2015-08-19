@@ -7,19 +7,22 @@ lazy val root = (project in file(".")).enablePlugins(PlayScala)
 scalaVersion := "2.11.7"
 
 libraryDependencies ++= Seq(
-  jdbc,
+  // jdbc,
   cache,
   ws,
   "commons-codec" % "commons-codec" % "1.9",
   "commons-io" % "commons-io" % "2.4",
-  // "org.postgresql"      %   "postgresql"    % "9.4-1200-jdbc4",
-  "org.reactivemongo" %% "play2-reactivemongo" % "0.11.2.play24",
-  "javax.mail" % "mail" % "1.4.7"
+  "org.postgresql" % "postgresql" % "9.4-1201-jdbc41",
+  // "org.reactivemongo" %% "play2-reactivemongo" % "0.11.2.play24",
+  // "com.h2database" % "h2" % "1.4.188",
+  "com.typesafe.play" %% "play-slick" % "1.0.1",
+  "com.typesafe.play" %% "play-slick-evolutions" % "1.0.1",
+  "javax.mail" % "mail" % "1.4.7",
+  "org.scalaj" %% "scalaj-http" % "1.1.4",
+  "com.github.tminglei" %% "slick-pg" % "0.9.1"
 )
 
-libraryDependencies +=  "org.scalaj" %% "scalaj-http" % "1.1.4"
-
-// routesGenerator := InjectedRoutesGenerator
+routesGenerator := InjectedRoutesGenerator
 
 //pipelineStages := Seq(rjs)
 

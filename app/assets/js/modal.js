@@ -2,11 +2,52 @@
   'use strict';
 
 angular.module("ui")
-  .directive("bqShare", bqShare)
-  .directive("bqSend", bqSend)
-  .directive("bqDownload", bqDownload)
-  .directive("bqForm", bqForm)
-  .directive("bqFeedback", bqFeedback);
+  // .directive("bqShare", bqShare)
+  // .directive("bqSend", bqSend)
+  // .directive("bqDownload", bqDownload)
+  // .directive("bqForm", bqForm)
+  .directive("bqFeedback", bqFeedback)
+  .directive("uiControls", uiControls);
+
+
+/* @ngInject */
+function uiControls($mdDialog) {
+  return {
+    controller: function($scope) {
+      // $scope.showOrder = function(ev) {
+      //   $mdDialog.show(makeDialog(ev, OrderController, "/assets/templates/order.html"));
+      // };
+
+      $scope.showDownload = function(ev) {
+        $mdDialog.show({
+          controller: DownloadController,
+          templateUrl: "/assets/templates/download.html",
+          scope: $scope
+        });
+      };
+
+      // $scope.showSend = function(ev) {
+      //   $mdDialog.show(makeDialog(ev, OrderController, "/assets/templates/send.html"));
+      // };
+
+      // $scope.showShare = function(ev) {
+      //   $mdDialog.show(makeDialog(ev, OrderController, "/assets/templates/share.html"));
+      // };
+    }
+  };
+}
+
+
+/* @ngInject */
+function DownloadController($scope, $mdDialog, $http) {
+  $scope.download = function() {
+    $mdDialog.hide();
+    $http.post("/mosaics/generate", $scope.composition).then(function() {
+      $window.location.href = "/users/"+$scope.user.id+"/download/"+$scope.composition.id+"?email="+encodeURIComponent($scope.email);
+    });
+  };
+}
+
 
 /* @ngInject */
 function bqShare($window) {
@@ -48,7 +89,7 @@ function bqShare($window) {
       };
     },
     link: function($scope, $element) {
-      $element.children(".modal-body button").tooltip();
+      // $element.children(".modal-body button").tooltip();
     }
   };
 }
@@ -78,30 +119,6 @@ function bqSend($http, $window) {
   };
 }
 
-/* @ngInject */
-function bqDownload($http, $window){
-  return {
-    controller: function($scope) {
-      $scope.download = function() {
-        $http.post("/mosaics/generate", $scope.composition).then(function() {
-          $window.location.href = "/users/"+$scope.user._id.$oid+"/download/"+$scope.composition._id.$oid+"?email="+encodeURIComponent($scope.email);
-        });
-      };
-    },
-    link: function($scope, $element) {
-      var emailRegex = /[^@]+@[^\.]+\..+/;
-      var form = angular.element(document.getElementById("download-form"));
-      var download = angular.element(document.getElementById("download-btn"));
-      angular.element(document.getElementById("email-input")).on("input", function(ev){
-        download.attr("disabled", !emailRegex.test(ev.target.value));
-      });
-
-      // form.on("submit", function() {
-      //   form.
-      // })
-    }
-  };
-}
 
 /* @ngInject */
 function bqForm($http){

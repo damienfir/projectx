@@ -1,9 +1,17 @@
-angular.module("ui", [
-    'ngResource',
-    'ngCookies',
-    'ngMaterial'
-]);
+(function(angular){
+  'use strict';
 
-angular.element().ready(function() {
-  angular.bootstrap(document, ['ui']);
+
+angular.module("ui", [
+    'ngMaterial',
+    'ui.collection'
+])
+.config(function($mdThemingProvider, $mdIconProvider) {
+  $mdThemingProvider.theme('default')
+    .primaryPalette('blue')
+    .accentPalette('red');
+  $mdIconProvider.fontSet('fa', 'fontawesome');
 });
+
+
+})(angular);

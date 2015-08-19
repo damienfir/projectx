@@ -8,47 +8,43 @@
 # GET     /stock                      controllers.Application.stock
 # GET     /themes                     controllers.Application.themes
 
-GET     /storage/*file              controllers.ExternalAssets.at(path="storage", file)
-GET     /assets/*file               controllers.Assets.at(path="/public", file)
+# GET     /storage/*file              @controllers.ExternalAssets.at(path="storage", file)
+GET     /assets/*file               @controllers.Assets.at(path="/public", file)
 
 
 # POST    /dropbox                    controllers.Application.dropbox
 
-GET     /questions                  controllers.Application.questions
-POST    /feedback                   controllers.Application.feedback
+# GET     /questions                  controllers.Application.questions
+# POST    /feedback                   controllers.Application.feedback
 # POST    /textfeedback               controllers.Feedback.textFeedback
 # GET     /reset                      controllers.Application.reset
-POST    /contact                    controllers.Application.contact
+# POST    /contact                    controllers.Application.contact
 
 
 
-GET     /users                      controllers.Users.list
-POST    /users                      controllers.Users.create
-GET     /users/:id                  controllers.Users.get(id)
-POST    /users/:id                  controllers.Users.update(id)
-DELETE  /users/:id                  controllers.Users.delete(id)
-GET     /users/:id/collections      controllers.Collections.fromUser(id)
-POST    /users/:id/collections      controllers.Collections.withUser(id)
-POST    /users/:id/send/:mid        controllers.Users.send(id, mid)
-GET     /users/:id/download/:mid    controllers.Users.download(id, mid, email)
+# GET     /users                      @controllers.Users.list
+POST    /users                      @controllers.Users.save
+GET     /users/:id                  @controllers.Users.get(id: Long)
+# DELETE  /users/:id                  @controllers.Users.delete(id: Long)
+GET     /users/:id/collections      controllers.Collections.fromUser(id: Long)
+POST    /users/:id/collections      controllers.Collections.withUser(id: Long)
+# POST    /users/:id/send/:mid        controllers.Users.send(id, mid)
+# GET     /users/:id/download/:mid    controllers.Users.download(id, mid, email)
 
 # GET     /collections                controllers.Collections.list
 # POST    /collections                controllers.Collections.create
-GET     /collections/:id            controllers.Collections.get(id)
-DELETE  /collections/:id            controllers.Collections.delete(id)
-POST    /collections/:id/users/:uid controllers.Collections.addUser(id, uid)
-DELETE  /collections/:id/users/:uid controllers.Collections.removeUser(id, uid)
-POST    /collections/:id/photos     controllers.Collections.addPhotos(id)
+# GET     /collections/:id            controllers.Collections.get(id)
+# DELETE  /collections/:id            controllers.Collections.delete(id)
+# POST    /collections/:id/users/:uid controllers.Collections.addUser(id, uid)
+# DELETE  /collections/:id/users/:uid controllers.Collections.removeUser(id, uid)
+POST    /collections/:id/photos     @controllers.Photos.addToCollection(id: Long)
 # GET     /collections/:id/photos/:photo_id controllers.Collections.getPhoto(id, photo_id)
 # DELETE  /collections/:id/photos/:photos_id  controllers.Collections.removePhoto(id, photo_id)
 
-POST    /collections/:id/mosaics    controllers.Mosaics.generateFromCollection(id)
-POST    /mosaics/generate           controllers.Mosaics.generate
-
-# POST    /collections/:id/subsets    controllers.Subsets.createFromCollection(id)
-# POST    /subsets/:id/mosaics        controllers.Mosaics.generateFromSubset(id)
+POST    /collections/:id/mosaics    @controllers.Compositions.generateFromCollection(id: Long)
+POST    /mosaics/generate           @controllers.Compositions.generate
 
 
-GET     /ui                         controllers.Application.ui
-GET     /                           controllers.Application.index(filename: String = "")
-GET     /:filename                  controllers.Application.index(filename: String)
+GET     /ui                         @controllers.Application.ui
+GET     /                           @controllers.Application.index(filename: String = "")
+GET     /:filename                  @controllers.Application.index(filename: String)
