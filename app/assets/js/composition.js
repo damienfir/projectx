@@ -315,6 +315,8 @@ function uiTile(){
           $ctrl.swap($scope.$index, $scope.last_swapped);
         }
         $ctrl.swapped($scope.$index);
+      } else {
+        $ctrl.swapped(undefined);
       }
     });
   }
