@@ -1,6 +1,6 @@
 package services
 
-import javax.inject.Inject
+import javax.inject._
 import scala.util.{Try, Success, Failure}
 import scala.util.control.Exception
 import scala.concurrent.Future
@@ -16,6 +16,7 @@ import models._
 import Backend._
 
 
+@Singleton
 class MosaicService @Inject()() {
   implicit val clusterFormat = Json.format[Cluster]
 
