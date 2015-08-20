@@ -23,7 +23,6 @@ trait FileService {
 }
 
 
-@Singleton
 class ImageService @Inject()() extends FileService {
   val baseDir = Play.current.configuration.getString("px.dir_photos").get
   // val thumbDir = Play.current.configuration.getString("px.dir_thumb").get

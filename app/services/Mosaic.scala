@@ -16,7 +16,6 @@ import models._
 import Backend._
 
 
-@Singleton
 class MosaicService @Inject()() {
   implicit val clusterFormat = Json.format[Cluster]
 
