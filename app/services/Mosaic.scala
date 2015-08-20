@@ -1,5 +1,6 @@
 package services
 
+import javax.inject.Inject
 import scala.util.{Try, Success, Failure}
 import scala.util.control.Exception
 import scala.concurrent.Future
@@ -15,7 +16,7 @@ import models._
 import Backend._
 
 
-object MosaicService {
+class MosaicService @Inject()() {
   implicit val clusterFormat = Json.format[Cluster]
 
   val binary = Play.current.configuration.getString("px.binary").get

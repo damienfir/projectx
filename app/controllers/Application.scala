@@ -83,28 +83,28 @@ class Collections @Inject()(collectionDAO: CollectionDAO) extends Controller {
 }
 
 
-class Photos @Inject()(photoDAO: PhotoDAO, imageService: ImageService) extends Controller {
+class Photos @Inject()(photoDAO: PhotoDAO, imageService: ImageService, mosaicService: MosaicService) extends Controller {
   implicit val format = Json.format[DB.Photo]
 
   def addToCollection(id: Long) = Action.async(parse.multipartFormData) { request =>
     val list = for {
       names <- imageService.saveImages(request.body.files.map(_.ref))
       photos <- photoDAO.addToCollection(id, names)
-      processed <- MosaicService.preprocessAll(names)
+      processed <- mosaicService.preprocessAll(names)
     } yield photos
     list map (items => Ok(Json.toJson(items)))
   }
 }
 
 
-class Compositions @Inject()(compositionDAO: CompositionDAO, collectionDAO: CollectionDAO, photoDAO: PhotoDAO) extends Controller {
+class Compositions @Inject()(compositionDAO: CompositionDAO, collectionDAO: CollectionDAO, photoDAO: PhotoDAO, mosaicService: MosaicService) extends Controller {
   implicit val format = Json.format[DB.Composition]
 
   def generateFromCollection(id: Long) = Action.async {
     val composition = for {
       comp <- compositionDAO.addWithCollection(id)
       photos <- photoDAO.allFromCollection(id)
-      (subset, tiles) <- MosaicService.generateComposition(comp.id.get, photos map (_.hash))
+      (subset, tiles) <- mosaicService.generateComposition(comp.id.get, photos map (_.hash))
       c <- compositionDAO.update(comp.copy(photos = subset, tiles = tiles))
     } yield c
     composition map (c => Ok(Json.toJson(c))) fallbackTo (Future(Ok))
@@ -114,7 +114,7 @@ class Compositions @Inject()(compositionDAO: CompositionDAO, collectionDAO: Coll
     val composition = request.body.as[DB.Composition]
     val out = for {
       c <- compositionDAO.update(composition)
-      a <- MosaicService.renderOtherComposition(c.id.get.toString, c.tiles)
+      a <- mosaicService.renderOtherComposition(c.id.get.toString, c.tiles)
     } yield a
     out map (_ => Ok)
   }
