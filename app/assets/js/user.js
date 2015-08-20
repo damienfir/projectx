@@ -31,6 +31,7 @@ function User($cookies, $resource){
           self.user = undefined;
           $cookies.remove(self.cookie);
           self.getUser();
+          return self.user;
         });
       }
     }
