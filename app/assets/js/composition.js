@@ -290,14 +290,17 @@ function uiTile(){
     $element.on("mousedown", function(downev){
       downev.stopPropagation();
       downev.preventDefault();
+      var lastpos = [downev.screenX, downev.screenY];
 
       $ctrl.moving($scope.$index);
 
       $element.on("mousemove", function(ev){
         ev.stopPropagation();
         ev.preventDefault();
-        move(ev.originalEvent.movementY / img.height, 'cy1', 'cy2');
-        move(ev.originalEvent.movementX / img.width, 'cx1', 'cx2');
+        var currentpos = [ev.screenX, ev.screenY];
+        move((currentpos[1] - lastpos[1]) / img.height, 'cy1', 'cy2');
+        move((currentpos[0] - lastpos[0]) / img.width, 'cx1', 'cx2');
+        lastpos = [currentpos[0], currentpos[1]];
         $scope.$digest();
       });
     });
