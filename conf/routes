@@ -8,7 +8,7 @@
 # GET     /stock                      controllers.Application.stock
 # GET     /themes                     controllers.Application.themes
 
-# GET     /storage/*file              @controllers.ExternalAssets.at(path="storage", file)
+GET     /storage/*file              @controllers.ExternalAssets.at(path="storage", file)
 GET     /assets/*file               @controllers.Assets.at(path="/public", file)
 
 
