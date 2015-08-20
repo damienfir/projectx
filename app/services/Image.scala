@@ -1,5 +1,6 @@
 package services
 
+import javax.inject._
 import play.api.libs.json._
 import play.api.libs.Files.TemporaryFile
 import play.api.Play
@@ -22,7 +23,8 @@ trait FileService {
 }
 
 
-object ImageService extends FileService {
+@Singleton
+class ImageService @Inject()() extends FileService {
   val baseDir = Play.current.configuration.getString("px.dir_photos").get
   // val thumbDir = Play.current.configuration.getString("px.dir_thumb").get
   val stockDir = Play.current.configuration.getString("px.dir_stock").get

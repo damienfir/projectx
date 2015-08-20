@@ -83,12 +83,12 @@ class Collections @Inject()(collectionDAO: CollectionDAO) extends Controller {
 }
 
 
-class Photos @Inject()(photoDAO: PhotoDAO) extends Controller {
+class Photos @Inject()(photoDAO: PhotoDAO, imageService: ImageService) extends Controller {
   implicit val format = Json.format[DB.Photo]
 
   def addToCollection(id: Long) = Action.async(parse.multipartFormData) { request =>
     val list = for {
-      names <- ImageService.saveImages(request.body.files.map(_.ref))
+      names <- imageService.saveImages(request.body.files.map(_.ref))
       photos <- photoDAO.addToCollection(id, names)
       processed <- MosaicService.preprocessAll(names)
     } yield photos
