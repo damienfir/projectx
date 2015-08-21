@@ -56,10 +56,10 @@ class ImageService @Inject()() extends FileService {
   def save(uploaded: TemporaryFile): String = {
     val filename = hashFromContent(FileUtils.readFileToByteArray(uploaded.file))
     val newFile = getFile(filename)
-    newFile.setReadable(true, false)
-    newFile.setExecutable(true, false)
 
     uploaded.moveTo(newFile)
+    newFile.setReadable(true, false)
+    newFile.setExecutable(true, false)
     // resize(filename)
     // Success(filename)
     filename
