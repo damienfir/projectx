@@ -334,12 +334,14 @@ function uiTile(){
     $element.on("mouseenter", function(ev) {
       if (!angular.isUndefined($scope.currently_moving) && $scope.currently_moving !== $scope.$index) {
         $ctrl.swap($scope.currently_moving, $scope.$index);
-        if (!angular.isUndefined($scope.last_swapped)) {
-          $ctrl.swap($scope.$index, $scope.last_swapped);
+        if ($scope.$index !== $scope.last_swapped) {
+          if (!angular.isUndefined($scope.last_swapped)) {
+            $ctrl.swap($scope.$index, $scope.last_swapped);
+          }
+          $ctrl.swapped($scope.$index);
+        } else {
+          $ctrl.swapped(undefined);
         }
-        $ctrl.swapped($scope.$index);
-      } else {
-        $ctrl.swapped(undefined);
       }
     });
   }
