@@ -57,16 +57,21 @@ function uiComposition() {
 
       tile.cx1 = 0;
       tile.cy1 = 0;
-      tile.cy2 = 1/arImg2;
-      tile.cx2 = 1*arImg2;
+      if (arImg2 > 1) {
+        tile.cy2 = 1/arImg2;
+        tile.cx2 = tile.cy2*arImg2;
+      } else {
+        tile.cx2 = arImg2;
+        tile.cy2 = tile.cx2/arImg2;
+      }
 
-      var dy = tile.cy2/2 - center[1];
-      tile.cy1 = Math.max(0,tile.cy1-dy);
-      tile.cy2 = Math.min(1,tile.cy2-dy);
+      var dx = Math.min(1-tile.cx2, Math.max(0, center[0]-tile.cx2/2));
+      tile.cx1 += dx;
+      tile.cx2 += dx;
 
-      var dx = tile.cx2/2 - center[0];
-      tile.cx1 = Math.max(0,tile.cx1-dx);
-      tile.cx2 = Math.min(1,tile.cx2-dx);
+      var dy = Math.min(1-tile.cy2, Math.max(0, center[1]-tile.cy2/2));
+      tile.cy1 += dy;
+      tile.cy2 += dy;
     }
 
     this.swap = function(idx1, idx2) {
