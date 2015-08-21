@@ -24,7 +24,6 @@ function Collection($q, $http, $resource, User) {
 
   this.newFromUser = function() {
     return User.getUser().then(function(user){
-      console.log(user);
       return self.resource.newFromUser({id: user.id}, {}).$promise;
     });
   };

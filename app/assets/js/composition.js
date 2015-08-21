@@ -40,44 +40,40 @@ function uiComposition() {
       $scope.last_swapped = idx;
     };
 
-    function centerTile(tile) {
-      var ar = (tile.tx2-tile.tx1)/(tile.ty2-tile.ty1);
-      var center = [tile.cx1+(tile.cx2-tile.cx1)/2, tile.cy1+(tile.cy2-tile.cy1)/2];
+    function resizeTile(idx, tile2) {
+      var tile = $scope.composition.tiles[idx];
+
+      var arTile = (tile.tx2-tile.tx1) / (tile.ty2-tile.ty1);
+      var arTile2 = (tile2.tx2-tile2.tx1) / (tile2.ty2-tile2.ty1);
+      var arImg = (tile.cx2-tile.cx1) / (tile.cy2-tile.cy1);
+      var arImg2 = arTile2 * arImg / arTile;
+
+      var center = [(tile.cx2+tile.cx1)/2, (tile.cy2+tile.cy1)/2];
+      
+      tile.tx1 = tile2.tx1;
+      tile.ty1 = tile2.ty1;
+      tile.tx2 = tile2.tx2;
+      tile.ty2 = tile2.ty2;
+
       tile.cx1 = 0;
       tile.cy1 = 0;
-      if (ar > 1) {
-        tile.cx2 = 1;
-        tile.cy2 = 1/ar;
-        var dy = tile.cy2/2 - center[1];
-        tile.cy1 = Math.max(0,tile.cy1-dy);
-        tile.cy2 = Math.min(1,tile.cy2-dy);
-      } else {
-        tile.cx2 = 1*ar;
-        tile.cy2 = 1;
-        var dx = tile.cx2/2 - center[0];
-        tile.cx1 = Math.max(0,tile.cx1-dx);
-        tile.cx2 = Math.min(1,tile.cx2-dx);
-      }
+      tile.cy2 = 1/arImg2;
+      tile.cx2 = 1*arImg2;
+
+      var dy = tile.cy2/2 - center[1];
+      tile.cy1 = Math.max(0,tile.cy1-dy);
+      tile.cy2 = Math.min(1,tile.cy2-dy);
+
+      var dx = tile.cx2/2 - center[0];
+      tile.cx1 = Math.max(0,tile.cx1-dx);
+      tile.cx2 = Math.min(1,tile.cx2-dx);
     }
 
     this.swap = function(idx1, idx2) {
-      var tile1 = $scope.composition.tiles[idx1];
-      var tile2 = $scope.composition.tiles[idx2];
-      var tmp = angular.copy(tile1);
-
-      tile1.tx1 = tile2.tx1;
-      tile1.ty1 = tile2.ty1;
-      tile1.tx2 = tile2.tx2;
-      tile1.ty2 = tile2.ty2;
-
-      tile2.tx1 = tmp.tx1;
-      tile2.ty1 = tmp.ty1;
-      tile2.tx2 = tmp.tx2;
-      tile2.ty2 = tmp.ty2;
-
-      centerTile(tile1);
-      centerTile(tile2);
-
+      var tile1 = angular.copy($scope.composition.tiles[idx1]);
+      var tile2 = angular.copy($scope.composition.tiles[idx2]);
+      resizeTile(idx1, tile2);
+      resizeTile(idx2, tile1);
       $scope.$digest();
     };
 
@@ -110,16 +106,32 @@ function uiComposition() {
       });
 
       if (!is_out) {
-        tile_tl.forEach(function(tile, i){
-          tile.tx1 = newcoord_tl[i][0];
-          tile.ty1 = newcoord_tl[i][1];
-          centerTile(tile);
+        targets.topleft.forEach(function(idx, i) {
+          resizeTile(idx, {
+            tx1: newcoord_tl[i][0],
+            ty1: newcoord_tl[i][1],
+            tx2: tile_tl[i].tx2,
+            ty2: tile_tl[i].ty2
+          });
         });
-        tile_br.forEach(function(tile, i){
-          tile.tx2 = newcoord_br[i][0];
-          tile.ty2 = newcoord_br[i][1];
-          centerTile(tile);
+        targets.bottomright.forEach(function(idx, i) {
+          resizeTile(idx, {
+            tx1: tile_br[i].tx1,
+            ty1: tile_br[i].ty1,
+            tx2: newcoord_br[i][0],
+            ty2: newcoord_br[i][1]
+          });
         });
+        // tile_tl.forEach(function(tile, i){
+        //   tile.tx1 = newcoord_tl[i][0];
+        //   tile.ty1 = newcoord_tl[i][1];
+        //   resizeTile(tile, elementAR);
+        // });
+        // tile_br.forEach(function(tile, i){
+        //   tile.tx2 = newcoord_br[i][0];
+        //   tile.ty2 = newcoord_br[i][1];
+        //   resizeTile(tile, elementAR);
+        // });
       }
     };
   }
@@ -217,7 +229,7 @@ function uiComposition() {
         var dx = (moveev.screenX - lastpos[0]) / elementSize[0];
         var dy = (moveev.screenY - lastpos[1]) / elementSize[1];
         lastpos = [moveev.screenX, moveev.screenY];
-        $scope.moveTiles(targets, orientation, bounds, dx, dy);
+        $scope.moveTiles(targets, orientation, bounds, dx, dy, elementSize[0]/elementSize[1]);
         $scope.$digest();
       });
     });
