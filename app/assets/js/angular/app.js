@@ -4,7 +4,7 @@
 
 angular.module("ui", [
     'ngMaterial',
-    'ui.collection'
+    // 'ui.collection'
 ])
 .config(function($mdThemingProvider, $mdIconProvider) {
   $mdThemingProvider.theme('default')

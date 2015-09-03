@@ -1,12 +1,21 @@
 module.exports = function(grunt) {
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
-    concat: {
+    "babel": {
+      options: {
+        sourceMap: true
+      },
       dist: {
-        src: ["app/assets/js/**/*.js"],
-        dest: "public/<%= pkg.name %>.js"
+        files: {
+          "dist/app.js": "src/app.js"
+        }
       }
     },
+    browserify: {
+      options: {
+
+      }
+    }
     uglify: {
       dist: {
         files: {
@@ -16,7 +25,7 @@ module.exports = function(grunt) {
     }
   });
 
-  grunt.loadNpmTasks('grunt-contrib-concat');
+  grunt.loadNpmTasks('grunt-browserify');
   grunt.loadNpmTasks('grunt-contrib-uglify');
 
   grunt.registerTask('default', ['concat']);

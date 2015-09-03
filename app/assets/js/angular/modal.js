@@ -39,10 +39,12 @@ function uiControls($mdDialog) {
 
 
 /* @ngInject */
-function DownloadController($scope, $mdDialog, $http) {
+function DownloadController($scope, $mdDialog, $http, $window) {
   $scope.download = function() {
-    $mdDialog.hide();
+    $scope.button = "Generating...";
     $http.post("/mosaics/generate", $scope.composition).then(function() {
+      $mdDialog.hide();
+      $scope.button = undefined;
       $window.location.href = "/users/"+$scope.user.id+"/download/"+$scope.composition.id+"?email="+encodeURIComponent($scope.email);
     });
   };

@@ -13,7 +13,7 @@
       <p class="text-muted">We will send you a link to your poster to view it later.</p>
     </md-dialog-content>
     <div class="md-actions">
-      <md-button type="submit" class="md-raised md-primary" ng-disabled="!downloadForm.$valid"><i class="fa fa-cloud-download fa-lg"></i> Download</md-button>
+      <md-button type="submit" class="md-raised md-primary" ng-disabled="!downloadForm.$valid"><i class="fa fa-cloud-download fa-lg"></i> {{ $scope.button ? $scope.button : 'Download'}}</md-button>
     </div>
   </form>
 </md-dialog>
