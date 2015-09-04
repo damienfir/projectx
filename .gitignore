@@ -19,6 +19,8 @@ storage
 db/sessions/*
 db/users/*
 *.swp
+*.swo
+*.swn
 node_modules
 public/photos/*
 public/generated/*
