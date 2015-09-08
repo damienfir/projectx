@@ -24,3 +24,4 @@ db/users/*
 node_modules
 public/photos/*
 public/generated/*
+public/js/bundle.js

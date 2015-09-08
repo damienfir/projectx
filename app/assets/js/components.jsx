@@ -10,8 +10,8 @@ var Upload = React.createClass({
 
   render: function() {
     return (
-      <div>
-        <button onClick={this.click}>upload</button>
+      <div className="upload-box shadow">
+        <button className="btn btn-primary" onClick={this.click}><i className="fa fa-upload"></i>&nbsp; Upload photos</button>
         <input type="file" name="image" onChange={Collection.addFiles} id="fileinput" multiple></input>
       </div>
     );
@@ -44,17 +44,19 @@ var Composition = React.createClass({
   percent(x) { return x * 100 + "%"; },
   render() {
     return (
-      <div className="ui-composition shadow">
-        {this.props.composition.tiles.map(tile => {
-          return <div className="ui-tile" style={{
-              height: this.percent(tile.ty2 - tile.ty1),
-              width: this.percent(tile.tx2 - tile.tx1),
-              top: this.percent(tile.ty1),
-              left: this.percent(tile.tx1)
-          }}>
-              <Tile tile={tile} comp={this.props.composition} />
-            </div>
-        })}
+      <div className="box-mosaic">
+        <div className="ui-composition shadow">
+          {this.props.composition.tiles.map(tile => {
+            return <div className="ui-tile" style={{
+                height: this.percent(tile.ty2 - tile.ty1),
+                width: this.percent(tile.tx2 - tile.tx1),
+                top: this.percent(tile.ty1),
+                left: this.percent(tile.tx1)
+            }}>
+                <Tile tile={tile} comp={this.props.composition} />
+              </div>
+          })}
+        </div>
       </div>
     );
   }
@@ -66,9 +68,7 @@ var UI = React.createClass({
     return (
       <div className="container-ui">
         <Upload />
-        <div className="box-mosaic">
-          <Composition composition={this.props.composition} />
-        </div>
+        <Composition composition={this.props.composition} />
       </div>
     );
   }

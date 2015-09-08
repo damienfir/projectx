@@ -7,16 +7,21 @@ var d = new Dispatcher();
 
 var User = {
   toProperty(initial) {
+
     return Bacon.update(initial,
-      [d.stream('get')], get
-    ).flatMap(x => x);
+      [d.stream('get')], get,
+      [d.stream('set')], set
+    );
 
     function get(user) {
       if (_.isUndefined(user) || _.isEmpty(user)) {
-        return Bacon.fromPromise($.get("/users/1"));
-      } else {
-        return Bacon.once(user);
+        d.plug('set', Bacon.fromPromise($.get("/users/1")));
       }
+      return user;
+    }
+
+    function set(user, newUser) {
+      return newUser;
     }
   },
 

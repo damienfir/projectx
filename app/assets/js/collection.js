@@ -12,23 +12,29 @@ var d = new Dispatcher();
 var Collection = {
   toProperty(initial, userP) {
     return Bacon.update(initial,
-      [d.stream('uploadAll')], uploadAll
-    ).flatMap(x => x);
+      [d.stream('uploadAll')], uploadAll,
+      [d.stream('set')], set
+    );
+
+    function set(collection, newCollection) {
+      return newCollection;
+    }
 
     function uploadOne(collection, file) {
       return addPhoto(collection.id, file).map(_ => collection)
     }
 
     function uploadAll(collection, files) {
-      User.getCurrent();
-      return userP
+      d.plug('set', userP
+        .filter(x => !_.isUndefined(x))
         .flatMap(getCollection)
         .flatMap(col => {
           var stream = Bacon.fromArray(toArray(files))
             .flatMap(f => uploadOne(col, f))
           stream.onEnd(_ => Composition.generate(col));
           return stream;
-        });
+        }));
+      User.getCurrent();
     }
   },
 
