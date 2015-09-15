@@ -13,36 +13,65 @@ var Collection = {
   toProperty(initial, userP) {
     return Bacon.update(initial,
       [d.stream('uploadAll')], uploadAll,
-      [d.stream('set')], set
+      [d.stream('setState')], setState
     );
 
-    function set(collection, newCollection) {
-      return newCollection;
+    function setState(previous, state) {
+      return state;
     }
 
-    function uploadOne(collection, file) {
-      return addPhoto(collection.id, file).map(_ => collection)
+    function setUser(state, user) {
+      return _.extend(state, {user});
     }
 
-    function uploadAll(collection, files) {
-      d.plug('set', userP
-        .filter(x => !_.isUndefined(x))
-        .flatMap(getCollection)
-        .flatMap(col => {
-          var stream = Bacon.fromArray(toArray(files))
-            .flatMap(f => uploadOne(col, f))
-          stream.onEnd(_ => Composition.generate(col));
-          return stream;
-        }));
-      User.getCurrent();
+    function setCollection(state, collection) {
+      return _.extend(state, {collection});
+    }
+
+    function setComposition(state, composition) {
+      return _.extend(state, {composition});
+    }
+
+    function getUser(state) {
+      if (_.isUndefined(state.user) || _.isEmpty(state.user)) {
+        return Bacon.fromPromise($.get("/users/1")).fold(state, setUser);
+      }
+      return Bacon.once(state);
+    }
+
+    function getCollection(state) {
+      if (_.isEmpty(state.collection)) {
+        return Bacon.fromPromise($.post("/users/"+state.user.id+"/collections")).fold(state, setCollection);
+      }
+      return Bacon.once(state);
+    }
+
+    function generateComposition(state) {
+      var out = Bacon.fromPromise($.post("/collections/"+state.collection.id+"/mosaics")).fold(state, setComposition);
+      d.plug('setState', out);
+      return state
+    }
+
+    function uploadToCollection(state, files) {
+      return Bacon.fromArray(toArray(files))
+        .flatMap(f => addPhoto(state.collection.id, f).map(_ => state))
+    }
+
+    function uploadAll(state, files) {
+      var out = getUser(state)
+        .flatMapLatest(getCollection)
+        .flatMapLatest(st => {
+          return uploadToCollection(state, files).mapEnd(_ => generateComposition(st));
+        });
+      // out.log();
+      d.plug('setState', out);
+      return state;
     }
   },
 
   addFiles(ev) { d.push('uploadAll', ev.target.files) },
-}
 
-function getCollection(user) {
-  return Bacon.fromPromise($.post("/users/"+user.id+"/collections"));
+  reset(ev) { d.push('setState', {}) }
 }
 
 function addPhoto(collectionID, file) {
@@ -55,6 +84,7 @@ function addPhoto(collectionID, file) {
     processData: false,
     contentType: false
   }));
+
 }
 
 function toArray(filelist) {
