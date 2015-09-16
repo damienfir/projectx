@@ -86,7 +86,7 @@ function main({DOM, HTTP}) {
     compositionRequest$
   );
 
-  var state$ = compositionResponse$.do(x => console.log(x)).startWith({composition});
+  var state$ = compositionResponse$.map(composition => ({composition})).startWith({composition});
 
   var vtree$ = state$.map(state => 
       <div className="container-ui limited-width">
