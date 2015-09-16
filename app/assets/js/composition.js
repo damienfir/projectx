@@ -23,7 +23,7 @@ var Composition = {
     var composition = drag.diff(undefined, (prev, curr) => {
         var p = prev || curr;
         return _.extend(curr, {'dx': curr.x-p.x, 'dy': curr.y-p.y})
-      }).log()
+      })
       .scan(initial, (comp, drag) => {
         comp.tiles[drag.moving] = dragTile(comp.tiles[drag.moving], drag.dx, drag.dy, drag.img);
         return comp;

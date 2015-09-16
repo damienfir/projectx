@@ -1,11 +1,9 @@
-const React = require("react"),
-      Bacon = require('baconjs'),
-      _ = require("underscore");
+/** @jsx hJSX */
 
-const Collection = require('./collection'),
-      Composition = require('./composition'),
-      User = require('./user'),
-      UI = require('./components');
+import Cycle from '@cycle/core';
+import {makeDOMDriver, hJSX} from '@cycle/dom';
+import {makeHTTPDriver} from '@cycle/http';
+import $ from "jquery"
 
 
 var composition = {
@@ -13,21 +11,104 @@ var composition = {
 };
 
 
-// var userStream = User.toProperty({});
-var collectionStream = Collection.toProperty({composition});
-var compositionStream = Composition.toProperty(composition).map(composition => {composition});
+function makeUploadRequest(file, collection) {
+  var fd = new FormData();
+  fd.append("image", file);
+  return Cycle.Rx.Observable.fromPromise($.ajax({
+    url: "/collections/"+collection.id+"/photos",
+    method: 'POST',
+    data: fd,
+    processData: false,
+    contentType: false
+  }));
+}
 
-// var stream = Bacon.combineTemplate({
-//   // user: userStream,
-//   collection: collectionStream,
-//   composition: compositionStream
-// });
+function  renderTile(tile, photos) {
+  function percent(x) { return x * 100 + "%"; }
+  function getFilename(path) { return path.split('/').pop() }
 
-var stream = Bacon.combineWith(collectionStream, compositionStream, _.extend);
-// var stream = collectionStream;
+  var scaleX = 1 / (tile.cx2 - tile.cx1);
+  var scaleY = 1 / (tile.cy2 - tile.cy1);
+
+  var imgStyle = {
+    height: percent(scaleY),
+    width: percent(scaleX),
+    top: percent(-tile.cy1 * scaleY),
+    left: percent(-tile.cx1 * scaleX)
+  };
+
+  var tileStyle = {
+    height: percent(tile.ty2 - tile.ty1),
+    width: percent(tile.tx2 - tile.tx1),
+    top: percent(tile.ty1),
+    left: percent(tile.tx1)
+  };
+
+  return <div className="ui-tile" style={tileStyle}>
+            <img src={"/storage/photos/"+getFilename(photos[tile.imgindex])} draggable={false} style={imgStyle} />
+        </div>
+}
+
+function renderUpload() {
+  return <div>
+    <button className="btn btn-primary" id="upload-btn"><i className="fa fa-upload"></i>&nbsp; Upload photos</button>
+    <button className="btn btn-default" id="reset-btn">Reset</button>
+    <input type="file" name="image" id="file-input" multiple></input>
+  </div>
+}
+
+function main({DOM, HTTP}) {
+  let btn$ = DOM.select('#upload-btn').events('click');
+  btn$.subscribe(_ => document.getElementById('file-input').dispatchEvent(new MouseEvent('click')));
+  
+  var uploadFiles$ = DOM.select('#file-input').events('change').map(ev => ev.target.files);
+
+  var getResponses$ = HTTP.filter(res$ => res$.request.method === undefined);
+  var postResponses$ = HTTP.filter(res$ => res$.request.method === 'POST');
+
+  var userResponse$ = getResponses$.filter(res$ => res$.request.match(/\/users\/\d+/)).mergeAll().map(res => res.body);
+  var collectionResponse$ = postResponses$.filter(res$ => res$.request.url.match(/\/users\/\d+\/collections/)).mergeAll().map(res => res.body).shareReplay(1);
+  var compositionResponse$ = postResponses$.filter(res$ => res$.request.url.match(/\/collections\/\d+\/mosaics/)).mergeAll().map(res => res.body);
+
+  var userRequest$ = uploadFiles$.map(f => '/users/1');
+  var collectionRequest$ = userResponse$.map(user => ({url:'/users/'+user.id+'/collections', method: 'POST', send: {}}));
+  var fileUploadRequest$ = uploadFiles$
+    .zip(collectionResponse$)
+    .flatMap(([files, collection]) => Cycle.Rx.Observable.from(files)
+        .flatMap(file => makeUploadRequest(file, collection))
+        .concat(Cycle.Rx.Observable.return('end')));
+  var compositionRequest$ = collectionResponse$.zip(fileUploadRequest$.filter(x => x === 'end'),
+      (collection, _) => ({url: '/collections/'+collection.id+'/mosaics', method: 'POST', send: {}}));
+
+  var requests$ = Cycle.Rx.Observable.merge(
+    userRequest$,
+    collectionRequest$,
+    compositionRequest$
+  );
+
+  var state$ = compositionResponse$.do(x => console.log(x)).startWith({composition});
+
+  var vtree$ = state$.map(state => 
+      <div className="container-ui limited-width">
+        {renderUpload()}
+        {state.composition ?
+        <div className="box-mosaic">
+          <div className="ui-composition shadow">
+            {state.composition.tiles.map(tile => renderTile(tile, state.composition.photos))}
+          </div>
+        </div>
+        : ''}
+      </div>
+  );
+  
+  return {
+    DOM: vtree$,
+    HTTP: requests$
+  };
+}
 
 
-stream.onValue((state) => {
-  // console.log(JSON.stringify(state.composition));
-  React.render(<UI {...state} />, document.getElementById("app"));
+Cycle.run(main, {
+  DOM: makeDOMDriver('#app'),
+  HTTP: makeHTTPDriver()
 });
