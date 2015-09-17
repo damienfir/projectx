@@ -4,14 +4,16 @@ import {hJSX} from '@cycle/dom';
 import _ from 'underscore';
 
 
-function intent(DOM) {
-  let eventToCoord = ev => ({
-      'x': ev.screenX,
-      'y': ev.screenY,
-      'img': ev.target,
-      'idx': ev.target['data-idx']
-    });
+function eventToCoord(ev) {
+  return {
+    'x': ev.screenX,
+    'y': ev.screenY,
+    'img': ev.target,
+    'idx': ev.target['data-idx']
+  };
+}
 
+function intent(DOM) {
   var mouseDown$ = DOM.select('.ui-tile').events('mousedown').map(eventToCoord);
   var mouseUp$ = DOM.select('.ui-tile').events('mouseup');
   var mouseMove$ = DOM.select('.ui-tile').events('mousemove').map(eventToCoord);
@@ -24,7 +26,7 @@ function intent(DOM) {
         return out;
       }, down)
       .map(mm => _.extend(mm, {orig: down})));
-  // drag$.subscribe(x => console.log(x));
+
   return {drag$};
 }
 

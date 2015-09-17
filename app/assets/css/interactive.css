@@ -69,7 +69,7 @@ body {
   padding-bottom: 10px;
 }
 
-#fileinput { opacity: 0; height: 0; }
+#file-input { opacity: 0; height: 0; }
 
 .upload-box {
   text-align: center;
