@@ -67,14 +67,19 @@ function compositionIntent(DOM) {
       'idx': ev.target['data-idx']
     });
 
-  var mouseDown$ = DOM.select('.ui-tile img').events('mousedown').map(eventToCoord);
-  var mouseUp$ = DOM.select('.ui-tile img').events('mouseup');
-  var mouseMove$ = DOM.select('.ui-tile img').events('mousemove').map(eventToCoord);
+  var mouseDown$ = DOM.select('.ui-tile').events('mousedown').map(eventToCoord);
+  var mouseUp$ = DOM.select('.ui-tile').events('mouseup');
+  var mouseMove$ = DOM.select('.ui-tile').events('mousemove').map(eventToCoord);
   var drag$ = mouseDown$.flatMapLatest(down => 
-      mouseMove$.map(mm => _.extend(mm, {orig: down}))
-      .takeUntil(mouseUp$)
-      .scan((prev, curr) => 
-        _.extend(curr, {'dx': curr.x-prev.x, 'dy': curr.y-prev.y}), down));
+      mouseMove$.takeUntil(mouseUp$)
+      .scan((prev, curr) => {
+        var out = _.clone(curr);
+        out.dx = curr.x-prev.x;
+        out.dy = curr.y-prev.y;
+        return out;
+      }, down)
+      .map(mm => _.extend(mm, {orig: down})));
+  // drag$.subscribe(x => console.log(x));
   return {drag$};
 }
 
@@ -82,30 +87,32 @@ function compositionIntent(DOM) {
 function compositionModel(actions, state$) {
   var composition$ = state$.flatMapLatest(state => actions.drag$
     .scan((comp, drag) => {
-      comp.tiles[drag.orig.idx] = dragTile(comp.tiles[drag.orig.idx], drag.dx, drag.dy, drag.img);
+      var moved_x = move(comp.tiles[drag.orig.idx], drag.dx / drag.img.width, 'cx1', 'cx2');
+      comp.tiles[drag.orig.idx] = move(moved_x, drag.dy / drag.img.height, 'cy1', 'cy2');
       return comp;
-    }, state));
+    }, state)).share();
   return composition$;
 }
 
 
 function dragTile(tile, dx, dy, img) {
-  var tile = move(tile, dx / img.width, 'cx1', 'cx2');
-  tile = move(tile, dy / img.height, 'cy1', 'cy2');
-  return tile;
+  var moved_x = move(tile, dx / img.width, 'cx1', 'cx2');
+  var moved_xy = move(moved_x, dy / img.height, 'cy1', 'cy2');
+  return moved_xy;
 }
 
 
 function move(tile, offset, prop1, prop2) {
-  var loc = tile[prop1];
-  var original_size = tile[prop2] - tile[prop1];
-  tile[prop1] = Math.max(0, tile[prop1] - offset);
-  tile[prop2] = tile[prop1] + original_size;
-  if (tile[prop2] > 1) {
-    tile[prop1] = loc;
-    tile[prop2] = loc + original_size;
+  var out = _.clone(tile);
+  var loc = out[prop1];
+  var original_size = out[prop2] - out[prop1];
+  out[prop1] = Math.max(0, out[prop1] - offset);
+  out[prop2] = out[prop1] + original_size;
+  if (out[prop2] > 1) {
+    out[prop1] = loc;
+    out[prop2] = loc + original_size;
   }
-  return tile;
+  return out;
 }
 
 
@@ -142,11 +149,11 @@ function main({DOM, HTTP}) {
 
   var compositionActions = compositionIntent(DOM);
 
-  var state$ = compositionResponse$.startWith({});
+  var state$ = compositionResponse$.startWith(composition);
   var composition$ = compositionModel(compositionActions, state$);
 
   var finalState$ = state$.merge(composition$).map(composition => ({composition}));
-  finalState$.subscribe(x => console.log(x));
+  // finalState$.subscribe(x => console.log(x));
 
   var vtree$ = finalState$.map(state => 
       <div className="container-ui limited-width">
