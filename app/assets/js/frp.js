@@ -4,6 +4,7 @@ import Cycle from '@cycle/core';
 import {makeDOMDriver, hJSX} from '@cycle/dom';
 import {makeHTTPDriver} from '@cycle/http';
 import $ from "jquery"
+import _ from 'underscore';
 
 
 var composition = {
@@ -45,7 +46,7 @@ function  renderTile(tile, photos) {
   };
 
   return <div className="ui-tile" style={tileStyle}>
-            <img src={"/storage/photos/"+getFilename(photos[tile.imgindex])} draggable={false} style={imgStyle} />
+            <img src={"/storage/photos/"+getFilename(photos[tile.imgindex])} draggable={false} style={imgStyle} data-idx={tile.tileindex} />
         </div>
 }
 
@@ -57,6 +58,57 @@ function renderUpload() {
   </div>
 }
 
+
+function compositionIntent(DOM) {
+  let eventToCoord = ev => ({
+      'x': ev.screenX,
+      'y': ev.screenY,
+      'img': ev.target,
+      'idx': ev.target['data-idx']
+    });
+
+  var mouseDown$ = DOM.select('.ui-tile img').events('mousedown').map(eventToCoord);
+  var mouseUp$ = DOM.select('.ui-tile img').events('mouseup');
+  var mouseMove$ = DOM.select('.ui-tile img').events('mousemove').map(eventToCoord);
+  var drag$ = mouseDown$.flatMapLatest(down => 
+      mouseMove$.map(mm => _.extend(mm, {orig: down}))
+      .takeUntil(mouseUp$)
+      .scan((prev, curr) => 
+        _.extend(curr, {'dx': curr.x-prev.x, 'dy': curr.y-prev.y}), down));
+  return {drag$};
+}
+
+
+function compositionModel(actions, state$) {
+  var composition$ = state$.flatMapLatest(state => actions.drag$
+    .scan((comp, drag) => {
+      comp.tiles[drag.orig.idx] = dragTile(comp.tiles[drag.orig.idx], drag.dx, drag.dy, drag.img);
+      return comp;
+    }, state));
+  return composition$;
+}
+
+
+function dragTile(tile, dx, dy, img) {
+  var tile = move(tile, dx / img.width, 'cx1', 'cx2');
+  tile = move(tile, dy / img.height, 'cy1', 'cy2');
+  return tile;
+}
+
+
+function move(tile, offset, prop1, prop2) {
+  var loc = tile[prop1];
+  var original_size = tile[prop2] - tile[prop1];
+  tile[prop1] = Math.max(0, tile[prop1] - offset);
+  tile[prop2] = tile[prop1] + original_size;
+  if (tile[prop2] > 1) {
+    tile[prop1] = loc;
+    tile[prop2] = loc + original_size;
+  }
+  return tile;
+}
+
+
 function main({DOM, HTTP}) {
   let btn$ = DOM.select('#upload-btn').events('click');
   btn$.subscribe(_ => document.getElementById('file-input').dispatchEvent(new MouseEvent('click')));
@@ -66,9 +118,11 @@ function main({DOM, HTTP}) {
   var getResponses$ = HTTP.filter(res$ => res$.request.method === undefined);
   var postResponses$ = HTTP.filter(res$ => res$.request.method === 'POST');
 
-  var userResponse$ = getResponses$.filter(res$ => res$.request.match(/\/users\/\d+/)).mergeAll().map(res => res.body);
-  var collectionResponse$ = postResponses$.filter(res$ => res$.request.url.match(/\/users\/\d+\/collections/)).mergeAll().map(res => res.body).shareReplay(1);
-  var compositionResponse$ = postResponses$.filter(res$ => res$.request.url.match(/\/collections\/\d+\/mosaics/)).mergeAll().map(res => res.body);
+  var userResponse$ = getResponses$.filter(res$ => res$.request.match(/\/users\/\d+/)).mergeAll().map(res => res.body).shareReplay(1);
+  var collectionResponse$ = postResponses$.filter(res$ => res$.request.url.match(/\/users\/\d+\/collections/)).mergeAll()
+    .map(res => res.body).shareReplay(1);
+  var compositionResponse$ = postResponses$.filter(res$ => res$.request.url.match(/\/collections\/\d+\/mosaics/)).mergeAll()
+    .map(res => res.body).shareReplay(1);
 
   var userRequest$ = uploadFiles$.map(f => '/users/1');
   var collectionRequest$ = userResponse$.map(user => ({url:'/users/'+user.id+'/collections', method: 'POST', send: {}}));
@@ -86,15 +140,21 @@ function main({DOM, HTTP}) {
     compositionRequest$
   );
 
-  var state$ = compositionResponse$.map(composition => ({composition})).startWith({composition});
+  var compositionActions = compositionIntent(DOM);
 
-  var vtree$ = state$.map(state => 
+  var state$ = compositionResponse$.startWith({});
+  var composition$ = compositionModel(compositionActions, state$);
+
+  var finalState$ = state$.merge(composition$).map(composition => ({composition}));
+  finalState$.subscribe(x => console.log(x));
+
+  var vtree$ = finalState$.map(state => 
       <div className="container-ui limited-width">
         {renderUpload()}
         {state.composition ?
         <div className="box-mosaic">
           <div className="ui-composition shadow">
-            {state.composition.tiles.map(tile => renderTile(tile, state.composition.photos))}
+            {state.composition.tiles ? state.composition.tiles.map(tile => renderTile(tile, state.composition.photos)) : ''}
           </div>
         </div>
         : ''}
