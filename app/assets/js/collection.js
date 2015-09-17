@@ -84,6 +84,7 @@ function addPhoto(collectionID, file) {
     processData: false,
     contentType: false
   }));
+
 }
 
 function toArray(filelist) {
