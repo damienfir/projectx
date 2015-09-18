@@ -11,7 +11,8 @@ import TestData from "./data"
 
 
 function initial() {
-  return TestData;
+  // return TestData;
+  return [TestData, TestData, TestData];
 }
 
 function toArray(filelist) {
@@ -34,7 +35,7 @@ function makeUploadRequest(file, collection) {
 
 
 function renderUpload() {
-  return <div>
+  return <div className="upload-box">
     <button className="btn btn-primary" id="upload-btn"><i className="fa fa-upload"></i>&nbsp; Upload photos</button>
     <button className="btn btn-default" id="reset-btn">Reset</button>
     <input type="file" name="image" id="file-input" multiple></input>
@@ -48,6 +49,8 @@ function intent(DOM, HTTP) {
   var uploadFiles$ = DOM.select('#file-input').events('change').map(ev => toArray(ev.target.files));
   var reset$ = DOM.select('#reset-btn').events('click');
   // reset$.subscribe(x => console.log(x))
+  
+  var albumUpload$ = uploadFiles$.flatMap(files => Cycle.Rx.Observable.from(divideArray(files, 3))).shareReplay(10);
 
   var getResponses$ = HTTP.filter(res$ => res$.request.method === undefined);
   var postResponses$ = HTTP.filter(res$ => res$.request.method === 'POST');
@@ -60,6 +63,7 @@ function intent(DOM, HTTP) {
 
   return {
     uploadFiles$,
+    albumUpload$,
     reset$,
     userResponse$,
     collectionResponse$,
@@ -76,16 +80,17 @@ function divideArray(array, n) {
   return out;
 }
 
+
 function requests(actions) {
   var userRequest$ = actions.uploadFiles$.map(f => '/users/1');
-  var collectionRequest$ = actions.userResponse$.map(user => ({url:'/users/'+user.id+'/collections', method: 'POST', send: {}}));
-  var fileUploadRequest$ = actions.uploadFiles$
+  var collectionRequest$ = actions.userResponse$.flatMap(user => 
+      actions.albumUpload$.map(x => ({url:'/users/'+user.id+'/collections', method: 'POST', send: {}})));
+  var fileUploadRequest$ = actions.albumUpload$
     .zip(actions.collectionResponse$)
     .flatMap(([files, collection]) =>
-      Cycle.Rx.Observable.from(divideArray(files, 3)).flatMap(portion =>
-        Cycle.Rx.Observable.from(portion)
+        Cycle.Rx.Observable.from(files)
         .flatMap(file => makeUploadRequest(file, collection))
-        .concat(Cycle.Rx.Observable.return('end'))));
+        .concat(Cycle.Rx.Observable.return('end')));
   var compositionRequest$ = actions.collectionResponse$.zip(fileUploadRequest$.filter(x => x === 'end'),
       (collection, _) => ({url: '/collections/'+collection.id+'/mosaics', method: 'POST', send: {}}));
 
@@ -98,11 +103,14 @@ function requests(actions) {
 
 
 function model(actions, compositionActions) {
-  var clearState$ = actions.reset$.map(x => initial());
-  var uploadState$ = actions.compositionResponse$.startWith(initial()).merge(clearState$);
-  var compositionState$ = Composition.model(compositionActions, uploadState$);
-  var state$ = uploadState$.merge(compositionState$).map(composition => ({composition}));
-  return state$;
+  var clearState$ = actions.reset$.map(x => []);
+  var albumState$ = actions.compositionResponse$
+    .startWith([])
+    .scan((album, composition) => album.concat(composition));
+    // .merge(clearState$);
+  var compositionState$ = Composition.model(compositionActions, albumState$);
+  var state$ = albumState$.merge(compositionState$).map(compositions => ({album: compositions}));
+  return state$.do(x => console.log(x));
 }
 
 
@@ -110,7 +118,7 @@ function view(state$) {
   return state$.map(state => 
       <div className="container-ui limited-width">
         {renderUpload()}
-        {state.composition ? Composition.view(state.composition) : ''}
+        {Composition.view(state.album)}
       </div>
   );
 }

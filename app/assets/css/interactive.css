@@ -1,4 +1,4 @@
-@import url(http://fonts.googleapis.com/css?family=Open+Sans|Maven+Pro|Pacifico);
+/* @import url(http://fonts.googleapis.com/css?family=Open+Sans|Maven+Pro|Pacifico); */
 
 [ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
   display: none !important;
@@ -7,7 +7,7 @@
 html, body {
   font-family: 'Open Sans', sans-serif;
   height: 100%;
-  overflow-x: hidden;
+  /* overflow-x: hidden; */
 }
 
 body {
@@ -19,13 +19,17 @@ body {
   /* padding-top: 64px; */
   /* margin-top: -64px; */
   height: 100%;
-  overflow: hidden;
+  margin: 0 auto;
+  /* overflow: hidden; */
 }
 
 .box-mosaic {
-  width: 100%;
+  width: 45%;
   display: inline-block;
   position: relative;
+  float: left;
+  margin-bottom: 30px;
+  margin-right: 10px;
 }
 
 /* trick to fix aspect ratio */
@@ -73,7 +77,7 @@ body {
 
 .upload-box {
   text-align: center;
-  padding: 70px;
+  padding: 10px;
   background-color: white;
   /* color: #666; */
 }
@@ -83,7 +87,7 @@ body {
 #overlay-mosaic { opacity: 0.7; }
 
 .shadow { box-shadow: 1px 1px 2px rgba(0,0,0,0.3); }
-.limited-width { max-width: 1200px; }
+.limited-width { max-width: 1400px; }
 .centered { text-align: center; }
 .hide { display: none; }
 

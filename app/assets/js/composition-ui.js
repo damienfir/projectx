@@ -9,7 +9,8 @@ function eventToCoord(ev) {
     'x': ev.screenX,
     'y': ev.screenY,
     'img': ev.target,
-    'idx': ev.target['data-idx']
+    'idx': ev.target['data-idx'],
+    'page': ev.target['data-page']
   };
 }
 
@@ -31,13 +32,13 @@ function intent(DOM) {
 }
 
 
-function model(actions, state$) {
-  var composition$ = state$.flatMapLatest(state => actions.drag$
-    .scan((comp, drag) => {
-      var moved_x = move(comp.tiles[drag.orig.idx], drag.dx / drag.img.width, 'cx1', 'cx2');
-      comp.tiles[drag.orig.idx] = move(moved_x, drag.dy / drag.img.height, 'cy1', 'cy2');
-      return comp;
-    }, state)).share();
+function model(actions, album$) {
+  var composition$ = album$.flatMapLatest(album => actions.drag$
+    .scan((alb, drag) => {
+      var moved_x = move(alb[drag.orig.page].tiles[drag.orig.idx], drag.dx / drag.img.width, 'cx1', 'cx2');
+      alb[drag.orig.page].tiles[drag.orig.idx] = move(moved_x, drag.dy / drag.img.height, 'cy1', 'cy2');
+      return alb;
+    }, album)).share();
   return composition$;
 }
 
@@ -63,7 +64,7 @@ function move(tile, offset, prop1, prop2) {
 }
 
 
-function  renderTile(tile, photos) {
+function  renderTile(tile, photos, page) {
   function percent(x) { return x * 100 + "%"; }
   function getFilename(path) { return path.split('/').pop() }
 
@@ -85,17 +86,20 @@ function  renderTile(tile, photos) {
   };
 
   return <div className="ui-tile" style={tileStyle}>
-            <img src={"/storage/photos/"+getFilename(photos[tile.imgindex])} draggable={false} style={imgStyle} data-idx={tile.tileindex} />
+            <img src={"/storage/photos/"+getFilename(photos[tile.imgindex])} draggable={false} style={imgStyle} data-page={page} data-idx={tile.tileindex} />
         </div>
 }
 
 
-function view(composition) {
-  return <div className="box-mosaic">
-          <div className="ui-composition shadow">
-            {composition.tiles ? composition.tiles.map(tile => renderTile(tile, composition.photos)) : ''}
-          </div>
+function view(album) {
+  // console.log(album);
+  return album.map((composition, page) =>
+    <div className="box-mosaic">
+        <div className="ui-composition shadow">
+          {composition.tiles ? composition.tiles.map(tile => renderTile(tile, composition.photos, page)) : ''}
         </div>
+      </div>
+  );
 }
 
 
