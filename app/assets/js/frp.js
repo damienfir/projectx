@@ -46,7 +46,7 @@ function renderUpload() {
 function intent(DOM, HTTP) {
   let btn$ = DOM.select('#upload-btn').events('click');
   btn$.subscribe(_ => document.getElementById('file-input').dispatchEvent(new MouseEvent('click')));
-  var uploadFiles$ = DOM.select('#file-input').events('change').map(ev => toArray(ev.target.files)).shareReplay(1);
+  var uploadFiles$ = DOM.select('#file-input').events('change').map(ev => toArray(ev.target.files)).share();
   var reset$ = DOM.select('#reset-btn').events('click');
   
   // var albumUpload$ = uploadFiles$.flatMap(files => Cycle.Rx.Observable.from(divideArray(files, 3))).shareReplay(10);
@@ -71,19 +71,10 @@ function intent(DOM, HTTP) {
 }
 
 
-// function divideArray(array, n) {
-//   var out = new Array();
-//   for (var i = 0; i < array.length; i=i+n) {
-//     out.push((array.length-i) >= n ? array.slice(i, i+n) : array.slice(i));
-//   }
-//   return out;
-// }
-
-
 function requests(actions) {
   var userRequest$ = actions.uploadFiles$.map(f => '/users/1');
-  var collectionRequest$ = actions.userResponse$.flatMap(user => 
-      actions.uploadFiles$.map(x => ({url:'/users/'+user.id+'/collections', method: 'POST', send: {}})));
+  var collectionRequest$ = actions.userResponse$.zip(actions.uploadFiles$,
+      (user, x) => ({url:'/users/'+user.id+'/collections', method: 'POST', send: {}}));
   var fileUploadRequest$ = actions.uploadFiles$
     .zip(actions.collectionResponse$)
     .flatMap(([files, collection]) =>

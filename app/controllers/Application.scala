@@ -81,14 +81,14 @@ class Collections @Inject()(compositionDAO: CompositionDAO, collectionDAO: Colle
   }
 
 
-  def divideIntoPages(photos: Seq[DBModels.Photo]): List[Seq[DBModels.Photo]] = photos.grouped(3).toList
+  def divideIntoPages(photos: Seq[DBModels.Photo]): List[(Seq[DBModels.Photo],Int)] = photos.grouped(3).toList.zipWithIndex
 
 
-  def generateComposition(id: Long, photos: List[DBModels.Photo]): Future[DBModels.Composition] = {
+  def generateComposition(id: Long, photos: List[DBModels.Photo], index: Int): Future[DBModels.Composition] = {
     for {
       comp <- compositionDAO.addWithCollection(id)
       (subset, tiles) <- mosaicService.generateComposition(comp.id.get, photos map (_.hash))
-      c <- compositionDAO.update(comp.copy(photos = subset, tiles = tiles))
+      c <- compositionDAO.update(comp.copy(photos = subset, tiles = tiles, index = index))
     } yield c
   }
 
@@ -96,7 +96,7 @@ class Collections @Inject()(compositionDAO: CompositionDAO, collectionDAO: Colle
   def generatePages(id: Long) = Action.async {
     photoDAO.allFromCollection(id)
       .map(divideIntoPages)
-      .map(pages => pages.map(subset => generateComposition(id, subset.toList)))
+      .map(pages => pages.map({case (subset, index) => generateComposition(id, subset.toList, index)}))
       .flatMap(pages => Future.sequence(pages))
       .map(pages => Ok(Json.toJson(pages)))
   }

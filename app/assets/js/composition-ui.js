@@ -64,7 +64,7 @@ function move(tile, offset, prop1, prop2) {
 }
 
 
-function  renderTile(tile, photos, page) {
+function  renderTile(tile, composition) {
   function percent(x) { return x * 100 + "%"; }
   function getFilename(path) { return path.split('/').pop() }
 
@@ -86,16 +86,16 @@ function  renderTile(tile, photos, page) {
   };
 
   return <div className="ui-tile" style={tileStyle}>
-            <img src={"/storage/photos/"+getFilename(photos[tile.imgindex])} draggable={false} style={imgStyle} data-page={page} data-idx={tile.tileindex} />
+            <img src={"/storage/photos/"+getFilename(composition.photos[tile.imgindex])} draggable={false} style={imgStyle} data-page={composition.index} data-idx={tile.tileindex} />
         </div>
 }
 
 
 function view(album) {
-  return album.map((composition, page) =>
+  return album.map(composition =>
     <div className="box-mosaic">
         <div className="ui-composition shadow">
-          {composition.tiles ? composition.tiles.map(tile => renderTile(tile, composition.photos, page)) : ''}
+          {composition.tiles ? composition.tiles.map(tile => renderTile(tile, composition)) : ''}
         </div>
       </div>
   );
