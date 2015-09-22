@@ -92,7 +92,6 @@ function  renderTile(tile, photos, page) {
 
 
 function view(album) {
-  // console.log(album);
   return album.map((composition, page) =>
     <div className="box-mosaic">
         <div className="ui-composition shadow">

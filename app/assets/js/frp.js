@@ -46,11 +46,10 @@ function renderUpload() {
 function intent(DOM, HTTP) {
   let btn$ = DOM.select('#upload-btn').events('click');
   btn$.subscribe(_ => document.getElementById('file-input').dispatchEvent(new MouseEvent('click')));
-  var uploadFiles$ = DOM.select('#file-input').events('change').map(ev => toArray(ev.target.files));
+  var uploadFiles$ = DOM.select('#file-input').events('change').map(ev => toArray(ev.target.files)).shareReplay(1);
   var reset$ = DOM.select('#reset-btn').events('click');
-  // reset$.subscribe(x => console.log(x))
   
-  var albumUpload$ = uploadFiles$.flatMap(files => Cycle.Rx.Observable.from(divideArray(files, 3))).shareReplay(10);
+  // var albumUpload$ = uploadFiles$.flatMap(files => Cycle.Rx.Observable.from(divideArray(files, 3))).shareReplay(10);
 
   var getResponses$ = HTTP.filter(res$ => res$.request.method === undefined);
   var postResponses$ = HTTP.filter(res$ => res$.request.method === 'POST');
@@ -58,12 +57,12 @@ function intent(DOM, HTTP) {
   var userResponse$ = getResponses$.filter(res$ => res$.request.match(/\/users\/\d+/)).mergeAll().map(res => res.body).share();
   var collectionResponse$ = postResponses$.filter(res$ => res$.request.url.match(/\/users\/\d+\/collections/)).mergeAll()
     .map(res => res.body).share();
-  var compositionResponse$ = postResponses$.filter(res$ => res$.request.url.match(/\/collections\/\d+\/mosaics/)).mergeAll()
+  var compositionResponse$ = postResponses$.filter(res$ => res$.request.url.match(/\/collections\/\d+\/pages/)).mergeAll()
     .map(res => res.body).share();
 
   return {
     uploadFiles$,
-    albumUpload$,
+    // albumUpload$,
     reset$,
     userResponse$,
     collectionResponse$,
@@ -72,27 +71,26 @@ function intent(DOM, HTTP) {
 }
 
 
-function divideArray(array, n) {
-  var out = new Array();
-  for (var i = 0; i < array.length; i=i+n) {
-    out.push((array.length-i) >= n ? array.slice(i, i+n) : array.slice(i));
-  }
-  return out;
-}
+// function divideArray(array, n) {
+//   var out = new Array();
+//   for (var i = 0; i < array.length; i=i+n) {
+//     out.push((array.length-i) >= n ? array.slice(i, i+n) : array.slice(i));
+//   }
+//   return out;
+// }
 
 
 function requests(actions) {
   var userRequest$ = actions.uploadFiles$.map(f => '/users/1');
   var collectionRequest$ = actions.userResponse$.flatMap(user => 
-      actions.albumUpload$.map(x => ({url:'/users/'+user.id+'/collections', method: 'POST', send: {}})));
-  var fileUploadRequest$ = actions.albumUpload$
+      actions.uploadFiles$.map(x => ({url:'/users/'+user.id+'/collections', method: 'POST', send: {}})));
+  var fileUploadRequest$ = actions.uploadFiles$
     .zip(actions.collectionResponse$)
     .flatMap(([files, collection]) =>
-        Cycle.Rx.Observable.from(files)
-        .flatMap(file => makeUploadRequest(file, collection))
+        Cycle.Rx.Observable.from(files).flatMap(file => makeUploadRequest(file, collection))
         .concat(Cycle.Rx.Observable.return('end')));
   var compositionRequest$ = actions.collectionResponse$.zip(fileUploadRequest$.filter(x => x === 'end'),
-      (collection, _) => ({url: '/collections/'+collection.id+'/mosaics', method: 'POST', send: {}}));
+      (collection, _) => ({url: '/collections/'+collection.id+'/pages', method: 'POST', send: {}}));
 
   return Cycle.Rx.Observable.merge(
     userRequest$,
@@ -106,11 +104,12 @@ function model(actions, compositionActions) {
   var clearState$ = actions.reset$.map(x => []);
   var albumState$ = actions.compositionResponse$
     .startWith([])
-    .scan((album, composition) => album.concat(composition));
+    .merge(clearState$);
+    // .scan((album, composition) => composition === false ? [] : album.concat(composition));
     // .merge(clearState$);
   var compositionState$ = Composition.model(compositionActions, albumState$);
   var state$ = albumState$.merge(compositionState$).map(compositions => ({album: compositions}));
-  return state$.do(x => console.log(x));
+  return state$;
 }
 
 

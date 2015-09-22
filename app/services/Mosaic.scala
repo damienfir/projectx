@@ -12,12 +12,10 @@ import play.api.Play
 import play.api.libs.Files.TemporaryFile
 import java.io._
 
-import models._
-import Backend._
+import models.MosaicModels._
 
 
 class MosaicService @Inject()() {
-  implicit val clusterFormat = Json.format[Cluster]
 
   val binary = Play.current.configuration.getString("px.binary").get
 

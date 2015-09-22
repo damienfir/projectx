@@ -22,29 +22,14 @@ class Application extends Controller {
   def ui = Action {
     Ok(views.html.interactive())
   }
-
-  // def feedback = Action.async(parse.json) { request =>
-  //   feedbackCollection.save(Json.toJson(request.body)) map { lastError =>
-  //     Ok
-  //   }
-  // }
-
-  // def contact = Action.async(parse.urlFormEncoded) { request =>
-  //   contactCollection.save(Json.toJson(request.body)) map { lastError =>
-  //     Ok
-  //   }
-  // }
 }
 
 
-class Users @Inject()(usersDAO: UsersDAO) extends Controller with CRUDActions[DB.User] {
-  implicit val format = Json.format[DB.User]
+class Users @Inject()(usersDAO: UsersDAO) extends Controller with CRUDActions[DBModels.User] {
+  implicit val format = Json.format[DBModels.User]
   
   def get(id: Long) = getAction(usersDAO.get(id))
   def save = saveAction(usersDAO.insert, usersDAO.update)
-  // def list = listAction(usersDAO.list)
-  // def delete(id: Long) = deleteAction(usersDAO.delete(id))
-
 
 //   def send(user_id: String, mosaic_id: String) = Action(parse.json) { implicit request =>
 //     request.body.asOpt[Email] map { req =>
@@ -67,12 +52,16 @@ class Users @Inject()(usersDAO: UsersDAO) extends Controller with CRUDActions[DB
 }
 
 
-class Collections @Inject()(collectionDAO: CollectionDAO) extends Controller {
-  implicit val format = Json.format[DB.Collection]
+class Collections @Inject()(compositionDAO: CompositionDAO, collectionDAO: CollectionDAO, photoDAO: PhotoDAO, imageService: ImageService, mosaicService: MosaicService) extends Controller {
+  implicit val collectionFormat = Json.format[DBModels.Collection]
+  implicit val photoFormat = Json.format[DBModels.Photo]
+  implicit val compositionFormat = Json.format[DBModels.Composition]
+
 
   def fromUser(id: Long) = Action.async {
     collectionDAO.fromUser(id) map (items => Ok(Json.toJson(items)))
   }
+
 
   def withUser(id: Long) = Action.async {
     collectionDAO.withUser(id) map {
@@ -80,11 +69,7 @@ class Collections @Inject()(collectionDAO: CollectionDAO) extends Controller {
       case None => NotFound
     }
   }
-}
 
-
-class Photos @Inject()(photoDAO: PhotoDAO, imageService: ImageService, mosaicService: MosaicService) extends Controller {
-  implicit val format = Json.format[DB.Photo]
 
   def addToCollection(id: Long) = Action.async(parse.multipartFormData) { request =>
     val list = for {
@@ -94,24 +79,31 @@ class Photos @Inject()(photoDAO: PhotoDAO, imageService: ImageService, mosaicSer
     } yield photos
     list map (items => Ok(Json.toJson(items)))
   }
-}
 
 
-class Compositions @Inject()(compositionDAO: CompositionDAO, collectionDAO: CollectionDAO, photoDAO: PhotoDAO, mosaicService: MosaicService) extends Controller {
-  implicit val format = Json.format[DB.Composition]
+  def divideIntoPages(photos: Seq[DBModels.Photo]): List[Seq[DBModels.Photo]] = photos.grouped(3).toList
 
-  def generateFromCollection(id: Long) = Action.async {
-    val composition = for {
+
+  def generateComposition(id: Long, photos: List[DBModels.Photo]): Future[DBModels.Composition] = {
+    for {
       comp <- compositionDAO.addWithCollection(id)
-      photos <- photoDAO.allFromCollection(id)
       (subset, tiles) <- mosaicService.generateComposition(comp.id.get, photos map (_.hash))
       c <- compositionDAO.update(comp.copy(photos = subset, tiles = tiles))
     } yield c
-    composition map (c => Ok(Json.toJson(c))) fallbackTo (Future(Ok))
   }
 
+
+  def generatePages(id: Long) = Action.async {
+    photoDAO.allFromCollection(id)
+      .map(divideIntoPages)
+      .map(pages => pages.map(subset => generateComposition(id, subset.toList)))
+      .flatMap(pages => Future.sequence(pages))
+      .map(pages => Ok(Json.toJson(pages)))
+  }
+
+
   def generate = Action.async(parse.json) { request =>
-    val composition = request.body.as[DB.Composition]
+    val composition = request.body.as[DBModels.Composition]
     val out = for {
       c <- compositionDAO.update(composition)
       a <- mosaicService.renderOtherComposition(c.id.get.toString, c.tiles)

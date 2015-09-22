@@ -10,7 +10,7 @@ import slick.driver.JdbcProfile
 import slick.backend.DatabaseConfig
 
 import PostgresDriverExt.api._
-import DB._
+import DBModels._
 import Tables._
 
 
@@ -74,7 +74,7 @@ class CompositionDAO @Inject()(protected val dbConfigProvider: DatabaseConfigPro
 
   def addWithCollection(id: Long): Future[Composition] = for {
     col <- collectionDAO.get(id)
-    comp <- db.run((compositions returning compositions) += Composition(None, col.get.id.get, List(), List()))
+    comp <- db.run((compositions returning compositions) += Composition(None, col.get.id.get, 0, List(), List()))
   } yield comp
 
   def update(comp: Composition): Future[Composition] = db.run {
