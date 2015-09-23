@@ -160,18 +160,18 @@ function swapTiles(album, [page1,idx1], [page2,idx2]) {
 //   };
 // }
 
-function findBounds(tl, br, orientation) {
-  var tl_tiles = tl.map(function(i){ return $scope.composition.tiles[i]; });
-  var br_tiles = br.map(function(i){ return $scope.composition.tiles[i]; });
+// function findBounds(tl, br, orientation) {
+//   var tl_tiles = tl.map(function(i){ return $scope.composition.tiles[i]; });
+//   var br_tiles = br.map(function(i){ return $scope.composition.tiles[i]; });
 
-  var m = 0.05;
-  return [
-    (br_tiles.map(function(tile){ return tile.tx1; }).sort(compare_max)[0] + m) * orientation[0],
-    (br_tiles.map(function(tile){ return tile.ty1; }).sort(compare_max)[0] + m) * orientation[1],
-    Math.max((tl_tiles.map(function(tile){ return tile.tx2; }).sort(compare_min)[0] - m), 1-orientation[0]),
-    Math.max((tl_tiles.map(function(tile){ return tile.ty2; }).sort(compare_min)[0] - m), 1-orientation[1])
-  ];
-}
+//   var m = 0.05;
+//   return [
+//     (br_tiles.map(function(tile){ return tile.tx1; }).sort(compare_max)[0] + m) * orientation[0],
+//     (br_tiles.map(function(tile){ return tile.ty1; }).sort(compare_max)[0] + m) * orientation[1],
+//     Math.max((tl_tiles.map(function(tile){ return tile.tx2; }).sort(compare_min)[0] - m), 1-orientation[0]),
+//     Math.max((tl_tiles.map(function(tile){ return tile.ty2; }).sort(compare_min)[0] - m), 1-orientation[1])
+//   ];
+// }
 
 
 function dragTile(tile, dx, dy, img) {
@@ -219,7 +219,7 @@ function intent(DOM) {
     })
     .merge(drag$.filter(x => !x).map(x => state => [false, false]))
     .scan((swap, func) => func(swap), [false, false])
-    .filter(([prev,curr]) => prev || curr)
+    .filter(([prev,curr]) => prev || curr).share().do(x => console.log(x))
 
   return {drag$: drag$.filter(x => x), swap$};
 }

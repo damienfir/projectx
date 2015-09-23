@@ -1,6 +1,7 @@
 package services
 
 import javax.inject._
+import java.util.UUID
 import scala.util.{Try, Success, Failure}
 import scala.util.control.Exception
 import scala.concurrent.Future
@@ -93,11 +94,29 @@ class MosaicService @Inject()() {
     render(id, id, id, id + ".jpg")
   }
 
-  def renderOtherComposition(id: String, tiles: Seq[Tile]): Future[String] = {
+  def renderOtherComposition(id: String, tiles: List[Tile], photos: List[String]): Future[String] = {
     val file = new File(matchFile(id))
     val writer = new PrintWriter(file);
     writer.write(Json.toJson(tiles).toString)
     writer.close()
+
+    val cluster = Json.parse(Source.fromFile(clusterFile(id)).mkString).as[Cluster]
+    val file2 = new File(clusterFile(id))
+    val writer2 = new PrintWriter(file2);
+    writer2.write(Json.toJson(cluster.copy(gists = photos)).toString)
+    writer2.close()
+
     renderComposition(id)
+  }
+  
+  def makeAlbum(pagesFilename: List[String]) : String = {
+    val fname = UUID.randomUUID().toString + ".jpg"
+    val out = mosaicFile(fname)
+    val cmd = "montage -geometry 100% -tile 2x " + pagesFilename.map(mosaicFile).mkString(" ") + " " + out
+    println(cmd)
+    cmd ! match {
+      case 0 => fname
+      case _ => throw new Exception
+    }
   }
 }

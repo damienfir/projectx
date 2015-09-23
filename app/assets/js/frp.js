@@ -62,7 +62,7 @@ function intent(DOM, HTTP) {
   var compositionResponse$ = postResponses$.filter(res$ => res$.request.url.match(/\/collections\/\d+\/pages/)).mergeAll()
     .map(res => res.body).share();
 
-  var downloadResponse$ = postResponses.filter(res$ => res$.request.url.match(/\user\/\d+\/download/)).mergeAll().map(res => res.body).share().do(x => console.log(x));
+  var downloadResponse$ = postResponses$.filter(res$ => res$.request.url.match(/\collections\/\d+\/download/)).mergeAll().map(res => res.body).share();
 
   return {
     uploadFiles$,
@@ -89,7 +89,7 @@ function requests(actions, state$) {
       (collection, _) => ({url: '/collections/'+collection.id+'/pages', method: 'POST', send: {}}));
 
   var downloadRequest$ = actions.download$.withLatestFrom(state$, (ev, state) => {
-    return {url: '/user/' + state.user.id + '/download', method: 'POST', send: state.album.map(convertToIndices)};
+    return {url: '/collections/' + state.collection.id + '/download', method: 'POST', send: state.album.map(convertToIndices)};
   }).do(x => console.log(x));
 
   return Cycle.Rx.Observable.merge(
@@ -115,7 +115,7 @@ function convertCompositions(comp) {
 
 function model(actions) {
   var clearState$ = actions.reset$.map(x => album => []);
-  var albumState$ = actions.compositionResponse$.map(compositions => album => compositions.map(convertCompositions))
+  var albumState$ = actions.compositionResponse$.map(compositions => album => compositions.map(convertCompositions));
   return Cycle.Rx.Observable.merge(albumState$, clearState$);
 }
 
@@ -135,13 +135,19 @@ function main({DOM, HTTP}) {
   let albumState$ = model(actions);
   let compositionState$ = Composition.model(Composition.intent(DOM));
 
-  var state$ = Cycle.Rx.Observable
+  var album$ = Cycle.Rx.Observable
     .merge(albumState$, compositionState$)
     .startWith(TestData.map(convertCompositions))
-    .scan((album, func) => func(album))
-    .combineLatest(actions.userResponse$, (album, user) => ({user, album}));
+    .scan((album, func) => func(album));
+
+  var state$ = album$.combineLatest(
+      actions.userResponse$.startWith({}),
+      actions.collectionResponse$.startWith({}),
+      (album, user, collection) => ({user, album, collection}));
 
   let requests$ = requests(actions, state$);
+  // requests$.subscribe(x => console.log(x));
+  // HTTP.mergeAll().subscribe(x => console.log(x.body));
 
   var vtree$ = view(state$);
   

@@ -102,12 +102,11 @@ class Collections @Inject()(compositionDAO: CompositionDAO, collectionDAO: Colle
   }
 
 
-  def generate = Action.async(parse.json) { request =>
-    val composition = request.body.as[DBModels.Composition]
-    val out = for {
-      c <- compositionDAO.update(composition)
-      a <- mosaicService.renderOtherComposition(c.id.get.toString, c.tiles)
-    } yield a
-    out map (_ => Ok)
+  def download(id: Long) = Action.async(parse.json) { request =>
+    Future.sequence(
+      request.body.as[List[DBModels.Composition]]
+      .map(c => mosaicService.renderOtherComposition(c.id.get.toString, c.tiles, c.photos))
+    ).map(mosaicService.makeAlbum)
+      .map(value => Ok(Json.toJson(value)))
   }
 }

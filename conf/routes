@@ -29,7 +29,6 @@ GET     /users/:id                  @controllers.Users.get(id: Long)
 GET     /users/:id/collections      controllers.Collections.fromUser(id: Long)
 POST    /users/:id/collections      controllers.Collections.withUser(id: Long)
 # POST    /users/:id/send/:mid        controllers.Users.send(id, mid)
-# GET     /users/:id/download/:mid    controllers.Users.download(id, mid, email)
 
 # GET     /collections                controllers.Collections.list
 # POST    /collections                controllers.Collections.create
@@ -37,12 +36,13 @@ POST    /users/:id/collections      controllers.Collections.withUser(id: Long)
 # DELETE  /collections/:id            controllers.Collections.delete(id)
 # POST    /collections/:id/users/:uid controllers.Collections.addUser(id, uid)
 # DELETE  /collections/:id/users/:uid controllers.Collections.removeUser(id, uid)
+POST     /collections/:id/download    @controllers.Collections.download(id: Long)
 POST    /collections/:id/photos     @controllers.Collections.addToCollection(id: Long)
 # GET     /collections/:id/photos/:photo_id controllers.Collections.getPhoto(id, photo_id)
 # DELETE  /collections/:id/photos/:photos_id  controllers.Collections.removePhoto(id, photo_id)
 
 POST    /collections/:id/pages    @controllers.Collections.generatePages(id: Long)
-POST    /mosaics/generate           @controllers.Collections.generate
+# POST    /mosaics/generate           @controllers.Collections.generate
 
 
 GET     /ui                         @controllers.Application.ui
