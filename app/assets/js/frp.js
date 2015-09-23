@@ -34,10 +34,11 @@ function makeUploadRequest(file, collection) {
 }
 
 
-function renderUpload() {
+function renderToolbar() {
   return <div className="upload-box">
     <button className="btn btn-primary" id="upload-btn"><i className="fa fa-upload"></i>&nbsp; Upload photos</button>
     <button className="btn btn-default" id="reset-btn">Reset</button>
+    <button className="btn btn-primary" id="download-btn">Download</button>
     <input type="file" name="image" id="file-input" multiple></input>
   </div>
 }
@@ -48,6 +49,7 @@ function intent(DOM, HTTP) {
   btn$.subscribe(_ => document.getElementById('file-input').dispatchEvent(new MouseEvent('click')));
   var uploadFiles$ = DOM.select('#file-input').events('change').map(ev => toArray(ev.target.files)).share();
   var reset$ = DOM.select('#reset-btn').events('click');
+  var download$ = DOM.select('#download-btn').events('click');
   
   // var albumUpload$ = uploadFiles$.flatMap(files => Cycle.Rx.Observable.from(divideArray(files, 3))).shareReplay(10);
 
@@ -60,18 +62,21 @@ function intent(DOM, HTTP) {
   var compositionResponse$ = postResponses$.filter(res$ => res$.request.url.match(/\/collections\/\d+\/pages/)).mergeAll()
     .map(res => res.body).share();
 
+  var downloadResponse$ = postResponses.filter(res$ => res$.request.url.match(/\user\/\d+\/download/)).mergeAll().map(res => res.body).share().do(x => console.log(x));
+
   return {
     uploadFiles$,
-    // albumUpload$,
     reset$,
+    download$,
     userResponse$,
     collectionResponse$,
-    compositionResponse$
+    compositionResponse$,
+    downloadResponse$
   };
 }
 
 
-function requests(actions) {
+function requests(actions, state$) {
   var userRequest$ = actions.uploadFiles$.map(f => '/users/1');
   var collectionRequest$ = actions.userResponse$.zip(actions.uploadFiles$,
       (user, x) => ({url:'/users/'+user.id+'/collections', method: 'POST', send: {}}));
@@ -83,11 +88,23 @@ function requests(actions) {
   var compositionRequest$ = actions.collectionResponse$.zip(fileUploadRequest$.filter(x => x === 'end'),
       (collection, _) => ({url: '/collections/'+collection.id+'/pages', method: 'POST', send: {}}));
 
+  var downloadRequest$ = actions.download$.withLatestFrom(state$, (ev, state) => {
+    return {url: '/user/' + state.user.id + '/download', method: 'POST', send: state.album.map(convertToIndices)};
+  }).do(x => console.log(x));
+
   return Cycle.Rx.Observable.merge(
     userRequest$,
     collectionRequest$,
-    compositionRequest$
+    compositionRequest$,
+    downloadRequest$
   );
+}
+
+
+function convertToIndices(comp) {
+  comp.tiles = comp.tiles.map((tile, idx) => _.extend(tile, {imgindex: idx}));
+  comp.photos = comp.tiles.map(tile => tile.img);
+  return comp;
 }
 
 
@@ -106,7 +123,7 @@ function model(actions) {
 function view(state$) {
   return state$.map(state => 
       <div className="container-ui limited-width">
-        {renderUpload()}
+        {renderToolbar()}
         {Composition.view(state.album)}
       </div>
   );
@@ -115,15 +132,16 @@ function view(state$) {
 
 function main({DOM, HTTP}) {
   let actions = intent(DOM, HTTP);
-  let requests$ = requests(actions);
   let albumState$ = model(actions);
   let compositionState$ = Composition.model(Composition.intent(DOM));
 
   var state$ = Cycle.Rx.Observable
     .merge(albumState$, compositionState$)
-    .startWith([TestData].map(convertCompositions))
+    .startWith(TestData.map(convertCompositions))
     .scan((album, func) => func(album))
-    .map(album => ({album}));
+    .combineLatest(actions.userResponse$, (album, user) => ({user, album}));
+
+  let requests$ = requests(actions, state$);
 
   var vtree$ = view(state$);
   
