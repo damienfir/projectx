@@ -231,8 +231,8 @@ function intent(DOM) {
 
 function model(actions) {
   var dragFunc$ = actions.drag$.map(drag => album => {
-    var moved_x = move(album[drag.orig.page].tiles[drag.orig.idx], drag.dx / drag.img.width, 'cx1', 'cx2');
-    album[drag.orig.page].tiles[drag.orig.idx] = move(moved_x, drag.dy / drag.img.height, 'cy1', 'cy2');
+    var moved_x = move(album[drag.page].tiles[drag.idx], drag.dx / drag.img.width, 'cx1', 'cx2');
+    album[drag.page].tiles[drag.idx] = move(moved_x, drag.dy / drag.img.height, 'cy1', 'cy2');
     return album;
   });
 
