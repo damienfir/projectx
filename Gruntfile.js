@@ -16,7 +16,7 @@ module.exports = function(grunt) {
         // },
         // watchifyOptions: {
         debug: true,
-        watch: true,
+        // watch: true,
         // keepAlive: true
         // }
       },
@@ -35,6 +35,10 @@ module.exports = function(grunt) {
       bootstrap: {
         files: ['app/assets/less/*.less'],
         tasks: ['less']
+      },
+      js: {
+        files: ['app/assets/js/*.js'],
+        tasks: ['browserify']
       }
     }
   });
@@ -44,7 +48,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-browserify');
   grunt.loadNpmTasks('grunt-contrib-less');
 
-  grunt.registerTask('dev', ['browserify', 'watch']);
+  // grunt.registerTask('dev', ['browserify', 'watch']);
 
   // grunt.registerTask('default', ['concat']);
 };

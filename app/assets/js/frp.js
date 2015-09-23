@@ -94,7 +94,7 @@ function requests(actions) {
 function model(actions, compositionActions) {
   var clearState$ = actions.reset$.map(x => []);
   var albumState$ = actions.compositionResponse$
-    .startWith([])
+    .startWith([TestData])
     .merge(clearState$);
     // .scan((album, composition) => composition === false ? [] : album.concat(composition));
     // .merge(clearState$);

@@ -1,8 +1,187 @@
 /** @jsx hJSX */
 
+import {Rx} from '@cycle/core';
 import {hJSX} from '@cycle/dom';
 import _ from 'underscore';
+import Immutable from 'immutable';
 
+
+function resizeTile(tile, tile2) {
+
+  var arTile = (tile.tx2-tile.tx1) / (tile.ty2-tile.ty1);
+  var arTile2 = (tile2.tx2-tile2.tx1) / (tile2.ty2-tile2.ty1);
+  var arImg = (tile.cx2-tile.cx1) / (tile.cy2-tile.cy1);
+  var arImg2 = arTile2 * arImg / arTile;
+
+  var center = [(tile.cx2+tile.cx1)/2, (tile.cy2+tile.cy1)/2];
+
+  tile.tx1 = tile2.tx1;
+  tile.ty1 = tile2.ty1;
+  tile.tx2 = tile2.tx2;
+  tile.ty2 = tile2.ty2;
+
+  tile.cx1 = 0;
+  tile.cy1 = 0;
+  if (arImg2 > 1) {
+    tile.cy2 = 1/arImg2;
+    tile.cx2 = tile.cy2*arImg2;
+  } else {
+    tile.cx2 = arImg2;
+    tile.cy2 = tile.cx2/arImg2;
+  }
+
+  var dx = Math.min(1-tile.cx2, Math.max(0, center[0]-tile.cx2/2));
+  tile.cx1 += dx;
+  tile.cx2 += dx;
+
+  var dy = Math.min(1-tile.cy2, Math.max(0, center[1]-tile.cy2/2));
+  tile.cy1 += dy;
+  tile.cy2 += dy;
+
+  return tile;
+}
+
+function swapTiles(album, [page1,idx1], [page2,idx2]) {
+  var tile1 = album[page1].tiles[idx1];
+  var tile2 = album[page2].tiles[idx2];
+  var tile1Resized = resizeTile(_.clone(tile1), tile2);
+  var tile2Resized = resizeTile(_.clone(tile2), tile1);
+  album[page1].tiles[idx1] = tile1Resized;
+  album[page2].tiles[idx2] = tile2Resized;
+  return album;
+}
+
+
+// function isOutOfBounds(position, bounds) {
+//   return position[0] < bounds[0] || position[1] < bounds[1] || position[0] > bounds[2] || position[1] > bounds[3];
+// }
+
+// function moveTiles(targets, orientation, bounds, dx, dy) {
+//   var tile_tl = targets.topleft.map(function(idx){ return $scope.composition.tiles[idx]; });
+//   var tile_br = targets.bottomright.map(function(idx){ return $scope.composition.tiles[idx]; });
+
+//   var newcoord_tl = tile_tl.map(function(tile){
+//     return [
+//       tile.tx1 + dx * orientation[0],
+//       tile.ty1 + dy * orientation[1]
+//     ];
+//   });
+
+//   var newcoord_br = tile_br.map(function(tile) {
+//     return [
+//       tile.tx2 + dx * orientation[0],
+//       tile.ty2 + dy * orientation[1]
+//     ];
+//   });
+
+//   var is_out = newcoord_tl.concat(newcoord_br).map(function(coord){
+//     return isOutOfBounds(coord, bounds);
+//   }).reduce(function(res, current) {
+//     return res || current;
+//   });
+
+//   if (!is_out) {
+//     targets.topleft.forEach(function(idx, i) {
+//       resizeTile(idx, {
+//         tx1: newcoord_tl[i][0],
+//         ty1: newcoord_tl[i][1],
+//         tx2: tile_tl[i].tx2,
+//         ty2: tile_tl[i].ty2
+//       });
+//     });
+//     targets.bottomright.forEach(function(idx, i) {
+//       resizeTile(idx, {
+//         tx1: tile_br[i].tx1,
+//         ty1: tile_br[i].ty1,
+//         tx2: newcoord_br[i][0],
+//         ty2: newcoord_br[i][1]
+//       });
+//     });
+//   }
+// }
+
+// function getOrientation(tiles, prop) {
+//   return tiles.map(function(idx) {
+//     return $scope.composition.tiles[idx][prop];
+//   }).reduce(function(prev, curr) {
+//     return (prev === curr) ? prev : false;
+//   }) ? [1,0] : [0,1];
+// }
+
+// function findOrientation(tl, br) {
+//   if (Math.min(tl.length, br.length) === 0) return [0,0];
+//   if (tl.length === br.length && tl.length === 1) {
+//     var tile_tl = $scope.composition.tiles[tl[0]];
+//     var tile_br = $scope.composition.tiles[br[0]];
+//     return (Math.abs(tile_tl.ty1-tile_br.ty2) < Math.abs(tile_tl.tx1-tile_br.tx2)) ? [0,1] : [1,0];
+//   }
+
+//   if (tl.length >= br.length) {
+//     return getOrientation(tl, 'tx1');
+//   } else {
+//     return getOrientation(br, 'tx2');
+//   }
+// }
+
+// function findTargets(xn, yn) {
+//   var tl_targets = [];
+//   var br_targets = [];
+//   var tiles = $scope.composition.tiles;
+//   var best1 = Infinity,
+//   best2 = Infinity;
+
+//   for (var i = 0; i < tiles.length; i++) {
+//     var dy1 = Math.abs(yn - tiles[i].ty1);
+//     var dx1 = Math.abs(xn - tiles[i].tx1);
+//     var dy2 = Math.abs(yn - tiles[i].ty2);
+//     var dx2 = Math.abs(xn - tiles[i].tx2);
+//     var min1 = Math.min(dy1, dx1);
+//     var min2 = Math.min(dy2, dx2);
+
+//     if (min1 < min2) {
+//       if (min1 < best1) {
+//         tl_targets = [];
+//         best1 = min1;
+//       }
+//       if (min1 == best1) {
+//         tl_targets.push(i);
+//       }
+//     } else {
+//       if (min2 < best2) {
+//         br_targets = [];
+//         best2 = min2;
+//       }
+//       if (min2 == best2) {
+//         br_targets.push(i);
+//       }
+//     }
+//   }
+
+//   return {
+//     'topleft': tl_targets,
+//     'bottomright': br_targets,
+//   };
+// }
+
+function findBounds(tl, br, orientation) {
+  var tl_tiles = tl.map(function(i){ return $scope.composition.tiles[i]; });
+  var br_tiles = br.map(function(i){ return $scope.composition.tiles[i]; });
+
+  var m = 0.05;
+  return [
+    (br_tiles.map(function(tile){ return tile.tx1; }).sort(compare_max)[0] + m) * orientation[0],
+    (br_tiles.map(function(tile){ return tile.ty1; }).sort(compare_max)[0] + m) * orientation[1],
+    Math.max((tl_tiles.map(function(tile){ return tile.tx2; }).sort(compare_min)[0] - m), 1-orientation[0]),
+    Math.max((tl_tiles.map(function(tile){ return tile.ty2; }).sort(compare_min)[0] - m), 1-orientation[1])
+  ];
+}
+
+
+function dragTile(tile, dx, dy, img) {
+  var moved_x = move(tile, dx / img.width, 'cx1', 'cx2');
+  var moved_xy = move(moved_x, dy / img.height, 'cy1', 'cy2');
+  return moved_xy;
+}
 
 function eventToCoord(ev) {
   return {
@@ -18,6 +197,8 @@ function intent(DOM) {
   var mouseDown$ = DOM.select('.ui-tile').events('mousedown').map(eventToCoord);
   var mouseUp$ = DOM.select('.ui-tile').events('mouseup');
   var mouseMove$ = DOM.select('.ui-tile').events('mousemove').map(eventToCoord);
+  var mouseEnter$ = DOM.select('.ui-tile img').events('mouseenter').map(eventToCoord);
+
   var drag$ = mouseDown$.flatMapLatest(down => 
       mouseMove$.takeUntil(mouseUp$)
       .scan((prev, curr) => {
@@ -26,27 +207,44 @@ function intent(DOM) {
         out.dy = curr.y-prev.y;
         return out;
       }, down)
-      .map(mm => _.extend(mm, {orig: down})));
+      .map(mm => _.extend(mm, {orig: down}))
+      .concat(Rx.Observable.return(false)));
 
-  return {drag$};
+  var swap$ = mouseEnter$.withLatestFrom(drag$, (enter, drag) => [enter, drag])
+    .filter(([enter, drag]) => drag && drag.orig.idx !== enter.idx)
+    .map(([enter, drag]) => ({from: drag.orig, to: enter}))
+    .scan(([old, prev], curr) => {
+      if (!prev || prev.to.idx !== curr.to.idx) {
+        return [prev, curr];
+      } else {
+        return [prev, false];
+      }
+    }, [false,false]);
+
+  return {drag$: drag$.filter(x => x), swap$};
 }
 
 
 function model(actions, album$) {
-  var composition$ = album$.flatMapLatest(album => actions.drag$
-    .scan((alb, drag) => {
-      var moved_x = move(alb[drag.orig.page].tiles[drag.orig.idx], drag.dx / drag.img.width, 'cx1', 'cx2');
-      alb[drag.orig.page].tiles[drag.orig.idx] = move(moved_x, drag.dy / drag.img.height, 'cy1', 'cy2');
-      return alb;
-    }, album)).share();
-  return composition$;
-}
+  var dragFunc$ = actions.drag$.map(drag => album => {
+    var moved_x = move(album[drag.orig.page].tiles[drag.orig.idx], drag.dx / drag.img.width, 'cx1', 'cx2');
+    album[drag.orig.page].tiles[drag.orig.idx] = move(moved_x, drag.dy / drag.img.height, 'cy1', 'cy2');
+    return album;
+  });
 
+  var swapFunc$ = actions.swap$.map(([prev,swap]) => album => {
+    if (prev) {
+      album = swapTiles(album, [prev.from.page, prev.from.idx], [prev.to.page, prev.to.idx]);
+    }
+    if (swap) {
+      album = swapTiles(album, [swap.from.page, swap.from.idx], [swap.to.page, swap.to.idx]);
+    }
+    return album;
+  });
 
-function dragTile(tile, dx, dy, img) {
-  var moved_x = move(tile, dx / img.width, 'cx1', 'cx2');
-  var moved_xy = move(moved_x, dy / img.height, 'cy1', 'cy2');
-  return moved_xy;
+  return album$.flatMapLatest(album =>
+      Rx.Observable.merge(dragFunc$, swapFunc$)
+        .scan((state, func) => func(state), album));
 }
 
 
