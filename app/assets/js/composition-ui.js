@@ -19,7 +19,7 @@ function resizeTile(tile, tile2) {
   // tile.ty1 = tile2.ty1;
   // tile.tx2 = tile2.tx2;
   // tile.ty2 = tile2.ty2;
-  newTile.imgindex = tile.imgindex;
+  newTile.img = tile.img;
 
   newTile.cx1 = 0;
   newTile.cy1 = 0;
@@ -282,7 +282,7 @@ function  renderTile(tile, composition) {
   };
 
   return <div className="ui-tile" style={tileStyle}>
-            <img src={"/storage/photos/"+getFilename(composition.photos[tile.imgindex])} draggable={false} style={imgStyle} data-page={composition.index} data-idx={tile.tileindex} />
+            <img src={"/storage/photos/"+getFilename(tile.img)} draggable={false} style={imgStyle} data-page={composition.index} data-idx={tile.tileindex} />
         </div>
 }
 

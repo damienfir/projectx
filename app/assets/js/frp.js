@@ -91,9 +91,14 @@ function requests(actions) {
 }
 
 
+function convertCompositions(comp) {
+  comp.tiles = comp.tiles.map(tile => _.extend(tile, {img: comp.photos[tile.imgindex]}));
+  return comp;
+}
+
 function model(actions) {
   var clearState$ = actions.reset$.map(x => album => []);
-  var albumState$ = actions.compositionResponse$.map(compositions => album => compositions)
+  var albumState$ = actions.compositionResponse$.map(compositions => album => compositions.map(convertCompositions))
   return Cycle.Rx.Observable.merge(albumState$, clearState$);
 }
 
@@ -116,7 +121,7 @@ function main({DOM, HTTP}) {
 
   var state$ = Cycle.Rx.Observable
     .merge(albumState$, compositionState$)
-    .startWith([TestData])
+    .startWith([TestData].map(convertCompositions))
     .scan((album, func) => func(album))
     .map(album => ({album}));
 
