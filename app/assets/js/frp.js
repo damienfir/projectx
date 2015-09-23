@@ -91,16 +91,10 @@ function requests(actions) {
 }
 
 
-function model(actions, compositionActions) {
-  var clearState$ = actions.reset$.map(x => []);
-  var albumState$ = actions.compositionResponse$
-    .startWith([TestData])
-    .merge(clearState$);
-    // .scan((album, composition) => composition === false ? [] : album.concat(composition));
-    // .merge(clearState$);
-  var compositionState$ = Composition.model(compositionActions, albumState$);
-  var state$ = albumState$.merge(compositionState$).map(compositions => ({album: compositions}));
-  return state$;
+function model(actions) {
+  var clearState$ = actions.reset$.map(x => album => []);
+  var albumState$ = actions.compositionResponse$.map(compositions => album => compositions)
+  return Cycle.Rx.Observable.merge(albumState$, clearState$);
 }
 
 
@@ -116,9 +110,16 @@ function view(state$) {
 
 function main({DOM, HTTP}) {
   let actions = intent(DOM, HTTP);
-  var compositionActions = Composition.intent(DOM);
   let requests$ = requests(actions);
-  let state$ = model(actions, compositionActions);
+  let albumState$ = model(actions);
+  let compositionState$ = Composition.model(Composition.intent(DOM));
+
+  var state$ = Cycle.Rx.Observable
+    .merge(albumState$, compositionState$)
+    .startWith([TestData])
+    .scan((album, func) => func(album))
+    .map(album => ({album}));
+
   var vtree$ = view(state$);
   
   return {

@@ -14,40 +14,41 @@ function resizeTile(tile, tile2) {
   var arImg2 = arTile2 * arImg / arTile;
 
   var center = [(tile.cx2+tile.cx1)/2, (tile.cy2+tile.cy1)/2];
+  var newTile = _.clone(tile2);
+  // tile.tx1 = tile2.tx1;
+  // tile.ty1 = tile2.ty1;
+  // tile.tx2 = tile2.tx2;
+  // tile.ty2 = tile2.ty2;
+  newTile.imgindex = tile.imgindex;
 
-  tile.tx1 = tile2.tx1;
-  tile.ty1 = tile2.ty1;
-  tile.tx2 = tile2.tx2;
-  tile.ty2 = tile2.ty2;
-
-  tile.cx1 = 0;
-  tile.cy1 = 0;
+  newTile.cx1 = 0;
+  newTile.cy1 = 0;
   if (arImg2 > 1) {
-    tile.cy2 = 1/arImg2;
-    tile.cx2 = tile.cy2*arImg2;
+    newTile.cy2 = 1/arImg2;
+    newTile.cx2 = newTile.cy2*arImg2;
   } else {
-    tile.cx2 = arImg2;
-    tile.cy2 = tile.cx2/arImg2;
+    newTile.cx2 = arImg2;
+    newTile.cy2 = newTile.cx2/arImg2;
   }
 
-  var dx = Math.min(1-tile.cx2, Math.max(0, center[0]-tile.cx2/2));
-  tile.cx1 += dx;
-  tile.cx2 += dx;
+  var dx = Math.min(1-newTile.cx2, Math.max(0, center[0]-newTile.cx2/2));
+  newTile.cx1 += dx;
+  newTile.cx2 += dx;
 
-  var dy = Math.min(1-tile.cy2, Math.max(0, center[1]-tile.cy2/2));
-  tile.cy1 += dy;
-  tile.cy2 += dy;
+  var dy = Math.min(1-newTile.cy2, Math.max(0, center[1]-newTile.cy2/2));
+  newTile.cy1 += dy;
+  newTile.cy2 += dy;
 
-  return tile;
+  return newTile;
 }
 
 function swapTiles(album, [page1,idx1], [page2,idx2]) {
   var tile1 = album[page1].tiles[idx1];
   var tile2 = album[page2].tiles[idx2];
-  var tile1Resized = resizeTile(_.clone(tile1), tile2);
-  var tile2Resized = resizeTile(_.clone(tile2), tile1);
-  album[page1].tiles[idx1] = tile1Resized;
-  album[page2].tiles[idx2] = tile2Resized;
+  var tile1Resized = resizeTile(tile1, tile2);
+  var tile2Resized = resizeTile(tile2, tile1);
+  album[page2].tiles[idx2] = tile1Resized;
+  album[page1].tiles[idx1] = tile2Resized;
   return album;
 }
 
@@ -211,21 +212,24 @@ function intent(DOM) {
       .concat(Rx.Observable.return(false)));
 
   var swap$ = mouseEnter$.withLatestFrom(drag$, (enter, drag) => [enter, drag])
-    .filter(([enter, drag]) => drag && drag.orig.idx !== enter.idx)
+    .filter(([enter, drag]) => drag)
     .map(([enter, drag]) => ({from: drag.orig, to: enter}))
-    .scan(([old, prev], curr) => {
-      if (!prev || prev.to.idx !== curr.to.idx) {
-        return [prev, curr];
-      } else {
+    .map(curr => ([old, prev]) => {
+      if (curr.from.idx === curr.to.idx && curr.from.page === curr.to.page) {
         return [prev, false];
+      } else {
+        return [prev, curr];
       }
-    }, [false,false]);
+    })
+    .merge(drag$.filter(x => !x).map(x => state => [false, false]))
+    .scan((swap, func) => func(swap), [false, false])
+    .filter(([prev,curr]) => prev || curr)
 
   return {drag$: drag$.filter(x => x), swap$};
 }
 
 
-function model(actions, album$) {
+function model(actions) {
   var dragFunc$ = actions.drag$.map(drag => album => {
     var moved_x = move(album[drag.orig.page].tiles[drag.orig.idx], drag.dx / drag.img.width, 'cx1', 'cx2');
     album[drag.orig.page].tiles[drag.orig.idx] = move(moved_x, drag.dy / drag.img.height, 'cy1', 'cy2');
@@ -233,18 +237,12 @@ function model(actions, album$) {
   });
 
   var swapFunc$ = actions.swap$.map(([prev,swap]) => album => {
-    if (prev) {
-      album = swapTiles(album, [prev.from.page, prev.from.idx], [prev.to.page, prev.to.idx]);
-    }
-    if (swap) {
-      album = swapTiles(album, [swap.from.page, swap.from.idx], [swap.to.page, swap.to.idx]);
-    }
+    if (prev) { album = swapTiles(album, [prev.from.page, prev.from.idx], [prev.to.page, prev.to.idx]); }
+    if (swap) { album = swapTiles(album, [swap.from.page, swap.from.idx], [swap.to.page, swap.to.idx]); }
     return album;
   });
 
-  return album$.flatMapLatest(album =>
-      Rx.Observable.merge(dragFunc$, swapFunc$)
-        .scan((state, func) => func(state), album));
+  return Rx.Observable.merge(dragFunc$, swapFunc$);
 }
 
 
