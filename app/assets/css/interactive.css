@@ -1,8 +1,5 @@
 /* @import url(http://fonts.googleapis.com/css?family=Open+Sans|Maven+Pro|Pacifico); */
 
-[ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
-  display: none !important;
-}
 
 html, body {
   font-family: 'Open Sans', sans-serif;
@@ -11,8 +8,8 @@ html, body {
 }
 
 body {
-  /* padding-top: 65px; */
-  /* background-color: #FFF; */
+  padding-top: 70px;
+  /* background-color: #f0f0f0; */
 }
 
 .container-ui {

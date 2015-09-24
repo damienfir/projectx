@@ -35,21 +35,26 @@ function makeUploadRequest(file, collection) {
 
 
 function renderToolbar() {
-  return <div className="upload-box">
-    <button className="btn btn-primary" id="upload-btn"><i className="fa fa-upload"></i>&nbsp; Upload photos</button>
-    <button className="btn btn-default" id="reset-btn">Reset</button>
-    <button className="btn btn-primary" id="download-btn">Download</button>
-    <input type="file" name="image" id="file-input" multiple></input>
-  </div>
+  return <div className="navbar navbar-default navbar-fixed-top">
+      <div className="container-fluid">
+        <ul className="nav navbar-nav navbar-right">
+          <li><button className="btn btn-default navbar-btn" id="download-btn"><span className="glyphicon glyphicon-cloud-download"></span> Download</button></li>
+        </ul>
+        <ul className="nav navbar-nav">
+          <li><button className="btn btn-default navbar-btn" id="upload-btn"><span className="glyphicon glyphicon-cloud-upload"></span> Upload photos</button></li>
+        </ul>
+      </div>
+      <input type="file" name="image" id="file-input" multiple></input>
+    </div>
 }
 
 
 function intent(DOM, HTTP) {
-  let btn$ = DOM.select('#upload-btn').events('click');
+  let btn$ = DOM.select('#upload-btn').events('click').share();
   btn$.subscribe(_ => document.getElementById('file-input').dispatchEvent(new MouseEvent('click')));
   var uploadFiles$ = DOM.select('#file-input').events('change').map(ev => toArray(ev.target.files)).share();
-  var reset$ = DOM.select('#reset-btn').events('click');
-  var download$ = DOM.select('#download-btn').events('click');
+  var reset$ = DOM.select('#reset-btn').events('click').share();
+  var download$ = DOM.select('#download-btn').events('click').share();
   
   // var albumUpload$ = uploadFiles$.flatMap(files => Cycle.Rx.Observable.from(divideArray(files, 3))).shareReplay(10);
 
@@ -61,8 +66,8 @@ function intent(DOM, HTTP) {
     .map(res => res.body).share();
   var compositionResponse$ = postResponses$.filter(res$ => res$.request.url.match(/\/collections\/\d+\/pages/)).mergeAll()
     .map(res => res.body).share();
-
-  var downloadResponse$ = postResponses$.filter(res$ => res$.request.url.match(/\collections\/\d+\/download/)).mergeAll().map(res => res.body).share();
+  var downloadResponse$ = postResponses$.filter(res$ => res$.request.url.match(/\/collections\/\d+\/download/)).mergeAll()
+    .map(res => res.body).share();
 
   return {
     uploadFiles$,
@@ -90,7 +95,7 @@ function requests(actions, state$) {
 
   var downloadRequest$ = actions.download$.withLatestFrom(state$, (ev, state) => {
     return {url: '/collections/' + state.collection.id + '/download', method: 'POST', send: state.album.map(convertToIndices)};
-  }).do(x => console.log(x));
+  });
 
   return Cycle.Rx.Observable.merge(
     userRequest$,
@@ -116,13 +121,19 @@ function convertCompositions(comp) {
 function model(actions) {
   var clearState$ = actions.reset$.map(x => album => []);
   var albumState$ = actions.compositionResponse$.map(compositions => album => compositions.map(convertCompositions));
+
+  actions.downloadResponse$.subscribe(url => {
+    console.log(url);
+    window.location.href = "/storage/generated/" + url;
+  });
+
   return Cycle.Rx.Observable.merge(albumState$, clearState$);
 }
 
 
 function view(state$) {
   return state$.map(state => 
-      <div className="container-ui limited-width">
+      <div className="container-fluid limited-width">
         {renderToolbar()}
         {Composition.view(state.album)}
       </div>
@@ -143,11 +154,10 @@ function main({DOM, HTTP}) {
   var state$ = album$.combineLatest(
       actions.userResponse$.startWith({}),
       actions.collectionResponse$.startWith({}),
-      (album, user, collection) => ({user, album, collection}));
+      (album, user, collection) => ({user, album, collection}))
+      .share();
 
   let requests$ = requests(actions, state$);
-  // requests$.subscribe(x => console.log(x));
-  // HTTP.mergeAll().subscribe(x => console.log(x.body));
 
   var vtree$ = view(state$);
   

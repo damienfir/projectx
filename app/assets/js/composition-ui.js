@@ -219,7 +219,7 @@ function intent(DOM) {
     })
     .merge(drag$.filter(x => !x).map(x => state => [false, false]))
     .scan((swap, func) => func(swap), [false, false])
-    .filter(([prev,curr]) => prev || curr).share().do(x => console.log(x))
+    .filter(([prev,curr]) => prev || curr);
 
   return {drag$: drag$.filter(x => x), swap$};
 }
