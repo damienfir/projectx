@@ -25,7 +25,11 @@ body {
 }
 
 .spread {
-  margin-bottom: 40px;
+  margin-bottom: 30px;
+}
+
+.spread-paper {
+  padding: 5px;
 }
 
 .navbar {
@@ -88,12 +92,9 @@ body {
   position: relative;
 }
 
-.page-left {
-  float: left;
-}
-
-.page-right {
-  float: right;
+.pages {
+  padding: 5px 15px 0px 15px;
+  color: #aaa;
 }
 
 /* trick to fix aspect ratio */

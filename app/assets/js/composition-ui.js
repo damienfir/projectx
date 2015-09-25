@@ -260,6 +260,4 @@ function move(tile, offset, prop1, prop2) {
 }
 
 
-
-
 module.exports = {model, intent}

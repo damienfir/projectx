@@ -9,10 +9,11 @@ import UI from './ui'
 import TestData from "./data"
 
 
-function initial() {
-  // return TestData;
-  return [TestData, TestData, TestData];
-}
+var initial = {
+  user: {},
+  collection: {},
+  album: TestData
+};
 
 function toArray(filelist) {
   var list = [];
@@ -114,8 +115,7 @@ function albumModel(actions, compositionState$) {
   });
 
   return Cycle.Rx.Observable.merge(albumState$, clearState$, compositionState$)
-    // .startWith(TestData.map(convertCompositions))
-    .startWith([])
+    .startWith(initial.album.map(convertCompositions))
     .scan((album, func) => func(album));
 }
 
@@ -132,7 +132,7 @@ function collectionModel(actions) {
   });
 
   return Cycle.Rx.Observable.merge(uploadStarted$, fileAdded$)
-    .startWith({})
+    .startWith(initial.collection)
     .scan((collection, func) => func(collection));
 }
 
