@@ -139,7 +139,7 @@ function collectionModel(actions) {
 
 function main({DOM, HTTP}) {
   let actions = intent(DOM, HTTP);
-  let compositionState$ = Composition.model(Composition.intent(DOM));
+  let compositionState$ = Composition.state(DOM);
 
   let requestsActions = requests(actions);
 

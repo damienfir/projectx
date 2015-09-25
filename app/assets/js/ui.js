@@ -11,6 +11,8 @@ var UI = {
 }
 
 
+function leftOrRight(index) { return index % 2 ? '.pull-right' : '.pull-left'; }
+
 function renderToolbar(state) {
   return h('div.navbar.navbar-default.navbar-static-top', [
       h('div.container-fluid', [
@@ -93,6 +95,11 @@ function renderFrontpage() {
           h('div.ui-composition.shadow', "front page"));
 }
 
+function renderPage(page) {
+  return h('.box-mosaic' + leftOrRight(page.index),
+      {'data-page': page.index},
+      page.tiles.map(tile => renderTile(tile, page.index)))
+}
 
 function splitIntoSpreads(spreads, page) {
   if(spreads.length && spreads[spreads.length-1].length < 2) {
@@ -103,14 +110,9 @@ function splitIntoSpreads(spreads, page) {
   return spreads;
 }
 
-
 function renderSpread(spread) {
-  let leftOrRight = (index) => (index % 2 ? '.pull-right' : '.pull-left')
-
   return h('.spread', [
-      h('.spread-paper.shadow.clearfix', spread.map(page => 
-          h('.box-mosaic' + leftOrRight(page.index), page.tiles.map(tile =>
-              renderTile(tile, page.index))))),
+      h('.spread-paper.shadow.clearfix', spread.map(renderPage)),
       h('.pages.clearfix', spread.map(({index}) =>
           h('span' + leftOrRight(index), "page "+(index+1))))
   ]);

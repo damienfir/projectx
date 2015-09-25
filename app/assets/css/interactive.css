@@ -69,7 +69,7 @@ body {
 }
 
 .album {
-  margin-top: 20px;
+  margin-top: 30px;
 }
 
 .progressbar {
@@ -90,6 +90,7 @@ body {
   width: 49.5%;
   display: inline-block;
   position: relative;
+  cursor: pointer;
 }
 
 .pages {
@@ -102,15 +103,6 @@ body {
   padding-top: 70.69%;
   display: block;
   content: '';
-}
-
-.ui-composition {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  right: 0;
-  left: 0;
-  cursor: pointer;
 }
 
 .ui-tile {
