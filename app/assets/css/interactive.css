@@ -1,14 +1,14 @@
-/* @import url(http://fonts.googleapis.com/css?family=Open+Sans|Maven+Pro|Pacifico); */
+@import url(http://fonts.googleapis.com/css?family=Open+Sans|Maven+Pro|Pacifico|Nunito);
 
 
 html, body {
-  font-family: 'Open Sans', sans-serif;
+  font-family: 'Nunito', sans-serif;
   height: 100%;
   /* overflow-x: hidden; */
 }
 
 body {
-  padding-top: 70px;
+  /* padding-top: 70px; */
   /* background-color: #f0f0f0; */
 }
 
@@ -20,12 +20,80 @@ body {
   /* overflow: hidden; */
 }
 
+.navbar-btn {
+  margin-right: 8px;
+}
+
+.spread {
+  margin-bottom: 40px;
+}
+
+.navbar {
+  margin-bottom: 0;
+}
+
+.upload-area {
+  height: 100px;
+  background-color: #eee;
+  position: relative;
+  cursor: pointer;
+}
+
+.upload-area:hover {
+  box-shadow: inset 0px 0px 4px #ccc;
+}
+
+.upload-area h4 {
+  position: absolute;
+  color: #999;
+  text-align: center;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  margin: 0;
+}
+
+#photo-collection {
+  padding: 10px;
+}
+
+#photo-collection img {
+  background-color: #333;
+  margin: 5px;
+  height: 50px;
+  width: 50px;
+}
+
+.album {
+  margin-top: 20px;
+}
+
+.progressbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+}
+
+.progressbar > div {
+  height: 100%;
+  width: 25%;
+  background-color: #337AB7;
+}
+
 .box-mosaic {
-  width: 48%;
+  width: 49.5%;
   display: inline-block;
   position: relative;
-  margin-bottom: 30px;
-  margin-right: 10px;
+}
+
+.page-left {
+  float: left;
+}
+
+.page-right {
+  float: right;
 }
 
 /* trick to fix aspect ratio */
@@ -82,7 +150,7 @@ body {
 
 #overlay-mosaic { opacity: 0.7; }
 
-.shadow { box-shadow: 1px 1px 2px rgba(0,0,0,0.3); }
+.shadow { box-shadow: 1px 1px 4px rgba(0,0,0,0.3); }
 .limited-width { max-width: 1400px; }
 .centered { text-align: center; }
 .hide { display: none; }

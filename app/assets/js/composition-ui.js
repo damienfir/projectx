@@ -1,7 +1,5 @@
-/** @jsx hJSX */
-
 import {Rx} from '@cycle/core';
-import {hJSX} from '@cycle/dom';
+import {h} from '@cycle/dom';
 import _ from 'underscore';
 import Immutable from 'immutable';
 
@@ -180,6 +178,12 @@ function dragTile(tile, dx, dy, img) {
   return moved_xy;
 }
 
+function cancelDefault(ev) {
+  ev.preventDefault();
+  ev.stopPropagation();
+  return ev;
+}
+
 function eventToCoord(ev) {
   return {
     'x': ev.screenX,
@@ -191,10 +195,10 @@ function eventToCoord(ev) {
 }
 
 function intent(DOM) {
-  var mouseDown$ = DOM.select('.ui-tile').events('mousedown').map(eventToCoord);
-  var mouseUp$ = DOM.select('.ui-tile').events('mouseup');
-  var mouseMove$ = DOM.select('.ui-tile').events('mousemove').map(eventToCoord);
-  var mouseEnter$ = DOM.select('.ui-tile img').events('mouseenter').map(eventToCoord);
+  var mouseDown$ = DOM.select('.ui-tile').events('mousedown').map(cancelDefault).map(eventToCoord);
+  var mouseUp$ = DOM.select('.ui-tile').events('mouseup').map(cancelDefault);
+  var mouseMove$ = DOM.select('.ui-tile').events('mousemove').map(cancelDefault).map(eventToCoord);
+  var mouseEnter$ = DOM.select('.ui-tile img').events('mouseenter').map(cancelDefault).map(eventToCoord);
 
   var drag$ = mouseDown$.flatMapLatest(down => 
       mouseMove$.takeUntil(mouseUp$)
@@ -256,42 +260,6 @@ function move(tile, offset, prop1, prop2) {
 }
 
 
-function  renderTile(tile, composition) {
-  function percent(x) { return x * 100 + "%"; }
-  function getFilename(path) { return path.split('/').pop() }
-
-  var scaleX = 1 / (tile.cx2 - tile.cx1);
-  var scaleY = 1 / (tile.cy2 - tile.cy1);
-
-  var imgStyle = {
-    height: percent(scaleY),
-    width: percent(scaleX),
-    top: percent(-tile.cy1 * scaleY),
-    left: percent(-tile.cx1 * scaleX)
-  };
-
-  var tileStyle = {
-    height: percent(tile.ty2 - tile.ty1),
-    width: percent(tile.tx2 - tile.tx1),
-    top: percent(tile.ty1),
-    left: percent(tile.tx1)
-  };
-
-  return <div className="ui-tile" style={tileStyle}>
-            <img src={"/storage/photos/"+getFilename(tile.img)} draggable={false} style={imgStyle} data-page={composition.index} data-idx={tile.tileindex} />
-        </div>
-}
 
 
-function view(album) {
-  return album.map(composition =>
-    <div className="box-mosaic">
-        <div className="ui-composition shadow">
-          {composition.tiles ? composition.tiles.map(tile => renderTile(tile, composition)) : ''}
-        </div>
-      </div>
-  );
-}
-
-
-module.exports = {model, intent, view}
+module.exports = {model, intent}

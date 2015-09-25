@@ -1,12 +1,11 @@
-/** @jsx hJSX */
-
 import Cycle from '@cycle/core';
-import {makeDOMDriver, hJSX} from '@cycle/dom';
+import {makeDOMDriver, h} from '@cycle/dom';
 import {makeHTTPDriver} from '@cycle/http';
 import $ from "jquery"
 import _ from 'underscore';
 
 import Composition from './composition-ui'
+import UI from './ui'
 import TestData from "./data"
 
 
@@ -34,29 +33,14 @@ function makeUploadRequest(file, collection) {
 }
 
 
-function renderToolbar() {
-  return <div className="navbar navbar-default navbar-fixed-top">
-      <div className="container-fluid">
-        <ul className="nav navbar-nav navbar-right">
-          <li><button className="btn btn-default navbar-btn" id="download-btn"><span className="glyphicon glyphicon-cloud-download"></span> Download</button></li>
-        </ul>
-        <ul className="nav navbar-nav">
-          <li><button className="btn btn-default navbar-btn" id="upload-btn"><span className="glyphicon glyphicon-cloud-upload"></span> Upload photos</button></li>
-        </ul>
-      </div>
-      <input type="file" name="image" id="file-input" multiple></input>
-    </div>
-}
-
 
 function intent(DOM, HTTP) {
-  let btn$ = DOM.select('#upload-btn').events('click').share();
+  let toggleUpload$ = DOM.select('#upload-btn').events('click').share();
+  let btn$ = DOM.select('#upload-area').events('click').share();
   btn$.subscribe(_ => document.getElementById('file-input').dispatchEvent(new MouseEvent('click')));
   var uploadFiles$ = DOM.select('#file-input').events('change').map(ev => toArray(ev.target.files)).share();
   var reset$ = DOM.select('#reset-btn').events('click').share();
   var download$ = DOM.select('#download-btn').events('click').share();
-  
-  // var albumUpload$ = uploadFiles$.flatMap(files => Cycle.Rx.Observable.from(divideArray(files, 3))).shareReplay(10);
 
   var getResponses$ = HTTP.filter(res$ => res$.request.method === undefined);
   var postResponses$ = HTTP.filter(res$ => res$.request.method === 'POST');
@@ -69,40 +53,43 @@ function intent(DOM, HTTP) {
   var downloadResponse$ = postResponses$.filter(res$ => res$.request.url.match(/\/collections\/\d+\/download/)).mergeAll()
     .map(res => res.body).share();
 
+  var uploadRequest$ = uploadFiles$.zip(collectionResponse$).share();
+  var fileUploadRequest$ = uploadRequest$.flatMap(([files, collection]) =>
+        Cycle.Rx.Observable.from(files).flatMap(file => makeUploadRequest(file, collection))
+        .concat(Cycle.Rx.Observable.return('end'))).share();
+
   return {
+    toggleUpload$,
     uploadFiles$,
     reset$,
     download$,
     userResponse$,
     collectionResponse$,
     compositionResponse$,
-    downloadResponse$
+    downloadResponse$,
+    uploadRequest$,
+    fileUploadRequest$
   };
 }
 
 
-function requests(actions, state$) {
-  var userRequest$ = actions.uploadFiles$.map(f => '/users/1');
+function requests(actions) {
+  var userRequest$ = actions.uploadFiles$.map(f => state => '/users/1');
   var collectionRequest$ = actions.userResponse$.zip(actions.uploadFiles$,
-      (user, x) => ({url:'/users/'+user.id+'/collections', method: 'POST', send: {}}));
-  var fileUploadRequest$ = actions.uploadFiles$
-    .zip(actions.collectionResponse$)
-    .flatMap(([files, collection]) =>
-        Cycle.Rx.Observable.from(files).flatMap(file => makeUploadRequest(file, collection))
-        .concat(Cycle.Rx.Observable.return('end')));
-  var compositionRequest$ = actions.collectionResponse$.zip(fileUploadRequest$.filter(x => x === 'end'),
-      (collection, _) => ({url: '/collections/'+collection.id+'/pages', method: 'POST', send: {}}));
+      (user, x) => state => ({url:'/users/'+user.id+'/collections', method: 'POST', send: {}}));
+  var compositionRequest$ = actions.collectionResponse$.zip(actions.fileUploadRequest$.filter(x => x === 'end'),
+      (collection, _) => state => ({url: '/collections/'+collection.id+'/pages', method: 'POST', send: {}}));
 
-  var downloadRequest$ = actions.download$.withLatestFrom(state$, (ev, state) => {
+  var downloadRequest$ = actions.download$.map(ev => state => {
     return {url: '/collections/' + state.collection.id + '/download', method: 'POST', send: state.album.map(convertToIndices)};
   });
 
-  return Cycle.Rx.Observable.merge(
+  return {
     userRequest$,
     collectionRequest$,
     compositionRequest$,
     downloadRequest$
-  );
+  };
 }
 
 
@@ -118,52 +105,56 @@ function convertCompositions(comp) {
   return comp;
 }
 
-function model(actions) {
+function albumModel(actions, compositionState$) {
   var clearState$ = actions.reset$.map(x => album => []);
   var albumState$ = actions.compositionResponse$.map(compositions => album => compositions.map(convertCompositions));
 
   actions.downloadResponse$.subscribe(url => {
-    console.log(url);
     window.location.href = "/storage/generated/" + url;
   });
 
-  return Cycle.Rx.Observable.merge(albumState$, clearState$);
+  return Cycle.Rx.Observable.merge(albumState$, clearState$, compositionState$)
+    // .startWith(TestData.map(convertCompositions))
+    .startWith([])
+    .scan((album, func) => func(album));
 }
 
+function collectionModel(actions) {
+  let uploadStarted$ = actions.uploadRequest$.map(([files, col]) => collection =>
+      _.extend(collection, _.extend(col, {nphotos: files.length})));
+  let fileAdded$ = actions.fileUploadRequest$.map(f => collection => {
+    if (collection.photos) {
+      collection.photos.push(f);
+    } else {
+      collection.photos = [f];
+    }
+    return collection;
+  });
 
-function view(state$) {
-  return state$.map(state => 
-      <div className="container-fluid limited-width">
-        {renderToolbar()}
-        {Composition.view(state.album)}
-      </div>
-  );
+  return Cycle.Rx.Observable.merge(uploadStarted$, fileAdded$)
+    .startWith({})
+    .scan((collection, func) => func(collection));
 }
 
 
 function main({DOM, HTTP}) {
   let actions = intent(DOM, HTTP);
-  let albumState$ = model(actions);
   let compositionState$ = Composition.model(Composition.intent(DOM));
 
-  var album$ = Cycle.Rx.Observable
-    .merge(albumState$, compositionState$)
-    .startWith(TestData.map(convertCompositions))
-    .scan((album, func) => func(album));
+  let requestsActions = requests(actions);
 
-  var state$ = album$.combineLatest(
-      actions.userResponse$.startWith({}),
-      actions.collectionResponse$.startWith({}),
-      (album, user, collection) => ({user, album, collection}))
+  var state$ = UI.model(actions, requestsActions).combineLatest(
+        albumModel(actions, compositionState$),
+        actions.userResponse$.startWith({}),
+        collectionModel(actions),
+      (ui, album, user, collection) => ({user, album, collection, ui}))
       .share();
-
-  let requests$ = requests(actions, state$);
-
-  var vtree$ = view(state$);
   
+  let requests$ = Cycle.Rx.Observable.merge(_.values(requestsActions));
+
   return {
-    DOM: vtree$,
-    HTTP: requests$
+    DOM: UI.view(state$),
+    HTTP: requests$.withLatestFrom(state$, (func, state) => func(state))
   };
 }
 
