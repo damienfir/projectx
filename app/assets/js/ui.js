@@ -13,16 +13,31 @@ var UI = {
 
 function leftOrRight(index) { return index % 2 ? '.pull-right' : '.pull-left'; }
 
+
+function renderButton() {
+  return h('.start-buttons', [
+      h('button.btn.btn-default.btn-lg', [
+        h('i.fa.fa-book.fa-3x'),
+        'Create album'
+      ]), 
+      h('.or', 'or...')
+      h('button.btn.btn-success.btn-lg', [
+        h('i.fa.fa-rocket.fa-3x'),
+        'View demo'
+      ])
+  ]);
+}
+
 function renderToolbar(state) {
   return h('div.navbar.navbar-default.navbar-static-top', [
       h('div.container-fluid', [
         h('ul.nav.navbar-nav', [
           h('li',
             h('button.btn.btn-default.navbar-btn#upload-btn', {type: 'button'}, [
-              h('i.fa.fa-cloud-upload'), ' Upload photos'])),
+              h('i.fa.fa-cloud-upload'), ' Add photos'])),
           state.album.length ? h('li',
             h('button.btn.btn-default.navbar-btn#download-btn', [
-              h('i.fa.fa-cloud-download'), ' Download'])) : ''
+              h('i.fa.fa-cloud-download'), ' Download album'])) : ''
         ])
       ]),
       h('input#file-input', {'type': "file", 'name': "image", 'multiple': true})
@@ -47,7 +62,7 @@ function renderUploadArea(state) {
   let ui = state.ui;
   if (ui & UI.uploadBox) {
     return h('div.upload-area#upload-area', [
-      renderProgressbar(state),
+      (ui & UI.uploading) ? renderProgressbar(state) : '',
       message(ui)
     ]);
   }
@@ -130,9 +145,10 @@ function view(state$) {
       h('div', [
         renderToolbar(state),
         renderUploadArea(state),
-        h('div.container-fluid.limited-width.album', 
+        state.album.length ? h('div.container-fluid.limited-width.album', 
           renderAlbum(state.album)
-        )
+        ) :
+        renderButton()
       ])
   );
 }

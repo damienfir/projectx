@@ -12,7 +12,7 @@ import TestData from "./data"
 var initial = {
   user: {},
   collection: {},
-  album: TestData
+  album: []
 };
 
 function toArray(filelist) {
@@ -32,7 +32,6 @@ function makeUploadRequest(file, collection) {
     contentType: false
   }));
 }
-
 
 
 function intent(DOM, HTTP) {
@@ -121,13 +120,9 @@ function albumModel(actions, compositionState$) {
 
 function collectionModel(actions) {
   let uploadStarted$ = actions.uploadRequest$.map(([files, col]) => collection =>
-      _.extend(collection, _.extend(col, {nphotos: files.length})));
+      _.extend(collection, _.extend(col, {nphotos: files.length, photos: []})));
   let fileAdded$ = actions.fileUploadRequest$.map(f => collection => {
-    if (collection.photos) {
-      collection.photos.push(f);
-    } else {
-      collection.photos = [f];
-    }
+    collection.photos.push(f);
     return collection;
   });
 

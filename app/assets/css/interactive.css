@@ -72,6 +72,25 @@ body {
   margin-top: 30px;
 }
 
+.start-buttons {
+  margin-top: 100px;
+  text-align: center;
+}
+
+.start-buttons .or {
+
+}
+
+.start-buttons button {
+  margin: 10px;
+  padding: 20px;
+}
+
+.start-buttons button i {
+  display: block;
+  margin-bottom: 10px;
+}
+
 .progressbar {
   position: absolute;
   top: 0;
