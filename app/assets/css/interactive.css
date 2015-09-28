@@ -91,6 +91,7 @@ body {
   display: inline-block;
   position: relative;
   cursor: pointer;
+  /* border-left: 1px dashed #999; */
 }
 
 .pages {

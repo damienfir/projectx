@@ -5,7 +5,6 @@ import Immutable from 'immutable';
 
 
 function resizeTile(tile, tile2) {
-
   var arTile = (tile.tx2-tile.tx1) / (tile.ty2-tile.ty1);
   var arTile2 = (tile2.tx2-tile2.tx1) / (tile2.ty2-tile2.ty1);
   var arImg = (tile.cx2-tile.cx1) / (tile.cy2-tile.cy1);
@@ -39,10 +38,8 @@ function resizeTile(tile, tile2) {
 function swapTiles(album, [page1,idx1], [page2,idx2]) {
   var tile1 = album[page1].tiles[idx1];
   var tile2 = album[page2].tiles[idx2];
-  var tile1Resized = resizeTile(tile1, tile2);
-  var tile2Resized = resizeTile(tile2, tile1);
-  album[page2].tiles[idx2] = tile1Resized;
-  album[page1].tiles[idx1] = tile2Resized;
+  album[page2].tiles[idx2] = resizeTile(tile1, tile2);
+  album[page1].tiles[idx1] = resizeTile(tile2, tile1);
   return album;
 }
 
@@ -73,15 +70,16 @@ function moveTiles(targets, orientation, bounds, dx, dy, tiles) {
   return tiles.map(tile => {
     let i = targets.topleft.indexOf(tile.tileindex);
     if (i !== -1) {
-      return resizeTile(tile, _.extend(tile, {
+      var out = resizeTile(_.clone(tile), _.extend(tile, {
         tx1: newcoord_tl[i][0],
         ty1: newcoord_tl[i][1],
       }));
+      return out;
     }
 
     let j = targets.bottomright.indexOf(tile.tileindex);
     if (j !== -1) {
-      return resizeTile(tile, _.extend(tile, {
+      return resizeTile(_.clone(tile), _.extend(tile, {
         tx2: newcoord_br[j][0],
         ty2: newcoord_br[j][1]
       }));
@@ -153,6 +151,9 @@ function findTargets(xn, yn, tiles) {
   };
 }
 
+function compare_min(a,b) { return a-b; }
+function compare_max(a,b) { return b-a; }
+
 function findBounds(tl, br, orientation, tiles) {
   var tl_tiles = tl.map(function(i){ return tiles[i]; });
   var br_tiles = br.map(function(i){ return tiles[i]; });
@@ -189,24 +190,25 @@ function eventToCoord(ev) {
   };
 }
 
+
 function pageIntent(DOM) {
   let mouseDown$ = DOM.select('.box-mosaic').events('mousedown').map(cancelDefault);
   let mouseUp$ = DOM.select('.box-mosaic').events('mouseup').map(cancelDefault);
   let mouseMove$ = DOM.select('.box-mosaic').events('mousemove').map(cancelDefault);
 
-  let down$ = mouseDown$.map(ev => ({
-    ev,
+  let down$ = mouseDown$.map(ev => _.extend(ev.target, {
     x: ev.offsetX/ev.target.offsetWidth,
     y: ev.offsetY/ev.target.offsetHeight,
     page: ev.target['data-page']
   }));
 
-  let drag$ = mouseDown$.flatMapLatest(down =>
+  let drag$ = down$.flatMapLatest(down =>
     mouseMove$.takeUntil(mouseUp$)
     .pairwise()
-    .map((prev,move) => ({
-      dx: (move.screenX - prev.screenX) / down.target.offsetWidth,
-      dy: (move.screenY - prev.screenY) / down.target.offsetHeight
+    .map(([prev,move]) => ({
+      dx: (move.screenX - prev.screenX) / down.offsetWidth,
+      dy: (move.screenY - prev.screenY) / down.offsetHeight,
+      down
     })));
 
   return {down$, drag$};
@@ -219,19 +221,18 @@ function pageModel(actions) {
     let targets = findTargets(x, y, tiles);
     let orientation = findOrientation(targets.topleft, targets.bottomright, tiles);
     let bounds = findBounds(targets.topleft, targets.bottomright, orientation, tiles);
-    // var lastpos = [ev.screenX, ev.screenY];
-    let elementSize = [ev.target.offsetWidth, ev.target.offsetHeight];
-    return {targets, orientation, bounds, elementSize$, page};
+    album[page].move = {targets, orientation, bounds, page};
+    return album;
   });
 
-  let dragFunc$ = actions.drag$.withLatestFrom(paramFunc$, (drag, makeParams) => state => {
-    let params = makeParams(state.album);
-    let newtiles = moveTiles(params.targets, params.orientation, params.bounds, drag.dx, drag.dy, params.elementSize[0]/params.elementSize[1]);
-    state.album[params.page].tiles = newtiles;
-    return state;
+  let dragFunc$ = actions.drag$.map(drag => album => {
+    let params = album[drag.down.page].move;
+    let newtiles = moveTiles(params.targets, params.orientation, params.bounds, drag.dx, drag.dy, album[params.page].tiles);
+    album[params.page].tiles = newtiles;
+    return album;
   });
 
-  return dragFunc$;
+  return Rx.Observable.merge(dragFunc$, paramFunc$);
 }
 
 function cropIntent(DOM) {
