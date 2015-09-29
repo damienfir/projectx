@@ -154,11 +154,11 @@ function view(state$) {
 }
 
 
-function model(actions, requests$) {
-  let uploadBox$ = actions.toggleUpload$.map(f => ui => ui ^ UI.uploadBox);
-  let uploading$ = actions.selectFiles$.map(f => ui => (ui ^ UI.uploading) & ~UI.processing);
-  let processing$ = requests$.createComposition$.map(f => ui => (ui ^ UI.processing) & ~UI.uploading);
-  let complete$ = actions.responses.createComposition$.map(f => ui => ui & ~(UI.uploading | UI.processing | UI.uploadBox));
+function model(DOMactions, HTTPactions, requests) {
+  let uploadBox$ = DOMactions.toggleUpload$.map(f => ui => ui ^ UI.uploadBox);
+  let uploading$ = DOMactions.selectFiles$.map(f => ui => (ui ^ UI.uploading) & ~UI.processing);
+  let processing$ = requests.createAlbum$.map(f => ui => (ui ^ UI.processing) & ~UI.uploading);
+  let complete$ = HTTPactions.createdAlbum$.map(f => ui => ui & ~(UI.uploading | UI.processing | UI.uploadBox));
 
   return Rx.Observable.merge(uploadBox$, uploading$, processing$, complete$)
     .startWith(UI.initial)
