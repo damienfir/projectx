@@ -16,12 +16,12 @@ function leftOrRight(index) { return index % 2 ? '.pull-right' : '.pull-left'; }
 
 function renderButton() {
   return h('.start-buttons', [
-      h('button.btn.btn-default.btn-lg', [
+      h('button.btn.btn-default.btn-lg#create-btn', [
         h('i.fa.fa-book.fa-3x'),
         'Create album'
       ]), 
-      h('.or', 'or...')
-      h('button.btn.btn-success.btn-lg', [
+      h('span.or', 'or'),
+      h('button.btn.btn-success.btn-lg#demo-btn', [
         h('i.fa.fa-rocket.fa-3x'),
         'View demo'
       ])
@@ -156,9 +156,9 @@ function view(state$) {
 
 function model(actions, requests$) {
   let uploadBox$ = actions.toggleUpload$.map(f => ui => ui ^ UI.uploadBox);
-  let uploading$ = actions.uploadFiles$.map(f => ui => (ui ^ UI.uploading) & ~UI.processing);
-  let processing$ = requests$.compositionRequest$.map(f => ui => (ui ^ UI.processing) & ~UI.uploading);
-  let complete$ = actions.compositionResponse$.map(f => ui => ui & ~(UI.uploading | UI.processing | UI.uploadBox));
+  let uploading$ = actions.selectFiles$.map(f => ui => (ui ^ UI.uploading) & ~UI.processing);
+  let processing$ = requests$.createComposition$.map(f => ui => (ui ^ UI.processing) & ~UI.uploading);
+  let complete$ = actions.responses.createComposition$.map(f => ui => ui & ~(UI.uploading | UI.processing | UI.uploadBox));
 
   return Rx.Observable.merge(uploadBox$, uploading$, processing$, complete$)
     .startWith(UI.initial)

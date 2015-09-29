@@ -78,7 +78,9 @@ body {
 }
 
 .start-buttons .or {
-
+  font-size: 18px;
+  font-weight: bold;
+  margin: 0 20px;
 }
 
 .start-buttons button {

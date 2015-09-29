@@ -34,61 +34,91 @@ function makeUploadRequest(file, collection) {
 }
 
 
-function intent(DOM, HTTP) {
-  let toggleUpload$ = DOM.select('#upload-btn').events('click').share();
+function cancelDefault(ev) {
+  ev.preventDefault();
+  ev.stopPropagation();
+  return ev;
+}
+
+
+function backendIntent(HTTP) {
+  function jsonGET(regex) {
+    return HTTP.filter(res$ => res$.request.method === undefined)
+      .filter(res$ => res$.request.match(regex))
+      .mergeAll().map(res => res.body).share();
+  }
+
+  function jsonPOST(regex) {
+    return HTTP.filter(res$ => res$.request.method === 'POST')
+      .filter(res$ => res$.request.url.match(regex))
+      .mergeAll().map(res => res.body).share();
+  }
+
+  var getUser$ = jsonGET(/\/users\/\d+/);
+  var createCollection$ = jsonPOST(/\/users\/\d+\/collections/);
+  var createComposition$ = jsonPOST(/\/collections\/\d+\/pages/);
+  var downloadAlbum$ = jsonPOST(/\/collections\/\d+\/download/);
+  var getDemo$ = jsonGET(/\/demo/);
+
+  return {
+    getUser$,
+    createCollection$,
+    createComposition$,
+    downloadAlbum$,
+    getDemo$
+  }
+}
+
+function intent(DOM, responses) {
+  let toggleUpload$ = DOM.select('#upload-btn').events('click').map(cancelDefault)
+    .merge(DOM.select('#create-btn').events('click').map(cancelDefault)).share();
   let btn$ = DOM.select('#upload-area').events('click').share();
   btn$.subscribe(_ => document.getElementById('file-input').dispatchEvent(new MouseEvent('click')));
-  var uploadFiles$ = DOM.select('#file-input').events('change').map(ev => toArray(ev.target.files)).share();
+  var selectFiles$ = DOM.select('#file-input').events('change').map(ev => toArray(ev.target.files)).share();
   var reset$ = DOM.select('#reset-btn').events('click').share();
+  var demo$ = DOM.select('#demo-btn').events('click');
   var download$ = DOM.select('#download-btn').events('click').share();
 
-  var getResponses$ = HTTP.filter(res$ => res$.request.method === undefined);
-  var postResponses$ = HTTP.filter(res$ => res$.request.method === 'POST');
-
-  var userResponse$ = getResponses$.filter(res$ => res$.request.match(/\/users\/\d+/)).mergeAll().map(res => res.body).share();
-  var collectionResponse$ = postResponses$.filter(res$ => res$.request.url.match(/\/users\/\d+\/collections/)).mergeAll()
-    .map(res => res.body).share();
-  var compositionResponse$ = postResponses$.filter(res$ => res$.request.url.match(/\/collections\/\d+\/pages/)).mergeAll()
-    .map(res => res.body).share();
-  var downloadResponse$ = postResponses$.filter(res$ => res$.request.url.match(/\/collections\/\d+\/download/)).mergeAll()
-    .map(res => res.body).share();
-
-  var uploadRequest$ = uploadFiles$.zip(collectionResponse$).share();
-  var fileUploadRequest$ = uploadRequest$.flatMap(([files, collection]) =>
+  var startUpload$ = selectFiles$.zip(responses.createCollection$).share();
+  var uploadFile$ = startUpload$.flatMap(([files, collection]) =>
         Cycle.Rx.Observable.from(files).flatMap(file => makeUploadRequest(file, collection))
         .concat(Cycle.Rx.Observable.return('end'))).share();
 
   return {
     toggleUpload$,
-    uploadFiles$,
+    selectFiles$,
     reset$,
     download$,
-    userResponse$,
-    collectionResponse$,
-    compositionResponse$,
-    downloadResponse$,
-    uploadRequest$,
-    fileUploadRequest$
+    demo$,
+    requests: {
+      startUpload$,
+      uploadFile$
+    },
+    responses
   };
 }
 
 
 function requests(actions) {
-  var userRequest$ = actions.uploadFiles$.map(f => state => '/users/1');
-  var collectionRequest$ = actions.userResponse$.zip(actions.uploadFiles$,
+  var responses = actions.responses;
+  var getUser$ = actions.selectFiles$.map(f => state => '/users/1');
+  var createCollection$ = responses.getUser$.zip(actions.selectFiles$,
       (user, x) => state => ({url:'/users/'+user.id+'/collections', method: 'POST', send: {}}));
-  var compositionRequest$ = actions.collectionResponse$.zip(actions.fileUploadRequest$.filter(x => x === 'end'),
+  var createComposition$ = responses.createCollection$.zip(actions.requests.uploadFile$.filter(x => x === 'end'),
       (collection, _) => state => ({url: '/collections/'+collection.id+'/pages', method: 'POST', send: {}}));
 
-  var downloadRequest$ = actions.download$.map(ev => state => {
+  var downloadAlbum$ = actions.download$.map(ev => state => {
     return {url: '/collections/' + state.collection.id + '/download', method: 'POST', send: state.album.map(convertToIndices)};
   });
 
+  var getDemo$ = actions.demo$.map(ev => state => '/demo');
+
   return {
-    userRequest$,
-    collectionRequest$,
-    compositionRequest$,
-    downloadRequest$
+    getUser$,
+    createCollection$,
+    createComposition$,
+    downloadAlbum$,
+    getDemo$
   };
 }
 
@@ -107,9 +137,11 @@ function convertCompositions(comp) {
 
 function albumModel(actions, compositionState$) {
   var clearState$ = actions.reset$.map(x => album => []);
-  var albumState$ = actions.compositionResponse$.map(compositions => album => compositions.map(convertCompositions));
+  var albumState$ = actions.responses.createComposition$
+    .merge(actions.responses.getDemo$)
+    .map(compositions => album => compositions.map(convertCompositions));
 
-  actions.downloadResponse$.subscribe(url => {
+  actions.responses.downloadAlbum$.subscribe(url => {
     window.location.href = "/storage/generated/" + url;
   });
 
@@ -119,9 +151,9 @@ function albumModel(actions, compositionState$) {
 }
 
 function collectionModel(actions) {
-  let uploadStarted$ = actions.uploadRequest$.map(([files, col]) => collection =>
+  let uploadStarted$ = actions.requests.startUpload$.map(([files, col]) => collection =>
       _.extend(collection, _.extend(col, {nphotos: files.length, photos: []})));
-  let fileAdded$ = actions.fileUploadRequest$.map(f => collection => {
+  let fileAdded$ = actions.requests.uploadFile$.map(f => collection => {
     collection.photos.push(f);
     return collection;
   });
@@ -133,14 +165,14 @@ function collectionModel(actions) {
 
 
 function main({DOM, HTTP}) {
-  let actions = intent(DOM, HTTP);
+  let actions = intent(DOM, backendIntent(HTTP));
   let compositionState$ = Composition.state(DOM);
 
   let requestsActions = requests(actions);
 
   var state$ = UI.model(actions, requestsActions).combineLatest(
         albumModel(actions, compositionState$),
-        actions.userResponse$.startWith({}),
+        actions.responses.getUser$.startWith({}),
         collectionModel(actions),
       (ui, album, user, collection) => ({user, album, collection, ui}))
       .share();
