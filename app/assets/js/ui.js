@@ -33,8 +33,11 @@ function renderToolbar(state) {
       h('div.container-fluid', [
         h('ul.nav.navbar-nav', [
           h('li',
-            h('button.btn.btn-default.navbar-btn#upload-btn', {type: 'button'}, [
+            h('button.btn.btn-default.navbar-btn#upload-btn', [
               h('i.fa.fa-cloud-upload'), ' Add photos'])),
+          !_.isEmpty(state.collection) ? h('li',
+            h('button.btn.btn-default.navbar-btn#reset-btn', [
+              h('i.fa.fa-refresh'), ' Reset'])) : '',
           state.album.length ? h('li',
             h('button.btn.btn-default.navbar-btn#download-btn', [
               h('i.fa.fa-cloud-download'), ' Download album'])) : ''
@@ -70,11 +73,12 @@ function renderUploadArea(state) {
 
 
 function renderProgressbar({collection}) {
-  let progress = collection.photos ? 100 * collection.photos.length / collection.nphotos : 0;
-  return h('div.progressbar',
-      h('div', {
-        style: {'width': progress + "%"}
-      }));
+  return '';
+  // let progress = collection.photos ? 100 * collection.photos.length / collection.nphotos : 0;
+  // return h('div.progressbar',
+  //     h('div', {
+  //       style: {'width': progress + "%"}
+  //     }));
 }
 
 

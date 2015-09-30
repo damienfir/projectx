@@ -58,12 +58,12 @@ function HTTPintent(HTTP) {
   let jsonGET = (regex) =>
     HTTP.filter(res$ => res$.request.method === undefined)
       .filter(res$ => res$.request.match(regex))
-      .mergeAll().map(res => res.body).shareReplay(1);
+      .mergeAll().map(res => res.body).share();
 
   let jsonPOST = (regex) =>
     HTTP.filter(res$ => res$.request.method === 'POST')
       .filter(res$ => res$.request.url.match(regex))
-      .mergeAll().map(res => res.body).shareReplay(1);
+      .mergeAll().map(res => res.body).share();
 
   return {
     gotUser$: jsonGET(/^\/users\/\d+$/),
@@ -131,15 +131,16 @@ function model(DOMactions, HTTPactions, composition$) {
     .merge(HTTPactions.gotDemo$)
     .map(newpages => album => album.concat(newpages.map(convertCompositions)).sort((a,b) => asc(a.index,b.index)));
 
-  const clearAll$ = DOMactions.reset$.map(x => item => []);
+  const clearCollection$ = DOMactions.reset$.map(x => item => initial.collection);
+  const clearAlbum$ = DOMactions.reset$.map(x => item => initial.album);
 
 
-  const collectionState$ = Observable.merge(collectionUpdated$, clearAll$)
+  const collectionState$ = Observable.merge(collectionUpdated$, clearCollection$)
     .startWith(initial.collection)
     .scan(apply)
     .shareReplay(1);
 
-  const albumState$ = Observable.merge(albumUpdated$, clearAll$, composition$)
+  const albumState$ = Observable.merge(albumUpdated$, clearAlbum$, composition$)
     .startWith(initial.album.map(convertCompositions))
     .scan(apply)
     .shareReplay(1);
@@ -156,8 +157,9 @@ function model(DOMactions, HTTPactions, composition$) {
   
   
   const startUpload$ = Observable.merge(
-      DOMactions.selectFiles$.zip(HTTPactions.createdCollection$),
-      DOMactions.selectFiles$.withLatestFrom(collectionState$.filter(isNotEmpty), argArray));
+      DOMactions.selectFiles$.flatMapLatest(files => HTTPactions.createdCollection$.do(x => console.log(x)).map(c => [files,c])),
+      DOMactions.selectFiles$.withLatestFrom(collectionState$, argArray).filter(([f,c]) => !_.isEmpty(c)))
+    .share();
 
   const uploadedFiles$ = startUpload$.flatMap(([files, collection]) =>
         Observable.from(files).flatMap(file => makeUploadRequest(file, collection)).reduce((acc,el) => acc.concat(el)))
@@ -179,7 +181,7 @@ function model(DOMactions, HTTPactions, composition$) {
 
     createCollection$: Observable.merge(
         DOMactions.selectFiles$.zip(userFromHTTP$),
-        DOMactions.selectFiles$.withLatestFrom(userState$.filter(isNotEmpty), argArray))
+        DOMactions.selectFiles$.withLatestFrom(userState$, argArray).filter(([f,u]) => !_.isEmpty(u)))
       .withLatestFrom(collectionState$, argArray).filter(([x,col]) => _.isEmpty(col)).map(([x,col]) => x)
       .map(([f,user]) => ({
         url:'/users/'+user.id+'/collections',
@@ -215,9 +217,9 @@ function main({DOM, HTTP}) {
 
   let uiState$ = UI.model(DOMactions, HTTPactions, requests);
   
-  var state$ = model$.combineLatest(uiState$, (state, ui) => _.extend(state, {ui})).do(x => console.log(x));
+  var state$ = model$.combineLatest(uiState$, (state, ui) => _.extend(state, {ui}));
   
-  let requests$ = Observable.merge(_.values(requests)).do(x => console.log(x));
+  let requests$ = Observable.merge(_.values(requests));
 
   return {
     DOM: UI.view(state$),
