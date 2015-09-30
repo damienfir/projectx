@@ -8,6 +8,7 @@ import Composition from './composition-ui'
 import UI from './ui'
 import TestData from "./data"
 
+let Observable = Rx.Observable;
 
 var initial = {
   user: {},
@@ -34,10 +35,16 @@ function convertCompositions(comp) {
   return comp;
 }
 
+let isNotEmpty = obj => !_.isEmpty(obj)
+let asc = (a,b) => a - b
+let apply = (state, func) => func(state)
+let log = x => console.log(x)
+let argArray = (a,b) => [a,b]
+
 function makeUploadRequest(file, collection) {
   var fd = new FormData();
   fd.append("image", file);
-  return Rx.Observable.fromPromise($.ajax({
+  return Observable.fromPromise($.ajax({
     url: "/collections/"+collection.id+"/photos",
     method: 'POST',
     data: fd,
@@ -51,16 +58,16 @@ function HTTPintent(HTTP) {
   let jsonGET = (regex) =>
     HTTP.filter(res$ => res$.request.method === undefined)
       .filter(res$ => res$.request.match(regex))
-      .mergeAll().map(res => res.body).share();
+      .mergeAll().map(res => res.body).shareReplay(1);
 
   let jsonPOST = (regex) =>
     HTTP.filter(res$ => res$.request.method === 'POST')
       .filter(res$ => res$.request.url.match(regex))
-      .mergeAll().map(res => res.body).share();
+      .mergeAll().map(res => res.body).shareReplay(1);
 
   return {
-    gotUser$: jsonGET(/\/users\/\d+/),
-    createdUser$: jsonPOST(/\/users/),
+    gotUser$: jsonGET(/^\/users\/\d+$/),
+    createdUser$: jsonPOST(/^\/users$/),
     createdCollection$: jsonPOST(/\/users\/\d+\/collections/),
     createdAlbum$: jsonPOST(/\/collections\/\d+\/pages/),
     downloadedAlbum$: jsonPOST(/\/collections\/\d+\/download/),
@@ -82,7 +89,7 @@ function DOMintent(DOM) {
     reset$: btn('#reset-btn'),
     download$: btn('#download-btn'),
     demo$: btn('#demo-btn'),
-    ready$: Rx.Observable.just({})
+    ready$: Observable.just({})
   }
 }
 
@@ -109,51 +116,52 @@ function model(DOMactions, HTTPactions, composition$) {
   // });
 
 
-  const userIDCookie$ = Rx.Observable.return(getUserIDFromCookie()).share();
+  const userIDCookie$ = Observable.return(getUserIDFromCookie()).shareReplay(1);
 
-  const user$ = Rx.Observable.merge(
+  const userFromHTTP$ = Observable.merge(
       HTTPactions.gotUser$,
       HTTPactions.createdUser$)
-    .filter(user => !_.isEmpty(user)).share();
+    .filter(isNotEmpty).shareReplay(1);
 
 
 
-  const userUpdated$ = user$.map(newuser => user => newuser);
-
+  const userUpdated$ = userFromHTTP$.map(newuser => user => newuser);
+  const collectionUpdated$ = HTTPactions.createdCollection$.map(col => collection => col);
   const albumUpdated$ = HTTPactions.createdAlbum$
     .merge(HTTPactions.gotDemo$)
-    .map(newpages => album => album.concat(newpages.map(convertCompositions)).sort((a,b) => b.index-a.index));
+    .map(newpages => album => album.concat(newpages.map(convertCompositions)).sort((a,b) => asc(a.index,b.index)));
 
   const clearAll$ = DOMactions.reset$.map(x => item => []);
 
 
-  const collectionState$ = Rx.Observable.merge(clearAll$)
+  const collectionState$ = Observable.merge(collectionUpdated$, clearAll$)
     .startWith(initial.collection)
-    .scan((collection, func) => func(collection));
+    .scan(apply)
+    .shareReplay(1);
 
-  const albumState$ = Rx.Observable.merge(albumUpdated$, clearAll$, composition$)
+  const albumState$ = Observable.merge(albumUpdated$, clearAll$, composition$)
     .startWith(initial.album.map(convertCompositions))
-    .scan((album, func) => func(album));
+    .scan(apply)
+    .shareReplay(1);
 
-  const userState$ = Rx.Observable.merge(userUpdated$)
+  const userState$ = Observable.merge(userUpdated$)
     .startWith({})
-    .scan((user, func) => func(user));
+    .scan(apply)
+    .shareReplay(1);
 
-  const model$ = Rx.Observable.combineLatest(
+  const model$ = Observable.combineLatest(
       albumState$, userState$, collectionState$,
       (album, user, collection) => ({user, album, collection}))
-      .share();
+      .shareReplay(1);
   
   
-  const startUpload$ = Rx.Observable.merge(
+  const startUpload$ = Observable.merge(
       DOMactions.selectFiles$.zip(HTTPactions.createdCollection$),
-      DOMactions.selectFiles$.withLatestFrom(collectionState$.filter(col => !_.isEmpty(col))));
+      DOMactions.selectFiles$.withLatestFrom(collectionState$.filter(isNotEmpty), argArray));
 
-  const uploadFile$ = startUpload$.flatMap(([files, collection]) =>
-        Rx.Observable.from(files).flatMap(file => makeUploadRequest(file, collection))
-        .concat(Rx.Observable.return('end'))).share();
-
-  const uploadEnd$ = uploadFile$.filter(x => x === 'end');
+  const uploadedFiles$ = startUpload$.flatMap(([files, collection]) =>
+        Observable.from(files).flatMap(file => makeUploadRequest(file, collection)).reduce((acc,el) => acc.concat(el)))
+    .share();
 
 
   const requests = {
@@ -169,21 +177,21 @@ function model(DOMactions, HTTPactions, composition$) {
         send: {}
       })),
 
-    createCollection$: Rx.Observable.merge(
-        DOMactions.selectFiles$.zip(user$),
-        DOMactions.selectFiles$.withLatestFrom(userState$.filter(user => !_.isEmpty(user))))
-      .withLatestFrom(collectionState$).filter(([x,col]) => _.isEmpty(col)).map(([x,col]) => x)
+    createCollection$: Observable.merge(
+        DOMactions.selectFiles$.zip(userFromHTTP$),
+        DOMactions.selectFiles$.withLatestFrom(userState$.filter(isNotEmpty), argArray))
+      .withLatestFrom(collectionState$, argArray).filter(([x,col]) => _.isEmpty(col)).map(([x,col]) => x)
       .map(([f,user]) => ({
         url:'/users/'+user.id+'/collections',
         method: 'POST',
         send: {}
       })),
 
-    createAlbum$: uploadEnd$.withLatestFrom(collectionState$,
-        (x, collection) => ({
-          url: '/collections/'+collection.id+'/pages',
+    createAlbum$: uploadedFiles$.withLatestFrom(collectionState$, albumState$,
+        (photos, collection, album) => ({
+          url: '/collections/'+collection.id+'/pages?startindex='+album.length,
           method: 'POST',
-          send: {}
+          send: photos
         })),
 
     downloadAlbum$: DOMactions.download$.withLatestFrom(collectionState$, albumState$,
@@ -209,7 +217,7 @@ function main({DOM, HTTP}) {
   
   var state$ = model$.combineLatest(uiState$, (state, ui) => _.extend(state, {ui})).do(x => console.log(x));
   
-  let requests$ = Rx.Observable.merge(_.values(requests)).do(x => console.log(x));
+  let requests$ = Observable.merge(_.values(requests)).do(x => console.log(x));
 
   return {
     DOM: UI.view(state$),

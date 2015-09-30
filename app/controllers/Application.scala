@@ -93,12 +93,11 @@ class Collections @Inject()(compositionDAO: CompositionDAO, collectionDAO: Colle
   }
 
 
-  def generatePages(id: Long) = Action.async {
-    photoDAO.allFromCollection(id)
-      .map(divideIntoPages)
-      .map(pages => pages.map({case (subset, index) => generateComposition(id, subset.toList, index)}))
-      .flatMap(pages => Future.sequence(pages))
-      .map(pages => Ok(Json.toJson(pages)))
+  def generatePages(id: Long, startindex: Int) = Action.async(parse.json) { request =>
+    Future.sequence(
+      divideIntoPages(request.body.as[List[DBModels.Photo]])
+        .map({case (subset, index) => generateComposition(id, subset.toList, startindex+index)})
+      ).map(pages => Ok(Json.toJson(pages)))
   }
 
 
