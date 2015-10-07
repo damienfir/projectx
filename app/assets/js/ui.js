@@ -134,7 +134,7 @@ let renderSpread = (collection) => (spread) => {
       h('.spread-paper.shadow.clearfix', spread.map(renderPage(collection))),
       h('.pages.clearfix', spread.map(({index}) =>
           h('span.page-btns' + leftOrRight(index), [
-            h('span.page', "page "+(index+1)),
+            h('span.page'+leftOrRight(index), "Page "+(index+1)),
             h('button.btn.btn-default.btn-sm.shuffle-btn', {'data-page': index}, [h('i.fa.fa-refresh'), " Shuffle"])
           ])))
   ]);

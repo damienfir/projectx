@@ -222,9 +222,10 @@ function main({DOM, HTTP}) {
 
   let uiState$ = UI.model(DOMactions, HTTPactions, requests);
   
-  var state$ = model$.combineLatest(uiState$, (state, ui) => _.extend(state, {ui}));
+  var state$ = model$.combineLatest(uiState$, (state, ui) => _.extend(state, {ui}))
+    // .do(x => console.log(JSON.stringify(x)));
   
-  let requests$ = Observable.merge(_.values(requests)).do(x => console.log(x));
+  let requests$ = Observable.merge(_.values(requests));
 
   return {
     DOM: UI.view(state$),
