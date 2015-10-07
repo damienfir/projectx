@@ -74,7 +74,7 @@ class CompositionDAO @Inject()(protected val dbConfigProvider: DatabaseConfigPro
 
   def addWithCollection(id: Long): Future[Composition] = for {
     col <- collectionDAO.get(id)
-    comp <- db.run((compositions returning compositions) += Composition(None, col.get.id.get, 0, List(), List()))
+    comp <- db.run((compositions returning compositions) += Composition(None, col.get.id.get, 0, List()))
   } yield comp
 
   def update(comp: Composition): Future[Composition] = db.run {

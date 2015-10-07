@@ -72,31 +72,31 @@ function renderUploadArea(state) {
 }
 
 
-function renderProgressbar({collection}) {
-  return '';
-  // let progress = collection.photos ? 100 * collection.photos.length / collection.nphotos : 0;
-  // return h('div.progressbar',
-  //     h('div', {
-  //       style: {'width': progress + "%"}
-  //     }));
+function renderProgressbar({upload}) {
+  let progress = (upload.files && upload.size) ? 100 * upload.files.length / upload.size : 0;
+  return h('div.progressbar',
+      h('div', {
+        style: {'width': progress + "%"}
+      }));
 }
 
 
-function renderTile(tile, index) {
+function renderTile(tile, tileindex, index, collection) {
   function percent(x) { return x * 100 + "%"; }
-  function getFilename(path) { return path.split('/').pop() }
+  // function getFilename(path) { return path.split('/').pop() }
 
   var scaleX = 1 / (tile.cx2 - tile.cx1);
   var scaleY = 1 / (tile.cy2 - tile.cy1);
 
-  return h('.ui-tile', {'style': {
+  if (_.isEmpty(collection.photos)) ''
+  else return h('.ui-tile', {'style': {
     height: percent(tile.ty2 - tile.ty1),
     width: percent(tile.tx2 - tile.tx1),
     top: percent(tile.ty1),
     left: percent(tile.tx1)
   }},
   h('img', {
-    'src': "/storage/photos/"+getFilename(tile.img),
+    'src': "/storage/photos/"+collection.photos[tile.photoID],
     'draggable': false,
     'style': {
       height: percent(scaleY),
@@ -105,7 +105,7 @@ function renderTile(tile, index) {
       left: percent(-tile.cx1 * scaleX)
     },
     'data-page': index,
-    'data-idx': tile.tileindex}));
+    'data-idx': tileindex}));
 }
 
 
@@ -114,10 +114,10 @@ function renderFrontpage() {
           h('div.ui-composition.shadow', "front page"));
 }
 
-function renderPage(page) {
+let renderPage = (collection) => (page) => {
   return h('.box-mosaic' + leftOrRight(page.index),
       {'data-page': page.index},
-      page.tiles.map(tile => renderTile(tile, page.index)))
+      page.tiles.map((tile, index) => renderTile(tile, index, page.index, collection)))
 }
 
 function splitIntoSpreads(spreads, page) {
@@ -129,18 +129,22 @@ function splitIntoSpreads(spreads, page) {
   return spreads;
 }
 
-function renderSpread(spread) {
+
+let renderSpread = (collection) => (spread) => {
   return h('.spread', [
-      h('.spread-paper.shadow.clearfix', spread.map(renderPage)),
+      h('.spread-paper.shadow.clearfix', spread.map(renderPage(collection))),
       h('.pages.clearfix', spread.map(({index}) =>
-          h('span' + leftOrRight(index), "page "+(index+1))))
+          h('span' + leftOrRight(index), [
+            "page "+(index+1),
+            h('button.btn.btn-default#shuffle-btn', {'data-page': index})
+          ])))
   ]);
 }
 
-function renderAlbum(album) {
+function renderAlbum(album, collection) {
   return album
     .reduce(splitIntoSpreads, [])
-    .map(renderSpread);
+    .map(renderSpread(collection));
 }
 
 
@@ -150,7 +154,7 @@ function view(state$) {
         renderToolbar(state),
         renderUploadArea(state),
         state.album.length ? h('div.container-fluid.limited-width.album', 
-          renderAlbum(state.album)
+          renderAlbum(state.album, state.collection)
         ) :
         renderButton()
       ])

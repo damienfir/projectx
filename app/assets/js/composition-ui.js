@@ -12,7 +12,7 @@ function resizeTile(tile, tile2) {
 
   var center = [(tile.cx2+tile.cx1)/2, (tile.cy2+tile.cy1)/2];
   var newTile = _.clone(tile2);
-  newTile.img = tile.img;
+  newTile.photoID = tile.photoID;
 
   newTile.cx1 = 0;
   newTile.cy1 = 0;

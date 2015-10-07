@@ -28,22 +28,23 @@ object DBModels {
     id: Option[Long],
     collectionID: Long,
     index: Int,
-    photos: List[String],
-    tiles: List[MosaicModels.Tile]
+    // photos: List[String],
+    tiles: List[Tile]
   )
 
-  // case class Tile(
-  //   imgindex: Int,
-  //   tileindex: Int,
-  //   cx1: Float,
-  //   cx2: Float,
-  //   cy1: Float,
-  //   cy2: Float,
-  //   tx1: Float,
-  //   tx2: Float,
-  //   ty1: Float,
-  //   ty2: Float
-  // )
+  case class Tile(
+    photoID: Long,
+    cx1: Float,
+    cx2: Float,
+    cy1: Float,
+    cy2: Float,
+    tx1: Float,
+    tx2: Float,
+    ty1: Float,
+    ty2: Float
+  )
+
+  implicit val tileformat = Json.format[Tile]
 }
 
 

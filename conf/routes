@@ -36,11 +36,12 @@ POST    /users/:id/collections      controllers.Collections.withUser(id: Long)
 # DELETE  /collections/:id            controllers.Collections.delete(id)
 # POST    /collections/:id/users/:uid controllers.Collections.addUser(id, uid)
 # DELETE  /collections/:id/users/:uid controllers.Collections.removeUser(id, uid)
-POST     /collections/:id/download    @controllers.Collections.download(id: Long)
+# POST     /collections/:id/download    @controllers.Collections.download(id: Long)
 POST    /collections/:id/photos     @controllers.Collections.addToCollection(id: Long)
 # GET     /collections/:id/photos/:photo_id controllers.Collections.getPhoto(id, photo_id)
 # DELETE  /collections/:id/photos/:photos_id  controllers.Collections.removePhoto(id, photo_id)
 
+POST    /collections/:id/page     @controllers.Collections.generatePage(id: Long, index: Int)
 POST    /collections/:id/pages    @controllers.Collections.generatePages(id: Long, startindex: Int)
 # POST    /mosaics/generate           @controllers.Collections.generate
 

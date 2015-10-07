@@ -16,6 +16,9 @@ module.exports = function(grunt) {
         // },
         // watchifyOptions: {
         debug: true,
+        // browserifyOptions: {
+        //   debug: true
+        // }
         // watch: true,
         // keepAlive: true
         // }
@@ -24,6 +27,12 @@ module.exports = function(grunt) {
         src: './app/assets/js/frp.js',
         dest: './public/js/bundle.js'
       }
+    },
+    extract_sourcemap: {
+      options: { 'removeSourcesContent': true },
+      files: {
+        'public/build': ['public/js/bundle.js'],
+      },
     },
     less: {
       bootstrap: {
@@ -38,6 +47,7 @@ module.exports = function(grunt) {
       },
       js: {
         files: ['app/assets/js/*.js'],
+        // tasks: ['js']
         tasks: ['browserify']
       }
     }
@@ -47,7 +57,9 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-browserify');
   grunt.loadNpmTasks('grunt-contrib-less');
+  grunt.loadNpmTasks('grunt-extract-sourcemap');
 
+  // grunt.registerTask('js', ['browserify', 'extract_sourcemap']);
   // grunt.registerTask('dev', ['browserify', 'watch']);
 
   // grunt.registerTask('default', ['concat']);

@@ -4,8 +4,8 @@ import com.github.tminglei.slickpg._
 import slick.driver.PostgresDriver
 import play.api.libs.json._
 
+
 import DBModels._
-import MosaicModels._
 
 
 trait PostgresDriverExt extends PostgresDriver with PgPlayJsonSupport {
@@ -61,9 +61,8 @@ object Tables {
     def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
     def collectionID = column[Long]("collection_id")
     def index = column[Int]("index")
-    def photos = column[List[String]]("photos")
     def tiles = column[List[Tile]]("tiles")
-    def * = (id.?, collectionID, index, photos, tiles) <> (Composition.tupled, Composition.unapply)
+    def * = (id.?, collectionID, index, tiles) <> (Composition.tupled, Composition.unapply)
   }
   val compositions = TableQuery[Compositions]
 

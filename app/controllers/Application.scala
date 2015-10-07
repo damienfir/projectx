@@ -87,9 +87,15 @@ class Collections @Inject()(compositionDAO: CompositionDAO, collectionDAO: Colle
   def generateComposition(id: Long, photos: List[DBModels.Photo], index: Int): Future[DBModels.Composition] = {
     for {
       comp <- compositionDAO.addWithCollection(id)
-      (subset, tiles) <- mosaicService.generateComposition(comp.id.get, photos map (_.hash))
-      c <- compositionDAO.update(comp.copy(photos = subset, tiles = tiles, index = index))
+      tiles <- mosaicService.generateComposition(comp.id.get, photos)
+      c <- compositionDAO.update(comp.copy(tiles = tiles, index = index))
     } yield c
+  }
+
+
+  def generatePage(id: Long, index: Int) = Action.async(parse.json) { request =>
+    generateComposition(id, request.body.as[List[DBModels.Photo]], index)
+      .map(page => Ok(Json.toJson(page)))
   }
 
 
@@ -102,10 +108,12 @@ class Collections @Inject()(compositionDAO: CompositionDAO, collectionDAO: Colle
 
 
   def download(id: Long) = Action.async(parse.json) { request =>
-    Future.sequence(
-      request.body.as[List[DBModels.Composition]]
-      .map(c => mosaicService.renderOtherComposition(c.id.get.toString, c.tiles, c.photos))
-    ).map(mosaicService.makeAlbum)
-      .map(value => Ok(Json.toJson(value)))
+    val compositions = request.body.as[List[DBModels.Composition]]
+    photoDAO.allFromCollection(id).flatMap(photos =>
+        Future.sequence(
+          compositions.map(c => mosaicService.renderComposition(c, photos))
+        ).map(mosaicService.makeAlbum)
+          .map(value => Ok(Json.toJson(value)))
+    )
   }
 }
