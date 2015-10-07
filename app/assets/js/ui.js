@@ -81,22 +81,21 @@ function renderProgressbar({upload}) {
 }
 
 
-function renderTile(tile, tileindex, index, collection) {
+function renderTile(tile, tileindex, index, photos) {
   function percent(x) { return x * 100 + "%"; }
   // function getFilename(path) { return path.split('/').pop() }
 
   var scaleX = 1 / (tile.cx2 - tile.cx1);
   var scaleY = 1 / (tile.cy2 - tile.cy1);
 
-  if (_.isEmpty(collection.photos)) ''
-  else return h('.ui-tile', {'style': {
+  return h('.ui-tile', {'style': {
     height: percent(tile.ty2 - tile.ty1),
     width: percent(tile.tx2 - tile.tx1),
     top: percent(tile.ty1),
     left: percent(tile.tx1)
   }},
   h('img', {
-    'src': "/storage/photos/"+collection.photos[tile.photoID],
+    'src': "/storage/photos/"+photos[tile.photoID],
     'draggable': false,
     'style': {
       height: percent(scaleY),
@@ -134,9 +133,9 @@ let renderSpread = (collection) => (spread) => {
   return h('.spread', [
       h('.spread-paper.shadow.clearfix', spread.map(renderPage(collection))),
       h('.pages.clearfix', spread.map(({index}) =>
-          h('span' + leftOrRight(index), [
-            "page "+(index+1),
-            h('button.btn.btn-default#shuffle-btn', {'data-page': index})
+          h('span.page-btns' + leftOrRight(index), [
+            h('span.page', "page "+(index+1)),
+            h('button.btn.btn-default.btn-sm.shuffle-btn', {'data-page': index}, [h('i.fa.fa-refresh'), " Shuffle"])
           ])))
   ]);
 }
@@ -147,6 +146,10 @@ function renderAlbum(album, collection) {
     .map(renderSpread(collection));
 }
 
+function hashMap(photos) {
+  return _.object(photos.map(p => [p.id, p.hash]))
+}
+
 
 function view(state$) {
   return state$.map(state => 
@@ -154,7 +157,7 @@ function view(state$) {
         renderToolbar(state),
         renderUploadArea(state),
         state.album.length ? h('div.container-fluid.limited-width.album', 
-          renderAlbum(state.album, state.collection)
+          renderAlbum(state.album, state.collection.photos ? hashMap(state.collection.photos) : {})
         ) :
         renderButton()
       ])

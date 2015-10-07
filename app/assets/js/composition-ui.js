@@ -67,17 +67,16 @@ function moveTiles(targets, orientation, bounds, dx, dy, tiles) {
 
   if (is_out) return tiles;
 
-  return tiles.map(tile => {
-    let i = targets.topleft.indexOf(tile.tileindex);
+  return tiles.map((tile,index) => {
+    let i = targets.topleft.indexOf(index);
     if (i !== -1) {
-      var out = resizeTile(_.clone(tile), _.extend(tile, {
+      return resizeTile(_.clone(tile), _.extend(tile, {
         tx1: newcoord_tl[i][0],
         ty1: newcoord_tl[i][1],
       }));
-      return out;
     }
 
-    let j = targets.bottomright.indexOf(tile.tileindex);
+    let j = targets.bottomright.indexOf(index);
     if (j !== -1) {
       return resizeTile(_.clone(tile), _.extend(tile, {
         tx2: newcoord_br[j][0],
@@ -200,7 +199,7 @@ function pageIntent(DOM) {
     x: ev.offsetX/ev.target.offsetWidth,
     y: ev.offsetY/ev.target.offsetHeight,
     page: ev.target['data-page']
-  }));
+  })).share();
 
   let drag$ = down$.flatMapLatest(down =>
     mouseMove$.takeUntil(mouseUp$)
@@ -209,7 +208,7 @@ function pageIntent(DOM) {
       dx: (move.screenX - prev.screenX) / down.offsetWidth,
       dy: (move.screenY - prev.screenY) / down.offsetHeight,
       down
-    })));
+    }))).share();
 
   return {down$, drag$};
 }
@@ -250,7 +249,7 @@ function cropIntent(DOM) {
         dy: curr.y-prev.y
       }))
       .map(mm => _.extend(mm, {orig: down}))
-      .concat(Rx.Observable.return(false)));
+      .concat(Rx.Observable.return(false))).share();
 
   var swap$ = mouseEnter$.withLatestFrom(drag$, (enter, drag) => [enter, drag])
     .filter(([enter, drag]) => drag)
@@ -292,7 +291,6 @@ function state(DOM) {
   var pageState$ = pageModel(pageIntent(DOM));
 
   return Rx.Observable.merge(cropState$, pageState$);
-  // return cropState$;
 }
 
 

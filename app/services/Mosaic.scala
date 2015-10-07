@@ -49,7 +49,9 @@ class MosaicService @Inject()() {
 
 
   def tilesToMosaic(tiles: List[DBModels.Tile], photos: Seq[DBModels.Photo]): (MosaicModels.Cluster, List[MosaicModels.Tile]) = {
-    val gists = tiles.map(t => photos.filter(_.id == t.photoID).head).map(_.hash).map(gistFile)
+    println(photos.map(_.id))
+    println(tiles.map(_.photoID))
+    val gists = tiles.map(t => photos.find(_.id == Some(t.photoID)).get.hash).map(gistFile)
     val newTiles = tiles.zipWithIndex.map({ case (tile,i) => MosaicModels.Tile(
       tileindex = i,
       imgindex = i,
@@ -111,8 +113,8 @@ class MosaicService @Inject()() {
   // }
   
 
-  def generateComposition(composition_id: Long, photos: Seq[DBModels.Photo]): Future[List[DBModels.Tile]] = {
-    val id = composition_id.toString
+  def generateComposition(compositionID: Long, photos: Seq[DBModels.Photo]): Future[List[DBModels.Tile]] = {
+    val id = compositionID.toString
     for {
       clu <- cluster(photos.map(_.hash), id)
       tiles <- assign(id, id, id)

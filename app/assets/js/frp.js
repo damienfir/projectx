@@ -7,8 +7,11 @@ import _ from 'underscore';
 import Composition from './composition-ui'
 import UI from './ui'
 import demo from "./demo"
+import cookie from './cookies'
 
 let Observable = Rx.Observable;
+
+let COOKIE = 'bigpiquser'
 
 var initial = {
   user: {},
@@ -23,27 +26,6 @@ function toArray(filelist) {
   return list;
 }
 
-
-function hashMap(photos) {
-  return _.object(photos.map(p => [p.id, p.hash]))
-}
-
-// function convertToIndices(comp) {
-//   comp.tiles = comp.tiles.map((tile, idx) => _.extend(tile, {imgindex: idx}));
-//   comp.photos = comp.tiles.map(tile => tile.img);
-//   return comp;
-// }
-
-
-// function convertCompositions(comp) {
-//   comp.tiles = comp.tiles.map(tile => _.extend(tile, {img: comp.photos[tile.imgindex]}));
-//   return comp;
-// }
-
-
-function tileToPhoto(collection) {
-  return (tile) => ({id: null, hash: tile.img, collectionID: collection.id});
-}
 
 let isNotEmpty = obj => !_.isEmpty(obj)
 let asc = (a,b) => a - b
@@ -79,10 +61,10 @@ function HTTPintent(HTTP) {
     gotUser$: jsonGET(/^\/users\/\d+$/),
     createdUser$: jsonPOST(/^\/users$/),
     createdCollection$: jsonPOST(/\/users\/\d+\/collections/),
-    createdAlbum$: jsonPOST(/\/collections\/\d+\/pages/),
+    createdAlbum$: jsonPOST(/\/collections\/\d+\/pages\?startindex=.*/),
     downloadedAlbum$: jsonPOST(/\/collections\/\d+\/download/),
     gotDemo$: jsonGET(/\/demo/),
-    shuffledPage$: jsonPOST(/^\/collections\/\d+\/page\?/)
+    shuffledPage$: jsonPOST(/\/collections\/\d+\/page\?index=.*/)
   }
 }
 
@@ -101,40 +83,28 @@ function DOMintent(DOM) {
     download$: btn('#download-btn'),
     demo$: btn('#demo-btn'),
     ready$: Observable.just({}),
-    shuffle$: btn('#shuffle').map(ev => ev.target['data-page'])
+    shuffle$: btn('.shuffle-btn').map(ev => ev.target['data-page'])
   }
 }
 
 
 
-function getUserIDFromCookie(key) {
-  return 1;
-}
-
 
 function model(DOMactions, HTTPactions, composition$) {
 
   HTTPactions.downloadedAlbum$.subscribe(url => {
-    window.location.href = "/storage/generated/" + url;
+    window.open("/storage/generated/" + url);
   });
 
 
-  // collection
-  // const uploadStarted$ = actions.requests.startUpload$.map(([files, col]) => collection =>
-  //     _.extend(collection, _.extend(col, {nphotos: files.length, photos: []})));
-  // const fileAdded$ = actions.requests.uploadFile$.map(f => collection => {
-  //   collection.photos.push(f);
-  //   return collection;
-  // });
-
-
-  const userIDCookie$ = Observable.return(getUserIDFromCookie()).shareReplay(1);
+  const userIDCookie$ = Observable.return(cookie.getItem(COOKIE)).shareReplay(1);
 
   const userFromHTTP$ = Observable.merge(
       HTTPactions.gotUser$,
       HTTPactions.createdUser$)
     .filter(isNotEmpty).share();
 
+  userFromHTTP$.subscribe(user => cookie.setItem(COOKIE, user.id));
 
   const demoAlbum$ = DOMactions.demo$.map(x => album => demo.album);
   const demoCollection$ = DOMactions.demo$.map(x => col => demo.collection);
@@ -145,15 +115,14 @@ function model(DOMactions, HTTPactions, composition$) {
     .map(newpages => album => album.concat(newpages).sort((a,b) => asc(a.index,b.index)));
   const clearCollection$ = DOMactions.reset$.map(x => item => initial.collection);
   const clearAlbum$ = DOMactions.reset$.map(x => item => initial.album);
-  // const shuffleAlbumPage$ = 
-
+  const albumPageShuffled$ = HTTPactions.shuffledPage$.map(page => album => { album[page.index] = page; return album; });
 
   const collectionState$ = Observable.merge(collectionUpdated$, clearCollection$, demoCollection$)
     .startWith(initial.collection)
     .scan(apply)
     .shareReplay(1);
 
-  const albumState$ = Observable.merge(albumUpdated$, clearAlbum$, demoAlbum$, composition$)
+  const albumState$ = Observable.merge(albumUpdated$, clearAlbum$, demoAlbum$, albumPageShuffled$, composition$)
     .startWith(initial.album)
     .scan(apply)
     .shareReplay(1);
@@ -186,7 +155,8 @@ function model(DOMactions, HTTPactions, composition$) {
     .scan(apply)
     .share();
 
-  const collectionWithPhotos$ = uploadedFiles$.combineLatest(collectionState$, (photos, collection) => _.extend(collection, {photos: hashMap(photos)}));
+  const collectionWithPhotos$ = uploadedFiles$.combineLatest(collectionState$,
+      (photos, collection) => _.extend(collection, {photos: (collection.photos || []).concat(photos)}));
 
   const model$ = Observable.combineLatest(
       albumState$, userState$, collectionState$.merge(collectionWithPhotos$), uploadState$,
@@ -233,9 +203,9 @@ function model(DOMactions, HTTPactions, composition$) {
 
     shufflePage$: DOMactions.shuffle$.withLatestFrom(collectionState$, albumState$,
         (page, collection, album) => ({
-          url: '/collections/'+collection.id+'/page?index'+page,
+          url: '/collections/'+collection.id+'/page?index='+page,
           method: 'POST',
-          send: album[page].map(tileToPhoto(collection))
+          send: _.filter(collection.photos, p => _.where(album[page].tiles, {'photoID': p.id}).length > 0)
         }))
   };
 
@@ -254,7 +224,7 @@ function main({DOM, HTTP}) {
   
   var state$ = model$.combineLatest(uiState$, (state, ui) => _.extend(state, {ui}));
   
-  let requests$ = Observable.merge(_.values(requests));
+  let requests$ = Observable.merge(_.values(requests)).do(x => console.log(x));
 
   return {
     DOM: UI.view(state$),

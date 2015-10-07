@@ -85,6 +85,7 @@ class Collections @Inject()(compositionDAO: CompositionDAO, collectionDAO: Colle
 
 
   def generateComposition(id: Long, photos: List[DBModels.Photo], index: Int): Future[DBModels.Composition] = {
+    println(photos)
     for {
       comp <- compositionDAO.addWithCollection(id)
       tiles <- mosaicService.generateComposition(comp.id.get, photos)
@@ -94,6 +95,7 @@ class Collections @Inject()(compositionDAO: CompositionDAO, collectionDAO: Colle
 
 
   def generatePage(id: Long, index: Int) = Action.async(parse.json) { request =>
+    println(id)
     generateComposition(id, request.body.as[List[DBModels.Photo]], index)
       .map(page => Ok(Json.toJson(page)))
   }
