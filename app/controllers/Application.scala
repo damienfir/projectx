@@ -95,7 +95,6 @@ class Collections @Inject()(compositionDAO: CompositionDAO, collectionDAO: Colle
 
 
   def generatePage(id: Long, index: Int) = Action.async(parse.json) { request =>
-    println(id)
     generateComposition(id, request.body.as[List[DBModels.Photo]], index)
       .map(page => Ok(Json.toJson(page)))
   }

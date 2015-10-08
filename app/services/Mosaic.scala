@@ -49,8 +49,6 @@ class MosaicService @Inject()() {
 
 
   def tilesToMosaic(tiles: List[DBModels.Tile], photos: Seq[DBModels.Photo]): (MosaicModels.Cluster, List[MosaicModels.Tile]) = {
-    println(photos.map(_.id))
-    println(tiles.map(_.photoID))
     val gists = tiles.map(t => photos.find(_.id == Some(t.photoID)).get.hash).map(gistFile)
     val newTiles = tiles.zipWithIndex.map({ case (tile,i) => MosaicModels.Tile(
       tileindex = i,

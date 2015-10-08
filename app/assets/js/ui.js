@@ -1,6 +1,7 @@
 import {Rx} from '@cycle/core';
 import {h} from '@cycle/dom';
 import _ from 'underscore';
+import Immutable from 'immutable';
 
 
 var UI = {
@@ -81,7 +82,7 @@ function renderProgressbar({upload}) {
 }
 
 
-function renderTile(tile, tileindex, index, photos) {
+function renderTile(tile, tileindex, index, state) {
   function percent(x) { return x * 100 + "%"; }
   // function getFilename(path) { return path.split('/').pop() }
 
@@ -95,7 +96,7 @@ function renderTile(tile, tileindex, index, photos) {
     left: percent(tile.tx1)
   }},
   h('img', {
-    'src': "/storage/photos/"+photos[tile.photoID],
+    'src': "/storage/photos/"+state.collection.get('photos').get(tile.photoID),
     'draggable': false,
     'style': {
       height: percent(scaleY),
@@ -113,10 +114,10 @@ function renderFrontpage() {
           h('div.ui-composition.shadow', "front page"));
 }
 
-let renderPage = (collection) => (page) => {
+let renderPage = (state) => (page) => {
   return h('.box-mosaic' + leftOrRight(page.index),
       {'data-page': page.index},
-      page.tiles.map((tile, index) => renderTile(tile, index, page.index, collection)))
+      page.tiles.map((tile, index) => renderTile(tile, index, page.index, state)))
 }
 
 function splitIntoSpreads(spreads, page) {
@@ -129,37 +130,45 @@ function splitIntoSpreads(spreads, page) {
 }
 
 
-let renderSpread = (collection) => (spread) => {
+let renderSpread = (state) => (spread) => {
+  let shuffling = (state.ui & UI.shuffling && state.edit.shuffling == index);
   return h('.spread', [
-      h('.spread-paper.shadow.clearfix', spread.map(renderPage(collection))),
+      h('.spread-paper.shadow.clearfix', spread.map(renderPage(state))),
       h('.pages.clearfix', spread.map(({index}) =>
           h('span.page-btns' + leftOrRight(index), [
             h('span.page'+leftOrRight(index), "Page "+(index+1)),
-            h('button.btn.btn-default.btn-sm.shuffle-btn', {'data-page': index}, [h('i.fa.fa-refresh'), " Shuffle"])
+            h('button.btn.btn-default.btn-sm.shuffle-btn', {'data-page': index, disabled: shuffling}, [h('i.fa.fa-refresh'), shuffling ? " Shuffling..." : " Shuffle"])
           ])))
   ]);
 }
 
-function renderAlbum(album, collection) {
-  return album
+function renderAlbum(state) {
+  return state.album
     .reduce(splitIntoSpreads, [])
-    .map(renderSpread(collection));
+    .map(renderSpread(state));
 }
 
 function hashMap(photos) {
-  return _.object(photos.map(p => [p.id, p.hash]))
+  if (!photos) return Immutable.fromJS({});
+  if (Immutable.Map.isMap(photos)) return photos;
+  return Immutable.Map(photos.map(p => [p.get('id'), p.get('hash')]));
 }
 
 
 function view(state$) {
-  return state$.map(state => 
+  return state$
+    .map(state => {
+      return _.extend(state, {
+        collection: state.collection.set('photos', hashMap(state.collection.get('photos')))
+      });
+    })
+    .map(state => 
       h('div', [
         renderToolbar(state),
         renderUploadArea(state),
-        state.album.length ? h('div.container-fluid.limited-width.album', 
-          renderAlbum(state.album, state.collection.photos ? hashMap(state.collection.photos) : {})
-        ) :
-        renderButton()
+        (state.album.length && !state.collection.get('photos').isEmpty()) ?
+          h('div.container-fluid.limited-width.album', renderAlbum(state)) :
+          renderButton()
       ])
   );
 }

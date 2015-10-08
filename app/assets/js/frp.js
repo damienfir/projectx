@@ -3,6 +3,7 @@ import {makeDOMDriver, h} from '@cycle/dom';
 import {makeHTTPDriver} from '@cycle/http';
 import $ from "jquery"
 import _ from 'underscore';
+import Immutable from 'immutable';
 
 import Composition from './composition-ui'
 import UI from './ui'
@@ -15,7 +16,7 @@ let COOKIE = 'bigpiquser'
 
 var initial = {
   user: {},
-  collection: {},
+  collection: Immutable.fromJS({'photos': []}),
   album: []
 };
 
@@ -83,7 +84,9 @@ function DOMintent(DOM) {
     download$: btn('#download-btn'),
     demo$: btn('#demo-btn'),
     ready$: Observable.just({}),
-    shuffle$: btn('.shuffle-btn').map(ev => ev.target['data-page'])
+    shuffle$: btn('.shuffle-btn').map(ev => ev.target['data-page']),
+    increment$: btn('.incr-btn').map(ev => ev.target['data-page']),
+    decrement$: btn('.decr-btn').map(ev => ev.target['data-page'])
   }
 }
 
@@ -107,13 +110,13 @@ function model(DOMactions, HTTPactions, composition$) {
   userFromHTTP$.subscribe(user => cookie.setItem(COOKIE, user.id));
 
   const demoAlbum$ = DOMactions.demo$.map(x => album => demo.album);
-  const demoCollection$ = DOMactions.demo$.map(x => col => demo.collection);
+  const demoCollection$ = DOMactions.demo$.map(x => col => Immutable.fromJS(demo.collection));
 
   const userUpdated$ = userFromHTTP$.map(newuser => user => newuser);
-  const collectionUpdated$ = HTTPactions.createdCollection$.map(col => collection => col);
+  const collectionUpdated$ = HTTPactions.createdCollection$.map(col => collection => Immutable.fromJS(col));
+  const clearCollection$ = DOMactions.reset$.map(x => item => initial.collection);
   const albumUpdated$ = HTTPactions.createdAlbum$
     .map(newpages => album => album.concat(newpages).sort((a,b) => asc(a.index,b.index)));
-  const clearCollection$ = DOMactions.reset$.map(x => item => initial.collection);
   const clearAlbum$ = DOMactions.reset$.map(x => item => initial.album);
   const albumPageShuffled$ = HTTPactions.shuffledPage$.map(page => album => { album[page.index] = page; return album; });
 
@@ -155,12 +158,19 @@ function model(DOMactions, HTTPactions, composition$) {
     .scan(apply)
     .share();
 
+  const editState$ = Observable.merge(
+      DOMactions.shuffle$.map(index => edit => _.extend(edit, {shuffling: index})))
+    .startWith({})
+    .scan(apply)
+    .share();
+
   const collectionWithPhotos$ = uploadedFiles$.combineLatest(collectionState$,
-      (photos, collection) => _.extend(collection, {photos: (collection.photos || []).concat(photos)}));
+      (photos, collection) => collection.set('photos', collection.get('photos').concat(Immutable.fromJS(photos))));
 
   const model$ = Observable.combineLatest(
-      albumState$, userState$, collectionState$.merge(collectionWithPhotos$), uploadState$,
-      (album, user, collection, upload) => ({user, album, collection, upload}))
+      albumState$, userState$, collectionState$.merge(collectionWithPhotos$), uploadState$, editState$,
+      (album, user, collection, upload, edit) => ({user, album, collection, upload}))
+      .do(x => console.log(x))
       .shareReplay(1);
 
 
@@ -201,11 +211,11 @@ function model(DOMactions, HTTPactions, composition$) {
           send: album
         })),
 
-    shufflePage$: DOMactions.shuffle$.withLatestFrom(collectionState$, albumState$,
-        (page, collection, album) => ({
-          url: '/collections/'+collection.id+'/page?index='+page,
+    shufflePage$: DOMactions.shuffle$.withLatestFrom(model$,
+        (page, model) => ({
+          url: '/collections/'+model.collection.id+'/page?index='+page,
           method: 'POST',
-          send: _.filter(collection.photos, p => _.where(album[page].tiles, {'photoID': p.id}).length > 0)
+          send: _.filter(model.collection.photos, p => _.where(model.album[page].tiles, {'photoID': p.id}).length > 0)
         }))
   };
 
