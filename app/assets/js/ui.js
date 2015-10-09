@@ -82,7 +82,7 @@ function renderProgressbar({upload}) {
 }
 
 
-function renderTile(tile, tileindex, index, state) {
+function renderTile(tile, tileindex, index, photos) {
   function percent(x) { return x * 100 + "%"; }
   // function getFilename(path) { return path.split('/').pop() }
 
@@ -96,7 +96,7 @@ function renderTile(tile, tileindex, index, state) {
     left: percent(tile.tx1)
   }},
   h('img', {
-    'src': "/storage/photos/"+state.collection.get('photos').get(tile.photoID),
+    'src': "/storage/photos/"+tile.hash,
     'draggable': false,
     'style': {
       height: percent(scaleY),
@@ -114,10 +114,11 @@ function renderFrontpage() {
           h('div.ui-composition.shadow', "front page"));
 }
 
-let renderPage = (state) => (page) => {
+let renderPage = (photos) => (page) => {
   return h('.box-mosaic' + leftOrRight(page.index),
       {'data-page': page.index},
-      page.tiles.map((tile, index) => renderTile(tile, index, page.index, state)))
+      page.tiles.map(t => _.extend(t, {hash: photos[t.photoID]}))
+      .map((tile, index) => renderTile(tile, index, page.index)))
 }
 
 function splitIntoSpreads(spreads, page) {
@@ -131,13 +132,13 @@ function splitIntoSpreads(spreads, page) {
 
 
 let renderSpread = (state) => (spread) => {
-  let shuffling = (state.ui & UI.shuffling && state.edit.shuffling == index);
+  // let shuffling = (state.ui & UI.shuffling && state.edit.shuffling == index);
   return h('.spread', [
-      h('.spread-paper.shadow.clearfix', spread.map(renderPage(state))),
+      h('.spread-paper.shadow.clearfix', spread.map(renderPage(state.photos))),
       h('.pages.clearfix', spread.map(({index}) =>
           h('span.page-btns' + leftOrRight(index), [
             h('span.page'+leftOrRight(index), "Page "+(index+1)),
-            h('button.btn.btn-default.btn-sm.shuffle-btn', {'data-page': index, disabled: shuffling}, [h('i.fa.fa-refresh'), shuffling ? " Shuffling..." : " Shuffle"])
+            h('button.btn.btn-default.btn-sm.shuffle-btn', {'data-page': index}, [h('i.fa.fa-refresh'), " Shuffle"])
           ])))
   ]);
 }
@@ -148,41 +149,5 @@ function renderAlbum(state) {
     .map(renderSpread(state));
 }
 
-function hashMap(photos) {
-  if (!photos) return Immutable.fromJS({});
-  if (Immutable.Map.isMap(photos)) return photos;
-  return Immutable.Map(photos.map(p => [p.get('id'), p.get('hash')]));
-}
 
-
-function view(state$) {
-  return state$
-    .map(state => {
-      return _.extend(state, {
-        collection: state.collection.set('photos', hashMap(state.collection.get('photos')))
-      });
-    })
-    .map(state => 
-      h('div', [
-        renderToolbar(state),
-        renderUploadArea(state),
-        (state.album.length && !state.collection.get('photos').isEmpty()) ?
-          h('div.container-fluid.limited-width.album', renderAlbum(state)) :
-          renderButton()
-      ])
-  );
-}
-
-
-function model(DOMactions, HTTPactions, requests) {
-  let uploadBox$ = DOMactions.toggleUpload$.map(f => ui => ui ^ UI.uploadBox);
-  let uploading$ = DOMactions.selectFiles$.map(f => ui => (ui ^ UI.uploading) & ~UI.processing);
-  let processing$ = requests.createAlbum$.map(f => ui => (ui ^ UI.processing) & ~UI.uploading);
-  let complete$ = HTTPactions.createdAlbum$.map(f => ui => ui & ~(UI.uploading | UI.processing | UI.uploadBox));
-
-  return Rx.Observable.merge(uploadBox$, uploading$, processing$, complete$)
-    .startWith(UI.initial)
-    .scan((ui,func) => func(ui));
-}
-
-module.exports = {view, model}
+module.exports = {UI, renderToolbar, renderUploadArea, renderAlbum, renderButton}

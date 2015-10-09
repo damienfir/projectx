@@ -286,13 +286,6 @@ function cropModel(actions) {
   return Rx.Observable.merge(dragFunc$, swapFunc$);
 }
 
-function state(DOM) {
-  var cropState$ = cropModel(cropIntent(DOM));
-  var pageState$ = pageModel(pageIntent(DOM));
-
-  return Rx.Observable.merge(cropState$, pageState$);
-}
-
 
 function move(tile, offset, prop1, prop2) {
   var out = _.clone(tile);
@@ -308,4 +301,9 @@ function move(tile, offset, prop1, prop2) {
 }
 
 
-module.exports = {state}
+module.exports = function(DOM) {
+  var cropState$ = cropModel(cropIntent(DOM));
+  var pageState$ = pageModel(pageIntent(DOM));
+
+  return Rx.Observable.merge(cropState$, pageState$);
+}
