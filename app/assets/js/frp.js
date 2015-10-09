@@ -55,9 +55,9 @@ function User(HTTP, DOMactions) {
   }
 
   function model(HTTPactions) {
-    const userIDCookie$ = Observable.return(cookie.getItem(COOKIE)).shareReplay(1);
+    let userIDCookie$ = Observable.return(cookie.getItem(COOKIE)).map(id => ({id})).shareReplay(1);
 
-    const userState$ = Observable.merge(
+    let userState$ = Observable.merge(
         HTTPactions.gotUser$,
         HTTPactions.createdUser$)
       .filter(isNotEmpty)
@@ -73,11 +73,11 @@ function User(HTTP, DOMactions) {
 
   function requests(DOMactions, userState$) {
     return {
-      getUser$: userIDCookie$.filter(x => x)
+      getUser$: userState$.filter(x => x.id)
         .zip(DOMactions.selectFiles$.first())
         .map(([id,files]) => '/users/'+id),
 
-      createUser$: userIDCookie$.filter(x => !x)
+      createUser$: userState$.filter(x => !x.id)
         .zip(DOMactions.selectFiles$.first())
         .map(x => ({
           method: 'POST',
@@ -88,7 +88,7 @@ function User(HTTP, DOMactions) {
   }
 
   let state$ = model(intent(HTTP))
-  let request$ = requests(DOMactions, state$);
+  let requests$ = requests(DOMactions, state$);
 
   return {
     HTTP: requests$,
@@ -142,7 +142,7 @@ function Upload(DOMactions, collection) {
 
 function Photos(DOMactions, upload) {
     let demoPhotos$ = DOMactions.demo$.map(x => y => demo.collection.photos);
-    let newPhotos$ = upload.uploadedFiles$.map(upload => photos => photos.concat(upload.files));
+    let newPhotos$ = upload.actions.uploadedFiles$.map(upload => photos => photos.concat(upload.files));
     let clearPhotos$ = DOMactions.reset$.map(x => y => []);
 
     let state$ = Observable.merge(newPhotos$, clearPhotos$, demoPhotos$)
@@ -194,8 +194,8 @@ function Collection(HTTP, DOMactions, userState$) {
     }
   }
 
-  let actions$ = intent(HTTP);
-  let state$ = model(actions$, DOMactions);
+  let actions = intent(HTTP);
+  let state$ = model(actions, DOMactions);
   let requests$ = requests(DOMactions, userState$, state$);
 
   return {
@@ -206,7 +206,7 @@ function Collection(HTTP, DOMactions, userState$) {
 }
 
 
-function Album(DOM, HTTP, collectionState$, uploadState$) {
+function Album(DOM, HTTP, DOMactions, collection, photos, upload) {
   function intent(HTTP) {
     return {
       createdAlbum$: jsonPOST(HTTP, /\/collections\/\d+\/pages\?startindex=.*/),
@@ -234,23 +234,23 @@ function Album(DOM, HTTP, collectionState$, uploadState$) {
     return albumState$;
   }
 
-  function requests(DOMactions, albumState$, collectionState$, uploadState$) {
+  function requests(DOMactions, album, collection, photos, upload) {
     return {
-      createAlbum$: uploadedFiles$.withLatestFrom(collectionState$, albumState$,
+      createAlbum$: upload.actions.uploadedFiles$.withLatestFrom(collection.state$, album.state$,
           (photos, collection, album) => ({
             url: '/collections/'+collection.id+'/pages?startindex='+album.length,
             method: 'POST',
             send: photos
           })),
 
-      downloadAlbum$: DOMactions.download$.withLatestFrom(collectionState$, albumState$,
+      downloadAlbum$: DOMactions.download$.withLatestFrom(collection.state$, album.state$,
           (x, collection, album) => ({
             url: '/collections/' + collection.id + '/download',
             method: 'POST',
             send: album
           })),
 
-      shufflePage$: DOMactions.shuffle$.withLatestFrom(collectionState$, photosState$, albumState$,
+      shufflePage$: DOMactions.shuffle$.withLatestFrom(collection.state$, photos.state$, album.state$,
           (page, collection, photos, album) => ({
             url: '/collections/'+collection.id+'/page?index='+page,
             method: 'POST',
@@ -279,14 +279,14 @@ function Album(DOM, HTTP, collectionState$, uploadState$) {
 
   let actions = intent(HTTP);
   let state$ = model(DOMactions, actions, compositionMod$);
-  let requests$ = requests(DOMactions, state$, collectionState$, uploadState$);
-  let vtree$ = view(albumState$, photosState$);
+  let requests$ = requests(DOMactions, state$, collection, photos, upload);
+  let vtree$ = view(state$, photos.state$);
 
   return {
     DOM: vtree$,
     HTTP: requests$,
     state$,
-    action
+    actions
   }
 }
 
@@ -356,10 +356,10 @@ function main({DOM, HTTP}) {
   let collection = Collection(HTTP, actions, user.state$);
   let upload = Upload(actions, collection);
   let photos = Photos(actions, upload);
-  let album = Album(HTTP, collection.state$, upload.state$);
-  let ui = ui(DOMactions, album);
+  let album = Album(DOM, HTTP, actions, collection, photos, upload);
+  let UI = ui(actions, album);
 
-  let state$ = model([user.state$, collection.state$, photos.state$, upload.state$, album.state$, ui.state$]);
+  let state$ = model([user.state$, collection.state$, photos.state$, upload.state$, album.state$, UI.state$]);
 
   let requests$ = Observable.merge(
       _.values(user.HTTP)
