@@ -1,31 +1,64 @@
-import Dispatcher from './dispatcher'
-import Bacon from 'baconjs'
-import _ from 'underscore'
-import $ from 'jquery'
+import {Rx} from '@cycle/core';
+import _ from 'underscore';
 
-var d = new Dispatcher();
+import cookie from './cookies'
+import {apply, isNotEmpty, jsonGET, jsonPOST, hasID, hasNoID} from './helpers'
 
-var User = {
-  toProperty(initial) {
+let Observable = Rx.Observable;
 
-    return Bacon.update(initial,
-      [d.stream('get')], get,
-      [d.stream('set')], set
-    );
+let COOKIE = 'bigpiquser'
 
-    function get(user) {
-      if (_.isUndefined(user) || _.isEmpty(user)) {
-        d.plug('set', Bacon.fromPromise($.get("/users/1")));
-      }
-      return user;
-    }
 
-    function set(user, newUser) {
-      return newUser;
-    }
-  },
-
-  getCurrent() { d.push('get') }
+function intent(HTTP) {
+  return {
+    gotCookie$: Observable.return(cookie.getItem(COOKIE)).map(id => (id && id.match(/\d+/)) ? id : null),
+    gotUser$: jsonGET(HTTP, /^\/users\/\d+$/),
+    createdUser$: jsonPOST(HTTP, /^\/users$/),
+  }
 }
 
-module.exports = User;
+
+function model(actions) {
+  let userState$ = Observable.merge(
+      actions.gotUser$,
+      actions.createdUser$)
+    .map(newuser => user => newuser)
+    .startWith({})
+    .scan(apply);
+
+  userState$.filter(hasID).subscribe(user => cookie.setItem(COOKIE, user.id));
+
+  return userState$;
+}
+
+
+function requests(DOMactions, actions, userState$) {
+  return {
+    getUser$: actions.gotCookie$.do(x => console.log(x))
+      .filter(_.identity)
+      .map(id => '/users/'+id),
+
+    createUser$: Observable.merge(
+      userState$.skip(1).filter(hasNoID),
+      actions.gotCookie$.filter(id => id === null).do(x => console.log(x))
+    ).take(1)
+      .zip(DOMactions.selectFiles$.take(1)).do(x => console.log(x))
+      .map(x => ({
+        method: 'POST',
+        url: '/users',
+        send: {}
+      }))
+  };
+}
+
+
+module.exports = function(HTTP, DOMactions) {
+  let actions = intent(HTTP);
+  let state$ = model(actions)
+  let requests$ = requests(DOMactions, actions, state$);
+
+  return {
+    HTTP: requests$,
+    state$
+  }
+}

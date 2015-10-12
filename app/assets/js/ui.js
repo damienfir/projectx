@@ -1,7 +1,7 @@
 import {Rx} from '@cycle/core';
 import {h} from '@cycle/dom';
 import _ from 'underscore';
-import Immutable from 'immutable';
+// import Immutable from 'immutable';
 
 
 var UI = {
@@ -29,17 +29,17 @@ function renderButton() {
   ]);
 }
 
-function renderToolbar(state) {
+function renderToolbar(collection, album) {
   return h('div.navbar.navbar-default.navbar-static-top', [
       h('div.container-fluid', [
         h('ul.nav.navbar-nav', [
           h('li',
             h('button.btn.btn-default.navbar-btn#upload-btn', [
               h('i.fa.fa-cloud-upload'), ' Add photos'])),
-          !_.isEmpty(state.collection) ? h('li',
+          !_.isEmpty(collection) ? h('li',
             h('button.btn.btn-default.navbar-btn#reset-btn', [
               h('i.fa.fa-refresh'), ' Reset'])) : '',
-          state.album.length ? h('li',
+          (album && album.length) ? h('li',
             h('button.btn.btn-default.navbar-btn#download-btn', [
               h('i.fa.fa-cloud-download'), ' Download album'])) : ''
         ])
@@ -49,7 +49,7 @@ function renderToolbar(state) {
 }
 
 
-function renderUploadArea(state) {
+function renderUploadArea(ui, upload) {
   let message = ui => {
     if (ui & UI.uploading)
       return h('h4', "uploading...")
@@ -63,17 +63,16 @@ function renderUploadArea(state) {
         ])
   }
 
-  let ui = state.ui;
   if (ui & UI.uploadBox) {
     return h('div.upload-area#upload-area', [
-      (ui & UI.uploading) ? renderProgressbar(state) : '',
+      (ui & UI.uploading) ? renderProgressbar(upload) : '',
       message(ui)
     ]);
   }
 }
 
 
-function renderProgressbar({upload}) {
+function renderProgressbar(upload) {
   let progress = (upload.files && upload.size) ? 100 * upload.files.length / upload.size : 0;
   return h('div.progressbar',
       h('div', {
@@ -131,10 +130,10 @@ function splitIntoSpreads(spreads, page) {
 }
 
 
-let renderSpread = (state) => (spread) => {
+let renderSpread = (photos) => (spread) => {
   // let shuffling = (state.ui & UI.shuffling && state.edit.shuffling == index);
   return h('.spread', [
-      h('.spread-paper.shadow.clearfix', spread.map(renderPage(state.photos))),
+      h('.spread-paper.shadow.clearfix', spread.map(renderPage(photos))),
       h('.pages.clearfix', spread.map(({index}) =>
           h('span.page-btns' + leftOrRight(index), [
             h('span.page'+leftOrRight(index), "Page "+(index+1)),
@@ -143,10 +142,10 @@ let renderSpread = (state) => (spread) => {
   ]);
 }
 
-function renderAlbum(state) {
-  return state.album
+function renderAlbum(album, photos) {
+  return album
     .reduce(splitIntoSpreads, [])
-    .map(renderSpread(state));
+    .map(renderSpread(photos));
 }
 
 

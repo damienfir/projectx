@@ -1,96 +1,54 @@
-import Bacon from 'baconjs'
-import $ from "jquery"
-import _ from 'underscore'
-
-import Dispatcher from './dispatcher'
-import Composition from './composition'
-import User from './user'
+import {Rx} from '@cycle/core';
+import _ from 'underscore';
+import demo from "./demo"
+import {apply, argArray, initial, jsonPOST,hasID} from './helpers'
+let Observable = Rx.Observable;
 
 
-var d = new Dispatcher();
-
-var Collection = {
-  toProperty(initial, userP) {
-    return Bacon.update(initial,
-      [d.stream('uploadAll')], uploadAll,
-      [d.stream('setState')], setState
-    );
-
-    function setState(previous, state) {
-      return state;
-    }
-
-    function setUser(state, user) {
-      return _.extend(state, {user});
-    }
-
-    function setCollection(state, collection) {
-      return _.extend(state, {collection});
-    }
-
-    function setComposition(state, composition) {
-      return _.extend(state, {composition});
-    }
-
-    function getUser(state) {
-      if (_.isUndefined(state.user) || _.isEmpty(state.user)) {
-        return Bacon.fromPromise($.get("/users/1")).fold(state, setUser);
-      }
-      return Bacon.once(state);
-    }
-
-    function getCollection(state) {
-      if (_.isEmpty(state.collection)) {
-        return Bacon.fromPromise($.post("/users/"+state.user.id+"/collections")).fold(state, setCollection);
-      }
-      return Bacon.once(state);
-    }
-
-    function generateComposition(state) {
-      var out = Bacon.fromPromise($.post("/collections/"+state.collection.id+"/mosaics")).fold(state, setComposition);
-      d.plug('setState', out);
-      return state
-    }
-
-    function uploadToCollection(state, files) {
-      return Bacon.fromArray(toArray(files))
-        .flatMap(f => addPhoto(state.collection.id, f).map(_ => state))
-    }
-
-    function uploadAll(state, files) {
-      var out = getUser(state)
-        .flatMapLatest(getCollection)
-        .flatMapLatest(st => {
-          return uploadToCollection(state, files).mapEnd(_ => generateComposition(st));
-        });
-      // out.log();
-      d.plug('setState', out);
-      return state;
-    }
-  },
-
-  addFiles(ev) { d.push('uploadAll', ev.target.files) },
-
-  reset(ev) { d.push('setState', {}) }
+function intent(HTTP) {
+  return {
+    createdCollection$: jsonPOST(HTTP, /\/users\/\d+\/collections/)
+  }
 }
 
-function addPhoto(collectionID, file) {
-  var fd = new FormData();
-  fd.append("image", file);
-  return Bacon.fromPromise($.ajax({
-    url: "/collections/"+collectionID+"/photos", fd,
-    method: 'POST',
-    data: fd,
-    processData: false,
-    contentType: false
-  }));
+function model(HTTPactions, DOMactions) {
+  let demoCollection$ = DOMactions.demo$.map(x => col => demo.collection);
+  let collectionUpdated$ = HTTPactions.createdCollection$.map(col => collection => col);
+  let clearCollection$ = DOMactions.reset$.map(x => item => initial.collection);
 
+  let collectionState$ = Observable.merge(
+      collectionUpdated$,
+      clearCollection$,
+      demoCollection$)
+    .startWith(initial.collection)
+    .scan(apply);
+
+  return collectionState$;
 }
 
-function toArray(filelist) {
-  var list = [];
-  for (var i = 0; i < filelist.length; i++) list.push(filelist[i]);
-  return list;
+function requests(DOMactions, userState$, state$) {
+  return {
+    createCollection$: Observable.merge(
+        DOMactions.selectFiles$.flatMapLatest(files => userState$.filter(hasID).map(user => [files,user])),
+        DOMactions.selectFiles$.withLatestFrom(userState$, argArray).filter(([f,u]) => hasID(u)))
+      .withLatestFrom(state$, argArray).filter(([x,col]) => _.isUndefined(col.id)).map(([x,col]) => x)
+      .map(([f,user]) => ({
+        url:'/users/'+user.id+'/collections',
+        method: 'POST',
+        send: {}
+      }))
+  }
 }
 
-module.exports = Collection;
+
+module.exports = function(HTTP, DOMactions, userState$) {
+  let actions = intent(HTTP);
+  let state$ = model(actions, DOMactions);
+  let requests$ = requests(DOMactions, userState$, state$);
+
+  return {
+    HTTP: requests$,
+    state$,
+    actions
+  }
+}
