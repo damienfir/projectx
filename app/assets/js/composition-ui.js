@@ -190,6 +190,20 @@ function eventToCoord(ev) {
 }
 
 
+function move(tile, offset, prop1, prop2) {
+  var out = _.clone(tile);
+  var loc = out[prop1];
+  var original_size = out[prop2] - out[prop1];
+  out[prop1] = Math.max(0, out[prop1] - offset);
+  out[prop2] = out[prop1] + original_size;
+  if (out[prop2] > 1) {
+    out[prop1] = loc;
+    out[prop2] = loc + original_size;
+  }
+  return out;
+}
+
+
 function pageIntent(DOM) {
   let mouseDown$ = DOM.select('.box-mosaic').events('mousedown').map(cancelDefault);
   let mouseUp$ = DOM.select('.box-mosaic').events('mouseup').map(cancelDefault);
@@ -199,7 +213,7 @@ function pageIntent(DOM) {
     x: ev.offsetX/ev.target.offsetWidth,
     y: ev.offsetY/ev.target.offsetHeight,
     page: ev.target['data-page']
-  })).share();
+  }));
 
   let drag$ = down$.flatMapLatest(down =>
     mouseMove$.takeUntil(mouseUp$)
@@ -208,7 +222,7 @@ function pageIntent(DOM) {
       dx: (move.screenX - prev.screenX) / down.offsetWidth,
       dy: (move.screenY - prev.screenY) / down.offsetHeight,
       down
-    }))).share();
+    })));
 
   return {down$, drag$};
 }
@@ -234,10 +248,11 @@ function pageModel(actions) {
   return Rx.Observable.merge(dragFunc$, paramFunc$);
 }
 
+
 function cropIntent(DOM) {
-  var mouseDown$ = DOM.select('.ui-tile').events('mousedown').map(cancelDefault).map(eventToCoord);
+  var mouseDown$ = DOM.select('.ui-tile').events('mousedown').map(cancelDefault).map(eventToCoord).share();
   var mouseUp$ = DOM.select('.ui-tile').events('mouseup').map(cancelDefault);
-  var mouseMove$ = DOM.select('.ui-tile').events('mousemove').map(cancelDefault).map(eventToCoord);
+  var mouseMove$ = DOM.select('.ui-tile').events('mousemove').map(cancelDefault).map(eventToCoord).share();
   var mouseEnter$ = DOM.select('.ui-tile img').events('mouseenter').map(cancelDefault).map(eventToCoord);
 
 
@@ -249,7 +264,7 @@ function cropIntent(DOM) {
         dy: curr.y-prev.y
       }))
       .map(mm => _.extend(mm, {orig: down}))
-      .concat(Rx.Observable.return(false))).share();
+      .concat(Rx.Observable.return(false)));
 
   var swap$ = mouseEnter$.withLatestFrom(drag$, (enter, drag) => [enter, drag])
     .filter(([enter, drag]) => drag)
@@ -287,23 +302,8 @@ function cropModel(actions) {
 }
 
 
-function move(tile, offset, prop1, prop2) {
-  var out = _.clone(tile);
-  var loc = out[prop1];
-  var original_size = out[prop2] - out[prop1];
-  out[prop1] = Math.max(0, out[prop1] - offset);
-  out[prop2] = out[prop1] + original_size;
-  if (out[prop2] > 1) {
-    out[prop1] = loc;
-    out[prop2] = loc + original_size;
-  }
-  return out;
-}
-
-
 module.exports = function(DOM) {
-  var cropState$ = cropModel(cropIntent(DOM));
-  var pageState$ = pageModel(pageIntent(DOM));
-
-  return Rx.Observable.merge(cropState$, pageState$);
+  return Rx.Observable.merge(
+      cropModel(cropIntent(DOM)),
+      pageModel(pageIntent(DOM)));
 }

@@ -37,10 +37,6 @@ function intent(DOM) {
   }
 }
 
-// function model(states) {
-//   return Observable.combineLatest(states,
-//       (collection, upload, album, ui) => ({user, album, collection, upload, photos, ui}));
-// }
 
 function view(collection, album, upload, GUI) {
   return Observable.combineLatest(collection.state$, album.state$, upload.state$, GUI.state$, album.DOM,

@@ -28,11 +28,10 @@ function model(DOMactions, HTTPactions, composition$) {
   const clearAlbum$ = DOMactions.reset$.map(x => item => initial.album);
   const albumPageShuffled$ = HTTPactions.shuffledPage$.map(page => album => { album[page.index] = page; return album; });
 
-  const albumState$ = Observable.merge(albumUpdated$, clearAlbum$, demoAlbum$, albumPageShuffled$, composition$)
+  return Observable.merge(albumUpdated$, clearAlbum$, demoAlbum$, albumPageShuffled$, composition$)
     .startWith(initial.album)
-    .scan(apply);
-
-  return albumState$;
+    .scan(apply)
+    .shareReplay(1);
 }
 
 
@@ -65,7 +64,6 @@ function requests(DOMactions, album$, collection, photos, upload) {
 function hashMap(photos) {
   if (!photos) return {};
   if (!_.isArray(photos)) return photos;
-  console.log(photos);
   return _.object(photos.map(p => [p.id, p.hash]));
 }
 
