@@ -17,12 +17,12 @@ function leftOrRight(index) { return index % 2 ? '.pull-right' : '.pull-left'; }
 
 function renderButton() {
   return h('.start-buttons', [
-      h('button.btn.btn-default.btn-lg#create-btn', [
+      h('button.btn.btn-primary.btn-lg#create-btn', [
         h('i.fa.fa-book.fa-3x'),
         'Create album'
       ]), 
       h('span.or', 'or'),
-      h('button.btn.btn-success.btn-lg#demo-btn', [
+      h('button.btn.btn-info.btn-lg#demo-btn', [
         h('i.fa.fa-rocket.fa-3x'),
         'View demo'
       ])
@@ -30,19 +30,23 @@ function renderButton() {
 }
 
 function renderToolbar(collection, album) {
-  return h('div.navbar.navbar-default.navbar-static-top', [
+  return h('div.navbar.navbar-default.navbar-fixed-top', [
       h('div.container-fluid', [
         h('ul.nav.navbar-nav', [
           h('li',
-            h('button.btn.btn-default.navbar-btn#upload-btn', [
+            h('button.btn.btn-primary.navbar-btn#upload-btn', [
               h('i.fa.fa-cloud-upload'), ' Add photos'])),
           !_.isEmpty(collection) ? h('li',
             h('button.btn.btn-default.navbar-btn#reset-btn', [
               h('i.fa.fa-refresh'), ' Reset'])) : '',
-          (album && album.length) ? h('li',
-            h('button.btn.btn-default.navbar-btn#download-btn', [
-              h('i.fa.fa-cloud-download'), ' Download album'])) : ''
-        ])
+        ]),
+        (album && album.length) ?  h('form.navbar-form.navbar-right', [
+          h('div.form-group',
+            h('input.form-control', {'type': 'text', 'placeholder': 'Album title...'})),
+           
+            h('button.btn.btn-info.navbar-btn#download-btn', [
+              h('i.fa.fa-cloud-download'), ' Download album'])
+        ]) : ''
       ]),
       h('input#file-input', {'type': "file", 'name': "image", 'multiple': true})
     ]);

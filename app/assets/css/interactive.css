@@ -2,13 +2,14 @@
 
 
 html, body {
-  font-family: 'Nunito', sans-serif;
+  /* font-family: 'Nunito', sans-serif; */
   height: 100%;
   /* overflow-x: hidden; */
 }
 
 body {
-  /* padding-top: 70px; */
+  padding-top: 53px;
+  background-color: #fff;
   /* background-color: #f0f0f0; */
 }
 
@@ -30,10 +31,13 @@ body {
 
 .spread-paper {
   padding: 5px;
+  background-color: #fff;
+  border-radius: 3px;
 }
 
 .page-btns .page {
-  margin: 0 10px;
+  margin: 0 5px;
+  font-size: 0.9em;
 }
 
 .navbar {
@@ -42,18 +46,20 @@ body {
 
 .upload-area {
   height: 100px;
-  background-color: #eee;
+  background-color: #bdc3c7;
   position: relative;
   cursor: pointer;
+  height: 150px;
 }
 
 .upload-area:hover {
-  box-shadow: inset 0px 0px 4px #ccc;
+  /* box-shadow: inset 0px 0px 4px #ccc; */
+  background-color: #1abc9c;
 }
 
 .upload-area h4 {
   position: absolute;
-  color: #999;
+  color: #fff;
   text-align: center;
   top: 50%;
   left: 50%;

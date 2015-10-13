@@ -16,14 +16,13 @@ function model(HTTPactions, DOMactions) {
   let collectionUpdated$ = HTTPactions.createdCollection$.map(col => collection => col);
   let clearCollection$ = DOMactions.reset$.map(x => item => initial.collection);
 
-  let collectionState$ = Observable.merge(
+  return Observable.merge(
       collectionUpdated$,
       clearCollection$,
       demoCollection$)
     .startWith(initial.collection)
     .scan(apply);
-
-  return collectionState$;
+    // .shareReplay(1);
 }
 
 function requests(DOMactions, userState$, state$) {
