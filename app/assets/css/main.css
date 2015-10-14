@@ -1,4 +1,4 @@
-@import url(http://fonts.googleapis.com/css?family=Open+Sans|Maven+Pro|Pacifico);
+@import url(http://fonts.googleapis.com/css?family=Open+Sans|Nunito);
 
 html, body {
   font-family: 'Open Sans', sans-serif;
@@ -6,26 +6,30 @@ html, body {
 }
 
 /* NAVBAR */
-.navbar { box-shadow: none; border: 0; margin-bottom: 5px; }
-.navbar-header > .navbar-brand {
-  font-size: 32px;
-  font-family: "Maven Pro";
-  color: #2196f3;
-  /* width: auto; */
-  vertical-align: middle;
-  margin-top: -7px;
-}
-.navbar-header > .navbar-brand:hover { color: #0c7cd5; }
-.navbar-brand > img {
-  display: inline;
-  /* width: 30px; */
-}
-.navbar-brand > small {
-  font-size: 12px;
-  display: block;
-  margin-left: 15px;
-  margin-top: -3px;
-  color: #999;
+/* .navbar { box-shadow: none; border: 0; margin-bottom: 5px; } */
+/* .navbar-header > .navbar-brand { */
+/*   font-size: 32px; */
+/*   font-family: "Maven Pro"; */
+/*   color: #2196f3; */
+/*   /1* width: auto; *1/ */
+/*   vertical-align: middle; */
+/*   margin-top: -7px; */
+/* } */
+/* .navbar-header > .navbar-brand:hover { color: #0c7cd5; } */
+/* .navbar-brand > img { */
+/*   display: inline; */
+/*   /1* width: 30px; *1/ */
+/* } */
+/* .navbar-brand > small { */
+/*   font-size: 12px; */
+/*   display: block; */
+/*   margin-left: 15px; */
+/*   margin-top: -3px; */
+/*   color: #999; */
+/* } */
+.navbar-default .navbar-brand {
+  /* font-family: "Nunito"; */
+  color: #34495e;
 }
 
 

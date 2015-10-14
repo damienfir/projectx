@@ -10,7 +10,9 @@
 
         <meta property="og:description" content="Bigpiq sorts, arranges, and prints your photo collection for you. Don't let your photos rest in the digital no man's land." />
 
-        <link href="@routes.Assets.at("css/bootstrap.min.css")" rel="stylesheet">
+        <!-- <link href="@routes.Assets.at("css/bootstrap.min.css")" rel="stylesheet"> -->
+  <link href="@routes.Assets.at("bower_components/bootstrap/dist/css/bootstrap.css")" rel="stylesheet">
+  <link href="@routes.Assets.at("bower_components/flat-ui/dist/css/flat-ui.min.css")" rel="stylesheet">
         <!-- <link href="@routes.Assets.at("bower_components/bootstrap/dist/css/bootstrap.min.css")" rel="stylesheet"> -->
         <link href="@routes.Assets.at("bower_components/font-awesome/css/font-awesome.min.css")" rel="stylesheet">
 
@@ -25,8 +27,9 @@
 <div class="navbar navbar-default navbar-static-top">
   <div class="container-fluid">
     <div class="navbar-header">
+      <div class="navbar-brand">bigpiq</div>
       <!-- <a class="navbar-brand logo" href="/"><img src="/assets/images/logo.png"/> bigpiq<small>Touching memories</small></a> -->
-      <a class="navbar-brand logo" href="/"><img src="/assets/images/logo.png"/></a>
+      <!-- <a class="navbar-brand logo" href="/"><img src="/assets/images/logo.png"/></a> -->
     </div>
     <div  class="collapse navbar-collapse navbar-right">
       <ul class="nav navbar-nav">
@@ -37,8 +40,8 @@
 </div>
 
 
-<div class="container-fluid relative cover-background">
-  <div class="cover"></div>
+<div class="container-fluid relative">
+  <!-- <div class="cover"></div> -->
   <a name="intro"></a>
   <div class="container-fluid" id="container-intro">
     <div class="" id="row-title">

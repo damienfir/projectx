@@ -1,15 +1,8 @@
 import {Rx} from '@cycle/core';
 import {h} from '@cycle/dom';
 import _ from 'underscore';
+import {UI} from './helpers'
 // import Immutable from 'immutable';
-
-
-var UI = {
-  initial: 1 << 0,
-  uploadBox: 1 << 1,
-  uploading: 1 << 2,
-  processing: 1 << 3
-}
 
 
 function leftOrRight(index) { return index % 2 ? '.pull-right' : '.pull-left'; }
@@ -30,22 +23,22 @@ function renderButton() {
 }
 
 function renderToolbar(collection, album) {
-  return h('div.navbar.navbar-default.navbar-fixed-top', [
+  return h('div.navbar.navbar-transparent.navbar-static-top', [
       h('div.container-fluid', [
         h('ul.nav.navbar-nav', [
           h('li',
             h('button.btn.btn-primary.navbar-btn#upload-btn', [
-              h('i.fa.fa-cloud-upload'), ' Add photos'])),
+              h('i.fa.fa-cloud-upload'), 'Add photos'])),
           !_.isEmpty(collection) ? h('li',
             h('button.btn.btn-default.navbar-btn#reset-btn', [
-              h('i.fa.fa-refresh'), ' Reset'])) : '',
+              h('i.fa.fa-refresh'), 'New Album'])) : '',
         ]),
         (album && album.length) ?  h('form.navbar-form.navbar-right', [
           h('div.form-group',
-            h('input.form-control', {'type': 'text', 'placeholder': 'Album title...'})),
+            h('input.form-control.form-info', {'type': 'text', 'placeholder': 'Album title...'})),
            
             h('button.btn.btn-info.navbar-btn#download-btn', [
-              h('i.fa.fa-cloud-download'), ' Download album'])
+              h('i.fa.fa-cloud-download'), 'Download album'])
         ]) : ''
       ]),
       h('input#file-input', {'type': "file", 'name': "image", 'multiple': true})
@@ -55,12 +48,12 @@ function renderToolbar(collection, album) {
 
 function renderUploadArea(ui, upload) {
   let message = ui => {
-    if (ui & UI.uploading)
-      return h('h4', "uploading...")
-    else if (ui & UI.processing)
-      return h('h4', "processing...")
+    if (ui & (UI.uploading | UI.processing))
+      return h('.message', [
+          (ui & UI.processing) ? "processing" : "uploading...",
+          renderProgressbar(upload)])
     else
-      return h('h4', [
+      return h('.message', [
           h('i.fa.fa-2x.fa-cloud-upload'),
           h('br'),
           ' drag files or click to upload'
@@ -69,7 +62,6 @@ function renderUploadArea(ui, upload) {
 
   if (ui & UI.uploadBox) {
     return h('div.upload-area#upload-area', [
-      (ui & UI.uploading) ? renderProgressbar(upload) : '',
       message(ui)
     ]);
   }
@@ -78,10 +70,10 @@ function renderUploadArea(ui, upload) {
 
 function renderProgressbar(upload) {
   let progress = (upload.files && upload.size) ? 100 * upload.files.length / upload.size : 0;
-  return h('div.progressbar',
-      h('div', {
-        style: {'width': progress + "%"}
-      }));
+  return h('div.progress',
+        h('div.progress-bar', {
+          style: {'width': progress + "%"}
+        }));
 }
 
 
@@ -138,10 +130,10 @@ let renderSpread = (photos) => (spread) => {
   // let shuffling = (state.ui & UI.shuffling && state.edit.shuffling == index);
   return h('.spread', [
       h('.spread-paper.shadow.clearfix', spread.map(renderPage(photos))),
-      h('.pages.clearfix', spread.map(({index}) =>
-          h('span.page-btns' + leftOrRight(index), [
-            h('span.page'+leftOrRight(index), "Page "+(index+1)),
-            h('button.btn.btn-default.btn-sm.shuffle-btn', {'data-page': index}, [h('i.fa.fa-refresh'), " Shuffle"])
+      h('.spread-btn.clearfix', spread.map(({index}) =>
+          h('span' + leftOrRight(index), [
+            h('span.page'+leftOrRight(index), ""+(index+1)),
+            h('button.btn.btn-default.btn-xs.shuffle-btn', {'data-page': index}, [h('i.fa.fa-refresh'), " Shuffle"])
           ])))
   ]);
 }
@@ -153,4 +145,4 @@ function renderAlbum(album, photos) {
 }
 
 
-module.exports = {UI, renderToolbar, renderUploadArea, renderAlbum, renderButton}
+module.exports = {renderToolbar, renderUploadArea, renderAlbum, renderButton}

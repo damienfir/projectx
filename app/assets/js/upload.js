@@ -1,7 +1,7 @@
 import {Rx} from '@cycle/core';
 import _ from 'underscore';
 import $ from "jquery"
-import {apply, argArray} from './helpers'
+import {apply, argArray, initial} from './helpers'
 let Observable = Rx.Observable;
 
 
@@ -36,7 +36,7 @@ module.exports = function(DOMactions, collection) {
       startUpload$.map(([files,collection]) => upload => _.extend(upload, {files: [], size: files.length})),
       fileUpload$.map(files => upload => _.extend(upload, {files: files})),
       uploadedFiles$.map(files => upload => ({})))
-    .startWith({})
+    .startWith(initial.upload)
     .scan(apply);
 
   return {

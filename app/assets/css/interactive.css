@@ -8,7 +8,7 @@ html, body {
 }
 
 body {
-  padding-top: 53px;
+  /* padding-top: 53px; */
   background-color: #fff;
   /* background-color: #f0f0f0; */
 }
@@ -25,8 +25,29 @@ body {
   margin-right: 8px;
 }
 
+.navbar-transparent {
+  background-color: transparent;
+}
+
+.navbar-btn {
+  padding: 7px 10px;
+  margin: 8px 8px 0 0;
+}
+
+.form-info, .form-info:focus {
+  border-color: #3498db;
+  color: #3498db;
+}
+
+.btn .fa {
+  margin-right: 7px;
+}
+.btn-xs .fa {
+  margin-right: 3px;
+}
+
 .spread {
-  margin-bottom: 30px;
+  margin-bottom: 70px;
 }
 
 .spread-paper {
@@ -35,9 +56,18 @@ body {
   border-radius: 3px;
 }
 
-.page-btns .page {
-  margin: 0 5px;
-  font-size: 0.9em;
+.spread-btn {
+  margin-top: 10px;
+  /* padding: 5px 15px 0px 15px; */
+  color: #aaa;
+}
+
+.shuffle-btn {
+  margin: 0 10px;
+}
+
+.spread-btn .page {
+  margin-top: -3px;
 }
 
 .navbar {
@@ -46,7 +76,7 @@ body {
 
 .upload-area {
   height: 100px;
-  background-color: #bdc3c7;
+  background-color: #ecf0f1;
   position: relative;
   cursor: pointer;
   height: 150px;
@@ -56,15 +86,23 @@ body {
   /* box-shadow: inset 0px 0px 4px #ccc; */
   background-color: #1abc9c;
 }
-
-.upload-area h4 {
-  position: absolute;
+.upload-area:hover .message {
   color: #fff;
+}
+
+.upload-area .message {
+  position: absolute;
+  color: #BDC3C7;
   text-align: center;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   margin: 0;
+  font-size: 1.5em;
+}
+
+.upload-area .progress {
+  margin-top: 10px;
 }
 
 #photo-collection {
@@ -79,7 +117,7 @@ body {
 }
 
 .album {
-  margin-top: 30px;
+  margin-top: 70px;
 }
 
 .start-buttons {
@@ -103,19 +141,19 @@ body {
   margin-bottom: 10px;
 }
 
-.progressbar {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-}
+/* .progressbar { */
+/*   position: absolute; */
+/*   top: 0; */
+/*   left: 0; */
+/*   right: 0; */
+/*   height: 3px; */
+/* } */
 
-.progressbar > div {
-  height: 100%;
-  width: 25%;
-  background-color: #337AB7;
-}
+/* .progressbar > div { */
+/*   height: 100%; */
+/*   width: 25%; */
+/*   background-color: #337AB7; */
+/* } */
 
 .box-mosaic {
   width: 49.5%;
@@ -123,11 +161,6 @@ body {
   position: relative;
   cursor: pointer;
   /* border-left: 1px dashed #999; */
-}
-
-.pages {
-  padding: 5px 15px 0px 15px;
-  color: #aaa;
 }
 
 /* trick to fix aspect ratio */

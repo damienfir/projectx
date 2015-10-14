@@ -1,9 +1,22 @@
 import _ from 'underscore';
 
+import demo from './demo'
+
+
+var UI = {
+  initial: 1 << 0,
+  uploadBox: 1 << 1,
+  uploading: 1 << 2,
+  processing: 1 << 3
+}
+
 var initial = {
   user: {},
-  collection: {},
-  album: []
+  collection: demo.collection,
+  album: demo.album,
+  photos: demo.collection.photos,
+  upload: {},
+  ui: UI.initial
 };
 
 
@@ -34,4 +47,4 @@ let jsonPOST = (HTTP, regex) =>
     .mergeAll().map(res => res.body).share();
 
 
-module.exports = {jsonGET, jsonPOST, apply, toArray, argArray, initial, hasID, hasNoID, asc}
+module.exports = {jsonGET, jsonPOST, apply, toArray, argArray, initial, hasID, hasNoID, asc, UI}
