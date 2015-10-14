@@ -27,7 +27,6 @@ function renderButton() {
 
 function renderTile(tile, tileindex, index, photos) {
   function percent(x) { return x * 100 + "%"; }
-  // function getFilename(path) { return path.split('/').pop() }
 
   var scaleX = 1 / (tile.cx2 - tile.cx1);
   var scaleY = 1 / (tile.cy2 - tile.cy1);
@@ -37,7 +36,9 @@ function renderTile(tile, tileindex, index, photos) {
     width: percent(tile.tx2 - tile.tx1),
     top: percent(tile.ty1),
     left: percent(tile.tx1)
-  }},
+  },
+    'data-page': index,
+    'data-idx': tileindex}, [
   h('img', {
     'src': "/storage/photos/"+tile.hash,
     'draggable': false,
@@ -46,9 +47,9 @@ function renderTile(tile, tileindex, index, photos) {
       width: percent(scaleX),
       top: percent(-tile.cy1 * scaleY),
       left: percent(-tile.cx1 * scaleX)
-    },
-    'data-page': index,
-    'data-idx': tileindex}));
+    }}),
+  h('button.btn.btn-danger.delete-btn', h('i.fa.fa-ban'))
+  ]);
 }
 
 
@@ -74,8 +75,8 @@ let renderBtn = ui => ({index}) => {
       h('button.btn.btn-xs.page-btn', {'data-page': index}, ["Page "+(index+1)+' ', h('i.fa'+ (toggle ? '.fa-caret-left' : '.fa-caret-right'))]),
       toggle ? [
       h('button.btn.btn-default.btn-xs.shuffle-btn', {'data-page': index}, [h('i.fa.fa-refresh'), " Shuffle"]),
-      h('button.btn.btn-default.btn-xs.incr-btn', {'data-page': index}, [h('i.fa.fa-plus'), " More photos"]),
-      h('button.btn.btn-default.btn-xs.decr-btn', {'data-page': index}, [h('i.fa.fa-minus'), " Less photos"])
+      h('button.btn.btn-default.btn-xs.incr-btn', {'data-page': index}, [h('i.fa.fa-plus'), " More"]),
+      h('button.btn.btn-default.btn-xs.decr-btn', {'data-page': index}, [h('i.fa.fa-minus'), " Less"])
       ] : ''
   ])
 }

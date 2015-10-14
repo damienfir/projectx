@@ -179,8 +179,8 @@ function eventToCoord(ev) {
     'x': ev.screenX,
     'y': ev.screenY,
     'img': ev.target,
-    'idx': ev.target['data-idx'],
-    'page': ev.target['data-page']
+    'idx': ev.target.parentNode['data-idx'],
+    'page': ev.target.parentNode['data-page']
   };
 }
 

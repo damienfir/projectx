@@ -63,7 +63,7 @@ function main({DOM, HTTP}) {
   let requests$ = Observable.merge(
       _.values(user.HTTP)
       .concat(_.values(collection.HTTP))
-      .concat(_.values(album.HTTP))).do(x => console.log(x));
+      .concat(_.values(album.HTTP)));
 
   return {
     DOM: view(collection, album, upload, ui),

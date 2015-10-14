@@ -19,6 +19,9 @@ var initial = {
   ui: {state: UI.initial}
 };
 
+_.extend(initial, demo);
+initial.photos = initial.collection.photos;
+
 
 function toArray(filelist) {
   var list = [];

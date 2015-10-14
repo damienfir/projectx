@@ -39,12 +39,12 @@ body {
 /*   color: #3498db; */
 /* } */
 
-.btn .fa {
+.navbar .btn .fa {
   margin-right: 7px;
 }
-.btn-xs .fa {
-  margin-right: 3px;
-}
+/* .btn-xs .fa { */
+/*   margin-right: 3px; */
+/* } */
 
 .spread {
   margin-bottom: 70px;
@@ -184,6 +184,22 @@ body {
 
 .ui-tile img:hover {
   opacity: 0.85;
+}
+
+.delete-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  /* box-shadow: 1px 1px 4px #333; */
+  padding: 4px 6px;
+  text-align: center;
+  display: none;
+  background-color: transparent;
+  color: #e74c3c;
+}
+
+.ui-tile:hover .delete-btn {
+  display: block;
 }
 
 .col-buttons button {
