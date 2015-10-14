@@ -2,6 +2,7 @@ import {Rx} from '@cycle/core';
 import {h} from '@cycle/dom';
 import _ from 'underscore';
 import Immutable from 'immutable';
+import {cancelDefault} from './helpers'
 
 
 function resizeTile(tile, tile2) {
@@ -171,12 +172,6 @@ function dragTile(tile, dx, dy, img) {
   var moved_x = move(tile, dx / img.width, 'cx1', 'cx2');
   var moved_xy = move(moved_x, dy / img.height, 'cy1', 'cy2');
   return moved_xy;
-}
-
-function cancelDefault(ev) {
-  ev.preventDefault();
-  ev.stopPropagation();
-  return ev;
 }
 
 function eventToCoord(ev) {

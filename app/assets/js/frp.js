@@ -3,7 +3,7 @@ import {makeDOMDriver, h} from '@cycle/dom';
 import {makeHTTPDriver} from '@cycle/http';
 import _ from 'underscore';
 
-import UI from './ui'
+import Elements from './ui'
 import demo from "./demo"
 
 import {toArray} from './helpers'
@@ -12,7 +12,7 @@ import Collection from './collection'
 import Upload from './upload'
 import Photos from './photos'
 import Album from './album'
-import userinterface from './userinterface'
+import UserInterface from './userinterface'
 
 let Observable = Rx.Observable;
 
@@ -38,12 +38,12 @@ function intent(DOM) {
 }
 
 
-function view(collection, album, upload, GUI) {
-  return Observable.combineLatest(collection.state$, album.state$, upload.state$, GUI.state$, album.DOM,
-      (collection, album, upload, GUI, albumVTree) =>
+function view(collection, album, upload, ui) {
+  return Observable.combineLatest(collection.state$, album.state$, upload.state$, ui.state$, album.DOM,
+      (collectionState, albumState, uploadState, uiState, albumVTree) =>
       h('div', [
-        UI.renderToolbar(collection, album),
-        UI.renderUploadArea(GUI, upload),
+        Elements.renderToolbar(collectionState, albumState),
+        Elements.renderUploadArea(uiState.state, uploadState),
         albumVTree
       ])
       );
@@ -58,7 +58,7 @@ function main({DOM, HTTP}) {
   let upload = Upload(actions, collection);
   let photos = Photos(actions, upload);
   let album = Album(DOM, HTTP, actions, collection, photos, upload);
-  let GUI = userinterface(actions, album);
+  let ui = UserInterface(actions, album);
 
   let requests$ = Observable.merge(
       _.values(user.HTTP)
@@ -66,7 +66,7 @@ function main({DOM, HTTP}) {
       .concat(_.values(album.HTTP))).do(x => console.log(x));
 
   return {
-    DOM: view(collection, album, upload, GUI),
+    DOM: view(collection, album, upload, ui),
     HTTP: requests$
   };
 }

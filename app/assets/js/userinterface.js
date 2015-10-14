@@ -14,7 +14,7 @@ module.exports = function(DOMactions, album) {
 
     let state$ = Observable.merge(uploadBox$, uploading$, processing$, complete$)
       .startWith(initial.ui)
-      .scan(apply)
+      .scan((ui,func) => _.extend(ui, {state: func(ui.state)}))
       .shareReplay(1);
 
     return state$;

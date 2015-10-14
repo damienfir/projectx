@@ -5,22 +5,6 @@ import {UI} from './helpers'
 // import Immutable from 'immutable';
 
 
-function leftOrRight(index) { return index % 2 ? '.pull-right' : '.pull-left'; }
-
-
-function renderButton() {
-  return h('.start-buttons', [
-      h('button.btn.btn-primary.btn-lg#create-btn', [
-        h('i.fa.fa-book.fa-3x'),
-        'Create album'
-      ]), 
-      h('span.or', 'or'),
-      h('button.btn.btn-info.btn-lg#demo-btn', [
-        h('i.fa.fa-rocket.fa-3x'),
-        'View demo'
-      ])
-  ]);
-}
 
 function renderToolbar(collection, album) {
   return h('div.navbar.navbar-transparent.navbar-static-top', [
@@ -31,13 +15,13 @@ function renderToolbar(collection, album) {
               h('i.fa.fa-cloud-upload'), 'Add photos'])),
           !_.isEmpty(collection) ? h('li',
             h('button.btn.btn-default.navbar-btn#reset-btn', [
-              h('i.fa.fa-refresh'), 'New Album'])) : '',
+              h('i.fa.fa-refresh'), 'New album'])) : '',
         ]),
         (album && album.length) ?  h('form.navbar-form.navbar-right', [
           h('div.form-group',
-            h('input.form-control.form-info', {'type': 'text', 'placeholder': 'Album title...'})),
+            h('input.form-control', {'type': 'text', 'placeholder': 'Album title...'})),
            
-            h('button.btn.btn-info.navbar-btn#download-btn', [
+            h('button.btn.btn-primary.navbar-btn#download-btn', [
               h('i.fa.fa-cloud-download'), 'Download album'])
         ]) : ''
       ]),
@@ -77,72 +61,10 @@ function renderProgressbar(upload) {
 }
 
 
-function renderTile(tile, tileindex, index, photos) {
-  function percent(x) { return x * 100 + "%"; }
-  // function getFilename(path) { return path.split('/').pop() }
-
-  var scaleX = 1 / (tile.cx2 - tile.cx1);
-  var scaleY = 1 / (tile.cy2 - tile.cy1);
-
-  return h('.ui-tile', {'style': {
-    height: percent(tile.ty2 - tile.ty1),
-    width: percent(tile.tx2 - tile.tx1),
-    top: percent(tile.ty1),
-    left: percent(tile.tx1)
-  }},
-  h('img', {
-    'src': "/storage/photos/"+tile.hash,
-    'draggable': false,
-    'style': {
-      height: percent(scaleY),
-      width: percent(scaleX),
-      top: percent(-tile.cy1 * scaleY),
-      left: percent(-tile.cx1 * scaleX)
-    },
-    'data-page': index,
-    'data-idx': tileindex}));
-}
-
-
 function renderFrontpage() {
   return h('.box-mosaic',
           h('div.ui-composition.shadow', "front page"));
 }
 
-let renderPage = (photos) => (page) => {
-  return h('.box-mosaic' + leftOrRight(page.index),
-      {'data-page': page.index},
-      page.tiles.map(t => _.extend(t, {hash: photos[t.photoID]}))
-      .map((tile, index) => renderTile(tile, index, page.index)))
-}
 
-function splitIntoSpreads(spreads, page) {
-  if(spreads.length && spreads[spreads.length-1].length < 2) {
-    spreads[spreads.length-1].push(page);
-  } else {
-    spreads.push([page]);
-  }
-  return spreads;
-}
-
-
-let renderSpread = (photos) => (spread) => {
-  // let shuffling = (state.ui & UI.shuffling && state.edit.shuffling == index);
-  return h('.spread', [
-      h('.spread-paper.shadow.clearfix', spread.map(renderPage(photos))),
-      h('.spread-btn.clearfix', spread.map(({index}) =>
-          h('span' + leftOrRight(index), [
-            h('span.page'+leftOrRight(index), ""+(index+1)),
-            h('button.btn.btn-default.btn-xs.shuffle-btn', {'data-page': index}, [h('i.fa.fa-refresh'), " Shuffle"])
-          ])))
-  ]);
-}
-
-function renderAlbum(album, photos) {
-  return album
-    .reduce(splitIntoSpreads, [])
-    .map(renderSpread(photos));
-}
-
-
-module.exports = {renderToolbar, renderUploadArea, renderAlbum, renderButton}
+module.exports = {renderToolbar, renderUploadArea}

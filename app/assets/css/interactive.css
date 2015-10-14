@@ -34,10 +34,10 @@ body {
   margin: 8px 8px 0 0;
 }
 
-.form-info, .form-info:focus {
-  border-color: #3498db;
-  color: #3498db;
-}
+/* .form-info, .form-info:focus { */
+/*   border-color: #3498db; */
+/*   color: #3498db; */
+/* } */
 
 .btn .fa {
   margin-right: 7px;
@@ -62,12 +62,13 @@ body {
   color: #aaa;
 }
 
-.shuffle-btn {
-  margin: 0 10px;
-}
 
 .spread-btn .page {
   margin-top: -3px;
+}
+
+.spread-btn .page-btn i {
+  margin-left: 5px;
 }
 
 .navbar {

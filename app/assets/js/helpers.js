@@ -12,11 +12,11 @@ var UI = {
 
 var initial = {
   user: {},
-  collection: demo.collection,
-  album: demo.album,
-  photos: demo.collection.photos,
+  collection: {}, // demo.collection,
+  album: [], // demo.album,
+  photos: [], //demo.collection.photos,
   upload: {},
-  ui: UI.initial
+  ui: {state: UI.initial}
 };
 
 
@@ -24,6 +24,12 @@ function toArray(filelist) {
   var list = [];
   for (var i = 0; i < filelist.length; i++) list.push(filelist[i]);
   return list;
+}
+
+function cancelDefault(ev) {
+  ev.preventDefault();
+  ev.stopPropagation();
+  return ev;
 }
 
 
@@ -47,4 +53,4 @@ let jsonPOST = (HTTP, regex) =>
     .mergeAll().map(res => res.body).share();
 
 
-module.exports = {jsonGET, jsonPOST, apply, toArray, argArray, initial, hasID, hasNoID, asc, UI}
+module.exports = {jsonGET, jsonPOST, apply, toArray, argArray, initial, hasID, hasNoID, asc, UI, cancelDefault}
