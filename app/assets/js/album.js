@@ -135,7 +135,7 @@ function requests(DOMactions, album$, collection, photos, upload) {
         (x, collection, album) => ({
           url: '/collections/' + collection.id + '/download',
           method: 'POST',
-          send: album
+          send: {collection, album}
         })),
 
     shufflePage$: DOMactions.shuffle$.withLatestFrom(collection.state$, photos.state$, album$,

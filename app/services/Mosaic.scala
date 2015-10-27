@@ -96,7 +96,7 @@ class MosaicService @Inject()() {
 
   def assign(tiles: String, clusters: String, id: String): Future[List[MosaicModels.Tile]] = Future {
     val out = matchFile(id) 
-    val cmd = Seq(binary, "--assign", "1.414", "1024", clusterFile(clusters), out, tileFile(tiles));
+    val cmd = Seq(binary, "--assign", "1.414", "3508", clusterFile(clusters), out, tileFile(tiles));
     println(cmd)
     cmd ! match {
       case 0 => Json.parse(Source.fromFile(out).mkString).as[List[MosaicModels.Tile]]
@@ -121,7 +121,7 @@ class MosaicService @Inject()() {
 
 
   def render(tile: String, cluster: String, match_id: String, output: String): Future[String] = Future {
-    val cmd = Seq(binary, "--generate", "1.414", "1024", tileFile(tile), clusterFile(cluster), matchFile(match_id), mosaicFile(output))
+    val cmd = Seq(binary, "--generate", "1.414", "3508", tileFile(tile), clusterFile(cluster), matchFile(match_id), mosaicFile(output))
     println(cmd)
     cmd ! match {
       case 0 => output
@@ -129,11 +129,15 @@ class MosaicService @Inject()() {
     }
   }
 
-  def writeJson(filename: String, content: JsValue) = {
+  def writeFile(filename: String, content: String) = {
     val file = new File(filename)
     val writer = new PrintWriter(file);
-    writer.write(content.toString)
+    writer.write(content)
     writer.close()
+  }
+
+  def writeJson(filename: String, content: JsValue) = {
+    writeFile(filename, content.toString)
   }
 
   def renderComposition(composition: DBModels.Composition, photos: Seq[DBModels.Photo]): Future[String] = {
@@ -142,6 +146,44 @@ class MosaicService @Inject()() {
     writeJson(clusterFile(id), Json.toJson(cluster))
     writeJson(matchFile(id), Json.toJson(mosaictiles))
     render(id, id, id, id + ".jpg")
+  }
+
+  def makeTitlePage(title: String) : String = {
+    val svg = Source.fromFile(mosaicFile("../title.svg")).mkString
+    val svgmod = svg.replaceAll("\\{\\{title\\}\\}", title)
+    val svgfile = mosaicFile(UUID.randomUUID().toString + ".svg")
+    val pdffile = mosaicFile(UUID.randomUUID().toString + ".pdf")
+    writeFile(svgfile, svgmod)
+    val cmd = "inkscape " + svgfile + " -A " + pdffile
+    println(cmd)
+    cmd ! match {
+      case 0 => pdffile
+      case _ => throw new Exception
+    }
+  }
+
+  def makePDFFromPages(pagesFilename: List[String]) : String = {
+    val fname = UUID.randomUUID().toString + ".pdf"
+    val out = mosaicFile(fname)
+    val cmd = "convert -density 300x300 " + pagesFilename.map(mosaicFile).mkString(" ") + " " + out
+    println(cmd)
+    cmd ! match {
+      case 0 => fname
+      case _ => throw new Exception
+    }
+  }
+
+  def makeAlbumPDF(title: String, pages: String) : String = {
+    val titlepage = makeTitlePage(title)
+    val blank = mosaicFile("../blank.pdf")
+    val albumname = UUID.randomUUID().toString + ".pdf"
+    val out = mosaicFile(albumname)
+    val cmd = "pdfjoin " + Seq(titlepage, blank, mosaicFile(pages), blank, blank).mkString(" ") + " --rotateoversize false --paper a4paper -o " + out
+    println(cmd)
+    cmd ! match {
+      case 0 => albumname
+      case _ => throw new Exception
+    }
   }
   
   def makeAlbum(pagesFilename: List[String]) : String = {

@@ -44,11 +44,11 @@ function renderUploadArea(ui, upload) {
         ])
   }
 
-  if (ui & UI.uploadBox) {
+  if (ui.state & UI.uploadBox) {
     return h('div.upload-area#upload-area', [
-      message(ui)
+      message(ui.state)
     ]);
-  }
+  } else return '';
 }
 
 

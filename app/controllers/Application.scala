@@ -109,11 +109,13 @@ class Collections @Inject()(compositionDAO: CompositionDAO, collectionDAO: Colle
 
 
   def download(id: Long) = Action.async(parse.json) { request =>
-    val compositions = request.body.as[List[DBModels.Composition]]
+    val collection = (request.body \ "collection").as[DBModels.Collection]
+    val compositions = (request.body \ "album").as[List[DBModels.Composition]]
     photoDAO.allFromCollection(id).flatMap(photos =>
         Future.sequence(
           compositions.map(c => mosaicService.renderComposition(c, photos))
-        ).map(mosaicService.makeAlbum)
+        ).map(mosaicService.makePDFFromPages)
+        .map(pages => mosaicService.makeAlbumPDF(collection.name.getOrElse("Album title"), pages))
           .map(value => Ok(Json.toJson(value)))
     )
   }

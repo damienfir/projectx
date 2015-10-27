@@ -39,14 +39,17 @@ function intent(DOM) {
 
 
 function view(collection, album, upload, ui) {
-  return Observable.combineLatest(collection.state$, album.state$, upload.state$, ui.state$, album.DOM,
-      (collectionState, albumState, uploadState, uiState, albumVTree) =>
+  let toolbarDOM = Observable.combineLatest(collection.state$, album.state$, Elements.renderToolbar);
+  let uploadDOM = Observable.combineLatest(ui.state$, upload.state$, Elements.renderUploadArea);
+
+  return Observable.combineLatest(toolbarDOM, uploadDOM, album.DOM,
+      (toolbarVTree, uploadVTree, albumVTree) =>
       h('div', [
-        Elements.renderToolbar(collectionState, albumState),
-        Elements.renderUploadArea(uiState.state, uploadState),
+        toolbarVTree,
+        uploadVTree,
         albumVTree
       ])
-      );
+  );
 }
 
 
