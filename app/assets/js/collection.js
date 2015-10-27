@@ -15,11 +15,13 @@ function model(HTTPactions, DOMactions) {
   let demoCollection$ = DOMactions.demo$.map(x => col => demo.collection);
   let collectionUpdated$ = HTTPactions.createdCollection$.map(col => collection => col);
   let clearCollection$ = DOMactions.reset$.map(x => item => initial.collection);
+  let collectionName$ = DOMactions.albumTitle$.map(name => collection => _.extend(collection, {name: name}))
 
   return Observable.merge(
       collectionUpdated$,
       clearCollection$,
-      demoCollection$)
+      demoCollection$,
+      collectionName$)
     .startWith(initial.collection)
     .scan(apply);
     // .shareReplay(1);

@@ -19,10 +19,11 @@ function renderToolbar(collection, album) {
         ]),
         (album && album.length) ?  h('form.navbar-form.navbar-right', [
           h('div.form-group',
-            h('input.form-control', {'type': 'text', 'placeholder': 'Album title...'})),
-           
+            h('input.form-control#album-title', {'type': 'text', 'placeholder': 'Album title...'})),
             h('button.btn.btn-primary.navbar-btn#download-btn', [
-              h('i.fa.fa-cloud-download'), 'Download album'])
+              h('i.fa.fa-cloud-download'), 'Download album']),
+            h('button.btn.btn-primary.navbar-btn#order-btn', [
+              h('i.fa.fa-shopping-cart'), 'Order album'])
         ]) : ''
       ]),
       h('input#file-input', {'type': "file", 'name': "image", 'multiple': true})

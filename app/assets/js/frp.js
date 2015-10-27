@@ -13,6 +13,7 @@ import Upload from './upload'
 import Photos from './photos'
 import Album from './album'
 import UserInterface from './userinterface'
+import Payment from './payment'
 
 let Observable = Rx.Observable;
 
@@ -29,24 +30,27 @@ function intent(DOM) {
     selectFiles$: DOM.select('#file-input').events('change').map(ev => toArray(ev.target.files)),
     reset$: btn('#reset-btn'),
     download$: btn('#download-btn'),
+    order$: btn('#order-btn'),
     demo$: btn('#demo-btn'),
     ready$: Observable.just({}),
     shuffle$: btn('.shuffle-btn').map(ev => ev.target['data-page']),
     increment$: btn('.incr-btn').map(ev => ev.target['data-page']),
-    decrement$: btn('.decr-btn').map(ev => ev.target['data-page'])
+    decrement$: btn('.decr-btn').map(ev => ev.target['data-page']),
+    albumTitle$: DOM.select('#album-title').events("input").debounce(300).map(ev => ev.target.value).do(x => console.log(x))
   }
 }
 
 
-function view(collection, album, upload, ui) {
+function view(collection, album, upload, ui, payment) {
   let toolbarDOM = Observable.combineLatest(collection.state$, album.state$, Elements.renderToolbar);
   let uploadDOM = Observable.combineLatest(ui.state$, upload.state$, Elements.renderUploadArea);
 
-  return Observable.combineLatest(toolbarDOM, uploadDOM, album.DOM,
-      (toolbarVTree, uploadVTree, albumVTree) =>
+  return Observable.combineLatest(toolbarDOM, uploadDOM, album.DOM, payment.DOM,
+      (toolbarVTree, uploadVTree, albumVTree, paymentVTree) =>
       h('div', [
         toolbarVTree,
         uploadVTree,
+        paymentVTree,
         albumVTree
       ])
   );
@@ -62,6 +66,7 @@ function main({DOM, HTTP}) {
   let photos = Photos(actions, upload);
   let album = Album(DOM, HTTP, actions, collection, photos, upload);
   let ui = UserInterface(actions, album);
+  let payment = Payment();
 
   let requests$ = Observable.merge(
       _.values(user.HTTP)
@@ -69,7 +74,7 @@ function main({DOM, HTTP}) {
       .concat(_.values(album.HTTP)));
 
   return {
-    DOM: view(collection, album, upload, ui),
+    DOM: view(collection, album, upload, ui, payment),
     HTTP: requests$
   };
 }
