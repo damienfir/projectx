@@ -22,6 +22,8 @@ class Application extends Controller {
   def ui = Action {
     Ok(views.html.interactive())
   }
+
+  def uiWithID(id: Long) = ui
 }
 
 
@@ -70,6 +72,15 @@ class Collections @Inject()(compositionDAO: CompositionDAO, collectionDAO: Colle
     }
   }
 
+  def getAlbum(id: Long) = Action.async {
+    val album = for {
+      collection <- collectionDAO.get(id)
+      pages <- compositionDAO.allFromCollection(collection.get.id.get)
+      photos <- photoDAO.allFromCollection(collection.get.id.get)
+    } yield Json.obj("collection" -> collection, "pages" -> pages, "photos" -> photos)
+    album.map(obj => Ok(Json.toJson(obj)))
+  }
+
 
   def addToCollection(id: Long) = Action.async(parse.multipartFormData) { request =>
     val list = for {
@@ -85,7 +96,6 @@ class Collections @Inject()(compositionDAO: CompositionDAO, collectionDAO: Colle
 
 
   def generateComposition(id: Long, photos: List[DBModels.Photo], index: Int): Future[DBModels.Composition] = {
-    println(photos)
     for {
       comp <- compositionDAO.addWithCollection(id)
       tiles <- mosaicService.generateComposition(comp.id.get, photos)
@@ -94,9 +104,27 @@ class Collections @Inject()(compositionDAO: CompositionDAO, collectionDAO: Colle
   }
 
 
-  def generatePage(id: Long, index: Int) = Action.async(parse.json) { request =>
-    generateComposition(id, request.body.as[List[DBModels.Photo]], index)
+  def shuffleComposition(id: Long, photos: List[DBModels.Photo], index: Int): Future[DBModels.Composition] = {
+    for {
+      comp <- compositionDAO.get(id)
+      tiles <- mosaicService.generateComposition(id, photos)
+    } yield comp.copy(tiles = tiles, index = index)
+  }
+
+
+  def generatePage(id: Long, pageID: Long, index: Int) = Action.async(parse.json) { request =>
+    shuffleComposition(pageID, request.body.as[List[DBModels.Photo]], index)
       .map(page => Ok(Json.toJson(page)))
+  }
+
+
+  def saveAlbum = Action.async(parse.json) { request =>
+    val collection = (request.body \ "collection").as[DBModels.Collection]
+    val compositions = (request.body \ "album").as[List[DBModels.Composition]]
+    for {
+      col <- collectionDAO.update(collection)
+      album <- compositionDAO.updateAll(compositions)
+    } yield Ok
   }
 
 

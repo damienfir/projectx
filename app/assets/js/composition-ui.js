@@ -1,7 +1,5 @@
 import {Rx} from '@cycle/core';
 import {h} from '@cycle/dom';
-import _ from 'underscore';
-import Immutable from 'immutable';
 import {cancelDefault} from './helpers'
 
 

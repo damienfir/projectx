@@ -1,5 +1,5 @@
 import {Rx} from '@cycle/core';
-import _ from 'underscore';
+// import _ from 'underscore';
 
 import cookie from './cookies'
 import {apply, isNotEmpty, jsonGET, jsonPOST, hasID, hasNoID} from './helpers'
@@ -34,7 +34,7 @@ function model(actions) {
 
 function requests(DOMactions, actions, userState$) {
   return {
-    getUser$: actions.gotCookie$.do(x => console.log(x))
+    getUser$: actions.gotCookie$
       .filter(_.identity)
       .map(id => '/users/'+id),
 

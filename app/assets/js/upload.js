@@ -1,6 +1,6 @@
 import {Rx} from '@cycle/core';
-import _ from 'underscore';
-import $ from "jquery"
+// import _ from 'underscore';
+// import $ from "jquery"
 import {apply, argArray, initial} from './helpers'
 let Observable = Rx.Observable;
 

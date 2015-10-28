@@ -86,6 +86,7 @@ class MosaicService @Inject()() {
 
   def cluster(gists: Seq[String], id: String): Future[MosaicModels.Cluster] = Future {
     val out = clusterFile(id)
+    println(gists.length)
     val cmd = binary +: "--cluster" +: gists.length.toString +: gists.map(gistFile) :+ out
     println(cmd)
     cmd ! match {

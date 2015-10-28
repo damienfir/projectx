@@ -40,6 +40,8 @@ class CollectionDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProv
 
   def get(id: Long) = db.run(collections.filter(_.id === id).result) map (_.headOption)
 
+  def update(collection: Collection) = db.run(collections.filter(_.id === collection.id.get).update(collection).asTry)
+
   def withUser(id: Long): Future[Option[Collection]] =
     db.run(users.one(id).result) map (_.headOption) flatMap {
       case Some(u) => db.run((collections returning collections) += Collection(None, None)) flatMap { c =>
@@ -71,6 +73,14 @@ class PhotoDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
 
 @Singleton
 class CompositionDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvider, collectionDAO: CollectionDAO) extends HasDatabaseConfigProvider[JdbcProfile] {
+
+  def get(id: Long) = db.run(compositions.filter(_.id === id).result).map(_.head)
+
+  def updateAll(comps: List[Composition]) = Future.sequence {
+     comps.map(comp => db.run(compositions.filter(_.id === comp.id.get).update(comp).asTry))
+  }
+
+  def allFromCollection(id: Long) = db.run(compositions.filter(_.collectionID === id).result)
 
   def addWithCollection(id: Long): Future[Composition] = for {
     col <- collectionDAO.get(id)

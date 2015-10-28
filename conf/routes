@@ -33,19 +33,26 @@ POST    /users/:id/collections      controllers.Collections.withUser(id: Long)
 # GET     /collections                controllers.Collections.list
 # POST    /collections                controllers.Collections.create
 # GET     /collections/:id            controllers.Collections.get(id)
+GET     /collections/:id/album        controllers.Collections.getAlbum(id: Long)
 # DELETE  /collections/:id            controllers.Collections.delete(id)
 # POST    /collections/:id/users/:uid controllers.Collections.addUser(id, uid)
 # DELETE  /collections/:id/users/:uid controllers.Collections.removeUser(id, uid)
 POST     /collections/:id/download    @controllers.Collections.download(id: Long)
+# GET     /collections/:id/photos     @controllers.Collections.getPhotos(id: Long)
 POST    /collections/:id/photos     @controllers.Collections.addToCollection(id: Long)
 # GET     /collections/:id/photos/:photo_id controllers.Collections.getPhoto(id, photo_id)
 # DELETE  /collections/:id/photos/:photos_id  controllers.Collections.removePhoto(id, photo_id)
 
-POST    /collections/:id/page     @controllers.Collections.generatePage(id: Long, index: Int)
+# GET     /collections/:id/pages      @controllers.Collections.getPages(id: Long)
+POST    /collections/:id/page/:pageID     @controllers.Collections.generatePage(id: Long, pageID: Long, index: Int)
 POST    /collections/:id/pages    @controllers.Collections.generatePages(id: Long, startindex: Int)
 # POST    /mosaics/generate           @controllers.Collections.generate
+#
+
+POST /save  @controllers.Collections.saveAlbum
 
 
 GET     /ui                         @controllers.Application.ui
+GET     /ui/:id                     @controllers.Application.uiWithID(id: Long)
 GET     /                           @controllers.Application.index(filename: String = "")
 GET     /:filename                  @controllers.Application.index(filename: String)

@@ -1,12 +1,14 @@
 import {Rx,run} from '@cycle/core';
 import {makeDOMDriver, h} from '@cycle/dom';
 import {makeHTTPDriver} from '@cycle/http';
-import _ from 'underscore';
+// import _ from 'underscore';
+// import jQuery from 'jquery'
+// import bootstrap from 'bootstrap'
 
 import Elements from './ui'
 import demo from "./demo"
 
-import {toArray} from './helpers'
+import {toArray, jsonPOST} from './helpers'
 import User from './user'
 import Collection from './collection'
 import Upload from './upload'
@@ -18,7 +20,7 @@ import Payment from './payment'
 let Observable = Rx.Observable;
 
 
-function intent(DOM) {
+function intent(DOM, HTTP) {
   let cancelDefault = (ev) => { ev.preventDefault(); ev.stopPropagation(); return ev; }
   let btn = (selector) => DOM.select(selector).events('click').map(cancelDefault)
 
@@ -36,7 +38,9 @@ function intent(DOM) {
     shuffle$: btn('.shuffle-btn').map(ev => ev.target['data-page']),
     increment$: btn('.incr-btn').map(ev => ev.target['data-page']),
     decrement$: btn('.decr-btn').map(ev => ev.target['data-page']),
-    albumTitle$: DOM.select('#album-title').events("input").debounce(300).map(ev => ev.target.value).do(x => console.log(x))
+    albumTitle$: DOM.select('#album-title').events("input").debounce(300).map(ev => ev.target.value),
+    save$: btn('#save-btn'),
+    hasID$: Observable.just(window.location.href.split('/')).filter(url => url.length > 2).map(url => url.pop())
   }
 }
 
@@ -63,7 +67,7 @@ function main({DOM, HTTP}) {
   let user = User(HTTP, actions);
   let collection = Collection(HTTP, actions, user.state$);
   let upload = Upload(actions, collection);
-  let photos = Photos(actions, upload);
+  let photos = Photos(actions, upload, collection);
   let album = Album(DOM, HTTP, actions, collection, photos, upload);
   let ui = UserInterface(actions, album);
   let payment = Payment();
@@ -71,7 +75,8 @@ function main({DOM, HTTP}) {
   let requests$ = Observable.merge(
       _.values(user.HTTP)
       .concat(_.values(collection.HTTP))
-      .concat(_.values(album.HTTP)));
+      .concat(_.values(album.HTTP)))
+    .do(x => console.log(x));
 
   return {
     DOM: view(collection, album, upload, ui, payment),

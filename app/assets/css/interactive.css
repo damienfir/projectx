@@ -2,7 +2,7 @@
 
 
 html, body {
-  /* font-family: 'Nunito', sans-serif; */
+  /* font-family: 'Open Sans', sans-serif; */
   height: 100%;
   /* overflow-x: hidden; */
 }
@@ -21,18 +21,23 @@ body {
   /* overflow: hidden; */
 }
 
-.navbar-btn {
-  margin-right: 8px;
-}
-
 .navbar-transparent {
   background-color: transparent;
+}
+
+.navbar-form .btn {
+  margin-left: 8px;
 }
 
 .navbar-btn {
   padding: 7px 10px;
   margin: 8px 8px 0 0;
 }
+
+/* .modal { */
+/*   display: block; */
+/*   position: static; */
+/* } */
 
 /* .form-info, .form-info:focus { */
 /*   border-color: #3498db; */

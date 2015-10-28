@@ -1,6 +1,6 @@
 import {Rx} from '@cycle/core';
 import {h} from '@cycle/dom';
-import _ from 'underscore';
+// import _ from 'underscore';
 import {UI} from './helpers'
 // import Immutable from 'immutable';
 
@@ -18,12 +18,15 @@ function renderToolbar(collection, album) {
               h('i.fa.fa-refresh'), 'New album'])) : '',
         ]),
         (album && album.length) ?  h('form.navbar-form.navbar-right', [
-          h('div.form-group',
+          h('.form-group',
             h('input.form-control#album-title', {'type': 'text', 'placeholder': 'Album title...'})),
-            h('button.btn.btn-primary.navbar-btn#download-btn', [
+            h('button.btn.btn-primary#download-btn', [
               h('i.fa.fa-cloud-download'), 'Download album']),
-            h('button.btn.btn-primary.navbar-btn#order-btn', [
-              h('i.fa.fa-shopping-cart'), 'Order album'])
+            h('button.btn.btn-primary#order-btn', [
+              h('i.fa.fa-shopping-cart'), 'Order album']),
+            h('button.btn.btn-primary#save-btn', [
+              h('i.fa.fa-cloud-download'), 'Save album']),
+            h('a.btn.btn-link', {'href': '/ui/'+collection.id}, 'Permanent link')
         ]) : ''
       ]),
       h('input#file-input', {'type': "file", 'name': "image", 'multiple': true})

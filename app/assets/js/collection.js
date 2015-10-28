@@ -1,21 +1,23 @@
 import {Rx} from '@cycle/core';
-import _ from 'underscore';
+// import _ from 'underscore';
 import demo from "./demo"
-import {apply, argArray, initial, jsonPOST,hasID} from './helpers'
+import {apply, argArray, initial, jsonPOST, jsonGET, hasID} from './helpers'
 let Observable = Rx.Observable;
 
 
 function intent(HTTP) {
   return {
-    createdCollection$: jsonPOST(HTTP, /\/users\/\d+\/collections/)
+    createdCollection$: jsonPOST(HTTP, /\/users\/\d+\/collections/),
+    storedAlbum$: jsonGET(HTTP, /\/collections\/\d+\/album/)
   }
 }
 
 function model(HTTPactions, DOMactions) {
-  let demoCollection$ = DOMactions.demo$.map(x => col => demo.collection);
+  let demoCollection$ = HTTPactions.storedAlbum$.map(demo => col => demo.collection);
   let collectionUpdated$ = HTTPactions.createdCollection$.map(col => collection => col);
   let clearCollection$ = DOMactions.reset$.map(x => item => initial.collection);
   let collectionName$ = DOMactions.albumTitle$.map(name => collection => _.extend(collection, {name: name}))
+  HTTPactions.createdCollection$.subscribe(col => window.history.pushState({}, '', '/ui/'+col.id));
 
   return Observable.merge(
       collectionUpdated$,
@@ -23,7 +25,7 @@ function model(HTTPactions, DOMactions) {
       demoCollection$,
       collectionName$)
     .startWith(initial.collection)
-    .scan(apply);
+    .scan(apply); //.do(x => console.log(x));
     // .shareReplay(1);
 }
 
@@ -37,7 +39,11 @@ function requests(DOMactions, userState$, state$) {
         url:'/users/'+user.id+'/collections',
         method: 'POST',
         send: {}
-      }))
+      })),
+
+    demoAlbum$: DOMactions.demo$.map('/collections/1085/album'),
+
+    storedAlbum$: DOMactions.hasID$.map(id => '/collections/'+id+'/album')
   }
 }
 

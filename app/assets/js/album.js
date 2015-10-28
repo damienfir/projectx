@@ -1,6 +1,6 @@
 import {Rx} from '@cycle/core';
 import {h} from '@cycle/dom';
-import _ from 'underscore';
+// import _ from 'underscore';
 import demo from "./demo"
 import {apply, argArray, asc, initial, jsonPOST, cancelDefault} from './helpers'
 import Composition from './composition-ui'
@@ -48,7 +48,7 @@ function renderTile(tile, tileindex, index, photos) {
       top: percent(-tile.cy1 * scaleY),
       left: percent(-tile.cx1 * scaleX)
     }}),
-  h('button.btn.btn-danger.delete-btn', h('i.fa.fa-ban'))
+  // h('button.btn.btn-danger.delete-btn', h('i.fa.fa-ban'))
   ]);
 }
 
@@ -70,9 +70,9 @@ function splitIntoSpreads(spreads, page) {
 }
 
 let renderBtn = ui => ({index}) => {
-  let toggle = (ui.toggle & (1 << index));
+  let toggle = !(ui.toggle & (1 << index));
   return h('.btn-group' + leftOrRight(index), [
-      h('button.btn.btn-xs.page-btn', {'data-page': index}, ["Page "+(index+1)+' ', h('i.fa'+ (toggle ? '.fa-caret-left' : '.fa-caret-right'))]),
+      h('button.btn.btn-xs.page-btn', {'data-page': index}, ["Page "+(index+1)+' ', /*h('i.fa'+ (toggle ? '.fa-caret-left' : '.fa-caret-right'))*/]),
       toggle ? [
       h('button.btn.btn-default.btn-xs.shuffle-btn', {'data-page': index}, [h('i.fa.fa-refresh'), " Shuffle"]),
       h('button.btn.btn-default.btn-xs.incr-btn', {'data-page': index}, [h('i.fa.fa-plus'), " More"]),
@@ -99,17 +99,18 @@ function intent(HTTP) {
   return {
     createdAlbum$: jsonPOST(HTTP, /\/collections\/\d+\/pages\?startindex=.*/),
     downloadedAlbum$: jsonPOST(HTTP, /\/collections\/\d+\/download/),
-    shuffledPage$: jsonPOST(HTTP, /\/collections\/\d+\/page\?index=.*/)
+    shuffledPage$: jsonPOST(HTTP, /\/collections\/\d+\/page\/\d+\?index=.*/),
+    savedPage$: jsonPOST(HTTP, /\/save/)
   }
 }
 
 
-function model(DOMactions, HTTPactions, composition$) {
+function model(DOMactions, collectionActions, HTTPactions, composition$) {
   HTTPactions.downloadedAlbum$.subscribe(url => {
     window.open("/storage/generated/" + url);
   });
 
-  const demoAlbum$ = DOMactions.demo$.map(x => album => demo.album);
+  const demoAlbum$ = collectionActions.storedAlbum$.map(demo => album => demo.pages);
   const albumUpdated$ = HTTPactions.createdAlbum$
     .map(newpages => album => album.concat(newpages).sort((a,b) => asc(a.index,b.index)));
   const clearAlbum$ = DOMactions.reset$.map(x => item => initial.album);
@@ -118,6 +119,7 @@ function model(DOMactions, HTTPactions, composition$) {
   return Observable.merge(albumUpdated$, clearAlbum$, demoAlbum$, albumPageShuffled$, composition$)
     .startWith(initial.album)
     .scan(apply)
+    .map(album => album.sort((a,b) => a.index-b.index))
     .shareReplay(1);
 }
 
@@ -140,10 +142,17 @@ function requests(DOMactions, album$, collection, photos, upload) {
 
     shufflePage$: DOMactions.shuffle$.withLatestFrom(collection.state$, photos.state$, album$,
         (page, collection, photos, album) => ({
-          url: '/collections/'+collection.id+'/page?index='+page,
+          url: '/collections/'+collection.id+'/page/'+album[page].id+'?index='+page,
           method: 'POST',
           send: _.filter(photos, p => _.where(album[page].tiles, {'photoID': p.id}).length > 0)
-        }))
+        })),
+    
+    saveAlbum$: DOMactions.save$.withLatestFrom(collection.state$, album$, (ev, collectionState, albumState) => ({
+      url: '/save',
+      method: 'POST',
+      eager: true,
+      send: {collection: collectionState, album: albumState}
+    }))
   };
 }
 
@@ -178,7 +187,7 @@ function uiModel(DOM) {
 module.exports = function(DOM, HTTP, DOMactions, collection, photos, upload) {
   let compositionMod$ = Composition(DOM);
   let actions = intent(HTTP);
-  let state$ = model(DOMactions, actions, compositionMod$);
+  let state$ = model(DOMactions, collection.actions, actions, compositionMod$);
   let req = requests(DOMactions, state$, collection, photos, upload);
   let ui$ = uiModel(DOM);
   let vtree$ = view(state$, photos.state$, ui$);
