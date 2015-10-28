@@ -18,6 +18,7 @@ function model(HTTPactions, DOMactions) {
   let clearCollection$ = DOMactions.reset$.map(x => item => initial.collection);
   let collectionName$ = DOMactions.albumTitle$.map(name => collection => _.extend(collection, {name: name}))
   HTTPactions.createdCollection$.subscribe(col => window.history.pushState({}, '', '/ui/'+col.id));
+  DOMactions.reset$.subscribe(x => window.history.pushState({}, '', '/ui'));
 
   return Observable.merge(
       collectionUpdated$,
