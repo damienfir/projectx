@@ -53,7 +53,7 @@ function renderTile(tile, tileindex, index) {
       left: percent(-tile.cx1 * scaleX)
     }}),
   // h('button.btn.btn-danger.delete-btn', h('i.fa.fa-ban'))
-    h('button.btn.btn-primary.hover-btn.cover-btn', {'data-id': tile.photoID}, h('i.fa.fa-check'))
+    h('button.btn.btn-primary.hover-btn.cover-btn', {'data-id': tile.photoID}, (index === 0) ? h('i.fa.fa-minus') : h('i.fa.fa-plus'))
   ]);
 }
 
@@ -82,8 +82,8 @@ let renderBtn = ui => ({index}) => {
       h('button.btn.btn-xs.page-btn', {'data-page': index}, ["Page "+(index+1)+' ', /*h('i.fa'+ (toggle ? '.fa-caret-left' : '.fa-caret-right'))*/]),
       toggle ? [
       h('button.btn.btn-default.btn-xs.shuffle-btn', {'data-page': index}, [h('i.fa.fa-refresh'), " Shuffle"]),
-      h('button.btn.btn-default.btn-xs.incr-btn', {'data-page': index}, [h('i.fa.fa-plus'), " More"]),
-      h('button.btn.btn-default.btn-xs.decr-btn', {'data-page': index}, [h('i.fa.fa-minus'), " Less"])
+      // h('button.btn.btn-default.btn-xs.incr-btn', {'data-page': index}, [h('i.fa.fa-plus'), " More"]),
+      // h('button.btn.btn-default.btn-xs.decr-btn', {'data-page': index}, [h('i.fa.fa-minus'), " Less"])
       ] : ''
   ])
 }
@@ -134,7 +134,12 @@ function model(DOMactions, collectionActions, HTTPactions, composition$) {
 
 function requests(DOMactions, album$, collection, photos, upload) {
 
-  let photosFromTiles = (photos, tiles) => _.filter(photos, p => _.where(tiles, {'photoID': p.id}).length > 0)
+  let photosFromTiles = (photos, tiles) => _.filter(photos, p => _.where(tiles, {'photoID': p.id}).length > 0);
+
+  let addOrRemove = (array, item) =>
+    _.isUndefined(item) ? array :
+      ((array.map(p => p.id).indexOf(item.id) === -1) ?
+        array.concat(item) : array.filter(el => el.id !== item.id));
 
   return {
     createAlbum$: upload.actions.uploadedFiles$.withLatestFrom(collection.state$, album$,
@@ -175,7 +180,7 @@ function requests(DOMactions, album$, collection, photos, upload) {
         return {
           url: url,
           method: 'POST',
-          send: photosFromTiles(photos, album[coverpage.index].tiles).concat(_.filter(photos, p => p.id === photoID))
+          send: addOrRemove(photosFromTiles(photos, album[coverpage.index].tiles), photos.filter(p => p.id === photoID).shift())
         };
       })
   };
@@ -193,7 +198,7 @@ function view(albumState$, photosState$, uiState$, collectionState$) {
   let photosDict$ = photosState$.map(hashMap);
   return albumState$.combineLatest(photosDict$, uiState$, collectionState$,
       (album, photos, ui, collection) =>
-        album.length ?
+        album.length > 1 ?
         h('div.container-fluid.limited-width.album', renderAlbum(album, photos, ui, collection.name)) :
         renderButton()
     );

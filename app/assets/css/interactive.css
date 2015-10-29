@@ -80,35 +80,33 @@ body {
   margin-bottom: 0;
 }
 
-.upload-area {
-  height: 100px;
-  background-color: #ecf0f1;
-  position: relative;
+#upload-area {
+  /* background-color: #37BC9B; */
+  /* background-color: #F5F7FA; */
   cursor: pointer;
-  height: 150px;
+  color: #fff;
+  position: relative;
 }
 
-.upload-area:hover {
-  /* box-shadow: inset 0px 0px 4px #ccc; */
-  background-color: #1abc9c;
+#upload-area:hover {
+  background-color: #48CFAD;
+  /* background-color: #E6E9ED; */
+  /* background-color: #37BC9B; */
 }
-.upload-area:hover .message {
+
+#upload-area:hover .modal-body {
   color: #fff;
 }
 
-.upload-area .message {
-  position: absolute;
-  color: #BDC3C7;
+#upload-area .modal-body {
+  color: #AAB2BD;
   text-align: center;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  margin: 0;
   font-size: 1.5em;
+  padding: 100px 30px;
 }
 
-.upload-area .progress {
-  margin-top: 10px;
+#upload-area .message {
+  margin-bottom: 20px;
 }
 
 #photo-collection {

@@ -20,11 +20,12 @@ function intent(DOM, HTTP) {
   let cancelDefault = (ev) => { ev.preventDefault(); ev.stopPropagation(); return ev; }
   let btn = (selector) => DOM.select(selector).events('click').map(cancelDefault)
 
-    btn('#upload-area').subscribe(_ => 
-        document.getElementById('file-input').dispatchEvent(new MouseEvent('click')));
+  btn('#upload-area').subscribe(_ => 
+      document.getElementById('file-input').dispatchEvent(new MouseEvent('click')));
+
+  btn('#upload-btn').merge(btn('#create-btn')).subscribe(ev => $('#upload-modal').modal('show'));
 
   return {
-    toggleUpload$: btn('#upload-btn').merge(btn('#create-btn')),
     selectFiles$: DOM.select('#file-input').events('change').map(ev => toArray(ev.target.files)),
     reset$: btn('#reset-btn'),
     download$: btn('#download-btn'),
@@ -41,17 +42,20 @@ function intent(DOM, HTTP) {
   }
 }
 
+function model(DOMactions) {
+  DOMactions.selectFiles$.subscribe(x => $('#upload-modal').modal('hide'));
+}
 
 function view(collection, album, upload, ui, payment) {
-  let toolbarDOM = Observable.combineLatest(collection.state$, album.state$, Elements.renderToolbar);
-  let uploadDOM = Observable.combineLatest(ui.state$, upload.state$, Elements.renderUploadArea);
+  let toolbarDOM = Observable.combineLatest(collection.state$, album.state$, upload.state$, ui.state$, Elements.renderToolbar);
+  let uploadDOM = Observable.just(Elements.renderUploadArea());
 
   return Observable.combineLatest(toolbarDOM, uploadDOM, album.DOM, payment.DOM,
       (toolbarVTree, uploadVTree, albumVTree, paymentVTree) =>
       h('div', [
         toolbarVTree,
         uploadVTree,
-        paymentVTree,
+        // paymentVTree,
         albumVTree
       ])
   );
@@ -68,6 +72,8 @@ function main({DOM, HTTP}) {
   let album = Album(DOM, HTTP, actions, collection, photos, upload);
   let ui = UserInterface(actions, album);
   let payment = Payment();
+
+  model(actions);
 
   let requests$ = Observable.merge(
       _.values(user.HTTP)
