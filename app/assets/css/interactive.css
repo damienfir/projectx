@@ -191,7 +191,7 @@ body {
   opacity: 0.85;
 }
 
-.delete-btn {
+.hover-btn {
   position: absolute;
   top: 10px;
   right: 10px;
@@ -199,12 +199,23 @@ body {
   padding: 4px 6px;
   text-align: center;
   display: none;
-  background-color: transparent;
-  color: #e74c3c;
+  /* background-color: transparent; */
+  /* color: #e74c3c; */
 }
 
-.ui-tile:hover .delete-btn {
+.ui-tile:hover .hover-btn {
   display: block;
+}
+
+.cover-title {
+  font-size: 2.5em;
+  background-color: #fff;
+  padding: 15px 30px 15px 100px;
+  /* width: 100%; */
+  position: absolute;
+  text-align: right;
+  bottom: 15%;
+  right: 0;
 }
 
 .col-buttons button {

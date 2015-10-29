@@ -12,9 +12,9 @@ var UI = {
 
 var initial = {
   user: {},
-  collection: {}, // demo.collection,
-  album: [], // demo.album,
-  photos: [], //demo.collection.photos,
+  collection: {},
+  album: [],
+  photos: [],
   upload: {},
   ui: {state: UI.initial}
 };

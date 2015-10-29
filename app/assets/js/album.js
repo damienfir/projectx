@@ -1,10 +1,14 @@
 import {Rx} from '@cycle/core';
 import {h} from '@cycle/dom';
-// import _ from 'underscore';
-import demo from "./demo"
 import {apply, argArray, asc, initial, jsonPOST, cancelDefault} from './helpers'
 import Composition from './composition-ui'
 let Observable = Rx.Observable;
+
+
+let coverpage = {
+  tiles: [],
+  index: 0
+};
 
 
 function leftOrRight(index) { return index % 2 ? '.pull-right' : '.pull-left'; }
@@ -25,7 +29,7 @@ function renderButton() {
 }
 
 
-function renderTile(tile, tileindex, index, photos) {
+function renderTile(tile, tileindex, index) {
   function percent(x) { return x * 100 + "%"; }
 
   var scaleX = 1 / (tile.cx2 - tile.cx1);
@@ -49,15 +53,18 @@ function renderTile(tile, tileindex, index, photos) {
       left: percent(-tile.cx1 * scaleX)
     }}),
   // h('button.btn.btn-danger.delete-btn', h('i.fa.fa-ban'))
+    h('button.btn.btn-primary.hover-btn.cover-btn', {'data-id': tile.photoID}, h('i.fa.fa-check'))
   ]);
 }
 
 
-let renderPage = (photos) => (page) => {
+let renderPage = (photos, title) => (page) => {
   return h('.box-mosaic' + leftOrRight(page.index),
       {'data-page': page.index},
-      page.tiles.map(t => _.extend(t, {hash: photos[t.photoID]}))
-      .map((tile, index) => renderTile(tile, index, page.index)))
+      page.tiles
+        .map(t => _.extend(t, {hash: photos[t.photoID]}))
+        .map((tile, index) => renderTile(tile, index, page.index))
+        .concat((page.index === 0 && title) ? h('.cover-title', title): ''))
 }
 
 function splitIntoSpreads(spreads, page) {
@@ -81,17 +88,17 @@ let renderBtn = ui => ({index}) => {
   ])
 }
 
-let renderSpread = (photos, ui) => (spread) => {
+let renderSpread = (photos, ui, title) => (spread) => {
   return h('.spread', [
-      h('.spread-paper.shadow.clearfix', spread.map(renderPage(photos))), 
+      h('.spread-paper.shadow.clearfix', spread.map(renderPage(photos, title))), 
       h('.spread-btn.clearfix', spread.map(renderBtn(ui)))
   ]);
 }
 
-function renderAlbum(album, photos, ui) {
+function renderAlbum(album, photos, ui, title) {
   return album
     .reduce(splitIntoSpreads, [])
-    .map(renderSpread(photos, ui));
+    .map(renderSpread(photos, ui, title));
 }
 
 
@@ -110,21 +117,25 @@ function model(DOMactions, collectionActions, HTTPactions, composition$) {
     window.open("/storage/generated/" + url);
   });
 
-  const demoAlbum$ = collectionActions.storedAlbum$.map(demo => album => demo.pages);
-  const albumUpdated$ = HTTPactions.createdAlbum$
+  let demoAlbum$ = collectionActions.storedAlbum$.map(demo => album => demo.pages);
+  let albumUpdated$ = HTTPactions.createdAlbum$.filter(pages => pages[0].index > 0)
     .map(newpages => album => album.concat(newpages).sort((a,b) => asc(a.index,b.index)));
-  const clearAlbum$ = DOMactions.reset$.map(x => item => initial.album);
-  const albumPageShuffled$ = HTTPactions.shuffledPage$.map(page => album => { album[page.index] = page; return album; });
+  let clearAlbum$ = DOMactions.reset$.map(x => item => [coverpage]);
+  let createdCover$ = HTTPactions.createdAlbum$.filter(pages => pages[0].index === 0).map(pages => pages[0]);
+  let albumPageShuffled$ = HTTPactions.shuffledPage$.merge(createdCover$).map(page => album => { album[page.index] = page; return album; });
 
   return Observable.merge(albumUpdated$, clearAlbum$, demoAlbum$, albumPageShuffled$, composition$)
-    .startWith(initial.album)
+    .startWith([coverpage])
     .scan(apply)
     .map(album => album.sort((a,b) => a.index-b.index))
-    .shareReplay(1);
+    .shareReplay(1);//.do(x => console.log(x));
 }
 
 
 function requests(DOMactions, album$, collection, photos, upload) {
+
+  let photosFromTiles = (photos, tiles) => _.filter(photos, p => _.where(tiles, {'photoID': p.id}).length > 0)
+
   return {
     createAlbum$: upload.actions.uploadedFiles$.withLatestFrom(collection.state$, album$,
         (photos, collection, album) => ({
@@ -144,7 +155,7 @@ function requests(DOMactions, album$, collection, photos, upload) {
         (page, collection, photos, album) => ({
           url: '/collections/'+collection.id+'/page/'+album[page].id+'?index='+page,
           method: 'POST',
-          send: _.filter(photos, p => _.where(album[page].tiles, {'photoID': p.id}).length > 0)
+          send: photosFromTiles(photos, album[page].tiles)
         })),
     
     saveAlbum$: DOMactions.save$.withLatestFrom(collection.state$, album$, (ev, collectionState, albumState) => ({
@@ -152,7 +163,21 @@ function requests(DOMactions, album$, collection, photos, upload) {
       method: 'POST',
       eager: true,
       send: {collection: collectionState, album: albumState}
-    }))
+    })),
+
+    editPhotoCover$: DOMactions.addPhotoCover$.withLatestFrom(collection.state$, photos.state$, album$,
+      (photoID, collection, photos, album) => {
+        let id = album[coverpage.index].id
+        let url = _.isUndefined(id) ?
+          '/collections/' + collection.id + '/pages?startindex='+coverpage.index :
+          '/collections/' + collection.id + '/page/' + id + '?index=' + coverpage.index ;
+
+        return {
+          url: url,
+          method: 'POST',
+          send: photosFromTiles(photos, album[coverpage.index].tiles).concat(_.filter(photos, p => p.id === photoID))
+        };
+      })
   };
 }
 
@@ -164,12 +189,12 @@ function hashMap(photos) {
 }
 
 
-function view(albumState$, photosState$, uiState$) {
+function view(albumState$, photosState$, uiState$, collectionState$) {
   let photosDict$ = photosState$.map(hashMap);
-  return albumState$.combineLatest(photosDict$, uiState$,
-      (album, photos, ui) =>
+  return albumState$.combineLatest(photosDict$, uiState$, collectionState$,
+      (album, photos, ui, collection) =>
         album.length ?
-        h('div.container-fluid.limited-width.album', renderAlbum(album, photos, ui)) :
+        h('div.container-fluid.limited-width.album', renderAlbum(album, photos, ui, collection.name)) :
         renderButton()
     );
 }
@@ -190,7 +215,7 @@ module.exports = function(DOM, HTTP, DOMactions, collection, photos, upload) {
   let state$ = model(DOMactions, collection.actions, actions, compositionMod$);
   let req = requests(DOMactions, state$, collection, photos, upload);
   let ui$ = uiModel(DOM);
-  let vtree$ = view(state$, photos.state$, ui$);
+  let vtree$ = view(state$, photos.state$, ui$, collection.state$);
 
   return {
     DOM: vtree$,

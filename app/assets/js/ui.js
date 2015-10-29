@@ -19,7 +19,7 @@ function renderToolbar(collection, album) {
         ]),
         (album && album.length) ?  h('form.navbar-form.navbar-right', [
           h('.form-group',
-            h('input.form-control#album-title', {'type': 'text', 'placeholder': 'Album title...'})),
+            h('input.form-control#album-title', {'type': 'text', 'placeholder': 'Album title...', 'value': collection.name})),
             h('button.btn.btn-primary#download-btn', [
               h('i.fa.fa-cloud-download'), 'Download album']),
             h('button.btn.btn-primary#order-btn', [

@@ -1,12 +1,8 @@
 import {Rx,run} from '@cycle/core';
 import {makeDOMDriver, h} from '@cycle/dom';
 import {makeHTTPDriver} from '@cycle/http';
-// import _ from 'underscore';
-// import jQuery from 'jquery'
-// import bootstrap from 'bootstrap'
 
 import Elements from './ui'
-import demo from "./demo"
 
 import {toArray, jsonPOST} from './helpers'
 import User from './user'
@@ -38,9 +34,10 @@ function intent(DOM, HTTP) {
     shuffle$: btn('.shuffle-btn').map(ev => ev.target['data-page']),
     increment$: btn('.incr-btn').map(ev => ev.target['data-page']),
     decrement$: btn('.decr-btn').map(ev => ev.target['data-page']),
-    albumTitle$: DOM.select('#album-title').events("input").debounce(300).map(ev => ev.target.value),
+    albumTitle$: DOM.select('#album-title').events("input").map(ev => ev.target.value),
     save$: btn('#save-btn'),
-    hasID$: Observable.just(window.location.href.split('/')).filter(url => url.length > 2).map(url => url.pop())
+    hasID$: Observable.just(window.location.href.split('/')).filter(url => url.length > 2).map(url => url.pop()),
+    addPhotoCover$: btn('.cover-btn').map(ev => ev.target['data-id'])
   }
 }
 

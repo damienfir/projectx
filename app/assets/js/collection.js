@@ -1,6 +1,4 @@
 import {Rx} from '@cycle/core';
-// import _ from 'underscore';
-import demo from "./demo"
 import {apply, argArray, initial, jsonPOST, jsonGET, hasID} from './helpers'
 let Observable = Rx.Observable;
 

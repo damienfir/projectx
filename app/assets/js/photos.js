@@ -1,7 +1,5 @@
 import {Rx} from '@cycle/core';
-// import _ from 'underscore';
 import {apply,initial} from './helpers'
-import demo from "./demo"
 let Observable = Rx.Observable;
 
 
