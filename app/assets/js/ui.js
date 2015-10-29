@@ -1,8 +1,6 @@
 import {Rx} from '@cycle/core';
 import {h} from '@cycle/dom';
-// import _ from 'underscore';
 import {UI} from './helpers'
-// import Immutable from 'immutable';
 
 
 

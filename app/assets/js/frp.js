@@ -11,7 +11,7 @@ import Upload from './upload'
 import Photos from './photos'
 import Album from './album'
 import UserInterface from './userinterface'
-import Payment from './payment'
+import Order from './order'
 
 let Observable = Rx.Observable;
 
@@ -23,13 +23,12 @@ function intent(DOM, HTTP) {
   btn('#upload-area').subscribe(_ => 
       document.getElementById('file-input').dispatchEvent(new MouseEvent('click')));
 
-  btn('#upload-btn').merge(btn('#create-btn')).subscribe(ev => $('#upload-modal').modal('show'));
 
   return {
+    toggleUpload$: btn('#upload-btn').merge(btn('#create-btn')),
     selectFiles$: DOM.select('#file-input').events('change').map(ev => toArray(ev.target.files)),
     reset$: btn('#reset-btn'),
     download$: btn('#download-btn'),
-    order$: btn('#order-btn'),
     demo$: btn('#demo-btn'),
     ready$: Observable.just({}),
     shuffle$: btn('.shuffle-btn').map(ev => ev.target['data-page']),
@@ -43,19 +42,20 @@ function intent(DOM, HTTP) {
 }
 
 function model(DOMactions) {
+  DOMactions.toggleUpload$.subscribe(ev => $('#upload-modal').modal('show'));
   DOMactions.selectFiles$.subscribe(x => $('#upload-modal').modal('hide'));
 }
 
-function view(collection, album, upload, ui, payment) {
+function view(collection, album, upload, ui, order) {
   let toolbarDOM = Observable.combineLatest(collection.state$, album.state$, upload.state$, ui.state$, Elements.renderToolbar);
   let uploadDOM = Observable.just(Elements.renderUploadArea());
 
-  return Observable.combineLatest(toolbarDOM, uploadDOM, album.DOM, payment.DOM,
-      (toolbarVTree, uploadVTree, albumVTree, paymentVTree) =>
+  return Observable.combineLatest(toolbarDOM, uploadDOM, album.DOM, order.DOM,
+      (toolbarVTree, uploadVTree, albumVTree, orderVTree) =>
       h('div', [
         toolbarVTree,
         uploadVTree,
-        // paymentVTree,
+        orderVTree,
         albumVTree
       ])
   );
@@ -71,18 +71,19 @@ function main({DOM, HTTP}) {
   let photos = Photos(actions, upload, collection);
   let album = Album(DOM, HTTP, actions, collection, photos, upload);
   let ui = UserInterface(actions, album);
-  let payment = Payment();
+  let order = Order(DOM, HTTP);
 
   model(actions);
 
   let requests$ = Observable.merge(
       _.values(user.HTTP)
       .concat(_.values(collection.HTTP))
+      .concat(_.values(order.HTTP))
       .concat(_.values(album.HTTP)))
     .do(x => console.log(x));
 
   return {
-    DOM: view(collection, album, upload, ui, payment),
+    DOM: view(collection, album, upload, ui, order),
     HTTP: requests$
   };
 }

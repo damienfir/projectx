@@ -19,7 +19,8 @@ libraryDependencies ++= Seq(
   "com.typesafe.play" %% "play-slick-evolutions" % "1.0.1",
   "javax.mail" % "mail" % "1.4.7",
   "org.scalaj" %% "scalaj-http" % "1.1.4",
-  "com.github.tminglei" %% "slick-pg" % "0.9.1"
+  "com.github.tminglei" %% "slick-pg" % "0.9.1",
+  "com.braintreepayments.gateway" % "braintree-java" % "2.52.0"
 )
 
 routesGenerator := InjectedRoutesGenerator

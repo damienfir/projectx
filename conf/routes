@@ -50,6 +50,9 @@ POST    /collections/:id/pages    @controllers.Collections.generatePages(id: Lon
 #
 
 POST /save  @controllers.Collections.saveAlbum
+POST /order @controllers.Collections.order
+
+GET /client_token @controllers.Payment.getToken
 
 
 GET     /ui                         @controllers.Application.ui

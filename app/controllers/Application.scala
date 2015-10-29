@@ -27,6 +27,14 @@ class Application extends Controller {
 }
 
 
+class Payment @Inject()(braintree: Braintree) extends Controller {
+
+  def getToken = Action.async {
+    braintree.token.map(token => Ok(token))
+  }
+}
+
+
 class Users @Inject()(usersDAO: UsersDAO) extends Controller with CRUDActions[DBModels.User] {
   implicit val format = Json.format[DBModels.User]
   
@@ -147,4 +155,6 @@ class Collections @Inject()(compositionDAO: CompositionDAO, collectionDAO: Colle
           .map(value => Ok(Json.toJson(value)))
     )
   }
+
+  def order = Action { Ok }
 }
