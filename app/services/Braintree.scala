@@ -1,5 +1,6 @@
 package services
 
+import scala.util.{Try, Success, Failure}
 import javax.inject._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.concurrent.Future
@@ -15,4 +16,19 @@ class Braintree {
     );
 
   def token = Future(gateway.clientToken().generate())
+
+  def order(order: DBModels.Order) = {
+    val request = new TransactionRequest()
+      .amount(order.amount)
+      .paymentMethodNonce(order.nonce)
+
+    Future(gateway.transaction().sale(request))
+      .map(res => 
+        if (res.isSuccess) {
+          Success(res)
+        } else if (res.getTransaction != null) {
+          Failure(new Exception(res))
+        }
+      )
+  }
 }

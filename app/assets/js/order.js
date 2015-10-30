@@ -19,38 +19,41 @@ function intent(DOM, HTTP) {
 
   let actions = {
     // formSubmit$: DOM.select('#order-form').events('submit').map(cancelDefault),
-    order$: btn('#order-btn'),
+    orderModal$: btn('#order-btn'),
     formSubmit$: btn('.submit-order-btn').map('order-form').map(extractFields(fields)),
     formSubmitted$: jsonPOST(HTTP, /\/order/),
-    clientToken$: HTTP.filter(res$ => !_.isUndefined(res$.request.url)).filter(res$ => res$.request.url.match(/\/client_token/)).mergeAll().map(res => res.text).share()
+    clientToken$: HTTP.filter(res$ => !_.isUndefined(res$.request.url))
+      .filter(res$ => res$.request.url.match(/\/client_token/))
+      .mergeAll().map(res => res.text).share(),
+    nonceReceived$: new Rx.Subject()
   }
 
-  actions.formSubmit$.subscribe(ev => $('#order-modal').modal('hide'));
-  actions.formSubmitted$.subscribe(ev => $('#payment-modal').modal('show'));
-  actions.order$.subscribe(ev => $('#order-modal').modal('show'));
+  actions.orderModal$.subscribe(ev => $('#order-modal').modal('show'));
   btn('.close-btn').subscribe(ev => $(ev.target['data-target']).modal('hide'));
-  btn('.payment-back-btn').subscribe(ev => {
-    $('#payment-modal').modal('hide');
-    $('#order-modal').modal('show');
-  });
 
   return actions;
 }
 
 
 function model(actions, user) {
-  actions.formSubmitted$.zip(actions.clientToken$, (ev, clientToken) => {
+  actions.clientToken$.subscribe(clientToken => {
     braintree.setup(clientToken, "dropin", {
-      container: "payment-form"
+      container: "payment-form",
+      onPaymentMethodReceived: function(obj) {
+        actions.nonceReceived$.onNext(obj);
+      }
     });
-  }).subscribe();
+  });
 
-  let updateInfos$ = actions.formSubmit$.do(x => console.log(x))
+  let updateInfos$ = actions.formSubmit$
     .withLatestFrom(user.state$, (info, user) => _.extend(info, {'userID': user.id}))
     .map(info => state => _.extend(state, info));
+
   let clientToken$ = actions.clientToken$.map(token => state => _.extend(state, {token}));
 
-  return Observable.merge(clientToken$, updateInfos$).startWith({}).scan(apply);
+  let updateNonce$ = actions.nonceReceived$.map(obj => state => _.extend(state, {'method': obj}));
+
+  return Observable.merge(clientToken$, updateInfos$, updateNonce$).startWith({}).scan(apply);
 }
 
 
@@ -62,7 +65,7 @@ function requests(actions, state$) {
       send: {}
     })),
 
-    clientToken$: actions.order$
+    clientToken$: actions.orderModal$
       .withLatestFrom(state$, (ev,state) => state.token)
       .filter(_.isUndefined)
       .map({url: '/client_token', 'method': 'GET', 'eager': true})
@@ -104,25 +107,32 @@ function view(state$) {
                 h('.col-lg-5.form-group', [
                   h('label', {'for': 'country'}, "Country"),
                   h('input.form-control', {'name': 'country', 'disabled': true, 'placeholder': '', 'value': 'Switzerland'})]),
-              ])])]),
+              ])]),
+
+              h('.panel.panel-default', [
+                // h('.panel-heading', h('h4.panel-title', "Payment information")),
+                h('.panel-body',
+                  h('form', [h('div#payment-form'), h('button.btn.btn-info.pull-right#verify-btn', "Validate payment method")]))
+              ])
+          ]),
           h('.modal-footer', [
-            h('button.btn.btn-primary.pull-right.submit-order-btn', {'type': 'button'}, ['Continue ', h('i.fa.fa-angle-right')]),
+            h('button.btn.btn-primary.pull-right.submit-order-btn', {'type': 'button', 'disabled': _.isUndefined(state.method)}, ['Confirm ', h('i.fa.fa-check')]),
             h('button.btn.btn-default.pull-right.close-btn.order-cancel-btn', {'data-target': '#order-modal'}, ['Not now ', h('i.fa.fa-times')]),
           ])
       ]))),
 
-      h('.modal.fade#payment-modal',
-        h('.modal-dialog',
-          h('.modal-content', [
-            h('.modal-header', ''),
-            h('.modal-body',
-              h('form', h('div#payment-form'))),
-            h('.modal-footer', [
-              h('button.btn.btn-primary.pull-right', ["Confirm ", h('i.fa.fa-check')]),
-              h('button.btn.btn-default.pull-right.close-btn.payment-cancel-btn', {'data-target': '#payment-modal', 'type': 'button'}, ["Not now ", h('i.fa.fa-times')]),
-              h('button.btn.btn-default.pull-right.payment-back-btn', [h('i.fa.fa-angle-left'), " Back"]),
-            ])
-          ])))
+      // h('.modal.fade#payment-modal',
+      //   h('.modal-dialog',
+      //     h('.modal-content', [
+      //       h('.modal-header', ''),
+      //       h('.modal-body',
+      //         h('form', h('div#payment-form'))),
+      //       h('.modal-footer', [
+      //         h('button.btn.btn-primary.pull-right.submit-payment-btn', ["Continue ", h('i.fa.fa-angle-right')]),
+      //         h('button.btn.btn-default.pull-right.close-btn.payment-cancel-btn', {'data-target': '#payment-modal', 'type': 'button'}, ["Not now ", h('i.fa.fa-times')]),
+      //         h('button.btn.btn-default.pull-right.payment-back-btn', [h('i.fa.fa-angle-left'), " Back"]),
+      //       ])
+      //     ])))
       ]));
 
         // h('.panel.panel-default', [

@@ -27,10 +27,18 @@ class Application extends Controller {
 }
 
 
-class Payment @Inject()(braintree: Braintree) extends Controller {
+class Payment @Inject()(braintree: Braintree, orderDAO: OrderDAO, infoDAO: InfoDAO) extends Controller {
 
   def getToken = Action.async {
     braintree.token.map(token => Ok(token))
+  }
+
+  def submitOrder = Action.async(parse.json) { request =>
+    val order = (request.body \ "order").as[DBModels.Order]
+    val info = (request.body \ "info").as[DBModels.Info]
+    braintree.order(order)
+    infoDAO.addOrUpdate(info)
+    orderDAO.addOrder(order)
   }
 }
 
@@ -40,25 +48,6 @@ class Users @Inject()(usersDAO: UsersDAO) extends Controller with CRUDActions[DB
   
   def get(id: Long) = getAction(usersDAO.get(id))
   def save = saveAction(usersDAO.insert, usersDAO.update)
-
-//   def send(user_id: String, mosaic_id: String) = Action(parse.json) { implicit request =>
-//     request.body.asOpt[Email] map { req =>
-//       _collection.update(Json.obj("_id" -> user_id), Json.obj("$set" -> Json.obj("email" -> req.from)))
-//       EmailService.sendToFriend(req.to, req.from, mosaic_id)
-//       Ok
-//     } getOrElse(InternalServerError)
-//   }
-
-//   def download(user_id: String, mosaic_id: String, email: String) = Action.async { implicit request =>
-//     request.queryString.get("email") map(_.head) map { email =>
-//       _collection.update(Json.obj("_id" -> user_id), Json.obj("$set" -> Json.obj("email" -> email)))
-//       Mosaics.DBA.get(mosaic_id) map {
-//         case Some(mosaic) =>
-//           EmailService.sendToSelf(email, mosaic._id.get.stringify)
-//           Ok.sendFile(MosaicService.getMosaicFile(mosaic_id + ".jpg"))
-//       }
-//     } getOrElse(Future(BadRequest))
-//   }
 }
 
 

@@ -44,6 +44,25 @@ object DBModels {
     ty2: Float
   )
 
+  case class Info(
+    id: Option[Long],
+    userID: Long,
+    name: String,
+    email: String,
+    address: String,
+    zip: String,
+    city: String,
+    country: String
+  )
+
+  case class Order(
+    id: Option[Long],
+    userID: Long,
+    collectionID: Long,
+    nonce: String,
+    price: Float
+  )
+
   implicit val tileformat = Json.format[Tile]
 }
 

@@ -55,6 +55,10 @@ body {
 /*   margin-right: 3px; */
 /* } */
 
+#verify-btn {
+  margin-top: 15px;
+}
+
 .spread {
   margin-bottom: 70px;
 }
