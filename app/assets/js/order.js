@@ -1,7 +1,16 @@
 import {Rx} from '@cycle/core';
 import {h} from '@cycle/dom';
-import {jsonPOST, jsonGET} from './helpers'
+import {jsonPOST, jsonGET, apply} from './helpers'
 let Observable = Rx.Observable;
+
+
+let fields = ['name', 'email', 'address', 'zip', 'city', 'country'];
+
+
+let extractFields = (fields) => (formID) => {
+  let data = document.getElementById(formID).elements;
+  return _.mapObject(_.pick(data, fields), (val, key) => val.value);
+}
 
 
 function intent(DOM, HTTP) {
@@ -11,9 +20,9 @@ function intent(DOM, HTTP) {
   let actions = {
     // formSubmit$: DOM.select('#order-form').events('submit').map(cancelDefault),
     order$: btn('#order-btn'),
-    formSubmit$: btn('.submit-order-btn'),
+    formSubmit$: btn('.submit-order-btn').map('order-form').map(extractFields(fields)),
     formSubmitted$: jsonPOST(HTTP, /\/order/),
-    clientToken$: HTTP.filter(res$ => !_.isUndefined(res$.request.url)).filter(res$ => res$.request.url.match(/\/client_token/)).mergeAll().map(res => res.body).share()
+    clientToken$: HTTP.filter(res$ => !_.isUndefined(res$.request.url)).filter(res$ => res$.request.url.match(/\/client_token/)).mergeAll().map(res => res.text).share()
   }
 
   actions.formSubmit$.subscribe(ev => $('#order-modal').modal('hide'));
@@ -29,20 +38,23 @@ function intent(DOM, HTTP) {
 }
 
 
-function model(actions) {
-  let clientToken$ = actions.clientToken$.do(x => console.log(x));
-
-  actions.formSubmitted$.withLatestFrom(clientToken$, (ev, clientToken) => {
-    if (!_.isUndefined(clientToken)) {
-      braintree.setup(clientToken, "dropin", {
-        container: "payment-form"
-      });
-    }
+function model(actions, user) {
+  actions.formSubmitted$.zip(actions.clientToken$, (ev, clientToken) => {
+    braintree.setup(clientToken, "dropin", {
+      container: "payment-form"
+    });
   }).subscribe();
+
+  let updateInfos$ = actions.formSubmit$.do(x => console.log(x))
+    .withLatestFrom(user.state$, (info, user) => _.extend(info, {'userID': user.id}))
+    .map(info => state => _.extend(state, info));
+  let clientToken$ = actions.clientToken$.map(token => state => _.extend(state, {token}));
+
+  return Observable.merge(clientToken$, updateInfos$).startWith({}).scan(apply);
 }
 
 
-function requests(actions) {
+function requests(actions, state$) {
   return {
     formSubmit$: actions.formSubmit$.map(ev => ({
       url: '/order',
@@ -50,13 +62,16 @@ function requests(actions) {
       send: {}
     })),
 
-    clientToken$: actions.order$.map({url: '/client_token', 'method': 'GET', 'eager': true})
+    clientToken$: actions.order$
+      .withLatestFrom(state$, (ev,state) => state.token)
+      .filter(_.isUndefined)
+      .map({url: '/client_token', 'method': 'GET', 'eager': true})
   }
 }
 
 
-function view() {
-  return Observable.just(h('div', [
+function view(state$) {
+  return state$.map(state => h('div', [
     h('.modal.fade#order-modal',
       h('.modal-dialog',
         h('.modal-content', [
@@ -143,12 +158,12 @@ function view() {
         //     ])])
 }
 
-module.exports = function(DOM, HTTP) {
+module.exports = function(DOM, HTTP, user) {
 
   let actions = intent(DOM, HTTP);
-  model(actions);
-  let requests$ = requests(actions);
-  let vtree$ = view();
+  let state$ = model(actions, user);
+  let requests$ = requests(actions, state$);
+  let vtree$ = view(state$);
 
   return {
     DOM: vtree$,

@@ -1,5 +1,4 @@
 import {Rx} from '@cycle/core';
-// import _ from 'underscore';
 
 import cookie from './cookies'
 import {apply, isNotEmpty, jsonGET, jsonPOST, hasID, hasNoID} from './helpers'
