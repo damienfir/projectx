@@ -1,6 +1,6 @@
 import {Rx} from '@cycle/core';
 import {h} from '@cycle/dom';
-import {apply, argArray, asc, initial, jsonPOST, cancelDefault} from './helpers'
+import {apply, argArray, asc, ascIndex, initial, jsonPOST, cancelDefault} from './helpers'
 import Composition from './composition-ui'
 let Observable = Rx.Observable;
 
@@ -58,13 +58,23 @@ function renderTile(tile, tileindex, index) {
 }
 
 
+let renderCover = (title, page) => {
+  return [
+    page.tiles.length === 0 ? h('.nocover', [
+      // h('i.fa.fa-', "Cover page"),
+      h('h6.covermessage.center', "Select images from the album to appear on the cover.")
+    ]) : h('.cover-title' + (title ? '' : '.notitle'), title ? title : 'Album title...')
+  ]
+}
+
 let renderPage = (photos, title) => (page) => {
   return h('.box-mosaic' + leftOrRight(page.index),
       {'data-page': page.index},
       page.tiles
         .map(t => _.extend(t, {hash: photos[t.photoID]}))
         .map((tile, index) => renderTile(tile, index, page.index))
-        .concat((page.index === 0 && title) ? h('.cover-title', title): ''))
+        .concat((page.index === 0) ? renderCover(title, page) : [])
+  );
 }
 
 function splitIntoSpreads(spreads, page) {
@@ -117,12 +127,25 @@ function model(DOMactions, collectionActions, HTTPactions, composition$) {
     window.open("/storage/generated/" + url);
   });
 
-  let demoAlbum$ = collectionActions.storedAlbum$.map(demo => album => demo.pages);
-  let albumUpdated$ = HTTPactions.createdAlbum$.filter(pages => pages[0].index > 0)
-    .map(newpages => album => album.concat(newpages).sort((a,b) => asc(a.index,b.index)));
-  let clearAlbum$ = DOMactions.reset$.map(x => item => [coverpage]);
-  let createdCover$ = HTTPactions.createdAlbum$.filter(pages => pages[0].index === 0).map(pages => pages[0]);
-  let albumPageShuffled$ = HTTPactions.shuffledPage$.merge(createdCover$).map(page => album => { album[page.index] = page; return album; });
+  let demoAlbum$ = collectionActions.storedAlbum$
+    .map(demo => _.sortBy(demo.pages, 'index'))
+    .do(x => console.log(x))
+    .map(pages => (pages[0].index === 0) ? pages : [coverpage].concat(pages))
+    .map(pages => album => pages);
+
+  let albumUpdated$ = HTTPactions.createdAlbum$
+    .filter(pages => pages[0].index > 0)
+    .map(newpages => album => album.concat(newpages).sort(ascIndex));
+
+  let clearAlbum$ = DOMactions.reset$
+    .map(x => item => [coverpage]);
+
+  let createdCover$ = HTTPactions.createdAlbum$
+    .filter(pages => pages[0].index === 0)
+    .map(pages => pages[0]);
+
+  let albumPageShuffled$ = HTTPactions.shuffledPage$.merge(createdCover$)
+    .map(page => album => { album[page.index] = page; return album; });
 
   return Observable.merge(albumUpdated$, clearAlbum$, demoAlbum$, albumPageShuffled$, composition$)
     .startWith([coverpage])
@@ -183,6 +206,7 @@ function requests(DOMactions, album$, collection, photos, upload) {
           send: addOrRemove(photosFromTiles(photos, album[coverpage.index].tiles), photos.filter(p => p.id === photoID).shift())
         };
       })
+      .filter(req => req.send.length > 0)
   };
 }
 

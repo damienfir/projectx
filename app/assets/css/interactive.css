@@ -224,6 +224,15 @@ body {
   right: 0;
 }
 
+.covermessage {
+  color: #999;
+  text-align: center;
+}
+
+.notitle {
+  color: #999;
+}
+
 .col-buttons button {
   color: #999;
   margin: 0 20px;

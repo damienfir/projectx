@@ -38,6 +38,7 @@ function cancelDefault(ev) {
 
 let isNotEmpty = obj => !_.isEmpty(obj)
 let asc = (a,b) => a - b
+let ascIndex = (a,b) => asc(a.index,b.index)
 let apply = (state, func) => func(state)
 let log = x => console.log(x)
 let argArray = (a,b) => [a,b]
