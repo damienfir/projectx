@@ -71,7 +71,7 @@ function main({DOM, HTTP}) {
   let photos = Photos(actions, upload, collection);
   let album = Album(DOM, HTTP, actions, collection, photos, upload);
   let ui = UserInterface(actions, album);
-  let order = Order(DOM, HTTP, user);
+  let order = Order(DOM, HTTP, user, collection);
 
   model(actions);
 

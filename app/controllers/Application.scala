@@ -27,18 +27,22 @@ class Application extends Controller {
 }
 
 
-class Payment @Inject()(braintree: Braintree, orderDAO: OrderDAO, infoDAO: InfoDAO) extends Controller {
+class Payment @Inject()(braintree: Braintree) extends Controller {
+  implicit val orderFormat = Json.format[APIModels.Order]
+  implicit val infoFormat = Json.format[APIModels.Info]
 
   def getToken = Action.async {
     braintree.token.map(token => Ok(token))
   }
 
   def submitOrder = Action.async(parse.json) { request =>
-    val order = (request.body \ "order").as[DBModels.Order]
-    val info = (request.body \ "info").as[DBModels.Info]
-    braintree.order(order)
-    infoDAO.addOrUpdate(info)
-    orderDAO.addOrder(order)
+    val order = (request.body \ "order").as[APIModels.Order].copy(price = 1f)
+    val info = (request.body \ "info").as[APIModels.Info]
+    braintree.order(order, info) map { trans =>
+      Ok
+    } recover {
+      case ex => BadRequest(ex.getMessage)
+    }
   }
 }
 
@@ -144,6 +148,4 @@ class Collections @Inject()(compositionDAO: CompositionDAO, collectionDAO: Colle
           .map(value => Ok(Json.toJson(value)))
     )
   }
-
-  def order = Action { Ok }
 }

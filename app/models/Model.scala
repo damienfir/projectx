@@ -44,10 +44,15 @@ object DBModels {
     ty2: Float
   )
 
+
+  implicit val tileformat = Json.format[Tile]
+}
+
+
+object APIModels {
   case class Info(
-    id: Option[Long],
-    userID: Long,
-    name: String,
+    firstName: String,
+    lastName: String,
     email: String,
     address: String,
     zip: String,
@@ -56,16 +61,12 @@ object DBModels {
   )
 
   case class Order(
-    id: Option[Long],
     userID: Long,
     collectionID: Long,
     nonce: String,
     price: Float
   )
-
-  implicit val tileformat = Json.format[Tile]
 }
-
 
 object MosaicModels {
   case class Cluster(
