@@ -52,7 +52,7 @@ function view(collection, album, upload, ui, order) {
 
   return Observable.combineLatest(toolbarDOM, uploadDOM, album.DOM, order.DOM,
       (toolbarVTree, uploadVTree, albumVTree, orderVTree) =>
-      h('div', [
+      h('div.theme-blue', [
         toolbarVTree,
         uploadVTree,
         orderVTree,

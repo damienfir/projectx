@@ -7,10 +7,21 @@ html, body {
   /* overflow-x: hidden; */
 }
 
-body {
-  /* padding-top: 53px; */
-  background-color: #fff;
-  /* background-color: #f0f0f0; */
+#app { min-height: 100%; position: relative; }
+
+.theme-blue { min-height: 100%; background-color: #4A89DC; color: #fff; position: relative; }
+
+.theme-blue .btn { border: 0; background-color: #E6E9ED; color: #434A54; }
+
+.theme-blue .btn-primary {
+  background-color: #5D9CEC;
+  color: #fff;
+}
+.theme-blue .btn-primary:hover { background-color: #48CFAD; }
+
+.theme-blue .btn-default {
+  background-color: #E6E9ED;
+  color: #656D78;
 }
 
 .container-ui {
@@ -25,9 +36,9 @@ body {
   background-color: transparent;
 }
 
-.navbar-form .btn {
-  margin-left: 8px;
-}
+/* .navbar-form .btn { */
+/*   margin-left: 8px; */
+/* } */
 
 .navbar-btn {
   padding: 7px 10px;
@@ -63,25 +74,34 @@ body {
   margin-bottom: 70px;
 }
 
+.spread-cover {
+  width: 50%;
+  text-align: center;
+  position: relative;
+  left: 50%;
+  transform: translate(-50%,0);
+}
+
 .spread-paper {
   padding: 5px;
   background-color: #fff;
   border-radius: 3px;
+  margin: 0 auto;
 }
 
 .spread-btn {
   margin-top: 10px;
   /* padding: 5px 15px 0px 15px; */
-  color: #aaa;
+  /* color: #aaa; */
 }
-
 
 .spread-btn .page {
-  margin-top: -3px;
+  font-size: 0.85em;
+  margin-right: 5px;
 }
 
-.spread-btn .page-btn i {
-  margin-left: 5px;
+.spread-btn i {
+  margin-right: 5px;
 }
 
 .navbar {
@@ -130,6 +150,8 @@ body {
 
 .album {
   margin-top: 70px;
+  max-width: 1400px;
+  text-align: center;
 }
 
 .start-buttons {
@@ -171,8 +193,11 @@ body {
   width: 49.5%;
   display: inline-block;
   position: relative;
-  cursor: pointer;
   /* border-left: 1px dashed #999; */
+}
+
+.spread-cover .box-mosaic {
+  width: 100%;
 }
 
 /* trick to fix aspect ratio */
@@ -180,6 +205,10 @@ body {
   padding-top: 70.69%;
   display: block;
   content: '';
+}
+
+.move-mosaic {
+  cursor: pointer;
 }
 
 .ui-tile {
@@ -215,6 +244,7 @@ body {
 
 .cover-title {
   font-size: 2.5em;
+  color: #333;
   background-color: #fff;
   padding: 15px 30px 15px 100px;
   /* width: 100%; */
@@ -222,6 +252,7 @@ body {
   text-align: right;
   bottom: 15%;
   right: 0;
+  border: 0;
 }
 
 .covermessage {

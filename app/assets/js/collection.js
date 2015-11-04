@@ -40,7 +40,7 @@ function requests(DOMactions, userState$, state$) {
         send: {}
       })),
 
-    demoAlbum$: DOMactions.demo$.map('/collections/1085/album'),
+    demoAlbum$: DOMactions.demo$.map('/collections/1119/album'),
 
     storedAlbum$: DOMactions.hasID$.map(id => '/collections/'+id+'/album')
   }

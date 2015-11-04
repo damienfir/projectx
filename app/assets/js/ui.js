@@ -14,21 +14,19 @@ function renderToolbar(collection, album, upload, ui) {
               h('button.btn.btn-primary.navbar-btn#upload-btn', [
                 h('i.fa.fa-cloud-upload'), 'Add photos'])),
             h('li',
-              h('button.btn.btn-default.navbar-btn#reset-btn', [
+              h('button.btn.btn-primary.navbar-btn#reset-btn', [
                 h('i.fa.fa-refresh'), 'New album'])),
           ]) : '',
 
         (album && album.length > 1) ?
-          h('form.navbar-form.navbar-right', [
-            h('.form-group',
-              h('input.form-control#album-title', {'type': 'text', 'placeholder': 'Album title...', 'value': collection.name})),
-              h('button.btn.btn-primary#download-btn', [
-                h('i.fa.fa-cloud-download'), 'Download album']),
-              h('button.btn.btn-primary#order-btn', [
-                h('i.fa.fa-shopping-cart'), 'Order album']),
-              h('button.btn.btn-primary#save-btn', [
-                h('i.fa.fa-cloud-download'), 'Save album']),
-              h('a.btn.btn-link', {'href': '/ui/'+collection.id}, 'Permanent link')
+          h('ul.nav.navbar-nav.navbar-right', [
+              h('li', h('button.btn.btn-primary.navbar-btn#download-btn', [
+                h('i.fa.fa-cloud-download'), 'Download album'])),
+              h('li', h('button.btn.btn-primary.navbar-btn#order-btn', [
+                h('i.fa.fa-shopping-cart'), 'Order album'])),
+              h('li', h('button.btn.btn-primary.navbar-btn#save-btn', [
+                h('i.fa.fa-cloud-download'), 'Save album'])),
+              // h('li', h('a.btn.btn-primary.navbar-btn', {'href': '/ui/'+collection.id}, 'Permanent link'))
           ]) : ''
       ]),
 

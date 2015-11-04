@@ -198,9 +198,9 @@ function move(tile, offset, prop1, prop2) {
 
 
 function pageIntent(DOM) {
-  let mouseDown$ = DOM.select('.box-mosaic').events('mousedown').map(cancelDefault);
-  let mouseUp$ = DOM.select('.box-mosaic').events('mouseup').map(cancelDefault);
-  let mouseMove$ = DOM.select('.box-mosaic').events('mousemove').map(cancelDefault);
+  let mouseDown$ = DOM.select('.move-mosaic').events('mousedown').filter(ev => _.contains(ev.target.classList, 'move-mosaic')).map(cancelDefault);
+  let mouseUp$ = DOM.select('.move-mosaic').events('mouseup').map(cancelDefault);
+  let mouseMove$ = DOM.select('.move-mosaic').events('mousemove').map(cancelDefault);
 
   let down$ = mouseDown$.map(ev => _.extend(ev.target, {
     x: ev.offsetX/ev.target.offsetWidth,

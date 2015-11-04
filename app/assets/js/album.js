@@ -10,8 +10,27 @@ let coverpage = {
   index: 0
 };
 
+let blankpage = {
+  tiles: [],
+  index: -1
+}
 
-function leftOrRight(index) { return index % 2 ? '.pull-right' : '.pull-left'; }
+
+let leftOrRight = (index) => index % 2 ? '.pull-right' : '.pull-left';
+let moveOrNot = (tiles) => tiles.length === 0 ? '.nomove' : '.move-mosaic';
+
+function splitIntoSpreads(spreads, page) {
+  if (!spreads.length) {
+    spreads.push([page]);
+  } else if (spreads.length === 1) {
+    spreads.push([blankpage, page]);
+  } else if(spreads.length && spreads[spreads.length-1].length < 2) {
+    spreads[spreads.length-1].push(page);
+  } else {
+    spreads.push([page]);
+  }
+  return spreads;
+}
 
 
 function renderButton() {
@@ -60,15 +79,14 @@ function renderTile(tile, tileindex, index) {
 
 let renderCover = (title, page) => {
   return [
-    page.tiles.length === 0 ? h('.nocover', [
-      // h('i.fa.fa-', "Cover page"),
-      h('h6.covermessage.center', "Select images from the album to appear on the cover.")
-    ]) : h('.cover-title' + (title ? '' : '.notitle'), title ? title : 'Album title...')
+    page.tiles.length === 0 ?
+      h('.nocover', h('h6.covermessage.center', "Select images from the album to appear on the cover.")) :
+      h('input.cover-title#album-title', {'type': 'text', 'placeholder': 'Album title...', 'value': title, 'autocomplete': 'off'})
   ]
 }
 
-let renderPage = (photos, title) => (page) => {
-  return h('.box-mosaic' + leftOrRight(page.index),
+let renderPage = (photos, title, j) => (page, i) => {
+  return h('.box-mosaic' + leftOrRight(j*2+i) + moveOrNot(page.tiles),
       {'data-page': page.index},
       page.tiles
         .map(t => _.extend(t, {hash: photos[t.photoID]}))
@@ -77,31 +95,20 @@ let renderPage = (photos, title) => (page) => {
   );
 }
 
-function splitIntoSpreads(spreads, page) {
-  if(spreads.length && spreads[spreads.length-1].length < 2) {
-    spreads[spreads.length-1].push(page);
-  } else {
-    spreads.push([page]);
-  }
-  return spreads;
-}
-
-let renderBtn = ui => ({index}) => {
-  let toggle = !(ui.toggle & (1 << index));
-  return h('.btn-group' + leftOrRight(index), [
-      h('button.btn.btn-xs.page-btn', {'data-page': index}, ["Page "+(index+1)+' ', /*h('i.fa'+ (toggle ? '.fa-caret-left' : '.fa-caret-right'))*/]),
-      toggle ? [
-      h('button.btn.btn-default.btn-xs.shuffle-btn', {'data-page': index}, [h('i.fa.fa-refresh'), " Shuffle"]),
+let renderBtn = (ui, j) => (page, i) => {
+  let p = j*2+i;
+  return h(leftOrRight(p), [
+      h('span.page', {'data-page': page.index}, p === 0 ? 'Cover page ' : "Page "+(p-1)+' '),
+      page.tiles.length ? h('button.btn.btn-primary.btn-xs.shuffle-btn', {'data-page': page.index}, [h('i.fa.fa-refresh'), " Shuffle"]) : '',
       // h('button.btn.btn-default.btn-xs.incr-btn', {'data-page': index}, [h('i.fa.fa-plus'), " More"]),
       // h('button.btn.btn-default.btn-xs.decr-btn', {'data-page': index}, [h('i.fa.fa-minus'), " Less"])
-      ] : ''
   ])
 }
 
-let renderSpread = (photos, ui, title) => (spread) => {
-  return h('.spread', [
-      h('.spread-paper.shadow.clearfix', spread.map(renderPage(photos, title))), 
-      h('.spread-btn.clearfix', spread.map(renderBtn(ui)))
+let renderSpread = (photos, ui, title) => (spread, i) => {
+  return h('.spread' + (spread.length === 1 ? '.spread-cover' : ''), [
+      h('.spread-paper.shadow.clearfix', spread.map(renderPage(photos, title, i))), 
+      h('.spread-btn.clearfix', spread.map(renderBtn(ui, i)))
   ]);
 }
 
@@ -110,6 +117,7 @@ function renderAlbum(album, photos, ui, title) {
     .reduce(splitIntoSpreads, [])
     .map(renderSpread(photos, ui, title));
 }
+
 
 
 function intent(HTTP) {
@@ -223,7 +231,7 @@ function view(albumState$, photosState$, uiState$, collectionState$) {
   return albumState$.combineLatest(photosDict$, uiState$, collectionState$,
       (album, photos, ui, collection) =>
         album.length > 1 ?
-        h('div.container-fluid.limited-width.album', renderAlbum(album, photos, ui, collection.name)) :
+        h('div.container-fluid.album', renderAlbum(album, photos, ui, collection.name)) :
         renderButton()
     );
 }
