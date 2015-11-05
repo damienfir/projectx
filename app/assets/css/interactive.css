@@ -7,11 +7,11 @@ html, body {
   /* overflow-x: hidden; */
 }
 
-#app { min-height: 100%; position: relative; }
+#app { height: 100%; position: relative; }
 
 .theme-blue { min-height: 100%; background-color: #4A89DC; color: #fff; position: relative; }
 
-.theme-blue .btn { border: 0; background-color: #E6E9ED; color: #434A54; }
+.theme-blue .btn { border: 0; }
 
 .theme-blue .btn-primary {
   background-color: #5D9CEC;
@@ -34,6 +34,21 @@ html, body {
 
 .navbar-transparent {
   background-color: transparent;
+}
+
+.navbar-form .form-control {
+  margin-right: 8px;
+}
+
+.theme-blue .input-blue {
+  background-color: #fff;
+  color: #333;
+  border: 0;
+}
+
+.theme-blue .input-blue:focus {
+  background-color: #eee;
+  color: #333;
 }
 
 /* .navbar-form .btn { */
@@ -75,7 +90,7 @@ html, body {
 }
 
 .spread-cover {
-  width: 50%;
+  width: 60%;
   text-align: center;
   position: relative;
   left: 50%;
@@ -246,7 +261,7 @@ html, body {
   font-size: 2.5em;
   color: #333;
   background-color: #fff;
-  padding: 15px 30px 15px 100px;
+  padding: 15px 30px 15px 50px;
   /* width: 100%; */
   position: absolute;
   text-align: right;
@@ -255,7 +270,7 @@ html, body {
   border: 0;
 }
 
-.covermessage {
+.cover-message {
   color: #999;
   text-align: center;
 }

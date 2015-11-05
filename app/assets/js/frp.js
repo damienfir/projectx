@@ -24,7 +24,7 @@ function intent(DOM, HTTP) {
       document.getElementById('file-input').dispatchEvent(new MouseEvent('click')));
 
 
-  return {
+  let actions = {
     toggleUpload$: btn('#upload-btn').merge(btn('#create-btn')),
     selectFiles$: DOM.select('#file-input').events('change').map(ev => toArray(ev.target.files)),
     reset$: btn('#reset-btn'),
@@ -32,19 +32,39 @@ function intent(DOM, HTTP) {
     demo$: btn('#demo-btn'),
     ready$: Observable.just({}),
     shuffle$: btn('.shuffle-btn').map(ev => ev.target['data-page']),
-    increment$: btn('.incr-btn').map(ev => ev.target['data-page']),
-    decrement$: btn('.decr-btn').map(ev => ev.target['data-page']),
+    // increment$: btn('.incr-btn').map(ev => ev.target['data-page']),
+    // decrement$: btn('.decr-btn').map(ev => ev.target['data-page']),
     albumTitle$: DOM.select('#album-title').events("input").map(ev => ev.target.value),
-    save$: btn('#save-btn'),
-    hasID$: Observable.just(window.location.href.split('/')).filter(url => url.length > 2).map(url => url.pop()),
+    // save$: btn('#save-btn'),
+    hasID$: Observable.just(window.location.pathname.split('/')).filter(url => url.length > 2).map(url => url.pop()),
     addPhotoCover$: btn('.cover-btn').map(ev => ev.target['data-id'])
   }
+
+  return actions;
 }
+
 
 function model(DOMactions) {
   DOMactions.toggleUpload$.subscribe(ev => $('#upload-modal').modal('show'));
   DOMactions.selectFiles$.subscribe(x => $('#upload-modal').modal('hide'));
 }
+
+
+function requests(album, collection) {
+  let save$ = album.state$.filter(a => a.length > 1)
+    .merge(collection.state$.filter(c => c.id))
+    .debounce(2000);
+
+  return {
+    saveAlbum$: save$.withLatestFrom(collection.state$, album.state$, (ev, collectionState, albumState) => ({
+      url: '/save',
+      method: 'POST',
+      eager: true,
+      send: {collection: collectionState, album: albumState}
+    }))
+  }
+}
+
 
 function view(collection, album, upload, ui, order) {
   let toolbarDOM = Observable.combineLatest(collection.state$, album.state$, upload.state$, ui.state$, Elements.renderToolbar);
@@ -75,11 +95,14 @@ function main({DOM, HTTP}) {
 
   model(actions);
 
+  let req = requests(album, collection);
+
   let requests$ = Observable.merge(
       _.values(user.HTTP)
       .concat(_.values(collection.HTTP))
       .concat(_.values(order.HTTP))
-      .concat(_.values(album.HTTP)))
+      .concat(_.values(album.HTTP))
+      .concat(_.values(req)))
     .do(x => console.log(x));
 
   return {

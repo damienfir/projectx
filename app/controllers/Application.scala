@@ -144,7 +144,7 @@ class Collections @Inject()(compositionDAO: CompositionDAO, collectionDAO: Colle
         Future.sequence(
           compositions.map(c => mosaicService.renderComposition(c, photos))
         ).map(mosaicService.makePDFFromPages)
-        .map(pages => mosaicService.makeAlbumPDF(collection.name.getOrElse("Album title"), pages))
+        .map(pages => mosaicService.makeAlbumPDF(collection.name, pages))
           .map(value => Ok(Json.toJson(value)))
     )
   }

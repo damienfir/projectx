@@ -80,8 +80,9 @@ function renderTile(tile, tileindex, index) {
 let renderCover = (title, page) => {
   return [
     page.tiles.length === 0 ?
-      h('.nocover', h('h6.covermessage.center', "Select images from the album to appear on the cover.")) :
-      h('input.cover-title#album-title', {'type': 'text', 'placeholder': 'Album title...', 'value': title, 'autocomplete': 'off'})
+      h('.nocover', h('h6.cover-message.center', "Select images from the album to appear on the cover.")) :
+      // h('input.cover-title#album-title', {'type': 'text', 'placeholder': 'Album title...', 'value': title, 'autocomplete': 'off'})
+      h('.cover-title', title ? title : 'Album title...')
   ]
 }
 
@@ -172,6 +173,7 @@ function requests(DOMactions, album$, collection, photos, upload) {
       ((array.map(p => p.id).indexOf(item.id) === -1) ?
         array.concat(item) : array.filter(el => el.id !== item.id));
 
+
   return {
     createAlbum$: upload.actions.uploadedFiles$.withLatestFrom(collection.state$, album$,
         (photos, collection, album) => ({
@@ -194,13 +196,6 @@ function requests(DOMactions, album$, collection, photos, upload) {
           send: photosFromTiles(photos, album[page].tiles)
         })),
     
-    saveAlbum$: DOMactions.save$.withLatestFrom(collection.state$, album$, (ev, collectionState, albumState) => ({
-      url: '/save',
-      method: 'POST',
-      eager: true,
-      send: {collection: collectionState, album: albumState}
-    })),
-
     editPhotoCover$: DOMactions.addPhotoCover$.withLatestFrom(collection.state$, photos.state$, album$,
       (photoID, collection, photos, album) => {
         let id = album[coverpage.index].id

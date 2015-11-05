@@ -149,9 +149,9 @@ class MosaicService @Inject()() {
     render(id, id, id, id + ".jpg")
   }
 
-  def makeTitlePage(title: String) : String = {
+  def makeTitlePage(title: Option[String]) : String = {
     val svg = Source.fromFile(mosaicFile("../title.svg")).mkString
-    val svgmod = svg.replaceAll("\\{\\{title\\}\\}", title)
+    val svgmod = svg.replaceAll("\\{\\{title\\}\\}", title.get)
     val svgfile = mosaicFile(UUID.randomUUID().toString + ".svg")
     val pdffile = mosaicFile(UUID.randomUUID().toString + ".pdf")
     writeFile(svgfile, svgmod)
@@ -174,7 +174,7 @@ class MosaicService @Inject()() {
     }
   }
 
-  def makeAlbumPDF(title: String, pages: String) : String = {
+  def makeAlbumPDF(title: Option[String], pages: String) : String = {
     val titlepage = makeTitlePage(title)
     val blank = mosaicFile("../blank.pdf")
     val albumname = UUID.randomUUID().toString + ".pdf"

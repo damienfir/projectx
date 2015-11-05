@@ -20,12 +20,13 @@ function renderToolbar(collection, album, upload, ui) {
 
         (album && album.length > 1) ?
           h('ul.nav.navbar-nav.navbar-right', [
-              h('li', h('button.btn.btn-primary.navbar-btn#download-btn', [
-                h('i.fa.fa-cloud-download'), 'Download album'])),
+            h('li.navbar-form', h('input.form-control.input-blue#album-title', {'type': 'text', 'placeholder': 'Album title...', 'value': collection.name, 'autocomplete': 'off'})),
+              // h('li', h('button.btn.btn-primary.navbar-btn#download-btn', [
+              //   h('i.fa.fa-cloud-download'), 'Download album'])),
               h('li', h('button.btn.btn-primary.navbar-btn#order-btn', [
                 h('i.fa.fa-shopping-cart'), 'Order album'])),
-              h('li', h('button.btn.btn-primary.navbar-btn#save-btn', [
-                h('i.fa.fa-cloud-download'), 'Save album'])),
+              // h('li', h('button.btn.btn-primary.navbar-btn#save-btn', [
+              //   h('i.fa.fa-cloud-download'), 'Save album'])),
               // h('li', h('a.btn.btn-primary.navbar-btn', {'href': '/ui/'+collection.id}, 'Permanent link'))
           ]) : ''
       ]),
