@@ -33,21 +33,6 @@ function splitIntoSpreads(spreads, page) {
 }
 
 
-function renderButton() {
-  return h('.start-buttons', [
-      h('button.btn.btn-primary.btn-lg#create-btn', [
-        h('i.fa.fa-book.fa-3x'),
-        'Create album'
-      ]), 
-      h('span.or', 'or'),
-      h('button.btn.btn-info.btn-lg#demo-btn', [
-        h('i.fa.fa-rocket.fa-3x'),
-        'View demo'
-      ])
-  ]);
-}
-
-
 function renderTile(tile, tileindex, index) {
   function percent(x) { return x * 100 + "%"; }
 
@@ -86,13 +71,20 @@ let renderCover = (title, page) => {
   ]
 }
 
+let renderBackside = () => {
+  console.log("value");
+  return h('.backside', "Empty page");
+}
+
 let renderPage = (photos, title, j) => (page, i) => {
   return h('.box-mosaic' + leftOrRight(j*2+i) + moveOrNot(page.tiles),
       {'data-page': page.index},
-      page.tiles
+      [].concat(
+        page.tiles
         .map(t => _.extend(t, {hash: photos[t.photoID]}))
-        .map((tile, index) => renderTile(tile, index, page.index))
-        .concat((page.index === 0) ? renderCover(title, page) : [])
+        .map((tile, index) => renderTile(tile, index, page.index)))
+      .concat((page.index === 0) ? renderCover(title, page) : [])
+      .concat((j === 1 && i === 0) ? renderBackside() : [])
   );
 }
 
@@ -227,7 +219,7 @@ function view(albumState$, photosState$, uiState$, collectionState$) {
       (album, photos, ui, collection) =>
         album.length > 1 ?
         h('div.container-fluid.album', renderAlbum(album, photos, ui, collection.name)) :
-        renderButton()
+        undefined
     );
 }
 

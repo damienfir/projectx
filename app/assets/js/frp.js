@@ -52,7 +52,8 @@ function model(DOMactions) {
 
 function requests(album, collection) {
   let save$ = album.state$.filter(a => a.length > 1)
-    .merge(collection.state$.filter(c => c.id))
+    .merge(collection.state$.filter(c => c.id && c.name))
+    .skip(1)
     .debounce(2000);
 
   return {
@@ -69,14 +70,15 @@ function requests(album, collection) {
 function view(collection, album, upload, ui, order) {
   let toolbarDOM = Observable.combineLatest(collection.state$, album.state$, upload.state$, ui.state$, Elements.renderToolbar);
   let uploadDOM = Observable.just(Elements.renderUploadArea());
+  let buttonDOM = Observable.just(Elements.renderButton());
 
-  return Observable.combineLatest(toolbarDOM, uploadDOM, album.DOM, order.DOM,
-      (toolbarVTree, uploadVTree, albumVTree, orderVTree) =>
+  return Observable.combineLatest(toolbarDOM, uploadDOM, album.DOM, order.DOM, buttonDOM,
+      (toolbarVTree, uploadVTree, albumVTree, orderVTree, buttonVTree) =>
       h('div.theme-blue', [
         toolbarVTree,
         uploadVTree,
         orderVTree,
-        albumVTree
+        albumVTree || buttonVTree
       ])
   );
 }

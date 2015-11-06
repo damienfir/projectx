@@ -17,14 +17,16 @@ function renderToolbar(collection, album, upload, ui) {
               h('button.btn.btn-primary.navbar-btn#reset-btn', [
                 h('i.fa.fa-refresh'), 'New album'])),
           ]) : '',
+          
+        h('ul.nav.navbar-nav', renderProgressbar(upload)),
 
         (album && album.length > 1) ?
           h('ul.nav.navbar-nav.navbar-right', [
             h('li.navbar-form', h('input.form-control.input-blue#album-title', {'type': 'text', 'placeholder': 'Album title...', 'value': collection.name, 'autocomplete': 'off'})),
-              // h('li', h('button.btn.btn-primary.navbar-btn#download-btn', [
-              //   h('i.fa.fa-cloud-download'), 'Download album'])),
-              h('li', h('button.btn.btn-primary.navbar-btn#order-btn', [
-                h('i.fa.fa-shopping-cart'), 'Order album'])),
+              h('li', h('button.btn.btn-primary.navbar-btn#download-btn', [
+                h('i.fa.fa-cloud-download'), 'Download album'])),
+              // h('li', h('button.btn.btn-primary.navbar-btn#order-btn', [
+              //   h('i.fa.fa-shopping-cart'), 'Order album'])),
               // h('li', h('button.btn.btn-primary.navbar-btn#save-btn', [
               //   h('i.fa.fa-cloud-download'), 'Save album'])),
               // h('li', h('a.btn.btn-primary.navbar-btn', {'href': '/ui/'+collection.id}, 'Permanent link'))
@@ -32,10 +34,22 @@ function renderToolbar(collection, album, upload, ui) {
       ]),
 
       h('input#file-input', {'type': "file", 'name': "image", 'multiple': true}),
-
-      (ui & (UI.uploading | UI.processing)) ?
-        renderProgressbar(upload) : ''
     ]);
+}
+
+
+function renderButton() {
+  return h('.start-buttons', [
+      h('button.btn.btn-primary.btn-lg#create-btn', [
+        h('i.fa.fa-book.fa-3x'),
+        'Upload photos'
+      ]), 
+      h('span.or', 'or'),
+      h('button.btn.btn-info.btn-lg#demo-btn', [
+        h('i.fa.fa-rocket.fa-3x'),
+        'View a demo'
+      ])
+  ]);
 }
 
 
@@ -48,11 +62,22 @@ function renderUploadArea() {
 
 
 function renderProgressbar(upload) {
-  let progress = (upload.files && upload.size) ? 100 * upload.files.length / upload.size : 0;
-  return h('.progress',
-        h('.progress-bar', {
-          style: {'width': progress + "%"}
-        }));
+  if (upload.size) {
+    let progress = (upload.files && upload.size) ? 100 * upload.files.length / upload.size : 0;
+    return [
+      h('li', 
+        h('span.navbar-text', progress < 100 ? 'Uploading...' : 'Processing...')),
+      h('li', 
+        h('.progress.navbar-text',
+          progress === 0 ?
+          h('.progress-bar.progress-bar-info.progress-bar-striped.active', {style: {width: '100%'}}) :
+          h('.progress-bar.progress-bar-info', {
+            style: {'width': progress + "%"}
+            // style: {'width': '50%'}
+          })
+        ))
+      ];
+    }
 }
 
 
@@ -62,4 +87,4 @@ function renderFrontpage() {
 }
 
 
-module.exports = {renderToolbar, renderUploadArea}
+module.exports = {renderToolbar, renderUploadArea, renderButton}

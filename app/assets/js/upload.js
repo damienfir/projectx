@@ -20,23 +20,25 @@ function makeUploadRequest(file, collection) {
 
 module.exports = function(DOMactions, collection) {
 
-  const startUpload$ = Observable.merge(
+  let startUpload$ = Observable.merge(
       DOMactions.selectFiles$.flatMapLatest(files => collection.actions.createdCollection$.map(c => [files,c])),
       DOMactions.selectFiles$.withLatestFrom(collection.state$, argArray).filter(([f,c]) => !_.isUndefined(c.id)));
 
-  const fileUpload$ = startUpload$.flatMap(([files, collection]) =>
+  let fileUpload$ = startUpload$.flatMap(([files, collection]) =>
       Observable.from(files).flatMap(file => makeUploadRequest(file, collection)).scan((acc,el) => acc.concat(el))).share();
 
-  const uploadedFiles$ = fileUpload$.withLatestFrom(startUpload$,
+  let uploadedFiles$ = fileUpload$.withLatestFrom(startUpload$,
       (uploaded, [files, collection]) => ({uploaded, files}))
     .filter(({uploaded, files}) => uploaded.length === files.length)
     .map(({uploaded, files}) => uploaded);
 
-  const state$ = Observable.merge(
-      startUpload$.map(([files,collection]) => upload => _.extend(upload, {files: [], size: files.length})),
-      fileUpload$.map(files => upload => _.extend(upload, {files: files})),
-      uploadedFiles$.map(files => upload => ({})))
-    .startWith(initial.upload)
+
+  let startedFunc$ = startUpload$.map(([files,collection]) => upload => _.extend(upload, {files: [], size: files.length}));
+  let uploadedFunc$ = fileUpload$.map(files => upload => _.extend(upload, {files: files}));
+  let finishedFunc$ = uploadedFiles$.map(files => upload => ({}));
+
+  let state$ = Observable.merge(startedFunc$, uploadedFunc$, finishedFunc$)
+    .startWith({})
     .scan(apply);
 
   return {

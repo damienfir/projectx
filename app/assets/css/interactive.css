@@ -81,6 +81,16 @@ html, body {
 /*   margin-right: 3px; */
 /* } */
 
+.backside {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 2em;
+  color: #ddd;
+  /* font-weight: bold; */
+}
+
 #verify-btn {
   margin-top: 15px;
 }
@@ -190,19 +200,10 @@ html, body {
   margin-bottom: 10px;
 }
 
-/* .progressbar { */
-/*   position: absolute; */
-/*   top: 0; */
-/*   left: 0; */
-/*   right: 0; */
-/*   height: 3px; */
-/* } */
 
-/* .progressbar > div { */
-/*   height: 100%; */
-/*   width: 25%; */
-/*   background-color: #337AB7; */
-/* } */
+.progress {
+  width: 400px;
+}
 
 .box-mosaic {
   width: 49.5%;

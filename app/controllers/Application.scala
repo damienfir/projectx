@@ -27,7 +27,7 @@ class Application extends Controller {
 }
 
 
-class Payment @Inject()(braintree: Braintree) extends Controller {
+class Payment @Inject()(braintree: Braintree, email: Email) extends Controller {
   implicit val orderFormat = Json.format[APIModels.Order]
   implicit val infoFormat = Json.format[APIModels.Info]
 
@@ -39,6 +39,7 @@ class Payment @Inject()(braintree: Braintree) extends Controller {
     val order = (request.body \ "order").as[APIModels.Order].copy(price = 1f)
     val info = (request.body \ "info").as[APIModels.Info]
     braintree.order(order, info) map { trans =>
+      email.confirmOrder(order, info) map (println(_))
       Ok
     } recover {
       case ex => BadRequest(ex.getMessage)

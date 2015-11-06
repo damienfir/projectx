@@ -6,7 +6,6 @@ let Observable = Rx.Observable;
 module.exports = function(DOMactions, album) {
 
   function model(DOMactions, album) {
-    // let uploadBox$ = DOMactions.toggleUpload$.map(f => ui => ui ^ UI.uploadBox);
     let uploading$ = DOMactions.selectFiles$.map(f => ui => (ui | UI.uploading) & ~UI.processing);
     let processing$ = album.HTTP.createAlbum$.map(f => ui => (ui ^ UI.processing) & ~UI.uploading);
     let complete$ = album.actions.createdAlbum$.map(f => ui => ui & ~(UI.uploading | UI.processing | UI.uploadBox));
