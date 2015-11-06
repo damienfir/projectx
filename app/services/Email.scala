@@ -1,66 +1,33 @@
 package services
 
+import javax.inject.Inject
 import scala.concurrent.Future
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.Play
+import play.api.libs.ws._
 
-import java.util.Properties;
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
+import models._
 
 
-// case class Email(address: Option[String], mosaic_id: Option[String])
-
-
-object EmailService {
+class Email @Inject()(ws: WSClient) {
   val host = Play.current.configuration.getString("px.host").get
+  val apiKey = Play.current.configuration.getString("px.mailgun-key").get
+  val fromEmail = Play.current.configuration.getString("px.from-email").get
 
-  def send(to: InternetAddress, from: InternetAddress, subject: String, text: String) = Future {
-    val props = new Properties()
-    val session = Session.getDefaultInstance(props, null)
+  def confirmOrder(order: APIModels.Order, info: APIModels.Info) = {
+    val res = ws.url("https://api.mailgun.net/v3/bigpiq.com/messages")
+      .withAuth("api", apiKey, WSAuthScheme.BASIC)
+      .post(Map(
+        "from" -> Seq(fromEmail),
+        "to" -> Seq(info.email),
+        "subject" -> Seq("Your order is processing"),
+        "text" -> Seq(s"""Hello ${info.firstName},
+Thank you for ordering your album with bigpiq, we are processing your order and will let you know when it's ready.
 
-    try {
-      val msg = new MimeMessage(session)
-      msg.setFrom(from)
-      msg.addRecipient(Message.RecipientType.TO, to)
-      msg.setSubject(subject)
-      msg.setText(text)
-      Transport.send(msg)
-    } catch {
-      case e: AddressException => println(e)
-      case e: MessagingException => println(e)
-    }
-  }
+http://${host}/ui/${order.collectionID}
 
+bigpiq team""")))
 
-  def sendToSelf(email: String, mosaic_id: String) = {
-    val msg = s"""
-      Hello,
-
-      Thank you for trying out our service, here is the link to view your bigpiq:
-      http://$host/$mosaic_id
-
-      Respectfully yours,
-      bigpiq team
-    """
-    send(new InternetAddress(email), new InternetAddress(s"info@$host", "bigpiq team"), "Link to your bigpiq", msg)
-  }
-
-
-  def sendToFriend(to: String, from: String, mosaic_id: String) = {
-    val msg = s"""
-      Hello,
-
-      I created a bigpiq and I'd like to share it with you. Click on the following link to see it:
-      http://$host/$mosaic_id
-
-      Kindest always
-    """
-    send(new InternetAddress(to), new InternetAddress(from), "bigpiq", msg)
+    res.map(_.json)
   }
 }

@@ -1,88 +1,34 @@
-@()
+@(demoID: Long)
 
 <html>
 <head>
   <title>bigpiq</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- <meta property="og:description" content="Bigpiq sorts, arranges, and prints your photo collection for you. Don't let your photos rest in the digital no man's land." /> -->
-  <link href="@routes.Assets.at("css/bootstrap.min.css")" rel="stylesheet">
-  <!-- <link href="@routes.Assets.at("bower_components/bootstrap/dist/css/bootstrap.min.css")" rel="stylesheet"> -->
+  <!-- <link href="@routes.Assets.at("css/custom-bootstrap.css")" rel="stylesheet"> -->
+  <link href="@routes.Assets.at("bower_components/bootstrap/dist/css/bootstrap.css")" rel="stylesheet">
+  <link href="@routes.Assets.at("bower_components/Bootflat/bootflat/css/bootflat.min.css")" rel="stylesheet">
+  <!-- <link href="@routes.Assets.at("bower_components/flat-ui/dist/css/flat-ui.min.css")" rel="stylesheet"> -->
+  <!-- <link href="@routes.Assets.at("x_paper_kit_1.0/assets/css/ct-paper.css")" rel="stylesheet"> -->
   <link href="@routes.Assets.at("bower_components/font-awesome/css/font-awesome.min.css")" rel="stylesheet">
+
   <!-- <link rel="shortcut icon" href="@routes.Assets.at("images/favicon.ico")"> -->
-  <link rel="stylesheet" media="screen" href="@routes.Assets.at("bower_components/angular-material/angular-material.min.css")">
   <link rel="stylesheet" media="screen" href="@routes.Assets.at("css/interactive.css")">
   <link rel="stylesheet" media="screen" href="@routes.Assets.at("css/animations.css")">
 
 </head>
-<body ng-app="ui" ng-cloak>
-<ui-controller>
-  
 
-  <md-toolbar>
-    <div class="md-toolbar-tools">
-      <md-button href="/"><img src="/assets/images/logo-white.png"/></md-button>
-    </div>
-  </md-toolbar>
+<body>
 
+  <input type="hidden" id="demo-id" value="@demoID">
 
-  <div layout="row" layout-align="center center" class="container-ui">
-    <div flex class="col-buttons centered" ng-show="composition">
-      <div layout="column">
-        <div>
-        <button class="btn btn-lg btn-link" ng-click="reset()"><i class="fa fa-th-large fa-3x"></i><br/>New</button>
-        </div>
-        <div>
-        <button class="btn btn-lg btn-link" ng-click="more()" bq-upload><i class="fa fa-plus-square-o fa-3x"></i><br/>Add photos</button>
-        </div>
-        <div>
-        <button class="btn btn-lg btn-link" ng-click="shuffle()"><i class="fa fa-refresh fa-3x"></i><br/>Shuffle</button>
-        </div>
-      </div>
-    </div>
+  <div id="app"></div>
 
-
-    <div id="box-mosaic" flex="66">
-      <ui-composition composition="composition" ng-show="composition"></ui-composition>
-      <div class="overlay" ng-show="generating || uploadMore || !collection"></div>
-      <ui-upload ng-show="!collection || uploadMore"></ui-upload>
-      <md-progress-linear md-mode="determinate" ng-value="100 * uploadedFiles / nFiles" ng-show="nFiles" class="md-primary"></md-progress-linear>
-      <md-progress-circular md-mode="indeterminate" ng-show="(collection && !composition) || generating" class="center"></md-progress-circular>
-    </div>
-
-    <div class="col-buttons centered" ng-show="composition" ui-controls flex>
-      <div layout="column">
-        <!-- <md-button class="md-icon" ng-click="showSend($event)" data-toggle="modal" data-target="#send-modal"><i class="fa fa-paper-plane fa-3x"></i><br/>Send</md-button> -->
-        <div>
-          <md-button class="md-icon" ng-click="showDownload($event)"><i class="fa fa-download fa-3x"></i><br/>Download</md-button>
-        </div>
-        <!-- <md-button class="md-icon" ng-click="showShare($event)" data-toggle="modal" data-target="#share-modal"><i class="fa fa-share-alt fa-3x"></i><br/>Share</md-button> -->
-        <!-- <md-button class="md-icon" ng-click="showOrder($event)" data-toggle="modal" data-target="#order-modal"><i class="fa fa-shopping-cart fa-3x"></i><br/>Order</md-button> -->
-      </div>
-    </div>
-  </div>
-
-</ui-controller>
-
-
-<script src="@routes.Assets.at("bower_components/jquery/dist/jquery.js")"></script>
-<script src="@routes.Assets.at("bower_components/bacon/dist/Bacon.js")"></script>
-<script src="@routes.Assets.at("bower_components/angular/angular.js")"></script>
-<script src="@routes.Assets.at("bower_components/angular-resource/angular-resource.js")"></script>
-<script src="@routes.Assets.at("bower_components/angular-cookies/angular-cookies.js")"></script>
-<script src="@routes.Assets.at("bower_components/angular-animate/angular-animate.js")"></script>
-<script src="@routes.Assets.at("bower_components/angular-aria/angular-aria.js")"></script>
-<script src="@routes.Assets.at("bower_components/angular-material/angular-material.js")"></script>
-<script src="@routes.Assets.at("bower_components/angular-bacon/dist/angular-bacon.js")"></script>
-<!-- <script src="@routes.Assets.at("bower_components/bootstrap/dist/js/bootstrap.min.js")"></script> -->
-
-<!-- <script src="@routes.Assets.at("js/test-data.js")"></script> -->
-<script src="@routes.Assets.at("js/google-analytics.js")"></script>
-<script src="@routes.Assets.at("js/app.js")"></script>
-<script src="@routes.Assets.at("js/collection.js")"></script>
-<script src="@routes.Assets.at("js/helpers.js")"></script>
-<script src="@routes.Assets.at("js/composition.js")"></script>
-<script src="@routes.Assets.at("js/user.js")"></script>
-<script src="@routes.Assets.at("js/modal.js")"></script>
+  <script src="@routes.Assets.at("bower_components/jquery/dist/jquery.min.js")" type="text/javascript" charset="utf-8"></script>
+  <script src="@routes.Assets.at("bower_components/bootstrap/dist/js/bootstrap.min.js")" type="text/javascript" charset="utf-8"></script>
+  <script src="@routes.Assets.at("bower_components/underscore/underscore-min.js")" type="text/javascript" charset="utf-8"></script>
+  <script src="@routes.Assets.at("bower_components/braintree-web/dist/braintree.js")" type="text/javascript" charset="utf-8"></script>
+  <script src="@routes.Assets.at("js/bundle.js")" type="text/javascript" charset="utf-8"></script>
 
   </body>
 </html>

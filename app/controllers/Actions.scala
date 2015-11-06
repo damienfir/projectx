@@ -9,7 +9,7 @@ import play.api.libs.json._
 import models._
 
 
-trait CRUDActions[T <: DB.HasID] extends Controller {
+trait CRUDActions[T <: DBModels.HasID] extends Controller {
   implicit val format: Format[T]
 
   def getAction(query: Future[Option[T]]) = Action.async {

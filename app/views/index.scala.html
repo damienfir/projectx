@@ -10,7 +10,10 @@
 
         <meta property="og:description" content="Bigpiq sorts, arranges, and prints your photo collection for you. Don't let your photos rest in the digital no man's land." />
 
-        <link href="@routes.Assets.at("css/bootstrap.min.css")" rel="stylesheet">
+        <!-- <link href="@routes.Assets.at("css/bootstrap.min.css")" rel="stylesheet"> -->
+        <link href="@routes.Assets.at("bower_components/bootstrap/dist/css/bootstrap.css")" rel="stylesheet">
+        <link href="@routes.Assets.at("bower_components/Bootflat/bootflat/css/bootflat.min.css")" rel="stylesheet">
+        <!-- <link href="@routes.Assets.at("bower_components/flat-ui/dist/css/flat-ui.min.css")" rel="stylesheet"> -->
         <!-- <link href="@routes.Assets.at("bower_components/bootstrap/dist/css/bootstrap.min.css")" rel="stylesheet"> -->
         <link href="@routes.Assets.at("bower_components/font-awesome/css/font-awesome.min.css")" rel="stylesheet">
 
@@ -21,47 +24,61 @@
     </head>
     <body>
 
+<!-- div.nav> -->
 
-<div class="navbar navbar-default navbar-static-top">
-  <div class="container-fluid">
-    <div class="navbar-header">
-      <!-- <a class="navbar-brand logo" href="/"><img src="/assets/images/logo.png"/> bigpiq<small>Touching memories</small></a> -->
-      <a class="navbar-brand logo" href="/"><img src="/assets/images/logo.png"/></a>
+<div class="navbar navbar-default navbar-fixed-top">
+	<div class="navbar-header">
+		<a href="/" class="navbar-brand">bigpiq</a>
+	</div>
+</div>
+
+<div class="container-fluid row-blue container-main">
+  <!-- <h1 class="brand">bigpiq</h1> -->
+  <!-- <div class="img-cover"></div> -->
+  <!-- <div class="gradient"></div> -->
+  <div class="container try">
+    <h3 class="phrase text-shadow">Print your next photo album.</h3>
+    <a href="/ui" class="btn btn-info btn-lg">Try it now</a>
+  </div>
+
+  <div class="album-demo sliding">
+    <div class="spread cover-page">
+      <img src="/assets/images/album/2263.jpg">
+      <div class="title">A bunch of stock photos...</div>
     </div>
-    <div  class="collapse navbar-collapse navbar-right">
-      <ul class="nav navbar-nav">
-        <li><a href="#about">About</a></li>
-      </ul>
+    <div class="spread">
+      <img src="/assets/images/album/2264.jpg">
+      <img src="/assets/images/album/2265.jpg">
+    </div>
+    <div class="spread">
+      <img src="/assets/images/album/2266.jpg">
+      <img src="/assets/images/album/2267.jpg">
+    </div>
+    <div class="spread">
+      <img src="/assets/images/album/2268.jpg">
+      <img src="/assets/images/album/2269.jpg">
+    </div>
+    <div class="spread">
+      <img src="/assets/images/album/2270.jpg">
+      <img src="/assets/images/album/2265.jpg">
     </div>
   </div>
 </div>
 
+<!-- <div class="container-fluid division row-bittersweet"> -->
+<!--   <div class="container"> -->
+<!--   </div> -->
+<!-- </div> -->
 
-<div class="container-fluid relative cover-background">
-  <div class="cover"></div>
-  <a name="intro"></a>
-  <div class="container-fluid" id="container-intro">
-    <div class="" id="row-title">
-      <div class="centered">
-        <h3>We sort, arrange, and print your photo collection for you.</h3>
-        <a href="/ui" class="btn btn-success btn-lg">Try it now</a>
-      </div>
-    </div>
-    <!-- <div class="row relative" id="row-presentation"> -->
-    <!--   <div class="col-sm-6 col-sm-offset-3" id="col-mosaic"> -->
-        <!-- <i class="fa fa-arrow-right fa-2x hidden-xs arrow-right arrow-right-left"></i> -->
-    <!--     <div class="relative" id="box-mosaic"> -->
-    <!--       <img class="photo-mosaic shadow" id="mosaic-img" src="/assets/stock/people/mosaic.jpg" /> -->
-    <!--     </div> -->
-    <!--   </div> -->
-    <!-- </div> -->
-  </div>
-</div>
+<!-- <div class="container-fluid division row-aqua"> -->
+<!--   <div class="container"> -->
+<!--   </div> -->
+<!-- </div> -->
 
 
 
-<a name="about"></a>
-<div class="row-wide">
+
+<div class="container-fluid division">
   <!-- <a href="#about" class="arrow arrow-down btn btn-default"><i class="fa fa-angle-down fa-3x"></i></a> -->
   <div class="container about">
     <div class="row">
@@ -71,8 +88,9 @@
         <p>
         We consider ourselves curators of your pictures. Our mission is to help you manage your growing collection of photos and enjoy them in ways that you have not experienced before.
         </p>
-        <a href="#" data-toggle="modal" data-target="#contact-modal" data-from="contact-link">Contact</a><br/>
-        <a href="#" data-toggle="modal" data-target="#terms-modal" data-from="terms-link">Terms and Condition</a>
+        <!-- <a href="#" data-toggle="modal" data-target="#contact-modal" data-from="contact-link">Contact</a><br/> -->
+        <a href="#" data-toggle="modal" data-target="#terms-modal" data-from="terms-link">Terms and Conditions</a><br />
+        <a href="#" data-toggle="modal" data-target="#jobs-modal" data-from="jobs-link">Jobs</a>
       </div>
       <!-- <div class="col-md-3"> -->
       <!--   <h4>Developers</h4> -->
