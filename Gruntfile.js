@@ -62,5 +62,5 @@ module.exports = function(grunt) {
   // grunt.registerTask('js', ['browserify', 'extract_sourcemap']);
   // grunt.registerTask('dev', ['browserify', 'watch']);
 
-  // grunt.registerTask('default', ['concat']);
+  grunt.registerTask('default', ['browserify']);
 };

@@ -1,5 +1,6 @@
 package services
 
+import play.api.Play
 import scala.util.{Try, Success, Failure}
 import javax.inject._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
@@ -11,12 +12,17 @@ import models.APIModels
 
 @Singleton
 class Braintree {
+  val environment = Play.current.configuration.getString("px.braintree-environment").get
+  val merchantID = Play.current.configuration.getString("px.braintree-merchant-id").get
+  val publicKey = Play.current.configuration.getString("px.braintree-public-key").get
+  val privateKey = Play.current.configuration.getString("px.braintree-private-key").get
+
   val gateway = new BraintreeGateway(
-      Environment.SANDBOX,
-      "9pzcg59d9xd7dbqb",
-      "d2y86xcpw9pvrmx5",
-      "1c0fd5e3d0a19812e4802dec008955e3"
-    );
+    if (environment.equals("production")) Environment.PRODUCTION else Environment.SANDBOX,
+    merchantID,
+    publicKey,
+    privateKey
+  );
 
   def printErrors[T](res: Result[T]) = 
     res.getErrors.getAllDeepValidationErrors.toList.foreach(err => println(err.getCode + " " + err.getMessage))

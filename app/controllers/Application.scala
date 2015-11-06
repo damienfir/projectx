@@ -20,7 +20,8 @@ class Application extends Controller {
   }
 
   def ui = Action {
-    Ok(views.html.interactive())
+    val id = Play.current.configuration.getLong("px.demoID").get
+    Ok(views.html.interactive(id))
   }
 
   def uiWithID(id: Long) = ui

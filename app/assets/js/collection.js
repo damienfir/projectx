@@ -15,7 +15,7 @@ function model(HTTPactions, DOMactions) {
   let collectionUpdated$ = HTTPactions.createdCollection$.map(col => collection => col);
   let clearCollection$ = DOMactions.reset$.map(x => item => initial.collection);
   let collectionName$ = DOMactions.albumTitle$.map(name => collection => _.extend(collection, {name: name}))
-  HTTPactions.createdCollection$.subscribe(col => window.history.pushState({}, '', '/ui/'+col.id));
+  HTTPactions.createdCollection$.merge(HTTPactions.storedAlbum$.map(d => d.collection)).subscribe(col => window.history.pushState({}, '', '/ui/'+col.id));
   DOMactions.reset$.subscribe(x => window.history.pushState({}, '', '/ui'));
 
   return Observable.merge(
@@ -40,7 +40,10 @@ function requests(DOMactions, userState$, state$) {
         send: {}
       })),
 
-    demoAlbum$: DOMactions.demo$.map('/collections/1119/album'),
+    demoAlbum$: DOMactions.demo$.map(x => {
+      let id = document.getElementById("demo-id").value;
+      return '/collections/'+id+'/album';
+    }),
 
     storedAlbum$: DOMactions.hasID$.map(id => '/collections/'+id+'/album')
   }

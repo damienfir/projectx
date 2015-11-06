@@ -1,6 +1,10 @@
+import Grunt._
+import play.PlayImport.PlayKeys.playRunHooks
+
+
 name := """projectx"""
 
-version := "1.0-SNAPSHOT"
+version := "0.1"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
@@ -25,6 +29,9 @@ libraryDependencies ++= Seq(
 
 routesGenerator := InjectedRoutesGenerator
 
-//pipelineStages := Seq(rjs)
+playRunHooks <+= baseDirectory.map(base => Grunt(base))
 
-//fork in run := true
+
+// forget about documentation
+sources in (Compile, doc) := Seq.empty
+publishArtifact in (Compile, packageDoc) := false
