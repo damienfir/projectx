@@ -1,38 +1,11 @@
 import demo from './demo'
 
-
-var UI = {
-  initial: 1 << 0,
-  uploadBox: 1 << 1,
-  uploading: 1 << 2,
-  processing: 1 << 3
-}
-
-var initial = {
-  user: {},
-  collection: {},
-  album: [],
-  photos: [],
-  upload: {},
-  ui: {state: UI.initial}
-};
-
-// _.extend(initial, demo);
-// initial.photos = initial.collection.photos;
-
-
-function toArray(filelist) {
-  var list = [];
-  for (var i = 0; i < filelist.length; i++) list.push(filelist[i]);
-  return list;
-}
-
-function cancelDefault(ev) {
-  ev.preventDefault();
-  ev.stopPropagation();
-  return ev;
-}
-
+let UI = {
+    initial: 1 << 0,
+    uploadBox: 1 << 1,
+    uploading: 1 << 2,
+    processing: 1 << 3
+  }
 
 let isNotEmpty = obj => !_.isEmpty(obj)
 let asc = (a,b) => a - b
@@ -44,15 +17,54 @@ let argArray = (a,b) => [a,b]
 let hasNoID = x => _.isUndefined(x.id)
 let hasID = x => !_.isUndefined(x.id) && x.id !== null
 
-let jsonGET = (HTTP, regex) =>
+let jsonGETResponse = (HTTP, regex) =>
   HTTP.filter(res$ => res$.request.method === undefined)
     .filter(res$ => res$.request.match(regex))
-    .mergeAll().map(res => res.body).share();
+    .mergeAll().share();
 
-let jsonPOST = (HTTP, regex) =>
+let jsonGET = (HTTP, regex) => jsonGETResponse(HTTP, regex).map(res => res.body)
+
+let jsonPOSTResponse = (HTTP, regex) =>
   HTTP.filter(res$ => res$.request.method === 'POST')
     .filter(res$ => res$.request.url.match(regex))
-    .mergeAll().map(res => res.body).share();
+    .mergeAll().share();
 
+let jsonPOST = (HTTP, regex) => jsonPOSTResponse(HTTP, regex).map(res => res.body)
 
-module.exports = {jsonGET, jsonPOST, apply, toArray, argArray, initial, hasID, hasNoID, asc, UI, cancelDefault}
+let jsonRes = (HTTP, regex) => HTTP.filter(res$ => res$.request.method ? res$.request.url.match(regex) : res$.request.match(regex))
+  .mergeAll().share();
+
+let json = (HTTP, regex) => jsonRes(HTTP, regex).map(res => res.body)
+
+  module.exports = {
+    jsonGET,
+    jsonPOST,
+    jsonGETResponse,
+    jsonPOSTResponse,
+    apply,
+    toArray: (filelist) => {
+      var list = [];
+      for (var i = 0; i < filelist.length; i++) list.push(filelist[i]);
+      return list;
+    },
+    argArray,
+    initial: {
+      user: {},
+      collection: {},
+      album: [],
+      photos: [],
+      upload: {},
+      ui: {state: UI.initial}
+    },
+    hasID,
+    hasNoID,
+    asc,
+    UI,
+    cancelDefault: (ev) => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      return ev;
+    },
+    jsonRes,
+    json
+  }

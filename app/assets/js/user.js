@@ -1,17 +1,17 @@
 import Rx from 'rx';
 
 import cookie from './cookies'
-import {apply, isNotEmpty, jsonGET, jsonPOST, hasID, hasNoID} from './helpers'
+import {apply, isNotEmpty, jsonGET, jsonGETResponse, jsonPOST, hasID, hasNoID} from './helpers'
 
 let Observable = Rx.Observable;
 
-let COOKIE = 'bigpiquser'
+let COOKIE = 'bigpiquserid'
 
 
 function intent(HTTP) {
   return {
     gotCookie$: Observable.return(cookie.getItem(COOKIE)).map(id => (id && id.match(/\d+/)) ? id : null),
-    gotUser$: jsonGET(HTTP, /^\/users\/\d+$/),
+    gotUser$: jsonGETResponse(HTTP, /^\/users\/\d+$/).do(x => console.log(x)),
     createdUser$: jsonPOST(HTTP, /^\/users$/),
   }
 }
@@ -19,7 +19,7 @@ function intent(HTTP) {
 
 function model(actions) {
   let userState$ = Observable.merge(
-      actions.gotUser$,
+      actions.gotUser$.filter(res => res.status !== 404).map(res => res.body),
       actions.createdUser$)
     .map(newuser => user => newuser)
     .startWith({})
@@ -39,6 +39,7 @@ function requests(DOMactions, actions, userState$) {
 
     createUser$: Observable.merge(
       userState$.skip(1).filter(hasNoID),
+      actions.gotUser$.filter(res => res.status === 404),
       actions.gotCookie$.filter(id => id === null)
     ).take(1)
       .zip(DOMactions.selectFiles$.take(1)).do(x => console.log(x))
