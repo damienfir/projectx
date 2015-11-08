@@ -1,4 +1,4 @@
-import {Rx} from '@cycle/core';
+import Rx from 'rx';
 
 import cookie from './cookies'
 import {apply, isNotEmpty, jsonGET, jsonPOST, hasID, hasNoID} from './helpers'
@@ -39,7 +39,7 @@ function requests(DOMactions, actions, userState$) {
 
     createUser$: Observable.merge(
       userState$.skip(1).filter(hasNoID),
-      actions.gotCookie$.filter(id => id === null).do(x => console.log(x))
+      actions.gotCookie$.filter(id => id === null)
     ).take(1)
       .zip(DOMactions.selectFiles$.take(1)).do(x => console.log(x))
       .map(x => ({

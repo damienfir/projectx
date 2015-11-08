@@ -1,0 +1,27 @@
+{
+  "name": "bigpiq",
+  "description": "",
+  "main": "",
+  "authors": [
+    "Damien Firmenich <fir.damien@gmail.com>"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/damienfir/projectx",
+  "moduleType": [],
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "public/bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "Bootflat": "~2.0.4",
+    "braintree-web": "~2.15.2",
+    "font-awesome": "fontawesome#~4.4.0",
+    "bootstrap": "~3.3.5",
+    "underscore": "~1.8.3"
+  }
+}

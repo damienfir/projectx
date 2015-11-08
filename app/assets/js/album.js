@@ -1,4 +1,4 @@
-import {Rx} from '@cycle/core';
+import Rx from 'rx';
 import {h} from '@cycle/dom';
 import {apply, argArray, asc, ascIndex, initial, jsonPOST, cancelDefault} from './helpers'
 import Composition from './composition-ui'
@@ -72,7 +72,6 @@ let renderCover = (title, page) => {
 }
 
 let renderBackside = () => {
-  console.log("value");
   return h('.backside', "Empty page");
 }
 

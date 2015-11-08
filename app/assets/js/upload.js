@@ -1,4 +1,4 @@
-import {Rx} from '@cycle/core';
+import Rx from 'rx';
 // import _ from 'underscore';
 // import $ from "jquery"
 import {apply, argArray, initial} from './helpers'
