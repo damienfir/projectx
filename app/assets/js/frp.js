@@ -1,4 +1,5 @@
-import {Rx,run} from '@cycle/core';
+import Rx from 'rx';
+import run from '@cycle/core';
 import {makeDOMDriver, h} from '@cycle/dom';
 import {makeHTTPDriver} from '@cycle/http';
 

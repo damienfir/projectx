@@ -2,13 +2,14 @@
   "name": "bigpiq",
   "version": "0.1.0",
   "devDependencies": {
+    "babelify": "^6.3.0",
     "grunt": "^0.4.5",
-    "grunt-browserify": "^4.0.0",
-    "grunt-contrib-less": "^1.0.1",
-    "grunt-contrib-watch": "^0.6.1",
-    "grunt-watchify": "^0.1.0"
+    "grunt-browserify": "^4.0.1",
+    "grunt-contrib-watch": "^0.6.1"
   },
   "dependencies": {
-    "braintree-web": "^2.15.2"
+    "@cycle/core": "^5.0.1",
+    "@cycle/dom": "^7.1.1",
+    "rx": "^4.0.6"
   }
 }

@@ -28,23 +28,23 @@ module.exports = function(grunt) {
         dest: './public/js/bundle.js'
       }
     },
-    extract_sourcemap: {
-      options: { 'removeSourcesContent': true },
-      files: {
-        'public/build': ['public/js/bundle.js'],
-      },
-    },
-    less: {
-      bootstrap: {
-        src: "app/assets/less/custom-bootstrap.less",
-        dest: "public/css/custom-bootstrap.css"
-      }
-    },
+    // extract_sourcemap: {
+    //   options: { 'removeSourcesContent': true },
+    //   files: {
+    //     'public/build': ['public/js/bundle.js'],
+    //   },
+    // },
+    // less: {
+    //   bootstrap: {
+    //     src: "app/assets/less/custom-bootstrap.less",
+    //     dest: "public/css/custom-bootstrap.css"
+    //   }
+    // },
     watch: {
-      bootstrap: {
-        files: ['app/assets/less/*.less'],
-        tasks: ['less']
-      },
+      // bootstrap: {
+      //   files: ['app/assets/less/*.less'],
+      //   tasks: ['less']
+      // },
       js: {
         files: ['app/assets/js/*.js'],
         // tasks: ['js']
@@ -56,8 +56,8 @@ module.exports = function(grunt) {
   // grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-browserify');
-  grunt.loadNpmTasks('grunt-contrib-less');
-  grunt.loadNpmTasks('grunt-extract-sourcemap');
+  // grunt.loadNpmTasks('grunt-contrib-less');
+  // grunt.loadNpmTasks('grunt-extract-sourcemap');
 
   // grunt.registerTask('js', ['browserify', 'extract_sourcemap']);
   // grunt.registerTask('dev', ['browserify', 'watch']);
