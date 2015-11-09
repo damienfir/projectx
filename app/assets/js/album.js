@@ -1,6 +1,6 @@
 import Rx from 'rx';
 import {h} from '@cycle/dom';
-import {apply, argArray, asc, ascIndex, initial, jsonPOST, cancelDefault} from './helpers'
+import {apply, argArray, asc, ascIndex, initial, jsonPOST, jsonPOSTResponse, cancelDefault} from './helpers'
 import Composition from './composition-ui'
 let Observable = Rx.Observable;
 
@@ -115,7 +115,7 @@ function renderAlbum(album, photos, ui, title) {
 function intent(HTTP) {
   return {
     createdAlbum$: jsonPOST(HTTP, /\/collections\/\d+\/pages\?startindex=.*/),
-    downloadedAlbum$: jsonPOST(HTTP, /\/collections\/\d+\/download/),
+    downloadedAlbum$: jsonPOSTResponse(HTTP, /\/collections\/\d+\/download/),
     shuffledPage$: jsonPOST(HTTP, /\/collections\/\d+\/page\/\d+\?index=.*/),
     savedPage$: jsonPOST(HTTP, /\/save/)
   }
@@ -123,8 +123,8 @@ function intent(HTTP) {
 
 
 function model(DOMactions, collectionActions, HTTPactions, composition$) {
-  HTTPactions.downloadedAlbum$.subscribe(url => {
-    window.open("/storage/generated/" + url);
+  HTTPactions.downloadedAlbum$.subscribe(res => {
+    window.open("/storage/generated/" + res.text);
   });
 
   let demoAlbum$ = collectionActions.storedAlbum$

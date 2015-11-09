@@ -130,11 +130,17 @@ class MosaicService @Inject()() {
     }
   }
 
+  def readFile(filename: String) = Source.fromFile(filename).mkString
+  def readJson(filename: String) = Json.parse(readFile(filename))
+
+  def readGist(hash: String) = readJson(gistFile(hash))
+
   def writeFile(filename: String, content: String) = {
     val file = new File(filename)
     val writer = new PrintWriter(file);
     writer.write(content)
     writer.close()
+    filename
   }
 
   def writeJson(filename: String, content: JsValue) = {
@@ -147,6 +153,29 @@ class MosaicService @Inject()() {
     writeJson(clusterFile(id), Json.toJson(cluster))
     writeJson(matchFile(id), Json.toJson(mosaictiles))
     render(id, id, id, id + ".jpg")
+  }
+
+
+  def makePDF(svgs: List[String]) = {
+    val fnames = svgs.map(svg => {
+        val f = mosaicFile(UUID.randomUUID.toString)
+        writeFile(f+".svg", svg)
+        "inkscape -d 300 " + f+".svg -A " + f+".pdf" ! match {
+          case 0 => {
+            (new File(f+".svg")).delete
+            f + ".pdf"
+          }
+          case _ => throw new Exception
+        }
+      })
+    val out = UUID.randomUUID.toString + ".pdf"
+    "pdfjoin " + fnames.mkString(" ") + " --rotateoversize false -q --paper a4paper -o " + mosaicFile(out) ! match {
+      case 0 => {
+        fnames.map(f => (new File(f)).delete)
+        out
+      }
+      case _ => throw new Exception
+    }
   }
 
   def makeTitlePage(title: Option[String]) : String = {
@@ -196,5 +225,11 @@ class MosaicService @Inject()() {
       case 0 => fname
       case _ => throw new Exception
     }
+  }
+
+  def writeSVG(id: Long, content: String) = {
+    val fname = id.toString + ".svg"
+    writeFile(mosaicFile(fname), content)
+    fname
   }
 }

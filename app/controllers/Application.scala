@@ -142,12 +142,10 @@ class Collections @Inject()(compositionDAO: CompositionDAO, collectionDAO: Colle
   def download(id: Long) = Action.async(parse.json) { request =>
     val collection = (request.body \ "collection").as[DBModels.Collection]
     val compositions = (request.body \ "album").as[List[DBModels.Composition]]
-    photoDAO.allFromCollection(id).flatMap(photos =>
-        Future.sequence(
-          compositions.map(c => mosaicService.renderComposition(c, photos))
-        ).map(mosaicService.makePDFFromPages)
-        .map(pages => mosaicService.makeAlbumPDF(collection.name, pages))
-          .map(value => Ok(Json.toJson(value)))
-    )
+    photoDAO.allFromCollection(id)
+        .map(photos => photos.map(p => p.id.get -> mosaicService.photoFile(p.hash)).toMap)
+        .map(photos => compositions.map(comp => views.html.page(comp, collection, photos).toString))
+        .map(svgs => mosaicService.makePDF(svgs))
+        .map(Ok(_))
   }
 }
