@@ -63,17 +63,16 @@ function renderTile(tile, tileindex, index) {
 
 
 let renderCover = (title, page) => {
-  return [
-    page.tiles.length === 0 ?
+  return page.tiles.length === 0 ?
       h('.nocover', h('h6.cover-message.center', "Select images from the album to appear on the cover.")) :
       // h('input.cover-title#album-title', {'type': 'text', 'placeholder': 'Album title...', 'value': title, 'autocomplete': 'off'})
       h('.cover-title', title ? title : 'Album title...')
-  ]
 }
 
 let renderBackside = () => {
   return h('.backside', "Empty page");
 }
+
 
 let renderPage = (photos, title, j) => (page, i) => {
   return h('.box-mosaic' + leftOrRight(j*2+i) + moveOrNot(page.tiles),

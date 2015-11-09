@@ -145,7 +145,7 @@ class Collections @Inject()(compositionDAO: CompositionDAO, collectionDAO: Colle
     photoDAO.allFromCollection(id)
         .map(photos => photos.map(p => p.id.get -> mosaicService.photoFile(p.hash)).toMap)
         .map(photos => compositions.map(comp => views.html.page(comp, collection, photos).toString))
-        .map(svgs => mosaicService.makePDF(svgs))
+        .map(svgs => mosaicService.makeAlbum(svgs))
         .map(Ok(_))
   }
 }

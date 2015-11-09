@@ -107,6 +107,10 @@ html, body {
   transform: translate(-50%,0);
 }
 
+.spread-cover .ui-tile {
+  opacity: 0.5;
+}
+
 .spread-paper {
   padding: 5px;
   background-color: #fff;
@@ -263,7 +267,7 @@ html, body {
   color: #333;
   background-color: #fff;
   padding: 15px 30px 15px 50px;
-  /* width: 100%; */
+  width: 100%;
   position: absolute;
   text-align: right;
   bottom: 15%;

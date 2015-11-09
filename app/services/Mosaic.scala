@@ -156,18 +156,7 @@ class MosaicService @Inject()() {
   }
 
 
-  def makePDF(svgs: List[String]) = {
-    val fnames = svgs.map(svg => {
-        val f = mosaicFile(UUID.randomUUID.toString)
-        writeFile(f+".svg", svg)
-        "inkscape -d 300 " + f+".svg -A " + f+".pdf" ! match {
-          case 0 => {
-            (new File(f+".svg")).delete
-            f + ".pdf"
-          }
-          case _ => throw new Exception
-        }
-      })
+  def joinPDFs(fnames: List[String]) = {
     val out = UUID.randomUUID.toString + ".pdf"
     "pdfjoin " + fnames.mkString(" ") + " --rotateoversize false -q --paper a4paper -o " + mosaicFile(out) ! match {
       case 0 => {
@@ -178,54 +167,21 @@ class MosaicService @Inject()() {
     }
   }
 
-  def makeTitlePage(title: Option[String]) : String = {
-    val svg = Source.fromFile(mosaicFile("../title.svg")).mkString
-    val svgmod = svg.replaceAll("\\{\\{title\\}\\}", title.get)
-    val svgfile = mosaicFile(UUID.randomUUID().toString + ".svg")
-    val pdffile = mosaicFile(UUID.randomUUID().toString + ".pdf")
-    writeFile(svgfile, svgmod)
-    val cmd = "inkscape " + svgfile + " -A " + pdffile
-    println(cmd)
-    cmd ! match {
-      case 0 => pdffile
-      case _ => throw new Exception
+  def makePDFs(svgs: List[String]) = svgs.map {
+    svg => {
+      val f = mosaicFile(UUID.randomUUID.toString)
+      writeFile(f+".svg", svg)
+      "inkscape -d 300 " + f+".svg -A " + f+".pdf" ! match {
+        case 0 => {
+          (new File(f+".svg")).delete
+          f + ".pdf"
+        }
+        case _ => throw new Exception
+      }
     }
   }
 
-  def makePDFFromPages(pagesFilename: List[String]) : String = {
-    val fname = UUID.randomUUID().toString + ".pdf"
-    val out = mosaicFile(fname)
-    val cmd = "convert -density 300x300 " + pagesFilename.map(mosaicFile).mkString(" ") + " " + out
-    println(cmd)
-    cmd ! match {
-      case 0 => fname
-      case _ => throw new Exception
-    }
-  }
-
-  def makeAlbumPDF(title: Option[String], pages: String) : String = {
-    val titlepage = makeTitlePage(title)
-    val blank = mosaicFile("../blank.pdf")
-    val albumname = UUID.randomUUID().toString + ".pdf"
-    val out = mosaicFile(albumname)
-    val cmd = "pdfjoin " + Seq(titlepage, blank, mosaicFile(pages), blank, blank).mkString(" ") + " --rotateoversize false --paper a4paper -o " + out
-    println(cmd)
-    cmd ! match {
-      case 0 => albumname
-      case _ => throw new Exception
-    }
-  }
-  
-  def makeAlbum(pagesFilename: List[String]) : String = {
-    val fname = UUID.randomUUID().toString + ".jpg"
-    val out = mosaicFile(fname)
-    val cmd = "montage -geometry 100% -tile 2x " + pagesFilename.map(mosaicFile).mkString(" ") + " " + out
-    println(cmd)
-    cmd ! match {
-      case 0 => fname
-      case _ => throw new Exception
-    }
-  }
+  def makeAlbum(svgs: List[String]) = joinPDFs(makePDFs(svgs))
 
   def writeSVG(id: Long, content: String) = {
     val fname = id.toString + ".svg"
