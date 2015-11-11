@@ -319,34 +319,9 @@ html, body {
 .centered { text-align: center; }
 .hide { display: none; }
 
-.overlay {
-  background-color: white;
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  opacity: 0.6;
-  transition: opacity 200ms;
+#order-modal .modal-footer {
+  text-align: left;
 }
-
-.overlay-element {
-  background-color: white;
-  opacity: 0.6;
-  border-radius: 4px;
-  padding: 20px 20px 15px 20px;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  margin: 0 auto;
-  transform: translate(-50%, -50%);
-  -webkit-transform: translate(-50%, -50%);
-  text-align: center;
-  z-index: 1000;
-}
-
-.overlay-loader img { width: auto; height: auto; }
-.overlay-loader span { display: block; font-size: 16px; }
 
 .center {
   position: absolute;

@@ -41,7 +41,7 @@ class Payment @Inject()(braintree: Braintree, email: Email) extends Controller {
     val info = (request.body \ "info").as[APIModels.Info]
     braintree.order(order, info) map { trans =>
       email.confirmOrder(order, info) map (println(_))
-      Ok
+      Ok(Json.obj("status" -> 1))
     } recover {
       case ex => BadRequest(ex.getMessage)
     }
@@ -133,10 +133,14 @@ class Collections @Inject()(compositionDAO: CompositionDAO, collectionDAO: Colle
 
 
   def generatePages(id: Long, startindex: Int) = Action.async(parse.json) { request =>
-    Future.sequence(
-      divideIntoPages(request.body.as[List[DBModels.Photo]])
-        .map({case (subset, index) => generateComposition(id, subset.toList, startindex+index)})
-      ).map(pages => Ok(Json.toJson(pages)))
+    val pages = divideIntoPages(request.body.as[List[DBModels.Photo]])
+    val pagesWithCover = if (startindex == 0) {
+      (pages.take(1).map({case (subset, index) => (subset.take(1), 0)}) ::: pages.map({case (p,i) => (p,i+1)}))
+    } else { pages }
+
+    Future.sequence {
+      pagesWithCover.map({case (subset, index) => generateComposition(id, subset.toList, startindex+index)})
+    }.map(pages => Ok(Json.toJson(pages)))
   }
 
 

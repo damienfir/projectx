@@ -68,8 +68,8 @@ function renderTile(tile, tileindex, index) {
 let renderCover = (title, page) => {
   return page.tiles.length === 0 ?
       h('.nocover', h('h6.cover-message.center', "Select images from the album to appear on the cover.")) :
-      // h('input.cover-title#album-title', {'type': 'text', 'placeholder': 'Album title...', 'value': title, 'autocomplete': 'off'})
-      h('.cover-title', title ? title : h('span.text-muted', 'Change your album title above'))
+      h('input.cover-title#album-title', {'type': 'text', 'placeholder': 'Click here to change the album title', 'maxLength': 50, 'value': title, 'autocomplete': 'off'})
+      // h('.cover-title', title ? title : h('span.text-muted', 'Click here to change the album title'))
 }
 
 let renderBackside = () => {
@@ -131,15 +131,15 @@ function model(DOMactions, collectionActions, HTTPactions, composition$) {
 
   let demoAlbum$ = collectionActions.storedAlbum$
     .map(demo => _.sortBy(demo.pages, 'index'))
-    .map(pages => (pages[0].index === 0) ? pages : [coverpage].concat(pages))
+    // .map(pages => (pages[0].index === 0) ? pages : [].concat(pages))
     .map(pages => album => pages);
 
   let albumUpdated$ = HTTPactions.createdAlbum$
-    .filter(pages => pages[0].index > 0)
+    // .filter(pages => pages[0].index > 0)
     .map(newpages => album => album.concat(newpages).sort(ascIndex));
 
   let clearAlbum$ = DOMactions.reset$
-    .map(x => item => [coverpage]);
+    .map(x => item => []);
 
   let createdCover$ = HTTPactions.createdAlbum$
     .filter(pages => pages[0].index === 0)
@@ -149,7 +149,7 @@ function model(DOMactions, collectionActions, HTTPactions, composition$) {
     .map(page => album => { album[page.index] = page; return album; });
 
   return Observable.merge(albumUpdated$, clearAlbum$, demoAlbum$, albumPageShuffled$, composition$)
-    .startWith([coverpage])
+    .startWith([])
     .scan(apply)
     .map(album => album.sort((a,b) => a.index-b.index))
     .shareReplay(1);//.do(x => console.log(x));

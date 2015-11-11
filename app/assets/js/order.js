@@ -56,11 +56,19 @@ function model(actions, user, collection) {
 
   let hasIntegration$ = actions.integrationReady$.map(obj => state => _.extend(state, {'ready': obj}));
 
+  let submittedOrder$ = actions.formSubmitted$.map(obj => state => _.extend(state, obj));
+
   let updateNonce$ = actions.nonceReceived$
     .withLatestFrom(user.state$, collection.state$, (obj, user, collection) =>
         state => _.extend(state, {'order': {'nonce': obj.nonce, 'userID': user.id, 'collectionID': collection.id, 'price': 0}}));
 
-  return Observable.merge(clientToken$, updateInfos$, updateNonce$, hasIntegration$).startWith({}).scan(apply);
+  return Observable.merge(
+      clientToken$,
+      updateInfos$,
+      updateNonce$,
+      hasIntegration$,
+      submittedOrder$
+    ).startWith({}).scan(apply);
 }
 
 
@@ -125,11 +133,25 @@ function view(state$) {
                 h('.panel-body',
                   h('form', [h('div#payment-form'), h('button.btn.btn-info.pull-right#verify-btn', {'disabled': _.isUndefined(state.ready)}, "Validate payment method")]))
               ])
-          ]),
-          h('.modal-footer', [
-            h('button.btn.btn-primary.pull-right.submit-order-btn', {'type': 'button', 'disabled': _.isUndefined(state.order)}, ['Confirm order ', h('i.fa.fa-check')]),
-            h('button.btn.btn-default.pull-right.close-btn.order-cancel-btn', {'data-target': '#order-modal'}, ['Not now ', h('i.fa.fa-times')]),
-          ])
+                ]),
+                h('.modal-footer', [
+                    !state.status ? h('.clearfix', [
+                      state.order ?
+                        h('button.btn.btn-primary.pull-right.submit-order-btn',
+                          {'type': 'button'},
+                          ['Confirm order ', h('i.fa.fa-check')]) : '',
+                      h('button.btn.btn-default.pull-right.close-btn.order-cancel-btn',
+                        {'data-target': '#order-modal'},
+                        ['Not now ', h('i.fa.fa-times')])]) :
+                    h('.alert.alert-info.clearfix', [
+                      h('.fa.fa-2x.fa-smile-o.pull-right'),
+                      h('p', "Your album has been ordered!"),
+                      h('p', "You will receive an email to confirm your order, and will be notified when your order has been processed. Thank you!"),
+                      h('div', h('button.btn.btn-primary.pull-right.close-btn',
+                          {'data-target': '#order-modal'},
+                          ["Close ", h('i.fa.fa-times')]))
+                    ])
+                ])
       ]))),
 
       // h('.modal.fade#payment-modal',

@@ -71,13 +71,12 @@ class MosaicService @Inject()() {
 
 
   def preprocess(filename: String): String =  {
-      val out = gistFile(filename)
-      val cmd = Seq(binary, "--preprocess", photoFile(filename), out)
-      println(cmd)
-      cmd.! match {
-        case 0 => out
-        case _ => throw new Exception
-      }
+    val out = gistFile(filename)
+    val cmd = Seq(binary, "--preprocess", photoFile(filename), out)
+    cmd.! match {
+      case 0 => out
+      case _ => throw new Exception
+    }
   }
 
   def preprocessAll(filenames: Seq[String]): Future[Seq[String]] = Future {
@@ -86,9 +85,7 @@ class MosaicService @Inject()() {
 
   def cluster(gists: Seq[String], id: String): Future[MosaicModels.Cluster] = Future {
     val out = clusterFile(id)
-    println(gists.length)
     val cmd = binary +: "--cluster" +: gists.length.toString +: gists.map(gistFile) :+ out
-    println(cmd)
     cmd ! match {
       case 0 => Json.parse(Source.fromFile(out).mkString).as[MosaicModels.Cluster]
       case _ => throw new Exception
@@ -98,7 +95,6 @@ class MosaicService @Inject()() {
   def assign(tiles: String, clusters: String, id: String): Future[List[MosaicModels.Tile]] = Future {
     val out = matchFile(id) 
     val cmd = Seq(binary, "--assign", "1.414", "3508", clusterFile(clusters), out, tileFile(tiles));
-    println(cmd)
     cmd ! match {
       case 0 => Json.parse(Source.fromFile(out).mkString).as[List[MosaicModels.Tile]]
       case _ => throw new Exception
@@ -110,7 +106,6 @@ class MosaicService @Inject()() {
   //   println(cmd)
   //   cmd !
   // }
-  
 
   def generateComposition(compositionID: Long, photos: Seq[DBModels.Photo]): Future[List[DBModels.Tile]] = {
     val id = compositionID.toString
@@ -123,7 +118,6 @@ class MosaicService @Inject()() {
 
   def render(tile: String, cluster: String, match_id: String, output: String): Future[String] = Future {
     val cmd = Seq(binary, "--generate", "1.414", "3508", tileFile(tile), clusterFile(cluster), matchFile(match_id), mosaicFile(output))
-    println(cmd)
     cmd ! match {
       case 0 => output
       case _ => throw new Exception

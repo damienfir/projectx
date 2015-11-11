@@ -39,7 +39,8 @@ function intent(DOM, HTTP) {
     // save$: btn('#save-btn'),
     hasID$: Observable.just(window.location.pathname.split('/'))
       .filter(url => url.length > 2).map(url => url.pop()),
-    addPhotoCover$: btn('.cover-btn').map(ev => ev.target['data-id'])
+    addPhotoCover$: btn('.cover-btn').map(ev => ev.target['data-id']),
+    clickTitle$: DOM.select(".cover-title").events('click')
   }
 
   let HTTPactions = { 
@@ -54,6 +55,7 @@ function intent(DOM, HTTP) {
 function model(DOMactions) {
   DOMactions.toggleUpload$.subscribe(ev => $('#upload-modal').modal('show'));
   DOMactions.selectFiles$.subscribe(x => $('#upload-modal').modal('hide'));
+  DOMactions.clickTitle$.subscribe(ev => document.getElementById("album-title").focus())
 }
 
 
@@ -83,7 +85,7 @@ function view(HTTPactions, collection, album, upload, ui, order) {
       Elements.renderToolbar);
   let uploadDOM = Observable.just(Elements.renderUploadArea());
   let buttonDOM = Observable.just(Elements.renderButton());
-  let alertDOM = Elements.saveNotification(HTTPactions.saved$).do(x => console.log(x));
+  let alertDOM = Elements.saveNotification(HTTPactions.saved$);
 
   return Observable.combineLatest(toolbarDOM, uploadDOM, album.DOM, order.DOM, buttonDOM, alertDOM,
       (toolbarVTree, uploadVTree, albumVTree, orderVTree, buttonVTree, alertVTree) =>
