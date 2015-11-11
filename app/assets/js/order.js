@@ -56,6 +56,7 @@ function model(actions, user, collection) {
 
   let hasIntegration$ = actions.integrationReady$.map(obj => state => _.extend(state, {'ready': obj}));
 
+  let submitOrder$ = actions.formSubmit$.map(obj => state => _.extend(state, {'status': -1}));
   let submittedOrder$ = actions.formSubmitted$.map(obj => state => _.extend(state, obj));
 
   let updateNonce$ = actions.nonceReceived$
@@ -67,6 +68,7 @@ function model(actions, user, collection) {
       updateInfos$,
       updateNonce$,
       hasIntegration$,
+      submitOrder$,
       submittedOrder$
     ).startWith({}).scan(apply);
 }
@@ -135,7 +137,7 @@ function view(state$) {
               ])
                 ]),
                 h('.modal-footer', [
-                    !state.status ? h('.clearfix', [
+                    _.isUndefined(state.status) ? h('.clearfix', [
                       state.order ?
                         h('button.btn.btn-primary.pull-right.submit-order-btn',
                           {'type': 'button'},
@@ -143,14 +145,21 @@ function view(state$) {
                       h('button.btn.btn-default.pull-right.close-btn.order-cancel-btn',
                         {'data-target': '#order-modal'},
                         ['Not now ', h('i.fa.fa-times')])]) :
-                    h('.alert.alert-info.clearfix', [
-                      h('.fa.fa-2x.fa-smile-o.pull-right'),
-                      h('p', "Your album has been ordered!"),
-                      h('p', "You will receive an email to confirm your order, and will be notified when your order has been processed. Thank you!"),
-                      h('div', h('button.btn.btn-primary.pull-right.close-btn',
-                          {'data-target': '#order-modal'},
-                          ["Close ", h('i.fa.fa-times')]))
-                    ])
+                    h('.alert.alert-info.clearfix', 
+                      state.status === -1 ?
+                      [
+                        h('i.fa.fa-spin.fa-circle-o-notch.pull-right'),
+                        " Submitting your order..."
+                      ] :
+                      [
+                        h('.fa.fa-2x.fa-smile-o.pull-right'),
+                        h('p', "Your album has been ordered!"),
+                        h('p', "You will receive an email to confirm your order, and will be notified when your order has been processed. Thank you!"),
+                        h('div', h('button.btn.btn-primary.pull-right.close-btn',
+                            {'data-target': '#order-modal'},
+                            ["Close ", h('i.fa.fa-times')]))
+                      ]
+                    )
                 ])
       ]))),
 
