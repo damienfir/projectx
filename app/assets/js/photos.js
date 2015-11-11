@@ -10,7 +10,7 @@ module.exports = function(DOMactions, upload, collection) {
 
     let state$ = Observable.merge(newPhotos$, clearPhotos$, demoPhotos$)
       .startWith(initial.photos)
-      .scan(apply);//.do(x => console.log(x));
+      .scan(apply);
 
     return {
       state$

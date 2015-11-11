@@ -10,6 +10,7 @@ function intent(HTTP) {
   }
 }
 
+
 function model(HTTPactions, DOMactions) {
   let demoCollection$ = HTTPactions.storedAlbum$.map(demo => col => demo.collection);
   let collectionUpdated$ = HTTPactions.createdCollection$.map(col => collection => col);
@@ -24,15 +25,15 @@ function model(HTTPactions, DOMactions) {
       demoCollection$,
       collectionName$)
     .startWith(initial.collection)
-    .scan(apply); //.do(x => console.log(x));
-    // .shareReplay(1);
+    .scan(apply)
+    .shareReplay(1);
 }
+
 
 function requests(DOMactions, userState$, state$) {
   return {
-    createCollection$: Observable.merge(
-        DOMactions.selectFiles$.flatMapLatest(files => userState$.filter(hasID).map(user => [files,user])),
-        DOMactions.selectFiles$.withLatestFrom(userState$, argArray).filter(([f,u]) => hasID(u)))
+    createCollection$: DOMactions.selectFiles$
+      .flatMapLatest(files => userState$.filter(hasID).map(user => [files,user]))
       .withLatestFrom(state$, argArray).filter(([x,col]) => _.isUndefined(col.id)).map(([x,col]) => x)
       .map(([f,user]) => ({
         url:'/users/'+user.id+'/collections',

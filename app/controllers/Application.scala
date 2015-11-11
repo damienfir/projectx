@@ -95,7 +95,8 @@ class Collections @Inject()(compositionDAO: CompositionDAO, collectionDAO: Colle
   }
 
 
-  def divideIntoPages(photos: Seq[DBModels.Photo]): List[(Seq[DBModels.Photo],Int)] = photos.grouped(3).toList.zipWithIndex
+  def divideIntoPages(photos: Seq[DBModels.Photo]): List[(Seq[DBModels.Photo],Int)] =
+    photos.grouped(3).toList.zipWithIndex
 
 
   def generateComposition(id: Long, photos: List[DBModels.Photo], index: Int): Future[DBModels.Composition] = {

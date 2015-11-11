@@ -16,17 +16,9 @@ import java.security.MessageDigest
 import collection.JavaConversions._
 
 
-trait FileService {
-  val baseDir: String
-  def fullPath(filename: String) = s"$baseDir/$filename"
-  def getFile(filename: String) = new File(fullPath(filename))
-}
-
-
-class ImageService @Inject()() extends FileService {
-  val baseDir = Play.current.configuration.getString("px.dir_photos").get
-  // val thumbDir = Play.current.configuration.getString("px.dir_thumb").get
-  val stockDir = Play.current.configuration.getString("px.dir_stock").get
+class ImageService @Inject()() {
+  def photoFile(id: String) = Play.current.configuration.getString("px.dir_photos").get + s"/$id"
+  def thumbFile(id: String) = Play.current.configuration.getString("px.dir_thumbs").get + s"/$id"
   
   def hashFromContent(data: Array[Byte]): String = {
     var digest = MessageDigest.getInstance("SHA-1")
@@ -34,47 +26,38 @@ class ImageService @Inject()() extends FileService {
     Hex.encodeHexString(digest.digest())
   }
 
-  // def resize(filename: String): Try[String] = {
-  //   val output = s"$thumbDir/$filename"
-  //   val cmd = Seq("convert", fullPath(filename), "-resize", "150x150", output)
-  //   cmd.! match {
-  //     case 0 => Success(output)
-  //     case _ => Failure(new Exception())
-  //   }
-  // }
-
-  def save(data: Array[Byte]): String = {
-    val filename = hashFromContent(data)
-    val file = getFile(filename)
-
-    FileUtils.writeByteArrayToFile(file, data)
-    // resize(filename)
-    // Success(filename)
-    filename
+  def resize(filename: String): String = {
+    val cmd = Seq("convert", photoFile(filename), "-resize", "500x500", thumbFile(filename))
+    cmd.! match {
+      case 0 => filename
+      case _ => throw new Exception()
+    }
   }
+
+//   def save(data: Array[Byte]): String = {
+//     val filename = hashFromContent(data)
+//     val file = new File(photoFile(filename))
+
+//     FileUtils.writeByteArrayToFile(file, data)
+//     // resize(filename)
+//     // Success(filename)
+//     filename
+//   }
 
   def save(uploaded: TemporaryFile): String = {
     val filename = hashFromContent(FileUtils.readFileToByteArray(uploaded.file))
-    val newFile = getFile(filename)
-
+    val newFile = new File(photoFile(filename))
     uploaded.moveTo(newFile)
     newFile.setReadable(true, false)
     newFile.setExecutable(true, false)
-    // resize(filename)
-    // Success(filename)
-    filename
+    val thumbFilename = resize(filename)
+    val thumb = new File(thumbFile(thumbFilename))
+    thumb.setReadable(true, false)
+    thumb.setExecutable(true, false)
+    thumbFilename
   }
 
   def saveImages(newImages: Seq[TemporaryFile]): Future[Seq[String]] = Future {
-    newImages
-      .filter(_.file.length > 4)
-      .map(save)
-      // .filter(_.isSuccess)
-      // .map(_.get)
-  }
-
-  def listStock = {
-    val stockFileDir = new File(stockDir)
-    FileUtils.listFiles(stockFileDir, Array("jpeg"), false).map(_.getName())
+    newImages.filter(_.file.length > 4).map(save)
   }
 }

@@ -11,7 +11,7 @@ let COOKIE = 'bigpiquserid'
 function intent(HTTP) {
   return {
     gotCookie$: Observable.return(cookie.getItem(COOKIE)).map(id => (id && id.match(/\d+/)) ? id : null),
-    gotUser$: jsonGETResponse(HTTP, /^\/users\/\d+$/).do(x => console.log(x)),
+    gotUser$: jsonGETResponse(HTTP, /^\/users\/\d+$/),
     createdUser$: jsonPOST(HTTP, /^\/users$/),
   }
 }
@@ -23,7 +23,8 @@ function model(actions) {
       actions.createdUser$)
     .map(newuser => user => newuser)
     .startWith({})
-    .scan(apply);
+    .scan(apply)
+    .shareReplay(1);
 
   userState$.filter(hasID).subscribe(user => cookie.setItem(COOKIE, user.id));
 
@@ -42,7 +43,7 @@ function requests(DOMactions, actions, userState$) {
       actions.gotUser$.filter(res => res.status === 404),
       actions.gotCookie$.filter(id => id === null)
     ).take(1)
-      .zip(DOMactions.selectFiles$.take(1)).do(x => console.log(x))
+      .zip(DOMactions.selectFiles$.take(1))
       .map(x => ({
         method: 'POST',
         url: '/users',

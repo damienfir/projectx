@@ -1,12 +1,14 @@
 import Rx from 'rx';
 import {h} from '@cycle/dom';
 import {apply, argArray, asc, ascIndex, initial, jsonPOST, jsonPOSTResponse, cancelDefault} from './helpers'
+import helpers from './helpers'
 import Composition from './composition-ui'
 let Observable = Rx.Observable;
 
 
 let coverpage = {
   tiles: [],
+  collectionID: -1,
   index: 0
 };
 
@@ -18,6 +20,7 @@ let blankpage = {
 
 let leftOrRight = (index) => index % 2 ? '.pull-right' : '.pull-left';
 let moveOrNot = (tiles) => tiles.length === 0 ? '.nomove' : '.move-mosaic';
+
 
 function splitIntoSpreads(spreads, page) {
   if (!spreads.length) {
@@ -48,7 +51,7 @@ function renderTile(tile, tileindex, index) {
     'data-page': index,
     'data-idx': tileindex}, [
   h('img', {
-    'src': "/storage/photos/"+tile.hash,
+    'src': "/storage/thumbs/"+tile.hash,
     'draggable': false,
     'style': {
       height: percent(scaleY),
@@ -66,7 +69,7 @@ let renderCover = (title, page) => {
   return page.tiles.length === 0 ?
       h('.nocover', h('h6.cover-message.center', "Select images from the album to appear on the cover.")) :
       // h('input.cover-title#album-title', {'type': 'text', 'placeholder': 'Album title...', 'value': title, 'autocomplete': 'off'})
-      h('.cover-title', title ? title : 'Album title...')
+      h('.cover-title', title ? title : h('span.text-muted', 'Change your album title above'))
 }
 
 let renderBackside = () => {
@@ -97,7 +100,7 @@ let renderBtn = (ui, j) => (page, i) => {
 }
 
 let renderSpread = (photos, ui, title) => (spread, i) => {
-  return h('.spread' + (spread.length === 1 ? '.spread-cover' : ''), [
+  return h('.spread' + ((spread.length === 1 && spread[0].index == 0) ? '.spread-cover' : ''), [
       h('.spread-paper.shadow.clearfix', spread.map(renderPage(photos, title, i))), 
       h('.spread-btn.clearfix', spread.map(renderBtn(ui, i)))
   ]);
@@ -128,7 +131,6 @@ function model(DOMactions, collectionActions, HTTPactions, composition$) {
 
   let demoAlbum$ = collectionActions.storedAlbum$
     .map(demo => _.sortBy(demo.pages, 'index'))
-    .do(x => console.log(x))
     .map(pages => (pages[0].index === 0) ? pages : [coverpage].concat(pages))
     .map(pages => album => pages);
 
@@ -165,7 +167,7 @@ function requests(DOMactions, album$, collection, photos, upload) {
 
 
   return {
-    createAlbum$: upload.actions.uploadedFiles$.withLatestFrom(collection.state$, album$,
+    createAlbum$: upload.actions.uploadedFiles$.withLatestFrom(collection.state$, album$, photos.state$,
         (photos, collection, album) => ({
           url: '/collections/'+collection.id+'/pages?startindex='+album.length,
           method: 'POST',
@@ -204,15 +206,9 @@ function requests(DOMactions, album$, collection, photos, upload) {
 }
 
 
-function hashMap(photos) {
-  if (!photos) return {};
-  if (!_.isArray(photos)) return photos;
-  return _.object(photos.map(p => [p.id, p.hash]));
-}
-
 
 function view(albumState$, photosState$, uiState$, collectionState$) {
-  let photosDict$ = photosState$.map(hashMap);
+  let photosDict$ = photosState$.map(helpers.hashMap);
   return albumState$.combineLatest(photosDict$, uiState$, collectionState$,
       (album, photos, ui, collection) =>
         album.length > 1 ?

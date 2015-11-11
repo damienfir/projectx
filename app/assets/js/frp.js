@@ -5,7 +5,7 @@ import {makeHTTPDriver} from '@cycle/http';
 
 import Elements from './ui'
 
-import {toArray, jsonPOST} from './helpers'
+import helpers from './helpers'
 import User from './user'
 import Collection from './collection'
 import Upload from './upload'
@@ -25,9 +25,9 @@ function intent(DOM, HTTP) {
       document.getElementById('file-input').dispatchEvent(new MouseEvent('click')));
 
 
-  let actions = {
+  let DOMactions = {
     toggleUpload$: btn('#upload-btn').merge(btn('#create-btn')),
-    selectFiles$: DOM.select('#file-input').events('change').map(ev => toArray(ev.target.files)),
+    selectFiles$: DOM.select('#file-input').events('change').map(ev => helpers.toArray(ev.target.files)),
     reset$: btn('#reset-btn'),
     download$: btn('#download-btn'),
     demo$: btn('#demo-btn'),
@@ -37,12 +37,18 @@ function intent(DOM, HTTP) {
     // decrement$: btn('.decr-btn').map(ev => ev.target['data-page']),
     albumTitle$: DOM.select('#album-title').events("input").map(ev => ev.target.value),
     // save$: btn('#save-btn'),
-    hasID$: Observable.just(window.location.pathname.split('/')).filter(url => url.length > 2).map(url => url.pop()),
+    hasID$: Observable.just(window.location.pathname.split('/'))
+      .filter(url => url.length > 2).map(url => url.pop()),
     addPhotoCover$: btn('.cover-btn').map(ev => ev.target['data-id'])
   }
 
-  return actions;
+  let HTTPactions = { 
+    saved$: helpers.jsonPOSTResponse(HTTP, /\/save/).do(x => console.log(x))
+  }
+
+  return {DOMactions, HTTPactions};
 }
+
 
 
 function model(DOMactions) {
@@ -68,35 +74,42 @@ function requests(album, collection) {
 }
 
 
-function view(collection, album, upload, ui, order) {
-  let toolbarDOM = Observable.combineLatest(collection.state$, album.state$, upload.state$, ui.state$, Elements.renderToolbar);
+function view(HTTPactions, collection, album, upload, ui, order) {
+  let toolbarDOM = Observable.combineLatest(
+      collection.state$,
+      album.state$,
+      upload.state$,
+      ui.state$,
+      Elements.renderToolbar);
   let uploadDOM = Observable.just(Elements.renderUploadArea());
   let buttonDOM = Observable.just(Elements.renderButton());
+  let alertDOM = Elements.saveNotification(HTTPactions.saved$).do(x => console.log(x));
 
-  return Observable.combineLatest(toolbarDOM, uploadDOM, album.DOM, order.DOM, buttonDOM,
-      (toolbarVTree, uploadVTree, albumVTree, orderVTree, buttonVTree) =>
+  return Observable.combineLatest(toolbarDOM, uploadDOM, album.DOM, order.DOM, buttonDOM, alertDOM,
+      (toolbarVTree, uploadVTree, albumVTree, orderVTree, buttonVTree, alertVTree) =>
       h('div.theme-blue', [
         toolbarVTree,
         uploadVTree,
         orderVTree,
-        albumVTree || buttonVTree
+        albumVTree || buttonVTree,
+        alertVTree
       ])
   );
 }
 
 
 function main({DOM, HTTP}) {
-  let actions = intent(DOM);
+  let {DOMactions, HTTPactions} = intent(DOM, HTTP);
 
-  let user = User(HTTP, actions);
-  let collection = Collection(HTTP, actions, user.state$);
-  let upload = Upload(actions, collection);
-  let photos = Photos(actions, upload, collection);
-  let album = Album(DOM, HTTP, actions, collection, photos, upload);
-  let ui = UserInterface(actions, album);
+  let user = User(HTTP, DOMactions);
+  let collection = Collection(HTTP, DOMactions, user.state$);
+  let upload = Upload(DOMactions, collection);
+  let photos = Photos(DOMactions, upload, collection);
+  let album = Album(DOM, HTTP, DOMactions, collection, photos, upload);
+  let ui = UserInterface(DOMactions, album);
   let order = Order(DOM, HTTP, user, collection);
 
-  model(actions);
+  model(DOMactions);
 
   let req = requests(album, collection);
 
@@ -106,10 +119,10 @@ function main({DOM, HTTP}) {
       .concat(_.values(order.HTTP))
       .concat(_.values(album.HTTP))
       .concat(_.values(req)))
-    .do(x => console.log(x));
+    // .do(x => console.log(x));
 
   return {
-    DOM: view(collection, album, upload, ui, order),
+    DOM: view(HTTPactions, collection, album, upload, ui, order),
     HTTP: requests$
   };
 }

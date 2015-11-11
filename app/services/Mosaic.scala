@@ -155,6 +155,10 @@ class MosaicService @Inject()() {
     render(id, id, id, id + ".jpg")
   }
 
+  def blankSVG = """<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+    width="297mm"
+    height="210mm"></svg>
+    """
 
   def joinPDFs(fnames: List[String]) = {
     val out = UUID.randomUUID.toString + ".pdf"
@@ -167,7 +171,7 @@ class MosaicService @Inject()() {
     }
   }
 
-  def makePDFs(svgs: List[String]) = svgs.map {
+  def makePDFs(svgs: List[String]) = (svgs.head :: (blankSVG :: svgs.tail)) map {
     svg => {
       val f = mosaicFile(UUID.randomUUID.toString)
       writeFile(f+".svg", svg)

@@ -77,7 +77,7 @@ class CompositionDAO @Inject()(protected val dbConfigProvider: DatabaseConfigPro
   def get(id: Long) = db.run(compositions.filter(_.id === id).result).map(_.head)
 
   def updateAll(comps: List[Composition]) = Future.sequence {
-     comps.map(comp => db.run(compositions.filter(_.id === comp.id.get).update(comp).asTry))
+     comps.filter(_.collectionID != -1).map(comp => db.run(compositions.filter(_.id === comp.id.get).update(comp).asTry))
   }
 
   def allFromCollection(id: Long) = db.run(compositions.filter(_.collectionID === id).result)
