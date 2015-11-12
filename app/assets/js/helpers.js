@@ -31,6 +31,8 @@ let ascIndex = (a,b) => asc(a.index,b.index)
 
 let apply = (state, func) => func(state)
 
+let btn = (DOM, selector) => DOM.select(selector).events('click').map(cancelDefault)
+
 let log = x => console.log(x)
 
 let argArray = (a,b) => [a,b]
@@ -77,7 +79,9 @@ let toArray = (filelist) => {
 module.exports = {
   asc,
   apply,
+  btn,
   cancelDefault,
+  cancel: cancelDefault,
   argArray,
   initial,
   jsonRes,

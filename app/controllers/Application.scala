@@ -6,6 +6,7 @@ import play.api._
 import play.api.mvc._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.concurrent.Future
+import scala.util.Random
 
 import models._
 import services._
@@ -95,7 +96,7 @@ class Collections @Inject()(compositionDAO: CompositionDAO, collectionDAO: Colle
   }
 
 
-  def divideIntoPages(photos: Seq[DBModels.Photo]): List[(Seq[DBModels.Photo],Int)] =
+  def divideIntoPages(photos: List[DBModels.Photo]): List[(List[DBModels.Photo],Int)] =
     photos.grouped(3).toList.zipWithIndex
 
 
@@ -133,13 +134,14 @@ class Collections @Inject()(compositionDAO: CompositionDAO, collectionDAO: Colle
 
 
   def generatePages(id: Long, startindex: Int) = Action.async(parse.json) { request =>
-    val pages = divideIntoPages(request.body.as[List[DBModels.Photo]])
+    val photos = request.body.as[List[DBModels.Photo]]
+    val pages = divideIntoPages(photos)
     val pagesWithCover = if (startindex == 0) {
-      (pages.take(1).map({case (subset, index) => (subset.take(1), 0)}) ::: pages.map({case (p,i) => (p,i+1)}))
+      (List(photos(Random.nextInt(photos.size))), 0) :: pages.map({case (p,i) => (p,i+1)})
     } else { pages }
 
     Future.sequence {
-      pagesWithCover.map({case (subset, index) => generateComposition(id, subset.toList, startindex+index)})
+      pagesWithCover.map({case (subset, index) => generateComposition(id, subset, startindex+index)})
     }.map(pages => Ok(Json.toJson(pages)))
   }
 

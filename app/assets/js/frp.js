@@ -24,22 +24,28 @@ function intent(DOM, HTTP) {
   btn('#upload-area').subscribe(_ => 
       document.getElementById('file-input').dispatchEvent(new MouseEvent('click')));
 
+  DOM.select('#upload-area').events('dragover')
+    .map(helpers.cancel)
+    .subscribe(ev => {ev.dataTransfer.dropEffect = 'copy'; return ev;});
+
+  let drop$ = DOM.select("#upload-area").events('drop')
+    .map(helpers.cancel)
+    .map(ev => ev.dataTransfer.files)
+    .map(helpers.toArray);
 
   let DOMactions = {
     toggleUpload$: btn('#upload-btn').merge(btn('#create-btn')),
-    selectFiles$: DOM.select('#file-input').events('change').map(ev => helpers.toArray(ev.target.files)),
+    selectFiles$: DOM.select('#file-input').events('change').map(ev => helpers.toArray(ev.target.files)).merge(drop$),
     reset$: btn('#reset-btn'),
     download$: btn('#download-btn'),
     demo$: btn('#demo-btn'),
     ready$: Observable.just({}),
-    shuffle$: btn('.shuffle-btn').map(ev => ev.target['data-page']),
     // increment$: btn('.incr-btn').map(ev => ev.target['data-page']),
     // decrement$: btn('.decr-btn').map(ev => ev.target['data-page']),
     albumTitle$: DOM.select('#album-title').events("input").map(ev => ev.target.value),
     // save$: btn('#save-btn'),
     hasID$: Observable.just(window.location.pathname.split('/'))
       .filter(url => url.length > 2).map(url => url.pop()),
-    addPhotoCover$: btn('.cover-btn').map(ev => ev.target['data-id']),
     clickTitle$: DOM.select(".cover-title").events('click')
   }
 
@@ -65,13 +71,15 @@ function requests(album, collection) {
     .skip(1)
     .debounce(2000);
 
+  let demoID = parseInt(document.getElementById("demo-id").value);
+
   return {
     saveAlbum$: save$.withLatestFrom(collection.state$, album.state$, (ev, collectionState, albumState) => ({
       url: '/save',
       method: 'POST',
       eager: true,
       send: {collection: collectionState, album: albumState}
-    }))
+    })).filter(req => req.send.collection.id !== demoID)
   }
 }
 
@@ -83,11 +91,10 @@ function view(HTTPactions, collection, album, upload, ui, order) {
       upload.state$,
       ui.state$,
       Elements.renderToolbar);
-  let uploadDOM = Observable.just(Elements.renderUploadArea());
   let buttonDOM = Observable.just(Elements.renderButton());
   let alertDOM = Elements.saveNotification(HTTPactions.saved$);
 
-  return Observable.combineLatest(toolbarDOM, uploadDOM, album.DOM, order.DOM, buttonDOM, alertDOM,
+  return Observable.combineLatest(toolbarDOM, upload.DOM, album.DOM, order.DOM, buttonDOM, alertDOM,
       (toolbarVTree, uploadVTree, albumVTree, orderVTree, buttonVTree, alertVTree) =>
       h('div.theme-blue', [
         toolbarVTree,
@@ -105,7 +112,7 @@ function main({DOM, HTTP}) {
 
   let user = User(HTTP, DOMactions);
   let collection = Collection(HTTP, DOMactions, user.state$);
-  let upload = Upload(DOMactions, collection);
+  let upload = Upload(DOM, DOMactions, collection);
   let photos = Photos(DOMactions, upload, collection);
   let album = Album(DOM, HTTP, DOMactions, collection, photos, upload);
   let ui = UserInterface(DOMactions, album);

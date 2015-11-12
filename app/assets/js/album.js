@@ -68,7 +68,7 @@ function renderTile(tile, tileindex, index) {
 let renderCover = (title, page) => {
   return page.tiles.length === 0 ?
       h('.nocover', h('h6.cover-message.center', "Select images from the album to appear on the cover.")) :
-      h('input.cover-title#album-title', {'type': 'text', 'placeholder': 'Click here to change the album title', 'maxLength': 50, 'value': title, 'autocomplete': 'off'})
+      h('input.cover-title#album-title', {'type': 'text', 'placeholder': 'Click here to change the album title...', 'maxLength': 50, 'value': title, 'autocomplete': 'off'})
       // h('.cover-title', title ? title : h('span.text-muted', 'Click here to change the album title'))
 }
 
@@ -93,9 +93,11 @@ let renderBtn = (ui, j) => (page, i) => {
   let p = j*2+i;
   return h(leftOrRight(p), [
       h('span.page', {'data-page': page.index}, p === 0 ? 'Cover page ' : "Page "+(p-1)+' '),
-      page.tiles.length ? h('button.btn.btn-primary.btn-xs.shuffle-btn', {'data-page': page.index}, [h('i.fa.fa-refresh'), " Shuffle"]) : '',
-      // h('button.btn.btn-default.btn-xs.incr-btn', {'data-page': index}, [h('i.fa.fa-plus'), " More"]),
-      // h('button.btn.btn-default.btn-xs.decr-btn', {'data-page': index}, [h('i.fa.fa-minus'), " Less"])
+      page.tiles.length ? h('.btn-group', [
+        h('button.btn.btn-primary.btn-xs.shuffle-btn', {'data-page': page.index}, [h('i.fa.fa-refresh'), " Shuffle"]),
+        h('button.btn.btn-primary.btn-xs.incr-btn', {'data-page': page.index}, [h('i.fa.fa-plus'), " More"]),
+        h('button.btn.btn-primary.btn-xs.decr-btn', {'data-page': page.index}, [h('i.fa.fa-minus'), " Less"])
+      ]) : ''
   ])
 }
 
@@ -114,17 +116,21 @@ function renderAlbum(album, photos, ui, title) {
 
 
 
-function intent(HTTP) {
+function intent(DOM, HTTP) {
   return {
     createdAlbum$: jsonPOST(HTTP, /\/collections\/\d+\/pages\?startindex=.*/),
     downloadedAlbum$: jsonPOSTResponse(HTTP, /\/collections\/\d+\/download/),
     shuffledPage$: jsonPOST(HTTP, /\/collections\/\d+\/page\/\d+\?index=.*/),
-    savedPage$: jsonPOST(HTTP, /\/save/)
+    savedPage$: jsonPOST(HTTP, /\/save/),
+    shuffle$: helpers.btn(DOM, '.shuffle-btn').map(ev => ev.target['data-page']),
+    incrPhotos$: helpers.btn(DOM, '.incr-btn').map(ev => ev.target['data-page']),
+    decrPhotos$: helpers.btn(DOM, '.decr-btn').map(ev => ev.target['data-page']),
+    addPhotoCover$: helpers.btn(DOM, '.cover-btn').map(ev => ev.target['data-id']),
   }
 }
 
 
-function model(DOMactions, collectionActions, HTTPactions, composition$) {
+function model(DOMactions, actions, collectionActions, HTTPactions, composition$) {
   HTTPactions.downloadedAlbum$.subscribe(res => {
     window.open("/storage/generated/" + res.text);
   });
@@ -156,7 +162,7 @@ function model(DOMactions, collectionActions, HTTPactions, composition$) {
 }
 
 
-function requests(DOMactions, album$, collection, photos, upload) {
+function requests(DOMactions, actions, album$, collection, photos, upload) {
 
   let photosFromTiles = (photos, tiles) => _.filter(photos, p => _.where(tiles, {'photoID': p.id}).length > 0);
 
@@ -165,6 +171,10 @@ function requests(DOMactions, album$, collection, photos, upload) {
       ((array.map(p => p.id).indexOf(item.id) === -1) ?
         array.concat(item) : array.filter(el => el.id !== item.id));
 
+  let getOtherPage = (page1, N) =>  {
+    let page2 = (page1 % 2) ? page1 - 1 : page1 + 1;
+    return page2 < 1 ? page2 + 2 : (page2 >= N ? page2 - 2 : page2);
+  }
 
   return {
     createAlbum$: upload.actions.uploadedFiles$.withLatestFrom(collection.state$, album$, photos.state$,
@@ -181,24 +191,62 @@ function requests(DOMactions, album$, collection, photos, upload) {
           send: {collection, album}
         })),
 
-    shufflePage$: DOMactions.shuffle$.withLatestFrom(collection.state$, photos.state$, album$,
+    shufflePage$: actions.shuffle$.withLatestFrom(collection.state$, photos.state$, album$,
         (page, collection, photos, album) => ({
           url: '/collections/'+collection.id+'/page/'+album[page].id+'?index='+page,
           method: 'POST',
           send: photosFromTiles(photos, album[page].tiles)
         })),
-    
-    editPhotoCover$: DOMactions.addPhotoCover$.withLatestFrom(collection.state$, photos.state$, album$,
-      (photoID, collection, photos, album) => {
-        let id = album[coverpage.index].id
-        let url = _.isUndefined(id) ?
-          '/collections/' + collection.id + '/pages?startindex='+coverpage.index :
-          '/collections/' + collection.id + '/page/' + id + '?index=' + coverpage.index ;
 
+    incrDecrPhotos$: actions.incrPhotos$.filter(p => p !== 0).withLatestFrom(album$, (page1, album) => {
+        return [page1, getOtherPage(page1, album.length)];
+      }).merge(actions.decrPhotos$.filter(p => p !== 0).withLatestFrom(album$, (page2, album) => {
+        return [getOtherPage(page2, album.length), page2];
+      }))
+      .withLatestFrom(album$, ([incr, decr], album) => ({'incr': album[incr], 'decr': album[decr]}))
+      .withLatestFrom(photos.state$, ({incr, decr}, photos) => {
+        let photos1 = photosFromTiles(photos, incr.tiles);
+        let photos2 = photosFromTiles(photos, decr.tiles);
+        if (photos2.length > 1) photos1.unshift(photos2.pop())
+        return [
+          {'page': incr, 'photos': photos1},
+          {'page': decr, 'photos': photos2}
+        ]
+      })
+      .flatMap(pages => Observable.fromArray(pages).withLatestFrom(collection.state$, ({page, photos}, collection) => ({
+        url: '/collections/' + collection.id + '/page/' + page.id + '?index=' + page.index,
+        method: 'POST',
+        send: photos
+      }))),
+
+    incrDecrCover$: actions.incrPhotos$.filter(p => p === 0).map(p => 1)
+      .merge(actions.decrPhotos$.filter(p => p === 0).map(p => -1))
+      .withLatestFrom(collection.state$, album$, photos.state$, (delta, collection, album, photos) => {
+        let page = album[0];
+        let coverPhotos = photosFromTiles(photos, page.tiles);
+        let coverIDs = coverPhotos.map(p => p.id)
+        let allIDs = photos.map(p => p.id)
+        let allowedIDs = _.difference(allIDs, coverIDs);
+        if (delta > 0) {
+          if (allowedIDs.length > 0) coverPhotos.push(photos[allIDs.indexOf(_.sample(allowedIDs))])
+        } else {
+          if (coverPhotos.length > 1) coverPhotos.pop()
+        }
         return {
-          url: url,
           method: 'POST',
-          send: addOrRemove(photosFromTiles(photos, album[coverpage.index].tiles), photos.filter(p => p.id === photoID).shift())
+          url: '/collections/' + collection.id + '/page/' + page.id + '?index=' + page.index,
+          eager: true,
+          send: coverPhotos
+        }
+      }),
+    
+    editPhotoCover$: actions.addPhotoCover$.withLatestFrom(collection.state$, photos.state$, album$,
+      (photoID, collection, photos, album) => {
+        let cover = album[0];
+        return {
+          url: '/collections/' + collection.id + '/page/' + cover.id + '?index=' + 0,
+          method: 'POST',
+          send: addOrRemove(photosFromTiles(photos, cover.tiles), photos.filter(p => p.id === photoID).shift())
         };
       })
       .filter(req => req.send.length > 0)
@@ -229,9 +277,9 @@ function uiModel(DOM) {
 
 module.exports = function(DOM, HTTP, DOMactions, collection, photos, upload) {
   let compositionMod$ = Composition(DOM);
-  let actions = intent(HTTP);
-  let state$ = model(DOMactions, collection.actions, actions, compositionMod$);
-  let req = requests(DOMactions, state$, collection, photos, upload);
+  let actions = intent(DOM, HTTP);
+  let state$ = model(DOMactions, actions, collection.actions, actions, compositionMod$);
+  let req = requests(DOMactions, actions, state$, collection, photos, upload);
   let ui$ = uiModel(DOM);
   let vtree$ = view(state$, photos.state$, ui$, collection.state$);
 

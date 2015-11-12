@@ -52,13 +52,6 @@ function renderButton() {
 }
 
 
-function renderUploadArea() {
-  return h('.modal.fade#upload-modal',
-      h('.modal-dialog',
-        h('.modal-content#upload-area',
-          h('.modal-body', [h('.message', "Drag to upload or click here"), h('.fa.fa-download.fa-3x')]))));
-}
-
 
 function renderProgressbar(upload) {
   if (upload.size) {
@@ -94,4 +87,4 @@ function saveNotification(saveEvent$) {
 }
 
 
-module.exports = {renderToolbar, renderUploadArea, renderButton, saveNotification}
+module.exports = {renderToolbar, renderButton, saveNotification}
