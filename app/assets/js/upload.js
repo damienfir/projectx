@@ -1,4 +1,5 @@
 import Rx from 'rx';
+import {h} from '@cycle/dom';
 import helpers from './helpers'
 
 
@@ -15,10 +16,10 @@ function makeUploadRequest(file, collection) {
 }
 
 
-module.exports = function(DOMactions, collection) {
-
+function intent(DOM, DOMactions, collection) {
   let startUpload$ = DOMactions.selectFiles$
     .flatMapLatest(files => collection.state$.filter(helpers.hasID)
+        .take(1)
         .map(c => [files, c]));
 
   let fileUpload$ = startUpload$.flatMap(([files, collection]) =>
@@ -32,20 +33,44 @@ module.exports = function(DOMactions, collection) {
     .filter(({uploaded, files}) => uploaded.length === files.length)
     .map(({uploaded, files}) => uploaded);
 
+  return {startUpload$, fileUpload$, uploadedFiles$};
+}
 
-  let startedFunc$ = startUpload$.map(([files,collection]) =>
+
+function model(actions, DOMactions) {
+
+  let startedFunc$ = actions.startUpload$.map(([files,collection]) =>
       upload => _.extend(upload, {files: [], size: files.length}));
 
-  let uploadedFunc$ = fileUpload$.map(files =>
+  let uploadedFunc$ = actions.fileUpload$.map(files =>
       upload => _.extend(upload, {files: files}));
 
-  let finishedFunc$ = uploadedFiles$.map(files =>
+  let finishedFunc$ = actions.uploadedFiles$.map(files =>
       upload => ({}));
 
-  let state$ = Rx.Observable.merge(startedFunc$, uploadedFunc$, finishedFunc$).startWith({}).scan(helpers.apply);
+  return Rx.Observable.merge(startedFunc$, uploadedFunc$, finishedFunc$)
+    .startWith({})
+    .scan(helpers.apply);
+}
+
+
+function view(state$) {
+  return state$.map(state =>
+      h('.modal.fade#upload-modal',
+      h('.modal-dialog',
+        h('.modal-content#upload-area',
+          h('.modal-body', [h('.message', "Drag to upload or click here"), h('.fa.fa-download.fa-3x')]))))
+  );
+}
+
+
+module.exports = function(DOM, DOMactions, collection) {
+  let actions = intent(DOM, DOMactions, collection);
+  let state$ = model(actions);
 
   return {
-    actions: {startUpload$, fileUpload$, uploadedFiles$},
+    DOM: view(state$),
+    actions,
     state$
   };
 }

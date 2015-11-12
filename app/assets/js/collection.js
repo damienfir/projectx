@@ -33,7 +33,7 @@ function model(HTTPactions, DOMactions) {
 function requests(DOMactions, userState$, state$) {
   return {
     createCollection$: DOMactions.selectFiles$
-      .flatMapLatest(files => userState$.filter(hasID).map(user => [files,user]))
+      .flatMapLatest(files => userState$.filter(hasID).take(1).map(user => [files,user]))
       .withLatestFrom(state$, argArray).filter(([x,col]) => _.isUndefined(col.id)).map(([x,col]) => x)
       .map(([f,user]) => ({
         url:'/users/'+user.id+'/collections',

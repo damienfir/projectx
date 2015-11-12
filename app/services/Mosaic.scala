@@ -20,8 +20,6 @@ class MosaicService @Inject()() {
 
   val binary = Play.current.configuration.getString("px.binary").get
 
-  // def genericFile(path: String) = id => s"$path/$id"
-  
   def getMosaicFile(filename: String) = new File(mosaicFile(filename))
 
   def mosaicFile(id: String) = Play.current.configuration.getString("px.dir_generated").get + s"/$id"
