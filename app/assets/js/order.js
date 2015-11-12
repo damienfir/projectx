@@ -61,7 +61,7 @@ function model(actions, user, collection) {
 
   let updateNonce$ = actions.nonceReceived$
     .withLatestFrom(user.state$, collection.state$, (obj, user, collection) =>
-        state => _.extend(state, {'order': {'nonce': obj.nonce, 'userID': user.id, 'collectionID': collection.id, 'price': 0}}));
+        state => _.extend(state, {'order': {'nonce': obj.nonce, 'userID': user.id, 'collectionID': collection.id, 'price': 39.00}}));
 
   return Observable.merge(
       clientToken$,
@@ -134,17 +134,37 @@ function view(state$) {
                 // h('.panel-heading', h('h4.panel-title', "Payment information")),
                 h('.panel-body',
                   h('form', [h('div#payment-form'), h('button.btn.btn-info.pull-right#verify-btn', {'disabled': _.isUndefined(state.ready)}, "Validate payment method")]))
+              ]),
+
+              h('.panel.panel-default', [
+                  // h('.panel-heading', h('h4.panel-title', "Quantity")),
+                  h('.panel-body.text-center',
+                    h('.btn-group.text-center', {'data-toggle': 'buttons'}, [
+                      h('label.btn.btn-primary', [
+                        h('input', {'type': 'radio', 'name': 'qty', 'value': '39.00', 'autocomplete': 'off', 'checked': 'checked'}),
+                        h('h3', "1"), "CHF 39.00"
+                      ]),
+                      h('label.btn.btn-primary', [
+                        h('input', {'type': 'radio', 'name': 'qty', 'value': '99.00', 'autocomplete': 'off'}),
+                        h('h3', "3"), "CHF 99.00"
+                      ]),
+                      h('label.btn.btn-primary', [
+                        h('input', {'type': 'radio', 'name': 'qty', 'value': '169.00', 'autocomplete': 'off'}),
+                        h('h3', "5"), "CHF 169.00"
+                      ]),
+                    ])
+                  )
               ])
                 ]),
-                h('.modal-footer', [
+                h('.modal-footer.text-left', [
                     _.isUndefined(state.status) ? h('.clearfix', [
-                      state.order ?
-                        h('button.btn.btn-primary.pull-right.submit-order-btn',
-                          {'type': 'button'},
-                          ['Confirm order ', h('i.fa.fa-check')]) : '',
-                      h('button.btn.btn-default.pull-right.close-btn.order-cancel-btn',
+                      h('button.btn.btn-primary.pull-right.submit-order-btn',
+                        {'type': 'button', 'disabled': _.isUndefined(state.order)},
+                        ['Purchase ', h('i.fa.fa-check')]),
+                      h('button.btn.btn-default.pull-left.close-btn.order-cancel-btn',
                         {'data-target': '#order-modal'},
-                        ['Not now ', h('i.fa.fa-times')])]) :
+                        ['Not now ', h('i.fa.fa-times')])
+                    ]) :
                     h('.alert.alert-info.clearfix', 
                       state.status === -1 ?
                       [

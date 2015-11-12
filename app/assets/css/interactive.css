@@ -319,10 +319,6 @@ html, body {
 .centered { text-align: center; }
 .hide { display: none; }
 
-#order-modal .modal-footer {
-  text-align: left;
-}
-
 .center {
   position: absolute;
   margin: 0 auto;

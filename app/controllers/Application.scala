@@ -38,7 +38,7 @@ class Payment @Inject()(braintree: Braintree, email: Email) extends Controller {
   }
 
   def submitOrder = Action.async(parse.json) { request =>
-    val order = (request.body \ "order").as[APIModels.Order].copy(price = 1f)
+    val order = (request.body \ "order").as[APIModels.Order]
     val info = (request.body \ "info").as[APIModels.Info]
     braintree.order(order, info) map { trans =>
       email.confirmOrder(order, info) map (println(_))
