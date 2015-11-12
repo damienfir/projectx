@@ -154,7 +154,7 @@ class MosaicService @Inject()() {
 
   def joinPDFs(fnames: List[String]) = {
     val out = UUID.randomUUID.toString + ".pdf"
-    "pdfjoin " + fnames.mkString(" ") + " --rotateoversize false -q --paper a4paper -o " + mosaicFile(out) ! match {
+    "pdfunite " + fnames.mkString(" ") + " " + mosaicFile(out) ! match {
       case 0 => {
         fnames.map(f => (new File(f)).delete)
         out
