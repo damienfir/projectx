@@ -18,11 +18,12 @@ html, body {
   color: #fff;
 }
 .theme-blue .btn-primary:hover { background-color: #48CFAD; }
+.theme-blue .btn-primary.active { background-color: #4A89DC; }
 
-.theme-blue .btn-default {
-  background-color: #E6E9ED;
-  color: #656D78;
-}
+/* .theme-blue .btn-default { */
+/*   background-color: #E6E9ED; */
+/*   color: #656D78; */
+/* } */
 
 .container-ui {
   /* padding-top: 64px; */
@@ -318,6 +319,11 @@ html, body {
 .limited-width { max-width: 1400px; }
 .centered { text-align: center; }
 .hide { display: none; }
+
+#order-modal .modal-footer {
+  text-align: left;
+}
+
 
 .center {
   position: absolute;

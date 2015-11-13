@@ -11,22 +11,26 @@ import models._
 
 class Email @Inject()(ws: WSClient) {
   val host = Play.current.configuration.getString("px.host").get
+  val apiBase = Play.current.configuration.getString("px.mailgun-base").get
   val apiKey = Play.current.configuration.getString("px.mailgun-key").get
   val fromEmail = Play.current.configuration.getString("px.from-email").get
 
   def confirmOrder(order: APIModels.Order, info: APIModels.Info) = {
-    val res = ws.url("https://api.mailgun.net/v3/bigpiq.com/messages")
+    val res = ws.url(s"$apiBase/messages")
       .withAuth("api", apiKey, WSAuthScheme.BASIC)
       .post(Map(
         "from" -> Seq(fromEmail),
         "to" -> Seq(info.email),
-        "subject" -> Seq("Your order is processing"),
-        "text" -> Seq(s"""Hello ${info.firstName},
-Thank you for ordering your album with bigpiq, we are processing your order and will let you know when it's ready.
+        "subject" -> Seq("Thank you. Your order is processing"),
+        "text" -> Seq(s"""Dear ${info.firstName},
 
+Thank you for ordering your album with us, we are processing your order and will let you know when it's ready.
+
+You can view your album and modify it until the order is processed. Please click on the following url:
 http://${host}/ui/${order.collectionID}
 
-bigpiq team""")))
+Faithfully yours,
+Damien & RK""")))
 
     res.map(_.json)
   }

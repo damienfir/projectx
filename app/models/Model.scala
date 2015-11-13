@@ -64,7 +64,7 @@ object APIModels {
     userID: Long,
     collectionID: Long,
     nonce: String,
-    price: Float
+    qty: Int
   )
 }
 

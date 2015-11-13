@@ -1,16 +1,24 @@
 import Rx from 'rx';
 import {h} from '@cycle/dom';
 import {jsonPOST, jsonGET, apply} from './helpers'
+import helpers from './helpers'
 let Observable = Rx.Observable;
 
 
 let fields = ['firstName', 'lastName', 'email', 'address', 'zip', 'city', 'country'];
 
+let formErrors = (info) => _.mapObject(info, (val, key) => !_.isEmpty(val))
 
-let extractFields = (fields) => (formID) => {
+let extractFields = (formID, fields) => {
   let data = document.getElementById(formID).elements;
   return _.mapObject(_.pick(data, fields), (val, key) => val.value);
 }
+
+
+let getQuantity = () => ["qty1"].map(id => document.getElementById(id))
+  .filter(el => el.checked)
+  .map(el => parseInt(el.value))
+  .shift();
 
 
 function intent(DOM, HTTP) {
@@ -20,7 +28,9 @@ function intent(DOM, HTTP) {
   let actions = {
     // formSubmit$: DOM.select('#order-form').events('submit').map(cancelDefault),
     orderModal$: btn('#order-btn'),
-    formSubmit$: btn('.submit-order-btn').map('order-form').map(extractFields(fields)),
+    formKeyUp$: DOM.select("#order-form input").events("input").debounce(100).map(ev => extractFields('order-form', fields)),
+    formSubmit$: btn('.submit-order-btn'),
+    changeQty$: DOM.select('#qty-selector').events('click').map(helpers.cancel).map(el => getQuantity()),
     formSubmitted$: jsonPOST(HTTP, /\/order/),
     clientToken$: HTTP.filter(res$ => !_.isUndefined(res$.request.url))
       .filter(res$ => res$.request.url.match(/\/client_token/))
@@ -40,28 +50,29 @@ function model(actions, user, collection) {
   actions.clientToken$.subscribe(clientToken => {
     braintree.setup(clientToken, "dropin", {
       container: "payment-form",
-      onPaymentMethodReceived: function(obj) {
-        actions.nonceReceived$.onNext(obj);
-      },
-      onReady: function(obj) {
-        actions.integrationReady$.onNext(obj);
-      }
+      onPaymentMethodReceived: (obj) => actions.nonceReceived$.onNext(obj),
+      onReady: (obj) => actions.integrationReady$.onNext(obj)
     });
   });
 
-  let updateInfos$ = actions.formSubmit$
-    .map(info => state => _.extend(state, {info}));
+  let initial = {order: {}, info: {}};
 
+  let updateInfos$ = actions.formKeyUp$.map(info => state => _.extend(state, {info}));
+  let checkForm$ = actions.formKeyUp$.map(formErrors).map(valid => state => _.extend(state, {valid}));
   let clientToken$ = actions.clientToken$.map(token => state => _.extend(state, {token}));
-
-  let hasIntegration$ = actions.integrationReady$.map(obj => state => _.extend(state, {'ready': obj}));
-
+  let hasIntegration$ = actions.integrationReady$.map(ready => state => _.extend(state, {ready}));
   let submitOrder$ = actions.formSubmit$.map(obj => state => _.extend(state, {'status': -1}));
-  let submittedOrder$ = actions.formSubmitted$.map(obj => state => _.extend(state, obj));
+  let submittedOrder$ = actions.formSubmitted$.map(obj => state => _.extend(state, {'status': obj.status}));
+  let changedQty$ = actions.changeQty$.map(qty => state => _.extend(state, {'order': _.extend(state.order, {qty})}));
 
   let updateNonce$ = actions.nonceReceived$
     .withLatestFrom(user.state$, collection.state$, (obj, user, collection) =>
-        state => _.extend(state, {'order': {'nonce': obj.nonce, 'userID': user.id, 'collectionID': collection.id, 'price': 39.00}}));
+        state => _.extend(state, {'order': _.extend(state.order, {
+          'nonce': obj.nonce,
+          'userID': user.id,
+          'collectionID': collection.id,
+          'qty': getQuantity()
+        })}));
 
   return Observable.merge(
       clientToken$,
@@ -69,19 +80,22 @@ function model(actions, user, collection) {
       updateNonce$,
       hasIntegration$,
       submitOrder$,
-      submittedOrder$
-    ).startWith({}).scan(apply);
+      submittedOrder$,
+      checkForm$
+    ).startWith(initial).scan(apply);
 }
 
 
 function requests(actions, state$) {
   return {
-    formSubmit$: actions.formSubmit$.withLatestFrom(state$, (ev, state) => ({
-      url: '/order',
-      method: 'POST',
-      send: {info: state.info, order: state.order},
-      eager: true
-    })),
+    formSubmit$: actions.formSubmit$.withLatestFrom(state$, helpers.argArray)
+      .filter(([ev, state]) => !_.isUndefined(state.valid) && _.every(_.values(state.valid)))
+      .map(([ev, state]) => ({
+        url: '/order',
+        method: 'POST',
+        send: {info: state.info, order: state.order},
+        eager: true
+      })),
 
     clientToken$: actions.orderModal$
       .withLatestFrom(state$, (ev,state) => state.token)
@@ -91,22 +105,27 @@ function requests(actions, state$) {
 }
 
 
+let checkFields = (fields) => (key) => _.isUndefined(fields) ? '' : (fields[key] ? '' : '.has-error')
+
 function view(state$) {
-  return state$.map(state => h('div', [
+  return state$.map(state => {
+    let check = checkFields(state.valid)
+    return h('div', [
     h('.modal.fade#order-modal',
       h('.modal-dialog',
         h('.modal-content', [
           h('.modal-header', ''),
           h('.modal-body', [
-            h('form#order-form', [
+            h('.panel', 
+            h('form.panel-body#order-form', [
               h('.row', [
-                h('.col-lg-3.form-group', [
+                h('.col-lg-3.form-group' + check('firstName'), [
                   h('label', {'for': 'firstName'}, 'First Name'),
                   h('input.form-control', {'name': 'firstName', 'placeholder': ''})]),
-                h('.col-lg-3.form-group', [
+                h('.col-lg-3.form-group' + check('lastName'), [
                   h('label', {'for': 'lastName'}, 'Last Name'),
                   h('input.form-control', {'name': 'lastName', 'placeholder': ''})]),
-                h('.col-lg-6.form-group', [
+                h('.col-lg-6.form-group' + check('email'), [
                   h('label', {'for': 'email'}, 'Email'),
                   h('.input-group', [
                     h('span.input-group-addon', '@'),
@@ -114,73 +133,87 @@ function view(state$) {
                 ])
               ]),
               h('.row', [
-                h('.col-lg-12.form-group', [
+                h('.col-lg-12.form-group' + check('address'), [
                   h('label', {'for': 'address'}, 'Address'),
                   h('input.form-control', {'name': 'address', 'placeholder': 'Street & number'})]),
               ]),
               h('.row', [
-                h('.col-lg-2.form-group', [
+                h('.col-lg-2.form-group' + check('zip'), [
                   h('label', {'for': 'zip'}, 'Zip Code'),
                   h('input.form-control', {'name': 'zip', 'placeholder': ''})]),
-                h('.col-lg-5.form-group', [
+                h('.col-lg-5.form-group' + check('city'), [
                   h('label', {'for': 'city'}, 'City'),
                   h('input.form-control', {'name': 'city', 'placeholder': ''})]),
-                h('.col-lg-5.form-group', [
+                h('.col-lg-5.form-group' + check('country'), [
                   h('label', {'for': 'country'}, "Country"),
-                  h('input.form-control', {'name': 'country', 'disabled': true, 'placeholder': '', 'value': 'CH'})]),
-              ])]),
+                  h('input.form-control',
+                    {'name': 'country', 'disabled': true, 'placeholder': '', 'value': 'CH'})]),
+              ])
+            ])),
 
               h('.panel.panel-default', [
                 // h('.panel-heading', h('h4.panel-title', "Payment information")),
                 h('.panel-body',
-                  h('form', [h('div#payment-form'), h('button.btn.btn-info.pull-right#verify-btn', {'disabled': _.isUndefined(state.ready)}, "Validate payment method")]))
+                  h('form', [
+                    h('div#payment-form'),
+                    h('button.btn.btn-info.pull-right#verify-btn',
+                      {'disabled': _.isUndefined(state.ready)},
+                      "Validate payment method")
+                  ]))
               ]),
 
-              h('.panel.panel-default', [
-                  // h('.panel-heading', h('h4.panel-title', "Quantity")),
-                  h('.panel-body.text-center',
-                    h('.btn-group.text-center', {'data-toggle': 'buttons'}, [
-                      h('label.btn.btn-primary', [
-                        h('input', {'type': 'radio', 'name': 'qty', 'value': '39.00', 'autocomplete': 'off', 'checked': 'checked'}),
-                        h('h3', "1"), "CHF 39.00"
-                      ]),
-                      h('label.btn.btn-primary', [
-                        h('input', {'type': 'radio', 'name': 'qty', 'value': '99.00', 'autocomplete': 'off'}),
-                        h('h3', "3"), "CHF 99.00"
-                      ]),
-                      h('label.btn.btn-primary', [
-                        h('input', {'type': 'radio', 'name': 'qty', 'value': '169.00', 'autocomplete': 'off'}),
-                        h('h3', "5"), "CHF 169.00"
-                      ]),
+              h('.panel.panel-normal', [
+                  // h('.panel-heading', h('h3.panel-title', "Quantity")),
+                  h('.panel-body.row', [
+                    h('.col-lg-3',
+                      h('.btn-group#qty-selector', {'attributes': {'data-toggle': 'buttons'}}, [
+                        h('label.btn.btn-primary.active', [
+                          h('input#qty1',
+                            {'type': 'radio', 'name': 'qty', 'value': '1', 'autocomplete': 'off', 'checked': 'checked'}),
+                          h('h4', [h('i.fa.fa-book'), " 1"]), "CHF 39.00"
+                        ]),
+                        // h('label.btn.btn-primary', [
+                        //   h('input#qty2', {'type': 'radio', 'name': 'qty', 'value': '3', 'autocomplete': 'off'}),
+                        //   h('h4', "3"), "CHF 99.00"
+                        // ]),
+                        // h('label.btn.btn-primary', [
+                        //   h('input#qty3', {'type': 'radio', 'name': 'qty', 'value': '5', 'autocomplete': 'off'}),
+                        //   h('h4', "5"), "CHF 169.00"
+                        // ]),
+                    ])),
+                  h('.col-lg-9', [
+                      h('p.text-muted', 'This price includes printing and shipping.'),
+                      h('p', 'You will not be charged until your order is processed and printed.')
                     ])
-                  )
+                  ])
               ])
-                ]),
-                h('.modal-footer.text-left', [
-                    _.isUndefined(state.status) ? h('.clearfix', [
-                      h('button.btn.btn-primary.pull-right.submit-order-btn',
-                        {'type': 'button', 'disabled': _.isUndefined(state.order)},
-                        ['Purchase ', h('i.fa.fa-check')]),
-                      h('button.btn.btn-default.pull-left.close-btn.order-cancel-btn',
+            ]),
+            h('.modal-footer', [
+                _.isUndefined(state.status) ? h('.clearfix', [
+                   (_.isUndefined(state.order.nonce) || _.isUndefined(state.order.qty)) ? '' :
+                    h('button.btn.btn-primary.pull-right.submit-order-btn',
+                      {'type': 'button', 'disabled': (_.isUndefined(state.valid) || !_.every(_.values(state.valid)))},
+                      ['Purchase ', h('i.fa.fa-check')]),
+                  h('button.btn.btn-default.pull-left.close-btn.order-cancel-btn',
+                    {'data-target': '#order-modal'},
+                    ['Not now ', h('i.fa.fa-times')])
+                ]) :
+                h('.alert.alert-info.clearfix', 
+                  state.status === -1 ?
+                  [
+                    h('i.fa.fa-spin.fa-circle-o-notch.pull-right'),
+                    " Submitting your order..."
+                  ] :
+                  [
+                    h('.fa.fa-2x.fa-smile-o.pull-right'),
+                    h('p', "Your album has been ordered!"),
+                    h('p', "You will receive an email to confirm your order, and will be notified when your order has been processed. Thank you!"),
+                    h('div', h('button.btn.btn-primary.pull-right.close-btn',
                         {'data-target': '#order-modal'},
-                        ['Not now ', h('i.fa.fa-times')])
-                    ]) :
-                    h('.alert.alert-info.clearfix', 
-                      state.status === -1 ?
-                      [
-                        h('i.fa.fa-spin.fa-circle-o-notch.pull-right'),
-                        " Submitting your order..."
-                      ] :
-                      [
-                        h('.fa.fa-2x.fa-smile-o.pull-right'),
-                        h('p', "Your album has been ordered!"),
-                        h('p', "You will receive an email to confirm your order, and will be notified when your order has been processed. Thank you!"),
-                        h('div', h('button.btn.btn-primary.pull-right.close-btn',
-                            {'data-target': '#order-modal'},
-                            ["Close ", h('i.fa.fa-times')]))
-                      ]
-                    )
-                ])
+                        ["Close ", h('i.fa.fa-times')]))
+                  ]
+                )
+            ])
       ]))),
 
       // h('.modal.fade#payment-modal',
@@ -195,7 +228,8 @@ function view(state$) {
       //         h('button.btn.btn-default.pull-right.payment-back-btn', [h('i.fa.fa-angle-left'), " Back"]),
       //       ])
       //     ])))
-      ]));
+      ])
+  });
 
         // h('.panel.panel-default', [
         //   h('.panel-heading', "Payment"),

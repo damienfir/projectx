@@ -38,14 +38,16 @@ class Payment @Inject()(braintree: Braintree, email: Email) extends Controller {
   }
 
   def submitOrder = Action.async(parse.json) { request =>
-    val order = (request.body \ "order").as[APIModels.Order]
-    val info = (request.body \ "info").as[APIModels.Info]
-    braintree.order(order, info) map { trans =>
-      email.confirmOrder(order, info) map (println(_))
-      Ok(Json.obj("status" -> 1))
-    } recover {
-      case ex => BadRequest(ex.getMessage)
-    }
+    (request.body \ "order").asOpt[APIModels.Order] flatMap { order =>
+      (request.body \ "info").asOpt[APIModels.Info] map { info =>
+        braintree.order(order, info) map { trans =>
+          email.confirmOrder(order, info) map (println(_))
+          Ok(Json.obj("status" -> 1))
+          } recover {
+            case ex => BadRequest(ex.getMessage)
+          }
+      }
+    } getOrElse { Future(BadRequest) }
   }
 }
 

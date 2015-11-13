@@ -25,8 +25,8 @@ function renderToolbar(collection, album, upload, ui) {
             // h('li.navbar-form',
               // h('input.form-control.input-blue#album-title',
               //   {'type': 'text', 'placeholder': 'Album title...', 'value': collection.name, 'autocomplete': 'off'})),
-              h('li', h('button.btn.btn-primary.navbar-btn#download-btn', [
-                h('i.fa.fa-cloud-download'), 'Download album'])),
+              // h('li', h('button.btn.btn-primary.navbar-btn#download-btn', [
+              //   h('i.fa.fa-cloud-download'), 'Download album'])),
               h('li', h('button.btn.btn-primary.navbar-btn#order-btn', [
                 h('i.fa.fa-shopping-cart'), 'Order album'])),
           ]) : ''

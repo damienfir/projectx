@@ -17,6 +17,8 @@ class Braintree {
   val publicKey = Play.current.configuration.getString("px.braintree-public-key").get
   val privateKey = Play.current.configuration.getString("px.braintree-private-key").get
 
+  val qtyToPrice = Map(1 -> 39.00, 3 -> 99.00, 5 -> 169.00)
+
   val gateway = new BraintreeGateway(
     if (environment.equals("production")) Environment.PRODUCTION else Environment.SANDBOX,
     merchantID,
@@ -43,7 +45,7 @@ class Braintree {
     } map { result =>
       if (result.isSuccess) {
         gateway.transaction().sale(new TransactionRequest()
-          .amount(BigDecimal.valueOf(order.price.toDouble).underlying)
+          .amount(BigDecimal.valueOf(qtyToPrice(order.qty).toDouble).underlying)
           .paymentMethodNonce(order.nonce)
           .customerId(result.getTarget.getId)
           .customField("collection_id", order.collectionID.toString)
