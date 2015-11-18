@@ -2,7 +2,6 @@ import Rx from 'rx';
 import {h} from '@cycle/dom';
 import {apply, argArray, asc, ascIndex, initial, jsonPOST, jsonPOSTResponse, cancelDefault} from './helpers'
 import helpers from './helpers'
-import Composition from './composition-ui'
 let Observable = Rx.Observable;
 
 
@@ -35,10 +34,9 @@ function splitIntoSpreads(spreads, page) {
   return spreads;
 }
 
+function percent(x) { return x * 100 + "%"; }
 
 function renderTile(tile, tileindex, index) {
-  function percent(x) { return x * 100 + "%"; }
-
   var scaleX = 1 / (tile.cx2 - tile.cx1);
   var scaleY = 1 / (tile.cy2 - tile.cy1);
 
@@ -258,10 +256,11 @@ function requests(DOMactions, actions, album$, collection, photos, upload) {
 function view(albumState$, photosState$, uiState$, collectionState$) {
   let photosDict$ = photosState$.map(helpers.hashMap);
   return albumState$.combineLatest(photosDict$, uiState$, collectionState$,
-      (album, photos, ui, collection) =>
-        album.length > 1 ?
+      (album, photos, ui, collection) => {
+        return album.length > 1 ?
         h('div.container-fluid.album', renderAlbum(album, photos, ui, collection.name)) :
         undefined
+      }
     );
 }
 
@@ -275,10 +274,9 @@ function uiModel(DOM) {
 }
 
 
-module.exports = function(DOM, HTTP, DOMactions, collection, photos, upload) {
-  let compositionMod$ = Composition(DOM);
+module.exports = function(DOM, HTTP, DOMactions, collection, photos, upload, composition) {
   let actions = intent(DOM, HTTP);
-  let state$ = model(DOMactions, actions, collection.actions, actions, compositionMod$);
+  let state$ = model(DOMactions, actions, collection.actions, actions, composition.state$);
   let req = requests(DOMactions, actions, state$, collection, photos, upload);
   let ui$ = uiModel(DOM);
   let vtree$ = view(state$, photos.state$, ui$, collection.state$);

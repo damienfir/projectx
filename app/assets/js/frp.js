@@ -11,8 +11,10 @@ import Collection from './collection'
 import Upload from './upload'
 import Photos from './photos'
 import Album from './album'
+import Composition from './composition-ui'
 import UserInterface from './userinterface'
 import Order from './order'
+import Analytics from './analytics'
 
 let Observable = Rx.Observable;
 
@@ -32,25 +34,26 @@ function intent(DOM, HTTP) {
     .map(helpers.cancel)
     .map(ev => ev.dataTransfer.files)
     .map(helpers.toArray);
+  
+  let filedialog$ = DOM.select('#file-input').events('change').map(ev => helpers.toArray(ev.target.files));
 
   let DOMactions = {
+    drop$,
+    filedialog$,
     toggleUpload$: btn('#upload-btn').merge(btn('#create-btn')),
-    selectFiles$: DOM.select('#file-input').events('change').map(ev => helpers.toArray(ev.target.files)).merge(drop$),
+    selectFiles$: filedialog$.merge(drop$),
     reset$: btn('#reset-btn'),
     download$: btn('#download-btn'),
     demo$: btn('#demo-btn'),
     ready$: Observable.just({}),
-    // increment$: btn('.incr-btn').map(ev => ev.target['data-page']),
-    // decrement$: btn('.decr-btn').map(ev => ev.target['data-page']),
     albumTitle$: DOM.select('#album-title').events("input").map(ev => ev.target.value),
-    // save$: btn('#save-btn'),
     hasID$: Observable.just(window.location.pathname.split('/'))
-      .filter(url => url.length > 2).map(url => url.pop()),
+      .filter(url => url.length > 2).map(url => url.pop()).shareReplay(1),
     clickTitle$: DOM.select(".cover-title").events('click')
   }
 
   let HTTPactions = { 
-    saved$: helpers.jsonPOSTResponse(HTTP, /\/save/).do(x => console.log(x))
+    saved$: helpers.jsonPOSTResponse(HTTP, /\/save/)
   }
 
   return {DOMactions, HTTPactions};
@@ -66,30 +69,28 @@ function model(DOMactions) {
 
 
 function requests(album, collection) {
-  let save$ = album.state$.filter(a => a.length > 1)
-    .merge(collection.state$.filter(c => c.id && c.name))
+  let save$ = album.state$.merge(collection.state$) 
     .skip(1)
     .debounce(2000);
 
   let demoID = parseInt(document.getElementById("demo-id").value);
 
   return {
-    saveAlbum$: save$.withLatestFrom(collection.state$, album.state$, (ev, collectionState, albumState) => ({
+    saveAlbum$: save$.withLatestFrom(collection.state$, album.state$, (ev, album, collection) => ({
       url: '/save',
       method: 'POST',
       eager: true,
-      send: {collection: collectionState, album: albumState}
-    })).filter(req => req.send.collection.id !== demoID)
+      send: {collection: collection, album: album}
+    })).filter(req => req.send.collection.id && req.send.collection.id !== demoID && req.send.album.length)
   }
 }
 
 
-function view(HTTPactions, collection, album, upload, ui, order) {
+function view(HTTPactions, collection, album, upload, order) {
   let toolbarDOM = Observable.combineLatest(
       collection.state$,
       album.state$,
       upload.state$,
-      ui.state$,
       Elements.renderToolbar);
   let buttonDOM = Observable.just(Elements.renderButton());
   let alertDOM = Elements.saveNotification(HTTPactions.saved$);
@@ -114,8 +115,8 @@ function main({DOM, HTTP}) {
   let collection = Collection(HTTP, DOMactions, user.state$);
   let upload = Upload(DOM, DOMactions, collection);
   let photos = Photos(DOMactions, upload, collection);
-  let album = Album(DOM, HTTP, DOMactions, collection, photos, upload);
-  let ui = UserInterface(DOMactions, album);
+  let composition = Composition(DOM);
+  let album = Album(DOM, HTTP, DOMactions, collection, photos, upload, composition);
   let order = Order(DOM, HTTP, user, collection);
 
   model(DOMactions);
@@ -127,11 +128,12 @@ function main({DOM, HTTP}) {
       .concat(_.values(collection.HTTP))
       .concat(_.values(order.HTTP))
       .concat(_.values(album.HTTP))
-      .concat(_.values(req)))
-    // .do(x => console.log(x));
+      .concat(_.values(req))).do(x => console.log(x));
+
+  Analytics(DOMactions, user, collection, upload, album, composition, order, req);
 
   return {
-    DOM: view(HTTPactions, collection, album, upload, ui, order),
+    DOM: view(HTTPactions, collection, album, upload, order),
     HTTP: requests$
   };
 }
