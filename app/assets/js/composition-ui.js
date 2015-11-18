@@ -243,19 +243,19 @@ function pageModel(actions) {
 
 
 function cropIntent(DOM) {
-  var mouseDown$ = DOM.select('.ui-tile').events('mousedown').map(cancelDefault).map(eventToCoord).share();
-  var mouseUp$ = DOM.select('.ui-tile').events('mouseup').map(cancelDefault);
-  var mouseMove$ = DOM.select('.ui-tile').events('mousemove').map(cancelDefault).map(eventToCoord).share();
+  var mouseDown$ = DOM.select('.ui-tile').events('mousedown').map(cancelDefault).map(eventToCoord);
+  var mouseUp$ = DOM.select(':root').events('mouseup').map(cancelDefault);
+  var mouseMove$ = DOM.select('.ui-tile').events('mousemove').map(cancelDefault).map(eventToCoord);
   var mouseEnter$ = DOM.select('.ui-tile img').events('mouseenter').map(cancelDefault).map(eventToCoord);
 
 
   var drag$ = mouseDown$.flatMapLatest(down => 
       mouseMove$.takeUntil(mouseUp$)
-      .pairwise()
-      .map(([prev, curr]) => _.extend(curr, {
-        dx: curr.x-prev.x,
-        dy: curr.y-prev.y
-      }))
+        .pairwise()
+        .map(([prev, curr]) => _.extend(curr, {
+          dx: curr.x-prev.x,
+          dy: curr.y-prev.y
+        }))
       .map(mm => _.extend(mm, {orig: down}))
       .concat(Rx.Observable.return(false)));
 
@@ -290,13 +290,20 @@ function cropModel(actions) {
     return album;
   });
 
-
   return Rx.Observable.merge(dragFunc$, swapFunc$);
 }
 
 
 module.exports = function(DOM) {
-  return Rx.Observable.merge(
-      cropModel(cropIntent(DOM)),
-      pageModel(pageIntent(DOM)));
+  let actions = {
+    crop: cropIntent(DOM),
+    edge: pageIntent(DOM)
+  }
+
+  return {
+    actions,
+    state$: Rx.Observable.merge(
+      cropModel(actions.crop),
+      pageModel(actions.edge))
+  };
 }

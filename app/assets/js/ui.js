@@ -1,10 +1,9 @@
 import Rx from 'rx';
 import {h} from '@cycle/dom';
-import {UI} from './helpers'
 
 
 
-function renderToolbar(collection, album, upload, ui) {
+function renderToolbar(collection, album, upload) {
   return h('div.navbar.navbar-transparent.navbar-static-top', [
       h('div.container-fluid', [
 
