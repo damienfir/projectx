@@ -76,12 +76,12 @@ function requests(album, collection) {
   let demoID = parseInt(document.getElementById("demo-id").value);
 
   return {
-    saveAlbum$: save$.withLatestFrom(collection.state$, album.state$, (ev, album, collection) => ({
+    saveAlbum$: save$.withLatestFrom(collection.state$, album.state$, (ev, collection, album) => ({
       url: '/save',
       method: 'POST',
       eager: true,
       send: {collection: collection, album: album}
-    })).filter(req => req.send.collection.id && req.send.collection.id !== demoID && req.send.album.length)
+    })).filter(req => req.send.collection.id && req.send.collection.id !== demoID && req.send.album)
   }
 }
 
