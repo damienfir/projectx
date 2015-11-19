@@ -1,31 +1,42 @@
 import Rx from 'rx';
 import {h} from '@cycle/dom';
+import helpers from './helpers'
 
 
 
 function renderToolbar(collection, album, upload) {
+  let loaded = album && album.length > 1 && collection.id !== helpers.demoID;
   return h('div.navbar.navbar-transparent.navbar-static-top', [
       h('div.container-fluid', [
 
-        !_.isEmpty(collection) ? 
+        loaded ? 
           h('ul.nav.navbar-nav', [
             h('li',
               h('button.btn.btn-primary.navbar-btn#upload-btn', [
-                h('i.fa.fa-cloud-upload'), 'Add photos'])),
+                h('i.fa.fa-cloud-upload'), 'Add more photos'])),
             h('li',
               h('button.btn.btn-primary.navbar-btn#reset-btn', [
-                h('i.fa.fa-refresh'), 'New album'])),
+                h('i.fa.fa-refresh'), ' New album'])),
           ]) : '',
+
+        collection.id === helpers.demoID ? h('.ul.nav.navbar-nav', [
+          h('li',
+            h('button.btn.btn-primary.navbar-btn#reset-btn', [
+              h('i.fa.fa-angle-left'), ' Back'
+            ]))
+        ]) : '',
           
         h('ul.nav.navbar-nav', renderProgressbar(upload)),
 
-        (album && album.length > 1) ?
+        loaded ?
           h('ul.nav.navbar-nav.navbar-right', [
             // h('li.navbar-form',
               // h('input.form-control.input-blue#album-title',
               //   {'type': 'text', 'placeholder': 'Album title...', 'value': collection.name, 'autocomplete': 'off'})),
               // h('li', h('button.btn.btn-primary.navbar-btn#download-btn', [
               //   h('i.fa.fa-cloud-download'), 'Download album'])),
+              h('li', h('button.btn.btn-primary.navbar-btn#save-btn', [
+                h('i.fa.fa-heart-o'), 'Save for later'])),
               h('li', h('button.btn.btn-primary.navbar-btn#order-btn', [
                 h('i.fa.fa-shopping-cart'), 'Order album'])),
           ]) : ''
@@ -38,6 +49,7 @@ function renderToolbar(collection, album, upload) {
 
 function renderButton() {
   return h('.start-buttons', [
+      h('.step1', "Step 1."),
       h('button.btn.btn-primary.btn-lg#create-btn', [
         h('i.fa.fa-book.fa-3x'),
         'Upload photos'
@@ -78,12 +90,4 @@ function renderFrontpage() {
 }
 
 
-function saveNotification(saveEvent$) {
-  return Rx.Observable.merge(
-    saveEvent$.map(h('.alert.alert-info.fade.in#save-alert', [h('i.fa.fa-check'), " Saved"])),
-    saveEvent$.delay(2000).map(null)
-  ).startWith(null);
-}
-
-
-module.exports = {renderToolbar, renderButton, saveNotification}
+module.exports = {renderToolbar, renderButton}

@@ -3,7 +3,7 @@ import Rx from 'rx';
 let gaEvent = (category, action, label, value) => ga('send', 'event', category, action, label, value);
 
 
-module.exports = function(DOMactions, user, collection, upload, album, composition, order, req) {
+module.exports = function(DOMactions, user, collection, upload, album, composition, order) {
   let events = [
 // global actions
     DOMactions.reset$.map({c: 'album', a: 'reset'}),
@@ -23,7 +23,7 @@ module.exports = function(DOMactions, user, collection, upload, album, compositi
 
 
 // album modifications
-    DOMactions.albumTitle$.debounce(2000).map(
+    collection.actions.albumTitle$.debounce(2000).map(
       title => ({c: 'title', a: 'change', l: title})),
 
     // album.state$.filter(a => a.length > 1).map({c: 'album', a: 'alter'}),

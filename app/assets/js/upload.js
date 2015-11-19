@@ -17,6 +17,15 @@ function makeUploadRequest(file, collection) {
 
 
 function intent(DOM, DOMactions, collection) {
+  helpers.btn(DOM, '#upload-area').subscribe(_ => 
+      document.getElementById('file-input').dispatchEvent(new MouseEvent('click')));
+
+  DOM.select('#upload-area').events('dragover')
+    .map(helpers.cancel)
+    .subscribe(ev => {ev.dataTransfer.dropEffect = 'copy'; return ev;});
+
+  let toggleUpload$ = helpers.btn(DOM, '#upload-btn').merge(helpers.btn(DOM, '#create-btn'));
+
   let startUpload$ = DOMactions.selectFiles$
     .flatMapLatest(files => collection.state$.filter(helpers.hasID)
         .take(1)
@@ -33,7 +42,13 @@ function intent(DOM, DOMactions, collection) {
     .filter(({uploaded, files}) => uploaded.length === files.length)
     .map(({uploaded, files}) => uploaded);
 
-  return {startUpload$, fileUpload$, uploadedFiles$};
+  return {toggleUpload$, startUpload$, fileUpload$, uploadedFiles$};
+}
+
+
+function events(DOMactions, actions) {
+  actions.toggleUpload$.subscribe(ev => $('#upload-modal').modal('show'));
+  DOMactions.selectFiles$.subscribe(x => $('#upload-modal').modal('hide'));
 }
 
 
@@ -67,6 +82,8 @@ function view(state$) {
 module.exports = function(DOM, DOMactions, collection) {
   let actions = intent(DOM, DOMactions, collection);
   let state$ = model(actions);
+
+  events(DOMactions, actions)
 
   return {
     DOM: view(state$),

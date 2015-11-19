@@ -32,14 +32,14 @@ function model(actions) {
 }
 
 
-function requests(DOMactions, actions, userState$) {
+function requests(DOMactions, actions, user$) {
   return {
     getUser$: actions.gotCookie$
       .filter(_.identity)
       .map(id => '/users/'+id),
 
     createUser$: Observable.merge(
-      userState$.skip(1).filter(hasNoID),
+      user$.skip(1).filter(hasNoID),
       actions.gotUser$.filter(res => res.status === 404),
       actions.gotCookie$.filter(id => id === null)
     ).take(1)

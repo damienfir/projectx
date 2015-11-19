@@ -3,21 +3,31 @@ import {apply, argArray, initial, jsonPOST, jsonGET, hasID} from './helpers'
 let Observable = Rx.Observable;
 
 
-function intent(HTTP) {
+function intent(DOM, HTTP) {
   return {
     createdCollection$: jsonPOST(HTTP, /\/users\/\d+\/collections/),
-    storedAlbum$: jsonGET(HTTP, /\/collections\/\d+\/album/)
+    storedAlbum$: jsonGET(HTTP, /\/collections\/\d+\/album/),
+    albumTitle$: DOM.select('#album-title').events("input").map(ev => ev.target.value),
+    clickTitle$: DOM.select(".cover-title").events('click')
   }
 }
 
 
-function model(HTTPactions, DOMactions) {
-  let demoCollection$ = HTTPactions.storedAlbum$.map(demo => col => demo.collection);
-  let collectionUpdated$ = HTTPactions.createdCollection$.map(col => collection => col);
-  let clearCollection$ = DOMactions.reset$.map(x => item => initial.collection);
-  let collectionName$ = DOMactions.albumTitle$.map(name => collection => _.extend(collection, {name: name}))
-  HTTPactions.createdCollection$.merge(HTTPactions.storedAlbum$.map(d => d.collection)).subscribe(col => window.history.pushState({}, '', '/ui/'+col.id));
+function events(DOMactions, actions) {
+  actions.clickTitle$.subscribe(ev => document.getElementById("album-title").focus());
   DOMactions.reset$.subscribe(x => window.history.pushState({}, '', '/ui'));
+}
+
+
+function model(actions, DOMactions) {
+  let demoCollection$ = actions.storedAlbum$.map(demo => col => demo.collection);
+  let collectionUpdated$ = actions.createdCollection$.map(col => collection => col);
+  let clearCollection$ = DOMactions.reset$.map(x => item => initial.collection);
+  let collectionName$ = actions.albumTitle$.map(name => collection => _.extend(collection, {name: name}))
+  actions.createdCollection$
+    .merge(actions.storedAlbum$
+        .map(d => d.collection))
+    .subscribe(col => window.history.pushState({}, '', '/ui/'+col.id));
 
   return Observable.merge(
       collectionUpdated$,
@@ -30,11 +40,11 @@ function model(HTTPactions, DOMactions) {
 }
 
 
-function requests(DOMactions, userState$, state$) {
+function requests(DOMactions, upload, user, collection$) {
   return {
     createCollection$: DOMactions.selectFiles$
-      .flatMapLatest(files => userState$.filter(hasID).take(1).map(user => [files,user]))
-      .withLatestFrom(state$, argArray).filter(([x,col]) => _.isUndefined(col.id)).map(([x,col]) => x)
+      .flatMapLatest(files => user.state$.filter(hasID).take(1).map(user => [files,user]))
+      .withLatestFrom(collection$, argArray).filter(([x,col]) => _.isUndefined(col.id)).map(([x,col]) => x)
       .map(([f,user]) => ({
         url:'/users/'+user.id+'/collections',
         method: 'POST',
@@ -51,10 +61,12 @@ function requests(DOMactions, userState$, state$) {
 }
 
 
-module.exports = function(HTTP, DOMactions, userState$) {
-  let actions = intent(HTTP);
+module.exports = function(DOM, HTTP, DOMactions, user, upload) {
+  let actions = intent(DOM, HTTP);
   let state$ = model(actions, DOMactions);
-  let requests$ = requests(DOMactions, userState$, state$);
+  let requests$ = requests(DOMactions, upload, user, state$);
+
+  events(DOMactions, actions);
 
   return {
     HTTP: requests$,

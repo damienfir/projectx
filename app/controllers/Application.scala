@@ -7,6 +7,7 @@ import play.api.mvc._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.concurrent.Future
 import scala.util.Random
+import scala.util.{Try, Success, Failure}
 
 import models._
 import services._
@@ -60,8 +61,9 @@ class Users @Inject()(usersDAO: UsersDAO) extends Controller with CRUDActions[DB
 }
 
 
-class Collections @Inject()(compositionDAO: CompositionDAO, collectionDAO: CollectionDAO, photoDAO: PhotoDAO, imageService: ImageService, mosaicService: MosaicService) extends Controller {
+class Collections @Inject()(usersDAO: UsersDAO, compositionDAO: CompositionDAO, collectionDAO: CollectionDAO, photoDAO: PhotoDAO, imageService: ImageService, mosaicService: MosaicService, emailService: Email) extends Controller {
   implicit val collectionFormat = Json.format[DBModels.Collection]
+  implicit val userFormat = Json.format[DBModels.User]
   implicit val photoFormat = Json.format[DBModels.Photo]
   implicit val compositionFormat = Json.format[DBModels.Composition]
 
@@ -124,14 +126,23 @@ class Collections @Inject()(compositionDAO: CompositionDAO, collectionDAO: Colle
       .map(page => Ok(Json.toJson(page)))
   }
 
-
-  def saveAlbum = Action.async(parse.json) { request =>
-    val collection = (request.body \ "collection").as[DBModels.Collection]
-    val compositions = (request.body \ "album").as[List[DBModels.Composition]]
+  def save(json: JsValue) = {
+    val collection = (json \ "collection").as[DBModels.Collection]
+    val compositions = (json \ "album").as[List[DBModels.Composition]]
     for {
       col <- collectionDAO.update(collection)
       album <- compositionDAO.updateAll(compositions)
     } yield Ok
+  }
+
+  def saveAlbum = Action.async(parse.json) { request =>
+    save(request.body)
+  }
+
+
+  def emailLink(id: Long, collectionID: Long) = Action.async(parse.json) { request =>
+    val email = (request.body \ "email").as[String]
+    emailService.sendLink(email, collectionID) map (Ok(_))
   }
 
 

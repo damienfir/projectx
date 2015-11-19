@@ -23,6 +23,8 @@ let cancelDefault = (ev) => {
   return ev;
 }
 
+let demoID = parseInt(document.getElementById("demo-id").value);
+
 let isNotEmpty = obj => !_.isEmpty(obj)
 
 let asc = (a,b) => a - b
@@ -95,4 +97,5 @@ module.exports = {
   hashMap,
   toArray,
   UI,
+  demoID
 }

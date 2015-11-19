@@ -128,31 +128,31 @@ function intent(DOM, HTTP) {
 }
 
 
-function model(DOMactions, actions, collectionActions, HTTPactions, composition$) {
-  HTTPactions.downloadedAlbum$.subscribe(res => {
+function model(DOMactions, actions, collection, composition) {
+  actions.downloadedAlbum$.subscribe(res => {
     window.open("/storage/generated/" + res.text);
   });
 
-  let demoAlbum$ = collectionActions.storedAlbum$
+  let demoAlbum$ = collection.actions.storedAlbum$
     .map(demo => _.sortBy(demo.pages, 'index'))
     // .map(pages => (pages[0].index === 0) ? pages : [].concat(pages))
     .map(pages => album => pages);
 
-  let albumUpdated$ = HTTPactions.createdAlbum$
+  let albumUpdated$ = actions.createdAlbum$
     // .filter(pages => pages[0].index > 0)
     .map(newpages => album => album.concat(newpages).sort(ascIndex));
 
   let clearAlbum$ = DOMactions.reset$
     .map(x => item => []);
 
-  let createdCover$ = HTTPactions.createdAlbum$
+  let createdCover$ = actions.createdAlbum$
     .filter(pages => pages[0].index === 0)
     .map(pages => pages[0]);
 
-  let albumPageShuffled$ = HTTPactions.shuffledPage$.merge(createdCover$)
+  let albumPageShuffled$ = actions.shuffledPage$.merge(createdCover$)
     .map(page => album => { album[page.index] = page; return album; });
 
-  return Observable.merge(albumUpdated$, clearAlbum$, demoAlbum$, albumPageShuffled$, composition$)
+  return Observable.merge(albumUpdated$, clearAlbum$, demoAlbum$, albumPageShuffled$, composition.state$)
     .startWith([])
     .scan(apply)
     .map(album => album.sort((a,b) => a.index-b.index))
@@ -276,7 +276,7 @@ function uiModel(DOM) {
 
 module.exports = function(DOM, HTTP, DOMactions, collection, photos, upload, composition) {
   let actions = intent(DOM, HTTP);
-  let state$ = model(DOMactions, actions, collection.actions, actions, composition.state$);
+  let state$ = model(DOMactions, actions, collection, composition);
   let req = requests(DOMactions, actions, state$, collection, photos, upload);
   let ui$ = uiModel(DOM);
   let vtree$ = view(state$, photos.state$, ui$, collection.state$);
