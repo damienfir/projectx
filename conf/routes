@@ -26,8 +26,9 @@ GET     /assets/*file               @controllers.Assets.at(path="/public", file)
 POST    /users                      @controllers.Users.save
 GET     /users/:id                  @controllers.Users.get(id: Long)
 # DELETE  /users/:id                  @controllers.Users.delete(id: Long)
-GET     /users/:id/collections      controllers.Collections.fromUser(id: Long)
-POST    /users/:id/collections      controllers.Collections.withUser(id: Long)
+GET     /users/:id/collections      @controllers.Collections.fromUser(id: Long)
+GET     /users/:id/collections/:hash      @controllers.Collections.getAlbumFromHash(id: Long, hash: String)
+POST    /users/:id/collections      @controllers.Collections.withUser(id: Long)
 POST    /users/:id/link/:cid        @controllers.Collections.emailLink(id: Long, cid: Long)
 
 # POST    /users/:id/send/:mid        controllers.Users.send(id, mid)

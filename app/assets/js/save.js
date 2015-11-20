@@ -6,19 +6,24 @@ import helpers from './helpers'
 
 function view(state$) {
   return state$.map(state => [
-      h('.modal#save-modal',
-        h('.modal-dialog.modal-sm',
+      h('.modal.fade#save-modal',
+        h('.modal-dialog.modal-md',
           h('.modal-content', [
-            h('.modal-header'),
+            h('.modal-header', h('button.close', {attributes: {'data-dismiss': 'modal'}, innerHTML: '&times;'})),
             h('.modal-body', [
-              h('form.form-inline#save-form', [
+              h('p', 'Where do you want to receive the link to your album ?'),
+              h('form#save-form', [
                 h('.input-group', [
                   h('span.input-group-addon', '@'),
-                  h('input.form-control', {type: 'email', name: 'email', placeholder: 'john@doe.com'})
+                  h('input.form-control', {type: 'email', name: 'email', placeholder: 'john@doe.com'}),
+                  h('span.input-group-btn',
+                    h('button.btn.btn-primary#submit-save-btn', 
+                      state.status ?
+                        [h('i.fa.fa-heart'), ' Saved'] :
+                        [h('i.fa.fa-heart-o'), ' Save']
+                    )
+                  )
                 ]),
-                h('button.btn.btn-primary#submit-save-btn', [
-                  h('i.fa.fa-heart'), ' Save'
-                ])
               ])
             ]),
             h('.modal-footer')
@@ -34,7 +39,7 @@ module.exports = function(DOM, HTTP, user, collection, album) {
     modal$: helpers.btn(DOM, '#save-btn'),
     submit$: helpers.btn(DOM, '#submit-save-btn')
       .map(ev => document.getElementById("save-form").elements['email'].value),
-    linkSent$: helpers.jsonPOST(HTTP, /\/users\/\d+\/link/),
+    linkSent$: helpers.jsonPOST(HTTP, /\/users\/\d+\/link\/\d+/),
     albumSaved$: helpers.jsonPOSTResponse(HTTP, /\/save/)
   }
 
@@ -44,7 +49,12 @@ module.exports = function(DOM, HTTP, user, collection, album) {
       actions.submit$)
     .debounce(2000)
 
-  actions.modal$.subscribe(ev => $('#save-modal').modal('show'));
+  actions.modal$.subscribe(ev => {
+    $('#save-modal').modal('show');
+    $('#save-form input[name=email]').focus();
+  });
+
+  actions.submit$.subscribe(email => user.actions.updateUser$.onNext({email: email}));
 
 
   let state$ = Rx.Observable.merge(
@@ -59,8 +69,9 @@ module.exports = function(DOM, HTTP, user, collection, album) {
   let requests = {
     emailLink$: actions.submit$.withLatestFrom(user.state$, collection.state$,
         (email, user, collection) => ({
-          url: '/user/' + user.id + '/link/' + collection.id,
+          url: '/users/' + user.id + '/link/' + collection.id,
           method: 'POST',
+          // eager: true,
           send: {email}
         })),
 

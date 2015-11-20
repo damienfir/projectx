@@ -43,6 +43,7 @@ object Tables {
   class Collections(tag: Tag) extends Table[Collection](tag, "collections") {
     def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
     def name = column[String]("name")
+    def hash = column[String]("hash")
     def * = (id.?, name.?) <> (Collection.tupled, Collection.unapply)
   }
   val collections = TableQuery[Collections]

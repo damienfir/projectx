@@ -13,22 +13,28 @@ function intent(HTTP) {
     gotCookie$: Observable.return(cookie.getItem(COOKIE)).map(id => (id && id.match(/\d+/)) ? id : null),
     gotUser$: jsonGETResponse(HTTP, /^\/users\/\d+$/),
     createdUser$: jsonPOST(HTTP, /^\/users$/),
+    updateUser$: new Rx.Subject()
   }
 }
 
 
 function model(actions) {
-  let userState$ = Observable.merge(
+  let newUser$ = Observable.merge(
       actions.gotUser$.filter(res => res.status !== 404).map(res => res.body),
       actions.createdUser$)
     .map(newuser => user => newuser)
+
+  let updateUser$ = actions.updateUser$.map(obj => user => _.extend(user, obj))
+
+  newUser$.filter(hasID).subscribe(user => cookie.setItem(COOKIE, user.id));
+
+  return Rx.Observable.merge(
+      newUser$,
+      updateUser$
+    )
     .startWith({})
     .scan(apply)
     .shareReplay(1);
-
-  userState$.filter(hasID).subscribe(user => cookie.setItem(COOKIE, user.id));
-
-  return userState$;
 }
 
 
@@ -48,7 +54,16 @@ function requests(DOMactions, actions, user$) {
         method: 'POST',
         url: '/users',
         send: {}
-      }))
+      })),
+
+    updateUser$: actions.updateUser$
+      .flatMapLatest(ev => user$.take(1)
+        .map(user => ({
+          url: '/users',
+          method: 'POST',
+          send: user
+        })
+      ))
   };
 }
 
@@ -60,6 +75,7 @@ module.exports = function(HTTP, DOMactions) {
 
   return {
     HTTP: requests$,
+    actions,
     state$
   }
 }

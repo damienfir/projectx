@@ -56,6 +56,14 @@ class CollectionDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProv
   } yield (c)
 
   def fromUser(id: Long) = db.run(fromUserQuery(id).result)
+
+  def getFromHash(userID: Long, hash: String) : Future[Option[DBModels.Collection]] = {
+    val col = for {
+      r <- usercollectionrelations.filter(_.userID === userID)
+      coll <- collections if (coll.id === r.collectionID && coll.hash === hash)
+    } yield coll
+    db.run(col.result) map (_.headOption)
+  }
 }
 
 

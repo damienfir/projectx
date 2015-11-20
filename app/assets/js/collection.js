@@ -6,7 +6,7 @@ let Observable = Rx.Observable;
 function intent(DOM, HTTP) {
   return {
     createdCollection$: jsonPOST(HTTP, /\/users\/\d+\/collections/),
-    storedAlbum$: jsonGET(HTTP, /\/collections\/\d+\/album/),
+    storedAlbum$: jsonGET(HTTP, /\/users\/\d+\/collections?hash=.+/),
     albumTitle$: DOM.select('#album-title').events("input").map(ev => ev.target.value),
     clickTitle$: DOM.select(".cover-title").events('click')
   }
@@ -56,7 +56,9 @@ function requests(DOMactions, upload, user, collection$) {
       return '/collections/'+id+'/album';
     }),
 
-    storedAlbum$: DOMactions.hasID$.map(id => '/collections/'+id+'/album')
+    storedAlbum$: DOMactions.hasHash$
+      .flatMapLatest(hash => user.state$
+          .take(1).map(user => '/users/'+user.id+'/collections?hash='+ hash))
   }
 }
 

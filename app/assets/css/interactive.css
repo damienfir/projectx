@@ -11,14 +11,21 @@ html, body {
 
 .theme-blue { min-height: 100%; background-color: #4A89DC; color: #fff; position: relative; }
 
-.theme-blue .btn { border: 0; }
+.theme-blue .btn {  }
 
 .theme-blue .btn-primary {
   background-color: #5D9CEC;
+  border-color: #5D9CEC;
   color: #fff;
 }
-.theme-blue .btn-primary:hover { background-color: #48CFAD; }
-.theme-blue .btn-primary.active { background-color: #4A89DC; }
+.theme-blue .btn-primary:hover { background-color: #48CFAD; border-color: #48CFAD; }
+.theme-blue .btn-primary.active { background-color: #4A89DC; border-color: #4A89DC }
+
+@media (min-width: 768px) {
+  .modal-md {
+    width: 450px;
+  }
+}
 
 /* .theme-blue .btn-default { */
 /*   background-color: #E6E9ED; */
@@ -293,6 +300,7 @@ html, body {
   bottom: 15%;
   right: 0;
   border: 0;
+  outline: none;
 }
 
 .cover-message {

@@ -15,26 +15,29 @@ class Email @Inject()(ws: WSClient) {
   val apiKey = Play.current.configuration.getString("px.mailgun-key").get
   val fromEmail = Play.current.configuration.getString("px.from-email").get
 
-  def message = ws.url(s"$apiBase/messages")
+  def message = ws.url(s"$apiBase/messages").withAuth("api", apiKey, WSAuthScheme.BASIC)
 
   def sendLink(email: String, id: Long) = {
-    val res = message.post(Map(
-      "from" -> Seq(fromEmail),
-      "to" -> Seq(email),
-      "subject" -> Seq("Link to your saved album"),
-      "text" -> Seq(s"""Thank you for saving your album on bigpiq.
+    message
+      .post(Map(
+        "from" -> Seq(fromEmail),
+        "to" -> Seq(email),
+        "subject" -> Seq("Link to your saved album"),
+        "text" -> Seq(s"""Thank you for saving your album on bigpiq.
 
 To get back to your album, please click on this link:
 http://${host}/ui/${id.toString}
 
 Faithfully yours,
 Damien & RK""")))
-
-    res.map(_.json)
+    .map(x => {
+        println(x)
+        x.json
+    })
   }
 
   def confirmOrder(order: APIModels.Order, info: APIModels.Info) = {
-    val res = message.withAuth("api", apiKey, WSAuthScheme.BASIC)
+    val res = message
       .post(Map(
         "from" -> Seq(fromEmail),
         "to" -> Seq(info.email),

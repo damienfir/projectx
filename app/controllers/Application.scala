@@ -89,6 +89,15 @@ class Collections @Inject()(usersDAO: UsersDAO, compositionDAO: CompositionDAO, 
     album.map(obj => Ok(Json.toJson(obj)))
   }
 
+  def getAlbumFromHash(userID: Long, hash: String) = Action.async {
+    val album = for {
+      collection <- collectionDAO.getFromHash(userID, hash)
+      pages <- compositionDAO.allFromCollection(collection.get.id.get)
+      photos <- photoDAO.allFromCollection(collection.get.id.get)
+    } yield Json.obj("collection" -> collection, "pages" -> pages, "photos" -> photos)
+    album.map(obj => Ok(Json.toJson(obj)))
+  }
+
 
   def addToCollection(id: Long) = Action.async(parse.multipartFormData) { request =>
     val list = for {

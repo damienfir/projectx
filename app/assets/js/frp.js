@@ -84,7 +84,7 @@ function main({DOM, HTTP}) {
       .concat(_.values(collection.HTTP))
       .concat(_.values(order.HTTP))
       .concat(_.values(album.HTTP))
-      .concat(_.values(save.HTTP)));
+      .concat(_.values(save.HTTP))).do(x => console.log(x));
 
   Analytics(DOMactions, user, collection, upload, album, composition, order);
 
