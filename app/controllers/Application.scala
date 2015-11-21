@@ -17,8 +17,9 @@ import play.api.libs.json._
 
 class Application extends Controller {
 
-  def index(filename: String) = Action {
-    Ok(views.html.index(filename))
+  def index = Action {
+    val id = Play.current.configuration.getLong("px.demoID").get
+    Ok(views.html.index(id))
   }
 
   def ui = Action {
@@ -26,7 +27,7 @@ class Application extends Controller {
     Ok(views.html.interactive(id))
   }
 
-  def uiWithID(id: Long) = ui
+  def uiWithHash(hash: String) = ui
 }
 
 
@@ -74,9 +75,10 @@ class Collections @Inject()(usersDAO: UsersDAO, compositionDAO: CompositionDAO, 
 
 
   def withUser(id: Long) = Action.async {
-    collectionDAO.withUser(id) map {
-      case Some(item) => Ok(Json.toJson(item))
-      case None => NotFound
+    collectionDAO.withUser(id) map { item =>
+      Ok(Json.toJson(item))
+    } recover {
+      case _ => NotFound
     }
   }
 
@@ -91,9 +93,9 @@ class Collections @Inject()(usersDAO: UsersDAO, compositionDAO: CompositionDAO, 
 
   def getAlbumFromHash(userID: Long, hash: String) = Action.async {
     val album = for {
-      collection <- collectionDAO.getFromHash(userID, hash)
-      pages <- compositionDAO.allFromCollection(collection.get.id.get)
-      photos <- photoDAO.allFromCollection(collection.get.id.get)
+      collection <- collectionDAO.getByHash(userID, hash)
+      pages <- compositionDAO.allFromCollection(collection.id.get)
+      photos <- photoDAO.allFromCollection(collection.id.get)
     } yield Json.obj("collection" -> collection, "pages" -> pages, "photos" -> photos)
     album.map(obj => Ok(Json.toJson(obj)))
   }
@@ -141,7 +143,7 @@ class Collections @Inject()(usersDAO: UsersDAO, compositionDAO: CompositionDAO, 
     for {
       col <- collectionDAO.update(collection)
       album <- compositionDAO.updateAll(compositions)
-    } yield Ok
+    } yield Ok(Json.toJson(collection))
   }
 
   def saveAlbum = Action.async(parse.json) { request =>
@@ -149,9 +151,9 @@ class Collections @Inject()(usersDAO: UsersDAO, compositionDAO: CompositionDAO, 
   }
 
 
-  def emailLink(id: Long, collectionID: Long) = Action.async(parse.json) { request =>
+  def emailLink(id: Long, hash: String) = Action.async(parse.json) { request =>
     val email = (request.body \ "email").as[String]
-    emailService.sendLink(email, collectionID) map (Ok(_))
+    emailService.sendLink(email, hash) map (Ok(_))
   }
 
 

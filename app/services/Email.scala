@@ -17,7 +17,7 @@ class Email @Inject()(ws: WSClient) {
 
   def message = ws.url(s"$apiBase/messages").withAuth("api", apiKey, WSAuthScheme.BASIC)
 
-  def sendLink(email: String, id: Long) = {
+  def sendLink(email: String, hash: String) = {
     message
       .post(Map(
         "from" -> Seq(fromEmail),
@@ -26,7 +26,7 @@ class Email @Inject()(ws: WSClient) {
         "text" -> Seq(s"""Thank you for saving your album on bigpiq.
 
 To get back to your album, please click on this link:
-http://${host}/ui/${id.toString}
+http://${host}/ui/${hash}
 
 Faithfully yours,
 Damien & RK""")))

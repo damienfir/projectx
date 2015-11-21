@@ -8,6 +8,7 @@ import play.api.db.slick.HasDatabaseConfigProvider
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import slick.driver.JdbcProfile
 import slick.backend.DatabaseConfig
+import java.util.UUID
 
 import PostgresDriverExt.api._
 import DBModels._
@@ -42,13 +43,20 @@ class CollectionDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProv
 
   def update(collection: Collection) = db.run(collections.filter(_.id === collection.id.get).update(collection).asTry)
 
-  def withUser(id: Long): Future[Option[Collection]] =
+  def withUser(id: Long): Future[Collection] =
+    // for {
+    // u <- db.run(users.one(id).result)
+    // c <- db.run(collections.returning(collections) += Collection(None, None, UUID.randomUUID.toString))
+    // r <- db.run(usercollectionrelations += (u.get.id.get, c.id.get))
+  // } yield c
+
     db.run(users.one(id).result) map (_.headOption) flatMap {
-      case Some(u) => db.run((collections returning collections) += Collection(None, None)) flatMap { c =>
-        db.run(usercollectionrelations += (u.id.get, c.id.get)) map (_ => Some(c))
+      case Some(u) => db.run((collections returning collections) += Collection(None, None, UUID.randomUUID.toString)) flatMap { c =>
+        db.run(usercollectionrelations += (u.id.get, c.id.get)) map (_ => c)
       }
-      case None => Future(None)
+      case None => throw new Exception
     }
+  
 
   def fromUserQuery(id: Long) = for {
     r <- usercollectionrelations.filter(_.userID === id) if users.one(id).exists
@@ -57,12 +65,12 @@ class CollectionDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProv
 
   def fromUser(id: Long) = db.run(fromUserQuery(id).result)
 
-  def getFromHash(userID: Long, hash: String) : Future[Option[DBModels.Collection]] = {
-    val col = for {
+  def getByHash(userID: Long, hash: String) : Future[DBModels.Collection] = {
+    val query = for {
       r <- usercollectionrelations.filter(_.userID === userID)
-      coll <- collections if (coll.id === r.collectionID && coll.hash === hash)
-    } yield coll
-    db.run(col.result) map (_.headOption)
+      col <- collections if (col.id === r.collectionID && col.hash === hash)
+    } yield col
+    db.run(query.result) map (_.head)
   }
 }
 

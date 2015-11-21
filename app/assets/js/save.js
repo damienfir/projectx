@@ -69,7 +69,7 @@ module.exports = function(DOM, HTTP, user, collection, album) {
   let requests = {
     emailLink$: actions.submit$.withLatestFrom(user.state$, collection.state$,
         (email, user, collection) => ({
-          url: '/users/' + user.id + '/link/' + collection.id,
+          url: '/users/' + user.id + '/link/' + collection.hash,
           method: 'POST',
           // eager: true,
           send: {email}

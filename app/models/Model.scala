@@ -15,7 +15,8 @@ object DBModels {
 
   case class Collection (
     id: Option[Long],
-    name: Option[String]
+    name: Option[String],
+    hash: String
   )
 
   case class Photo (

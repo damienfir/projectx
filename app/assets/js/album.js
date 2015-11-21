@@ -135,11 +135,9 @@ function model(DOMactions, actions, collection, composition) {
 
   let demoAlbum$ = collection.actions.storedAlbum$
     .map(demo => _.sortBy(demo.pages, 'index'))
-    // .map(pages => (pages[0].index === 0) ? pages : [].concat(pages))
     .map(pages => album => pages);
 
   let albumUpdated$ = actions.createdAlbum$
-    // .filter(pages => pages[0].index > 0)
     .map(newpages => album => album.concat(newpages).sort(ascIndex));
 
   let clearAlbum$ = DOMactions.reset$

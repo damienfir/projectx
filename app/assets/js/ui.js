@@ -54,11 +54,11 @@ function renderButton() {
         h('i.fa.fa-book.fa-3x'),
         'Upload photos'
       ]), 
-      h('span.or', 'or'),
-      h('button.btn.btn-info.btn-lg#demo-btn', [
-        h('i.fa.fa-rocket.fa-3x'),
-        'View a demo'
-      ])
+      // h('span.or', 'or'),
+      // h('button.btn.btn-info.btn-lg#demo-btn', [
+      //   h('i.fa.fa-rocket.fa-3x'),
+      //   'View a demo'
+      // ])
   ]);
 }
 

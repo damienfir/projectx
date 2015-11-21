@@ -6,7 +6,7 @@ let Observable = Rx.Observable;
 function intent(DOM, HTTP) {
   return {
     createdCollection$: jsonPOST(HTTP, /\/users\/\d+\/collections/),
-    storedAlbum$: jsonGET(HTTP, /\/users\/\d+\/collections?hash=.+/),
+    storedAlbum$: jsonGET(HTTP, /\/users\/\d+\/albums\/[\w\d-]+/),
     albumTitle$: DOM.select('#album-title').events("input").map(ev => ev.target.value),
     clickTitle$: DOM.select(".cover-title").events('click')
   }
@@ -20,19 +20,20 @@ function events(DOMactions, actions) {
 
 
 function model(actions, DOMactions) {
-  let demoCollection$ = actions.storedAlbum$.map(demo => col => demo.collection);
+  let storedCollection$ = actions.storedAlbum$.map(demo => col => demo.collection);
   let collectionUpdated$ = actions.createdCollection$.map(col => collection => col);
   let clearCollection$ = DOMactions.reset$.map(x => item => initial.collection);
   let collectionName$ = actions.albumTitle$.map(name => collection => _.extend(collection, {name: name}))
+
   actions.createdCollection$
     .merge(actions.storedAlbum$
         .map(d => d.collection))
-    .subscribe(col => window.history.pushState({}, '', '/ui/'+col.id));
+    .subscribe(col => window.history.pushState({}, '', '/ui/'+col.hash));
 
   return Observable.merge(
       collectionUpdated$,
       clearCollection$,
-      demoCollection$,
+      storedCollection$,
       collectionName$)
     .startWith(initial.collection)
     .scan(apply)
@@ -51,14 +52,16 @@ function requests(DOMactions, upload, user, collection$) {
         send: {}
       })),
 
-    demoAlbum$: DOMactions.demo$.map(x => {
-      let id = document.getElementById("demo-id").value;
-      return '/collections/'+id+'/album';
-    }),
+    // demoAlbum$: DOMactions.demo$.map(x => {
+    //   let id = document.getElementById("demo-id").value;
+    //   return '/collections/'+id+'/album';
+    // }),
 
     storedAlbum$: DOMactions.hasHash$
       .flatMapLatest(hash => user.state$
-          .take(1).map(user => '/users/'+user.id+'/collections?hash='+ hash))
+          .filter(user => user.id)
+          .take(1)
+          .map(user => '/users/'+user.id+'/albums/'+ hash))
   }
 }
 

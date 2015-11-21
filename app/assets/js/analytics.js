@@ -8,10 +8,10 @@ module.exports = function(DOMactions, user, collection, upload, album, compositi
 // global actions
     DOMactions.reset$.map({c: 'album', a: 'reset'}),
 
-    DOMactions.demo$.map({c: 'album', a: 'demo'}),
+    // DOMactions.demo$.map({c: 'album', a: 'demo'}),
 
-    DOMactions.hasID$.map(
-      id => ({c: 'album', a: 'load', l: id})),
+    DOMactions.hasHash$.map(
+      hash => ({c: 'album', a: 'load', l: hash})),
 
 
 // file upload

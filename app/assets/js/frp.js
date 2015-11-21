@@ -38,7 +38,7 @@ function intent(DOM, HTTP) {
     download$: btn('#download-btn'),
     demo$: btn('#demo-btn'),
     ready$: Observable.just({}),
-    hasID$: Observable.just(window.location.pathname.split('/'))
+    hasHash$: Observable.just(window.location.pathname.split('/'))
       .filter(url => url.length > 2).map(url => url.pop()).shareReplay(1),
   }
 

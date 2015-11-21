@@ -27,11 +27,13 @@ POST    /users                      @controllers.Users.save
 GET     /users/:id                  @controllers.Users.get(id: Long)
 # DELETE  /users/:id                  @controllers.Users.delete(id: Long)
 GET     /users/:id/collections      @controllers.Collections.fromUser(id: Long)
-GET     /users/:id/collections/:hash      @controllers.Collections.getAlbumFromHash(id: Long, hash: String)
+# GET     /users/:id/collections      @controllers.Collections.getAlbumFromHash(id: Long, hash: String)
 POST    /users/:id/collections      @controllers.Collections.withUser(id: Long)
-POST    /users/:id/link/:cid        @controllers.Collections.emailLink(id: Long, cid: Long)
+POST    /users/:id/link/:hash        @controllers.Collections.emailLink(id: Long, hash: String)
 
 # POST    /users/:id/send/:mid        controllers.Users.send(id, mid)
+
+GET     /users/:id/albums/:hash      @controllers.Collections.getAlbumFromHash(id: Long, hash: String)
 
 # GET     /collections                controllers.Collections.list
 # POST    /collections                controllers.Collections.create
@@ -59,6 +61,5 @@ POST /order @controllers.Payment.submitOrder
 
 
 GET     /ui                         @controllers.Application.ui
-GET     /ui/:id                     @controllers.Application.uiWithID(id: Long)
-GET     /                           @controllers.Application.index(filename: String = "")
-GET     /:filename                  @controllers.Application.index(filename: String)
+GET     /ui/:hash                   @controllers.Application.uiWithHash(hash: String)
+GET     /                           @controllers.Application.index

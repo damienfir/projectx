@@ -1,4 +1,4 @@
-@(filename: String = "")
+@(demoID: Long)
 
 <!DOCTYPE html>
 
@@ -38,7 +38,8 @@
   <!-- <div class="gradient"></div> -->
   <div class="container try">
     <h3 class="phrase text-shadow">Print your next photo album.</h3>
-    <a href="/ui" class="btn btn-info btn-lg">Try it now</a>
+    <a href="/ui" class="btn btn-primary btn-lg"><i class="fa-book"></i> Try it now</a>
+    <a href="/ui/@demoID" class="btn btn-info btn-lg"><i class="fa-rocket"></i> View a sample</a>
   </div>
 
   <div class="album-demo sliding">
