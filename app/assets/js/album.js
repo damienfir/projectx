@@ -2,6 +2,7 @@ import Rx from 'rx';
 import {h} from '@cycle/dom';
 import {apply, argArray, asc, ascIndex, initial, jsonPOST, jsonPOSTResponse, cancelDefault} from './helpers'
 import helpers from './helpers'
+import * as utils from './utils'
 let Observable = Rx.Observable;
 
 
@@ -21,7 +22,7 @@ let leftOrRight = (index) => index % 2 ? '.pull-right' : '.pull-left';
 let moveOrNot = (tiles) => tiles.length === 0 ? '.nomove' : '.move-mosaic';
 
 
-function splitIntoSpreads(spreads, page) {
+let splitIntoSpreads = (spreads, page) => {
   if (!spreads.length) {
     spreads.push([page]);
   } else if (spreads.length === 1) {
@@ -34,9 +35,10 @@ function splitIntoSpreads(spreads, page) {
   return spreads;
 }
 
-function percent(x) { return x * 100 + "%"; }
 
-function renderTile(tile, tileindex, index) {
+let percent = (x) => x*100 + "%"
+
+let renderTile = (tile, tileindex, index) => {
   var scaleX = 1 / (tile.cx2 - tile.cx1);
   var scaleY = 1 / (tile.cy2 - tile.cy1);
 
@@ -58,17 +60,27 @@ function renderTile(tile, tileindex, index) {
       left: percent(-tile.cx1 * scaleX)
     }}),
   // h('button.btn.btn-danger.delete-btn', h('i.fa.fa-ban'))
-    h('button.btn.btn-primary.hover-btn.cover-btn', {'data-id': tile.photoID}, (index === 0) ? h('i.fa.fa-minus') : h('i.fa.fa-plus'))
+    // h('button.btn.btn-primary.hover-btn.cover-btn',
+    //   {'data-id': tile.photoID},
+    //   (index === 0) ? h('i.fa.fa-minus') : h('i.fa.fa-plus'))
   ]);
 }
 
 
 let renderCover = (title, page) => {
   return page.tiles.length === 0 ?
-      h('.nocover', h('h6.cover-message.center', "Select images from the album to appear on the cover.")) :
-      h('input.cover-title#album-title', {'type': 'text', 'placeholder': 'Click here to change the album title...', 'maxLength': 50, 'value': title, 'autocomplete': 'off'})
-      // h('.cover-title', title ? title : h('span.text-muted', 'Click here to change the album title'))
+      h('.nocover',
+          h('h6.cover-message.center', "Select images from the album to appear on the cover.")) :
+      h('input.cover-title#album-title',
+          {
+            'type': 'text',
+            'placeholder': 'Click here to change the album title...',
+            'maxLength': 50,
+            'value': title,
+            'autocomplete': 'off'
+          })
 }
+
 
 let renderBackside = () => {
   return h('.backside', "Empty page");
@@ -87,7 +99,7 @@ let renderPage = (photos, title, j) => (page, i) => {
   );
 }
 
-let renderBtn = (ui, j) => (page, i) => {
+let renderBtn = (j) => (page, i) => {
   let p = j*2+i;
   return h(leftOrRight(p), [
       h('span.page', {'data-page': page.index}, p === 0 ? 'Cover page ' : "Page "+(p-1)+' '),
@@ -99,17 +111,17 @@ let renderBtn = (ui, j) => (page, i) => {
   ])
 }
 
-let renderSpread = (photos, ui, title) => (spread, i) => {
+let renderSpread = (photos, title) => (spread, i) => {
   return h('.spread' + ((spread.length === 1 && spread[0].index == 0) ? '.spread-cover' : ''), [
       h('.spread-paper.shadow.clearfix', spread.map(renderPage(photos, title, i))), 
-      h('.spread-btn.clearfix', spread.map(renderBtn(ui, i)))
+      h('.spread-btn.clearfix', spread.map(renderBtn(i)))
   ]);
 }
 
-function renderAlbum(album, photos, ui, title) {
+function renderAlbum(album, photos, title) {
   return album
     .reduce(splitIntoSpreads, [])
-    .map(renderSpread(photos, ui, title));
+    .map(renderSpread(photos, title));
 }
 
 
@@ -128,7 +140,7 @@ function intent(DOM, HTTP) {
 }
 
 
-function model(DOMactions, actions, collection, composition) {
+function model(DOMactions, actions, collection, editing) {
   actions.downloadedAlbum$.subscribe(res => {
     window.open("/storage/generated/" + res.text);
   });
@@ -148,13 +160,50 @@ function model(DOMactions, actions, collection, composition) {
     .map(pages => pages[0]);
 
   let albumPageShuffled$ = actions.shuffledPage$.merge(createdCover$)
-    .map(page => album => { album[page.index] = page; return album; });
+    .map(page => album =>
+        { album[page.index] = page; return album; });
 
-  return Observable.merge(albumUpdated$, clearAlbum$, demoAlbum$, albumPageShuffled$, composition.state$)
+  let swapPages$ = editing.actions.swap$
+    .map(swap => album => 
+      utils.swapTiles(album, [swap[0].page, swap[0].idx], [swap[1].page, swap[1].idx]));
+
+  let dragPhoto$ = editing.actions.drag$
+    .map(drag => album => {
+      let moved_x = utils.move(album[drag.page].tiles[drag.idx], drag.dx, 'cx1', 'cx2');
+      album[drag.page].tiles[drag.idx] = utils.move(moved_x, drag.dy, 'cy1', 'cy2');
+      return album;
+    });
+
+  let clickEdge$ = editing.actions.clickEdge$.map(({ev,x,y,page}) => album => {
+    let tiles = album[page].tiles;
+    let targets = utils.findTargets(x, y, tiles);
+    let orientation = utils.findOrientation(targets.topleft, targets.bottomright, tiles);
+    let bounds = utils.findBounds(targets.topleft, targets.bottomright, orientation, tiles);
+    album[page].move = {targets, orientation, bounds, page};
+    return album;
+  });
+
+  let dragEdge$ = editing.actions.dragEdge$.map(drag => album => {
+    let params = album[drag.down.page].move;
+    let newtiles = utils.moveTiles(params.targets, params.orientation, params.bounds, drag.dx, drag.dy, album[params.page].tiles);
+    album[params.page].tiles = newtiles;
+    return album;
+  });
+
+  return Observable.merge(
+      albumUpdated$,
+      clearAlbum$,
+      demoAlbum$,
+      albumPageShuffled$,
+      // composition.state$,
+      swapPages$,
+      dragPhoto$,
+      clickEdge$,
+      dragEdge$)
     .startWith([])
     .scan(apply)
     .map(album => album.sort((a,b) => a.index-b.index))
-    .shareReplay(1);//.do(x => console.log(x));
+    .shareReplay(1);
 }
 
 
@@ -251,33 +300,23 @@ function requests(DOMactions, actions, album$, collection, photos, upload) {
 
 
 
-function view(albumState$, photosState$, uiState$, collectionState$) {
-  let photosDict$ = photosState$.map(helpers.hashMap);
-  return albumState$.combineLatest(photosDict$, uiState$, collectionState$,
-      (album, photos, ui, collection) => {
+function view(album$, photos$, collection$) {
+  let photosDict$ = photos$.map(helpers.hashMap);
+  return album$.combineLatest(photosDict$, collection$,
+      (album, photos, collection) => {
         return album.length > 1 ?
-        h('div.container-fluid.album', renderAlbum(album, photos, ui, collection.name)) :
+        h('div.container-fluid.album', renderAlbum(album, photos, collection.name)) :
         undefined
       }
     );
 }
 
-function uiModel(DOM) {
-  return Observable.merge(
-    DOM.select('.page-btn').events('click').map(cancelDefault).map(ev => ev.target['data-page'])
-      .map(idx => state => _.extend(state, {'toggle': state.toggle ^ (1 << idx)}))
-  )
-  .startWith({'toggle': 0})
-  .scan(apply);
-}
 
-
-module.exports = function(DOM, HTTP, DOMactions, collection, photos, upload, composition) {
+module.exports = function(DOM, HTTP, DOMactions, collection, photos, upload, editing) {
   let actions = intent(DOM, HTTP);
-  let state$ = model(DOMactions, actions, collection, composition);
+  let state$ = model(DOMactions, actions, collection, editing);
   let req = requests(DOMactions, actions, state$, collection, photos, upload);
-  let ui$ = uiModel(DOM);
-  let vtree$ = view(state$, photos.state$, ui$, collection.state$);
+  let vtree$ = view(state$, photos.state$, collection.state$);
 
   return {
     DOM: vtree$,

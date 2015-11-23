@@ -12,6 +12,7 @@ import Upload from './upload'
 import Photos from './photos'
 import Album from './album'
 import Composition from './composition-ui'
+import Editing from './editing'
 import UserInterface from './userinterface'
 import Order from './order'
 import Save from './save'
@@ -74,8 +75,8 @@ function main({DOM, HTTP}) {
   let collection = Collection(DOM, HTTP, DOMactions, user);
   let upload = Upload(DOM, DOMactions, collection);
   let photos = Photos(DOMactions, upload, collection);
-  let composition = Composition(DOM);
-  let album = Album(DOM, HTTP, DOMactions, collection, photos, upload, composition);
+  let editing = Editing(DOM);
+  let album = Album(DOM, HTTP, DOMactions, collection, photos, upload, editing);
   let order = Order(DOM, HTTP, user, collection);
   let save = Save(DOM, HTTP, user, collection, album);
 
@@ -86,7 +87,7 @@ function main({DOM, HTTP}) {
       .concat(_.values(album.HTTP))
       .concat(_.values(save.HTTP))).do(x => console.log(x));
 
-  Analytics(DOMactions, user, collection, upload, album, composition, order);
+  Analytics(DOMactions, user, collection, upload, album, order);
 
   return {
     DOM: view(collection, album, upload, order, save),

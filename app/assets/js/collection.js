@@ -14,7 +14,7 @@ function intent(DOM, HTTP) {
 
 
 function events(DOMactions, actions) {
-  actions.clickTitle$.subscribe(ev => document.getElementById("album-title").focus());
+  actions.clickTitle$.do(x => console.log(x)).subscribe(ev => document.getElementById("album-title").focus());
   DOMactions.reset$.subscribe(x => window.history.pushState({}, '', '/ui'));
 }
 
