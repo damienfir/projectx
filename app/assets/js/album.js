@@ -38,31 +38,39 @@ let splitIntoSpreads = (spreads, page) => {
 
 let percent = (x) => x*100 + "%"
 
-let renderTile = (tile, tileindex, index) => {
+let renderTile = (tile, tileindex, page, editing) => {
   var scaleX = 1 / (tile.cx2 - tile.cx1);
   var scaleY = 1 / (tile.cy2 - tile.cy1);
 
-  return h('.ui-tile', {'style': {
-    height: percent(tile.ty2 - tile.ty1),
-    width: percent(tile.tx2 - tile.tx1),
-    top: percent(tile.ty1),
-    left: percent(tile.tx1)
-  },
-    'data-page': index,
-    'data-idx': tileindex}, [
-  h('img', {
-    'src': "/storage/thumbs/"+tile.hash,
-    'draggable': false,
-    'style': {
-      height: percent(scaleY),
-      width: percent(scaleX),
-      top: percent(-tile.cy1 * scaleY),
-      left: percent(-tile.cx1 * scaleX)
-    }}),
+  let selectedClass = editing.selected ?
+    (editing.selected.page === page && editing.selected.idx === tileindex ? '.tile-selected' : '.tile-unselected') : '';
+
+  return h('.ui-tile' + selectedClass,
+      {
+        'style': {
+        height: percent(tile.ty2 - tile.ty1),
+        width: percent(tile.tx2 - tile.tx1),
+        top: percent(tile.ty1),
+        left: percent(tile.tx1)
+        },
+        'data-page': page,
+        'data-idx': tileindex}, [
+          h('img', {
+            'src': "/storage/thumbs/"+tile.hash,
+            'draggable': false,
+            'style': {
+              height: percent(scaleY),
+              width: percent(scaleX),
+              top: percent(-tile.cy1 * scaleY),
+              left: percent(-tile.cx1 * scaleX)
+            }}),
+          // (editing.selected &&
+          //  editing.selected.page == page &&
+          //  editing.selected.idx !== tileindex) ? h('h2.center', "Swap photo") : ''
   // h('button.btn.btn-danger.delete-btn', h('i.fa.fa-ban'))
     // h('button.btn.btn-primary.hover-btn.cover-btn',
     //   {'data-id': tile.photoID},
-    //   (index === 0) ? h('i.fa.fa-minus') : h('i.fa.fa-plus'))
+    //   (page === 0) ? h('i.fa.fa-minus') : h('i.fa.fa-plus'))
   ]);
 }
 
@@ -86,17 +94,21 @@ let renderBackside = () => {
   return h('.backside', "Empty page");
 }
 
+let renderHover = (editing, page) => 
+  (editing.selected && editing.selected.page !== page.index) ?
+    h('.page-hover', {'data-page': page.index, 'data-idx': 0}, h('h2.center', "Move photo to this page")) : ''
 
-let renderPage = (photos, title, j) => (page, i) => {
+
+let renderPage = (photos, title, j, editing) => (page, i) => {
   return h('.box-mosaic' + leftOrRight(j*2+i) + moveOrNot(page.tiles),
-      {'data-page': page.index},
-      [].concat(
-        page.tiles
-        .map(t => _.extend(t, {hash: photos[t.photoID]}))
-        .map((tile, index) => renderTile(tile, index, page.index)))
-      .concat((page.index === 0) ? renderCover(title, page) : [])
-      .concat((j === 1 && i === 0) ? renderBackside() : [])
-  );
+      {'data-page': page.index}, [
+        (j === 1 && i === 0) ? renderBackside() :
+          page.tiles
+            .map(t => _.extend(t, {hash: photos[t.photoID]}))
+            .map((tile, index) => renderTile(tile, index, page.index, editing))
+        .concat((page.index === 0) ? renderCover(title, page) : undefined)
+        .concat(renderHover(editing, page))
+      ]);
 }
 
 let renderBtn = (j) => (page, i) => {
@@ -111,17 +123,21 @@ let renderBtn = (j) => (page, i) => {
   ])
 }
 
-let renderSpread = (photos, title) => (spread, i) => {
-  return h('.spread' + ((spread.length === 1 && spread[0].index == 0) ? '.spread-cover' : ''), [
-      h('.spread-paper.shadow.clearfix', spread.map(renderPage(photos, title, i))), 
+let renderSpread = (photos, title, editing) => (spread, i) => {
+  let cover = (spread.length === 1 && spread[0].index == 0) ?
+      '.spread-cover' + (editing.selected ? '' : '.spread-cover-unselected') :
+      '';
+
+  return h('.spread' + cover, [
+      h('.spread-paper.shadow.clearfix', spread.map(renderPage(photos, title, i, editing))), 
       h('.spread-btn.clearfix', spread.map(renderBtn(i)))
   ]);
 }
 
-function renderAlbum(album, photos, title) {
+function renderAlbum(album, photos, title, editing) {
   return album
     .reduce(splitIntoSpreads, [])
-    .map(renderSpread(photos, title));
+    .map(renderSpread(photos, title, editing));
 }
 
 
@@ -225,13 +241,17 @@ function requests(DOMactions, actions, album$, collection, photos, upload, editi
       let photosB = photosFromTiles(photos, album[move.to.page].tiles);
       let photoID = album[move.from.page].tiles[move.from.idx].photoID;
       return [
-        {page: move.from.page, photos: photosA.filter(p => p.id !== photoID)},
-        {page: move.to.page, photos: photosB.concat(photos.filter(p => p.id === photoID))},
-      ]
+        {page: move.to.page, photos: _.uniq(photosB.concat(photos.filter(p => p.id === photoID)))}
+      ].concat(move.to.page !== 0 ? {page: move.from.page, photos: photosA.filter(p => p.id !== photoID)} : [])
     })
-    .do(x => console.log(x))
-    .filter(([a,b]) => a.photos.length > 0)
+    .filter(([a,b]) => b ? b.photos.length > 0 : true)
     .flatMap(reqs => Rx.Observable.fromArray(reqs));
+
+  let removeTile$ = editing.actions.remove$.withLatestFrom(album$, photos.state$, editing.state$, (ev, album, photos, {selected}) => ({
+    page: selected.page,
+    photos: photosFromTiles(photos, album[selected.page].tiles)
+      .filter(p => p.id !== album[selected.page].tiles[selected.idx].photoID)
+  }));
 
   return {
     createAlbum$: upload.actions.uploadedFiles$.withLatestFrom(collection.state$, album$, photos.state$,
@@ -255,7 +275,7 @@ function requests(DOMactions, actions, album$, collection, photos, upload, editi
           send: photosFromTiles(photos, album[page].tiles)
         })),
 
-    generatePage$: moveTile$.withLatestFrom(collection.state$, album$, (req, collection, album) => ({
+    generatePage$: moveTile$.merge(removeTile$).withLatestFrom(collection.state$, album$, (req, collection, album) => ({
         url: '/collections/'+collection.id+'/page/'+album[req.page].id+'?index='+req.page,
         method: 'POST',
         send: req.photos
@@ -318,12 +338,12 @@ function requests(DOMactions, actions, album$, collection, photos, upload, editi
 
 
 
-function view(album$, photos$, collection$) {
+function view(album$, photos$, collection$, editing$) {
   let photosDict$ = photos$.map(helpers.hashMap);
-  return album$.combineLatest(photosDict$, collection$,
-      (album, photos, collection) => {
+  return album$.combineLatest(photosDict$, collection$, editing$,
+      (album, photos, collection, editing) => {
         return album.length > 1 ?
-        h('div.container-fluid.album', renderAlbum(album, photos, collection.name)) :
+        h('div.container-fluid.album', renderAlbum(album, photos, collection.name, editing)) :
         undefined
       }
     );
@@ -334,7 +354,7 @@ module.exports = function(DOM, HTTP, DOMactions, collection, photos, upload, edi
   let actions = intent(DOM, HTTP);
   let state$ = model(DOMactions, actions, collection, editing);
   let req = requests(DOMactions, actions, state$, collection, photos, upload, editing);
-  let vtree$ = view(state$, photos.state$, collection.state$);
+  let vtree$ = view(state$, photos.state$, collection.state$, editing.state$);
 
   return {
     DOM: vtree$,

@@ -103,6 +103,22 @@ html, body {
   margin-top: 15px;
 }
 
+.page-hover {
+  position: absolute;
+  top: 0; bottom: 0; left: 0; right: 0;
+  background-color: white;
+  color: #000;
+  opacity: 0.0;
+}
+
+.page-hover:hover {
+  opacity: 0.5;
+}
+
+.page-hover h2 {
+  padding: 0;
+}
+
 .spread {
   margin-bottom: 70px;
 }
@@ -115,7 +131,7 @@ html, body {
   transform: translate(-50%,0);
 }
 
-.spread-cover .ui-tile {
+.spread-cover-unselected .ui-tile {
   opacity: 0.5;
 }
 
@@ -289,6 +305,25 @@ html, body {
   display: block;
 }
 
+.ui-tile h2 {
+  opacity: 1;
+  color: #000;
+}
+.ui-tile:hover h2 {
+  opacity: 0.0;
+}
+
+.tile-selected {
+  opacity: 1;
+}
+
+.tile-unselected {
+  opacity: 0.3;
+}
+.tile-unselected:hover {
+  opacity: 1;
+}
+
 .cover-title {
   font-size: 2.5em;
   color: #333;
@@ -320,6 +355,10 @@ html, body {
 
 .col-buttons button > i {
   padding-bottom: 10px;
+}
+
+.toolbar {
+  box-shadow: 0px 2px 35px rgba(0,0,0,0.3);
 }
 
 #file-input { opacity: 0; height: 0; }

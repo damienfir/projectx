@@ -47,7 +47,7 @@ function intent(DOM, HTTP) {
 }
 
 
-function view(collection, album, upload, order, save) {
+function view(collection, album, upload, order, save, editing) {
   let toolbarDOM = Observable.combineLatest(
       collection.state$,
       album.state$,
@@ -55,14 +55,15 @@ function view(collection, album, upload, order, save) {
       Elements.renderToolbar);
   let buttonDOM = Observable.just(Elements.renderButton());
 
-  return Observable.combineLatest(toolbarDOM, upload.DOM, album.DOM, order.DOM, buttonDOM, save.DOM,
-      (toolbarVTree, uploadVTree, albumVTree, orderVTree, buttonVTree, saveVTree) =>
+  return Observable.combineLatest(toolbarDOM, upload.DOM, album.DOM, order.DOM, buttonDOM, save.DOM, editing.DOM,
+      (toolbarVTree, uploadVTree, albumVTree, orderVTree, buttonVTree, saveVTree, editingVTree) =>
       h('div.theme-blue', [
         toolbarVTree,
         uploadVTree,
         orderVTree,
         albumVTree || buttonVTree,
-        saveVTree
+        saveVTree,
+        editingVTree
       ])
   );
 }
@@ -85,12 +86,12 @@ function main({DOM, HTTP}) {
       .concat(_.values(collection.HTTP))
       .concat(_.values(order.HTTP))
       .concat(_.values(album.HTTP))
-      .concat(_.values(save.HTTP))).do(x => console.log(x));
+      .concat(_.values(save.HTTP)));//.do(x => console.log(x));
 
   Analytics(DOMactions, user, collection, upload, album, order);
 
   return {
-    DOM: view(collection, album, upload, order, save),
+    DOM: view(collection, album, upload, order, save, editing),
     HTTP: requests$
   };
 }

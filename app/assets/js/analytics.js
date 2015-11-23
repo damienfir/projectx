@@ -44,5 +44,5 @@ module.exports = function(DOMactions, user, collection, upload, album, order) {
     //     drag => ({c: 'album', a: 'edge', l: drag.down.page})),
   ];
 
-  Rx.Observable.merge(events).do(x => console.log(x)).subscribe(({c,a,l,v}) => gaEvent(c,a,l,v));
+  Rx.Observable.merge(events).subscribe(({c,a,l,v}) => gaEvent(c,a,l,v));
 }

@@ -1,4 +1,5 @@
-// import {h} from '@cycle/dom';
+import Rx from 'rx';
+import {h} from '@cycle/dom';
 import helpers from './helpers'
 
 let pageAndIndex = (ev) => ({page: ev.target.parentNode['data-page'], index: ev.target.parentNode['data-idx']})
@@ -7,20 +8,21 @@ let eventToCoord = (ev) => ({
     'x': ev.screenX,
     'y': ev.screenY,
     'img': ev.target,
-    'idx': ev.target.parentNode['data-idx'],
-    'page': ev.target.parentNode['data-page']
+    'idx': (ev.target['data-idx'] + 1 || ev.target.parentNode['data-idx'] + 1) - 1,
+    'page': (ev.target['data-page'] + 1 || ev.target.parentNode['data-page'] + 1) -1
 })
 
 
 function intent(DOM) {
-  let tiles = DOM.select('.ui-tile');
-  let tileDown$ = tiles.events('mousedown').map(eventToCoord);
-  let tileUp$ = tiles.events('mouseup').map(eventToCoord);
+  let tileDown$ = DOM.select('.ui-tile, .page-hover').events('mousedown').map(eventToCoord);
+  let tileUp$ = DOM.select('.ui-tile, .page-hover').events('mouseup').do(x => console.log(x)).map(eventToCoord);
   let mouseUp$ = DOM.select(':root').events('mouseup');
   let mouseMove$ = DOM.select(':root').events('mousemove').map(helpers.cancel);
   let edgeDown$ = DOM.select('.move-mosaic').events('mousedown')
     .filter(ev => _.contains(ev.target.classList, 'move-mosaic'));
 
+  let remove$ = helpers.btn(DOM, '#remove-btn');
+  let cancelBtn$ = helpers.btn(DOM, '#cancel-btn');
 
   let clickEdge$ = edgeDown$.map(ev => _.extend(ev.target, {
     x: ev.offsetX/ev.target.offsetWidth,
@@ -40,23 +42,24 @@ function intent(DOM) {
   let cancel$ = tileDown$
     .flatMapLatest(down => mouseMove$
         .takeUntil(mouseUp$)
-        .map(false)
-        .take(1));
+        .take(1))
+    .merge(remove$)
+    .merge(cancelBtn$)
+    .map(false);
 
-  let mouseOver$ = tileUp$
+  let selected$ = tileDown$
+    .flatMapLatest(down => mouseMove$
+        .takeUntil(mouseUp$)
+        .count()
+        .filter(c => c === 0)
+        .map(down))
     .merge(cancel$)
-    .bufferWithCount(2)
-    .map(([from,to]) => ({from, to}))
-    .filter(({from,to}) => !_.isEqual(from,to) && from && to);
-
+    .scan((prev, x) => prev ? false : x, false)
+    .filter(_.identity);
+  
+  let mouseOver$ = selected$.flatMapLatest(from => tileUp$.take(1).takeUntil(cancel$).map(to => ({from,to})));
   let swap$ = mouseOver$.filter(({from,to}) => from.page === to.page);
   let move$ = mouseOver$.filter(({from,to}) => from.page !== to.page);
-  
-  // let move$ = tileDown$
-  //   .flatMapLatest(from => tileUp$
-  //       .filter(to => to.page !== from.page)
-  //       .take(1)
-  //       .map([from, to]));
 
   let drag$ = tileDown$.flatMapLatest(down => mouseMove$
       .takeUntil(mouseUp$)
@@ -68,15 +71,47 @@ function intent(DOM) {
         idx: down.idx,
       })));
 
-  return {swap$, move$, drag$, clickEdge$, dragEdge$};
+  return {swap$, move$, drag$, selected$, cancel$, clickEdge$, dragEdge$, remove$};
+}
+
+function model(actions) {
+  return Rx.Observable.merge(
+      actions.selected$.map(down => state => _.extend(state, {selected: down})),
+      Rx.Observable.merge(
+        actions.swap$,
+        actions.move$,
+        actions.cancel$).map(x => state => ({}))
+    )
+    .startWith({})
+    .scan(helpers.apply);
+}
+
+
+function view(state$) {
+  return state$.map(state =>
+    state.selected ?
+      h('.navbar.navbar-default.navbar-fixed-top.toolbar',
+        h('.container-fluid', [
+          h('ul.nav.navbar-nav.navbar-left', [
+            h('li', h('button.btn.btn-warning.navbar-btn#remove-btn', [h('i.fa.fa-trash-o'), " Remove from album"])),
+            h('li', h('button.btn.btn-warning.navbar-btn#rotate-btn', [h('i.fa.fa-rotate-right'), " Rotate"])),
+          ]),
+          h('ul.nav.navbar-nav.navbar-right', [
+            h('li', h('button.btn.btn-link.navbar-btn#cancel-btn', h('i.fa.fa-times.fa-lg')))
+          ])
+        ])) : ''
+  )
 }
 
 
 module.exports = function(DOM) {
 
   let actions = intent(DOM);
+  let state$ = model(actions);
 
   return {
+    DOM: view(state$),
+    state$,
     actions
   }
 }
