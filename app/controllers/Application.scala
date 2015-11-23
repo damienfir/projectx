@@ -18,12 +18,12 @@ import play.api.libs.json._
 class Application extends Controller {
 
   def index = Action {
-    val id = Play.current.configuration.getLong("px.demoID").get
+    val id = Play.current.configuration.getString("px.demoID").get
     Ok(views.html.index(id))
   }
 
   def ui = Action {
-    val id = Play.current.configuration.getLong("px.demoID").get
+    val id = Play.current.configuration.getString("px.demoID").get
     Ok(views.html.interactive(id))
   }
 
