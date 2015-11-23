@@ -29,6 +29,22 @@ function resizeTile(tile, tile2) {
   return newTile;
 }
 
+
+function transpose(tile) {
+  let newTile = _.clone(tile);
+  newTile.tx1 = tile.ty1;
+  newTile.ty1 = tile.tx1;
+  newTile.tx2 = tile.ty2;
+  newTile.ty2 = tile.tx2;
+  return newTile;
+}
+
+
+export function rotateTile(tile) {
+  return transpose(resizeTile(tile, transpose(tile)));
+}
+
+
 export function swapTiles(album, [page1,idx1], [page2,idx2]) {
   var tile1 = album[page1].tiles[idx1];
   var tile2 = album[page2].tiles[idx2];

@@ -15,7 +15,7 @@ let eventToCoord = (ev) => ({
 
 function intent(DOM) {
   let tileDown$ = DOM.select('.ui-tile, .page-hover').events('mousedown').map(eventToCoord);
-  let tileUp$ = DOM.select('.ui-tile, .page-hover').events('mouseup').do(x => console.log(x)).map(eventToCoord);
+  let tileUp$ = DOM.select('.ui-tile, .page-hover').events('mouseup').map(eventToCoord);
   let mouseUp$ = DOM.select(':root').events('mouseup');
   let mouseMove$ = DOM.select(':root').events('mousemove').map(helpers.cancel);
   let edgeDown$ = DOM.select('.move-mosaic').events('mousedown')
@@ -23,6 +23,7 @@ function intent(DOM) {
 
   let remove$ = helpers.btn(DOM, '#remove-btn');
   let cancelBtn$ = helpers.btn(DOM, '#cancel-btn');
+  let rotate$ = helpers.btn(DOM, '#rotate-btn');
 
   let clickEdge$ = edgeDown$.map(ev => _.extend(ev.target, {
     x: ev.offsetX/ev.target.offsetWidth,
@@ -71,7 +72,7 @@ function intent(DOM) {
         idx: down.idx,
       })));
 
-  return {swap$, move$, drag$, selected$, cancel$, clickEdge$, dragEdge$, remove$};
+  return {swap$, move$, drag$, selected$, cancel$, clickEdge$, dragEdge$, remove$, rotate$};
 }
 
 function model(actions) {

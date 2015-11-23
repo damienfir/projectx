@@ -407,3 +407,8 @@ html, body {
   animation: fadein 1s linear 0s, fadeout 1s linear 2s;
   animation-fill-mode: forwards;
 }
+
+
+.rotate90 { transform: rotate(90deg); }
+.rotate180 { transform: rotate(180deg); }
+.rotate270 { transform: rotate(270deg); }

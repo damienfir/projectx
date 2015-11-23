@@ -55,7 +55,7 @@ let renderTile = (tile, tileindex, page, editing) => {
         },
         'data-page': page,
         'data-idx': tileindex}, [
-          h('img', {
+          h('img' + (tile.rot ? '.rotate'+tile.rot : ''), {
             'src': "/storage/thumbs/"+tile.hash,
             'draggable': false,
             'style': {
@@ -190,6 +190,15 @@ function model(DOMactions, actions, collection, editing) {
       return album;
     });
 
+  let rotatePhoto$ = editing.actions.rotate$
+    .withLatestFrom(editing.state$, (ev, editing) => album => {
+      let tile = album[editing.selected.page].tiles[editing.selected.idx];
+      tile = utils.rotateTile(tile);
+      tile.rot = ((tile.rot || 0) + 90) % 360;
+      album[editing.selected.page].tiles[editing.selected.idx] = tile;
+      return album;
+    });
+
   let clickEdge$ = editing.actions.clickEdge$.map(({ev,x,y,page}) => album => {
     let tiles = album[page].tiles;
     let targets = utils.findTargets(x, y, tiles);
@@ -213,6 +222,7 @@ function model(DOMactions, actions, collection, editing) {
       albumPageShuffled$,
       swapTiles$,
       dragPhoto$,
+      rotatePhoto$,
       clickEdge$,
       dragEdge$)
     .startWith([])
