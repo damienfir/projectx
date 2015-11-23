@@ -163,9 +163,9 @@ function model(DOMactions, actions, collection, editing) {
     .map(page => album =>
         { album[page.index] = page; return album; });
 
-  let swapPages$ = editing.actions.swap$
+  let swapTiles$ = editing.actions.swap$
     .map(swap => album => 
-      utils.swapTiles(album, [swap[0].page, swap[0].idx], [swap[1].page, swap[1].idx]));
+      utils.swapTiles(album, [swap.from.page, swap.from.idx], [swap.to.page, swap.to.idx]));
 
   let dragPhoto$ = editing.actions.drag$
     .map(drag => album => {
@@ -195,8 +195,7 @@ function model(DOMactions, actions, collection, editing) {
       clearAlbum$,
       demoAlbum$,
       albumPageShuffled$,
-      // composition.state$,
-      swapPages$,
+      swapTiles$,
       dragPhoto$,
       clickEdge$,
       dragEdge$)
@@ -207,7 +206,7 @@ function model(DOMactions, actions, collection, editing) {
 }
 
 
-function requests(DOMactions, actions, album$, collection, photos, upload) {
+function requests(DOMactions, actions, album$, collection, photos, upload, editing) {
 
   let photosFromTiles = (photos, tiles) => _.filter(photos, p => _.where(tiles, {'photoID': p.id}).length > 0);
 
@@ -220,6 +219,19 @@ function requests(DOMactions, actions, album$, collection, photos, upload) {
     let page2 = (page1 % 2) ? page1 - 1 : page1 + 1;
     return page2 < 1 ? page2 + 2 : (page2 >= N ? page2 - 2 : page2);
   }
+
+  let moveTile$ = editing.actions.move$.withLatestFrom(album$, photos.state$, (move, album, photos) => {
+      let photosA = photosFromTiles(photos, album[move.from.page].tiles);
+      let photosB = photosFromTiles(photos, album[move.to.page].tiles);
+      let photoID = album[move.from.page].tiles[move.from.idx].photoID;
+      return [
+        {page: move.from.page, photos: photosA.filter(p => p.id !== photoID)},
+        {page: move.to.page, photos: photosB.concat(photos.filter(p => p.id === photoID))},
+      ]
+    })
+    .do(x => console.log(x))
+    .filter(([a,b]) => a.photos.length > 0)
+    .flatMap(reqs => Rx.Observable.fromArray(reqs));
 
   return {
     createAlbum$: upload.actions.uploadedFiles$.withLatestFrom(collection.state$, album$, photos.state$,
@@ -242,6 +254,12 @@ function requests(DOMactions, actions, album$, collection, photos, upload) {
           method: 'POST',
           send: photosFromTiles(photos, album[page].tiles)
         })),
+
+    generatePage$: moveTile$.withLatestFrom(collection.state$, album$, (req, collection, album) => ({
+        url: '/collections/'+collection.id+'/page/'+album[req.page].id+'?index='+req.page,
+        method: 'POST',
+        send: req.photos
+      })),
 
     incrDecrPhotos$: actions.incrPhotos$.filter(p => p !== 0).withLatestFrom(album$, (page1, album) => {
         return [page1, getOtherPage(page1, album.length)];
@@ -315,7 +333,7 @@ function view(album$, photos$, collection$) {
 module.exports = function(DOM, HTTP, DOMactions, collection, photos, upload, editing) {
   let actions = intent(DOM, HTTP);
   let state$ = model(DOMactions, actions, collection, editing);
-  let req = requests(DOMactions, actions, state$, collection, photos, upload);
+  let req = requests(DOMactions, actions, state$, collection, photos, upload, editing);
   let vtree$ = view(state$, photos.state$, collection.state$);
 
   return {

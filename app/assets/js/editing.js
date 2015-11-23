@@ -43,16 +43,20 @@ function intent(DOM) {
         .map(false)
         .take(1));
 
-  let swap$ = tileUp$
+  let mouseOver$ = tileUp$
     .merge(cancel$)
     .bufferWithCount(2)
-    .filter(([a,b]) => !_.isEqual(a,b) && a && b);
+    .map(([from,to]) => ({from, to}))
+    .filter(({from,to}) => !_.isEqual(from,to) && from && to);
 
-  let move$ = tileDown$
-    .flatMapLatest(from => tileUp$
-        .filter(to => to.page !== from.page)
-        .take(1)
-        .map([from, to]));
+  let swap$ = mouseOver$.filter(({from,to}) => from.page === to.page);
+  let move$ = mouseOver$.filter(({from,to}) => from.page !== to.page);
+  
+  // let move$ = tileDown$
+  //   .flatMapLatest(from => tileUp$
+  //       .filter(to => to.page !== from.page)
+  //       .take(1)
+  //       .map([from, to]));
 
   let drag$ = tileDown$.flatMapLatest(down => mouseMove$
       .takeUntil(mouseUp$)
