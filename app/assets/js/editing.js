@@ -14,10 +14,11 @@ let eventToCoord = (ev) => ({
 
 
 function intent(DOM) {
-  let tileDown$ = DOM.select('.ui-tile, .page-hover').events('mousedown').map(eventToCoord);
+  let tileDown$ = DOM.select('.ui-tile, .page-hover').events('mousedown').map(helpers.cancel).map(eventToCoord);
   let tileUp$ = DOM.select('.ui-tile, .page-hover').events('mouseup').map(eventToCoord);
   let mouseUp$ = DOM.select(':root').events('mouseup');
   let mouseMove$ = DOM.select(':root').events('mousemove').map(helpers.cancel);
+  let mouseMoveCoord$ = mouseMove$.map(eventToCoord);
   let edgeDown$ = DOM.select('.move-mosaic').events('mousedown')
     .filter(ev => _.contains(ev.target.classList, 'move-mosaic'));
 
@@ -64,10 +65,10 @@ function intent(DOM) {
   let swap$ = mouseOver$.filter(({from,to}) => from.page === to.page);
   let move$ = mouseOver$.filter(({from,to}) => from.page !== to.page);
 
-  let drag$ = tileDown$.flatMapLatest(down => mouseMove$
+  let drag$ = tileDown$.flatMapLatest(down => mouseMoveCoord$
       .takeUntil(mouseUp$)
       .pairwise()
-      .map(([prev, curr]) => _.extend(curr, {
+      .map(([prev, curr]) => ({
         dx: (curr.x-prev.x) / down.img.width,
         dy: (curr.y-prev.y) / down.img.height,
         page: down.page,
@@ -93,18 +94,13 @@ function model(actions) {
 function view(state$) {
   return state$.map(state =>
     state.selected ?
-      h('.navbar.navbar-default.navbar-fixed-top.toolbar',
-        h('.container-fluid', [
-          h('ul.nav.navbar-nav.navbar-left', [
-            h('li', h('button.btn.btn-warning.navbar-btn#remove-btn', [h('i.fa.fa-trash-o'),
-                state.selected.page === 0 ? " Remove from cover page" : " Remove from album"])),
-            // h('li', h('button.btn.btn-warning.navbar-btn#rotate-btn', [h('i.fa.fa-rotate-right'), " Rotate"])),
-            state.selected.page !== 0 ? h('li', h('button.btn.btn-warning.navbar-btn#add-cover-btn', [h('i.fa.fa-book'), " Add photo to cover page"])) : '',
-          ]),
-          h('ul.nav.navbar-nav.navbar-right', [
-            h('li', h('button.btn.btn-link.navbar-btn#cancel-btn', h('i.fa.fa-times.fa-lg')))
-          ])
-        ])) : ''
+          h('.btn-group.toolbar', [
+            h('button.btn.btn-info.btn-lg#remove-btn', [
+              h('i.fa.fa-trash-o')]),
+            // h('li', h('button.btn.btn-warning.navbar-btn#rotate-btn', [h('i.fa.fa-rotate-right')])),
+            state.selected.page !== 0 ? h('button.btn.btn-info.btn-lg#add-cover-btn', [h('i.fa.fa-book')]) : '',
+            h('button.btn.btn-info.btn-lg#cancel-btn', [h('i.fa.fa-times')])
+        ]) : ''
   )
 }
 

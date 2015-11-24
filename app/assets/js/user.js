@@ -21,15 +21,17 @@ function intent(HTTP) {
 function model(actions) {
   let newUser$ = Observable.merge(
       actions.gotUser$.filter(res => res.status !== 404).map(res => res.body),
-      actions.createdUser$)
-    .map(newuser => user => newuser)
-
+      actions.createdUser$);
+    
   let updateUser$ = actions.updateUser$.map(obj => user => _.extend(user, obj))
 
-  newUser$.filter(hasID).subscribe(user => cookie.setItem(COOKIE, user.id));
+  newUser$.filter(hasID).subscribe(user => {
+    console.log(user.id);
+    cookie.setItem(COOKIE, user.id)
+  });
 
   return Rx.Observable.merge(
-      newUser$,
+      newUser$.map(newuser => user => newuser),
       updateUser$
     )
     .startWith({})

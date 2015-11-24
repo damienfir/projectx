@@ -108,7 +108,19 @@ let renderPage = (photos, title, j, editing) => (page, i) => {
             .map((tile, index) => renderTile(tile, index, page.index, editing))
         .concat((page.index === 0) ? renderCover(title, page) : undefined)
         .concat(renderHover(editing, page))
+        .concat(renderToolbar(editing, page))
       ]);
+}
+
+let renderToolbar = (editing, page) => {
+  return (editing.selected && editing.selected.page === page.index) ?
+          h('.btn-group.toolbar', [
+            h('button.btn.btn-info.btn-lg#remove-btn', [
+              h('i.fa.fa-trash-o')]),
+            // h('li', h('button.btn.btn-warning.navbar-btn#rotate-btn', [h('i.fa.fa-rotate-right')])),
+            editing.selected.page !== 0 ? h('button.btn.btn-info.btn-lg#add-cover-btn', [h('i.fa.fa-book')]) : '',
+            h('button.btn.btn-info.btn-lg#cancel-btn', [h('i.fa.fa-times')])
+        ]) : ''
 }
 
 let renderBtn = (j) => (page, i) => {
