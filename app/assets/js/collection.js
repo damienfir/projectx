@@ -1,6 +1,10 @@
 import Rx from 'rx';
 import {apply, argArray, initial, jsonPOST, jsonGET, hasID} from './helpers'
+import helpers from './helpers'
 let Observable = Rx.Observable;
+
+
+let initialState = {}
 
 
 function intent(DOM, HTTP) {
@@ -8,22 +12,26 @@ function intent(DOM, HTTP) {
     createdCollection$: jsonPOST(HTTP, /\/users\/\d+\/collections/),
     storedAlbum$: jsonGET(HTTP, /\/users\/\d+\/albums\/[\w\d-]+/),
     albumTitle$: DOM.select('#album-title').events("input").map(ev => ev.target.value),
-    clickTitle$: DOM.select(".cover-title").events('click')
+    clickTitle$: DOM.select(".cover-title").events('click'),
+    confirmTitle$: helpers.btn(DOM, '#title-btn').map(ev => document.getElementById("album-title-front").value)
   }
 }
 
 
 function events(DOMactions, actions) {
-  actions.clickTitle$.do(x => console.log(x)).subscribe(ev => document.getElementById("album-title").focus());
+  actions.clickTitle$.subscribe(ev => document.getElementById("album-title").focus());
   DOMactions.reset$.subscribe(x => window.history.pushState({}, '', '/ui'));
 }
 
+let replaceName = (c) => c.name ? c : _.extend(c, {name: null})
 
 function model(actions, DOMactions) {
-  let storedCollection$ = actions.storedAlbum$.map(demo => col => demo.collection);
-  let collectionUpdated$ = actions.createdCollection$.map(col => collection => col);
-  let clearCollection$ = DOMactions.reset$.map(x => item => initial.collection);
-  let collectionName$ = actions.albumTitle$.map(name => collection => _.extend(collection, {name: name}))
+  let storedCollection$ = actions.storedAlbum$.map(replaceName).map(demo => col => demo.collection);
+  let collectionUpdated$ = actions.createdCollection$.map(replaceName).map(col => collection => col);
+  let clearCollection$ = DOMactions.reset$.map(x => item => initialState);
+  let collectionName$ = actions.albumTitle$
+    .merge(actions.confirmTitle$)
+    .map(name => collection => _.extend(collection, {name: name}))
 
   actions.createdCollection$
     .merge(actions.storedAlbum$
@@ -35,7 +43,7 @@ function model(actions, DOMactions) {
       clearCollection$,
       storedCollection$,
       collectionName$)
-    .startWith(initial.collection)
+    .startWith(initialState)
     .scan(apply)
     .shareReplay(1);
 }

@@ -3,7 +3,7 @@ import {run} from '@cycle/core';
 import {makeDOMDriver, h} from '@cycle/dom';
 import {makeHTTPDriver} from '@cycle/http';
 
-import Elements from './ui'
+import * as Elements from './ui'
 
 import helpers from './helpers'
 import User from './user'
@@ -38,6 +38,8 @@ function intent(DOM, HTTP) {
     reset$: btn('#reset-btn'),
     download$: btn('#download-btn'),
     demo$: btn('#demo-btn'),
+    undo$: btn('#undo-btn'),
+    redo$: btn('#redo-btn'),
     ready$: Observable.just({}),
     hasHash$: Observable.just(window.location.pathname.split('/'))
       .filter(url => url.length > 2).map(url => url.pop()).shareReplay(1),
@@ -53,7 +55,7 @@ function view(collection, album, upload, order, save, editing) {
       album.state$,
       upload.state$,
       Elements.renderToolbar);
-  let buttonDOM = Observable.just(Elements.renderButton());
+  let buttonDOM = collection.state$.map(Elements.renderStartPage);
 
   return Observable.combineLatest(toolbarDOM, upload.DOM, album.DOM, order.DOM, buttonDOM, save.DOM, editing.DOM,
       (toolbarVTree, uploadVTree, albumVTree, orderVTree, buttonVTree, saveVTree, editingVTree) =>

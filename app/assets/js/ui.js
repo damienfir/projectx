@@ -4,8 +4,8 @@ import helpers from './helpers'
 
 
 
-function renderToolbar(collection, album, upload) {
-  let loaded = album && album.length > 1 && collection.id !== helpers.demoID;
+export function renderToolbar(collection, album, upload) {
+  let loaded = album && album.length > 1 && collection.id !== helpers.demoID && collection.name !== null;
   return h('div.navbar.navbar-transparent.navbar-static-top', [
       h('div.container-fluid', [
 
@@ -16,7 +16,13 @@ function renderToolbar(collection, album, upload) {
                 h('i.fa.fa-cloud-upload'), 'Add more photos'])),
             h('li',
               h('button.btn.btn-primary.navbar-btn#reset-btn', [
-                h('i.fa.fa-refresh'), ' New album'])),
+                h('i.fa.fa-refresh'), ' Start over'])),
+            // h('li',
+            //   h('button.btn.btn-primary.navbar-btn#undo-btn', [
+            //     h('i.fa.fa-undo'), ' Undo'])),
+            // h('li',
+            //   h('button.btn.btn-primary.navbar-btn#redo-btn', [
+            //     h('i.fa.fa-undo'), ' Redo'])),
           ]) : '',
 
         collection.id === helpers.demoID ? h('.ul.nav.navbar-nav', [
@@ -47,18 +53,32 @@ function renderToolbar(collection, album, upload) {
 }
 
 
-function renderButton() {
-  return h('.start-buttons', [
-      h('.step1', "Step 1."),
-      h('button.btn.btn-primary.btn-lg#create-btn', [
-        h('i.fa.fa-book.fa-3x'),
-        'Upload photos'
+export function renderStartPage(collection) {
+  return h('.container.start-buttons', [
+      h('.steps' + (!_.isUndefined(collection.id) ? '.step-disabled' : ''), [
+        h('.step1', "Step 1."),
+        h('button.btn.btn-primary.btn-lg.btn-step#create-btn', {
+          disabled: !_.isUndefined(collection.id)
+        }, [
+          h('i.fa.fa-book.fa-3x'),
+          'Upload multiple photos'
+        ])
       ]), 
-      // h('span.or', 'or'),
-      // h('button.btn.btn-info.btn-lg#demo-btn', [
-      //   h('i.fa.fa-rocket.fa-3x'),
-      //   'View a demo'
-      // ])
+      h('.steps' + (_.isUndefined(collection.id) ? '.step-disabled' : ''), [
+        h('.step2', "Step 2."),
+        h('.form-inline', [
+          h('.form-group', [
+            h('input.form-control.input-lg.shadow.step2-title#album-title-front', {
+              disabled: _.isUndefined(collection.id),
+              type: 'text',
+              placeholder: 'Type your album title',
+              maxLength: 50,
+              autocomplete: 'off'
+            })
+          ]),
+          h('button.btn.btn-info.shadow#title-btn',  h('i.fa.fa-arrow-right'))
+        ])
+      ])
   ]);
 }
 
@@ -88,6 +108,3 @@ function renderFrontpage() {
   return h('.box-mosaic',
           h('div.ui-composition.shadow', "front page"));
 }
-
-
-module.exports = {renderToolbar, renderButton}

@@ -217,14 +217,22 @@ html, body {
 }
 
 .start-buttons {
-  margin-top: 50px;
+  margin-top: 30px;
   text-align: center;
 }
 
 
-.start-buttons .step1 {
+.steps {
   font-size: 36px;
-  margin-bottom: 70px;
+  margin-bottom: 50px;
+}
+
+.step1 {
+  margin-bottom: 30px;
+}
+
+.step-disabled {
+  opacity: 0.7;
 }
 
 .start-buttons .or {
@@ -233,7 +241,7 @@ html, body {
   margin: 0 20px;
 }
 
-.start-buttons button {
+.btn-step {
   margin: 10px;
   padding: 20px;
 }
@@ -243,6 +251,37 @@ html, body {
   margin-bottom: 10px;
 }
 
+.step2 {
+  margin-top: 80px;
+  margin-bottom: 30px;
+}
+
+.step2-title {
+  font-size: 36px;
+  background-color: #fff;
+  color: #333;
+  height: 75px;
+  padding: 20px;
+  width: 70%;
+  border: 0;
+  outline: none;
+  border-radius: 5px;
+}
+
+.step2-title:disabled {
+  opacity: 0.6;
+}
+
+#title-btn {
+  margin-left: 20px;
+  height: 75px;
+  font-size: 24px;
+  padding: 0 20px;
+}
+
+#title-btn i {
+  margin-bottom: 0;
+}
 
 .text-shadow {
   text-shadow: 1px 1px 3px rgba(0,0,0,0.3);

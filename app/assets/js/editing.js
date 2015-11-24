@@ -24,6 +24,7 @@ function intent(DOM) {
   let remove$ = helpers.btn(DOM, '#remove-btn');
   let cancelBtn$ = helpers.btn(DOM, '#cancel-btn');
   let rotate$ = helpers.btn(DOM, '#rotate-btn');
+  let cover$ = helpers.btn(DOM, '#add-cover-btn');
 
   let clickEdge$ = edgeDown$.map(ev => _.extend(ev.target, {
     x: ev.offsetX/ev.target.offsetWidth,
@@ -46,6 +47,7 @@ function intent(DOM) {
         .take(1))
     .merge(remove$)
     .merge(cancelBtn$)
+    .merge(cover$)
     .map(false);
 
   let selected$ = tileDown$
@@ -72,7 +74,7 @@ function intent(DOM) {
         idx: down.idx,
       })));
 
-  return {swap$, move$, drag$, selected$, cancel$, clickEdge$, dragEdge$, remove$, rotate$};
+  return {swap$, move$, drag$, selected$, cancel$, clickEdge$, dragEdge$, remove$, rotate$, cover$};
 }
 
 function model(actions) {
@@ -94,8 +96,10 @@ function view(state$) {
       h('.navbar.navbar-default.navbar-fixed-top.toolbar',
         h('.container-fluid', [
           h('ul.nav.navbar-nav.navbar-left', [
-            h('li', h('button.btn.btn-warning.navbar-btn#remove-btn', [h('i.fa.fa-trash-o'), " Remove from album"])),
-            h('li', h('button.btn.btn-warning.navbar-btn#rotate-btn', [h('i.fa.fa-rotate-right'), " Rotate"])),
+            h('li', h('button.btn.btn-warning.navbar-btn#remove-btn', [h('i.fa.fa-trash-o'),
+                state.selected.page === 0 ? " Remove from cover page" : " Remove from album"])),
+            // h('li', h('button.btn.btn-warning.navbar-btn#rotate-btn', [h('i.fa.fa-rotate-right'), " Rotate"])),
+            state.selected.page !== 0 ? h('li', h('button.btn.btn-warning.navbar-btn#add-cover-btn', [h('i.fa.fa-book'), " Add photo to cover page"])) : '',
           ]),
           h('ul.nav.navbar-nav.navbar-right', [
             h('li', h('button.btn.btn-link.navbar-btn#cancel-btn', h('i.fa.fa-times.fa-lg')))

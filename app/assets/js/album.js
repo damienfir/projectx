@@ -123,6 +123,7 @@ let renderBtn = (j) => (page, i) => {
   ])
 }
 
+
 let renderSpread = (photos, title, editing) => (spread, i) => {
   let cover = (spread.length === 1 && spread[0].index == 0) ?
       '.spread-cover' + (editing.selected ? '' : '.spread-cover-unselected') :
@@ -133,6 +134,7 @@ let renderSpread = (photos, title, editing) => (spread, i) => {
       h('.spread-btn.clearfix', spread.map(renderBtn(i)))
   ]);
 }
+
 
 function renderAlbum(album, photos, title, editing) {
   return album
@@ -192,10 +194,10 @@ function model(DOMactions, actions, collection, editing) {
 
   let rotatePhoto$ = editing.actions.rotate$
     .withLatestFrom(editing.state$, (ev, editing) => album => {
-      let tile = album[editing.selected.page].tiles[editing.selected.idx];
-      tile = utils.rotateTile(tile);
-      tile.rot = ((tile.rot || 0) + 90) % 360;
-      album[editing.selected.page].tiles[editing.selected.idx] = tile;
+      // let tile = album[editing.selected.page].tiles[editing.selected.idx];
+      // tile = utils.rotateTile(tile);
+      // tile.rot = ((tile.rot || 0) + 90) % 360;
+      // album[editing.selected.page].tiles[editing.selected.idx] = tile;
       return album;
     });
 
@@ -246,7 +248,12 @@ function requests(DOMactions, actions, album$, collection, photos, upload, editi
     return page2 < 1 ? page2 + 2 : (page2 >= N ? page2 - 2 : page2);
   }
 
-  let moveTile$ = editing.actions.move$.withLatestFrom(album$, photos.state$, (move, album, photos) => {
+  let cover$ = editing.actions.cover$.withLatestFrom(editing.state$, (ev, {selected}) => ({
+    from: selected,
+    to: {page: 0}
+  }));
+
+  let moveTile$ = editing.actions.move$.merge(cover$).withLatestFrom(album$, photos.state$, (move, album, photos) => {
       let photosA = photosFromTiles(photos, album[move.from.page].tiles);
       let photosB = photosFromTiles(photos, album[move.to.page].tiles);
       let photoID = album[move.from.page].tiles[move.from.idx].photoID;
@@ -352,7 +359,7 @@ function view(album$, photos$, collection$, editing$) {
   let photosDict$ = photos$.map(helpers.hashMap);
   return album$.combineLatest(photosDict$, collection$, editing$,
       (album, photos, collection, editing) => {
-        return album.length > 1 ?
+        return album.length > 1 && collection.name !== null ?
         h('div.container-fluid.album', renderAlbum(album, photos, collection.name, editing)) :
         undefined
       }

@@ -39,8 +39,22 @@ function transpose(tile) {
   return newTile;
 }
 
+function transposeImg(tile) {
+  let newTile = _.clone(tile);
+  newTile.cx1 = tile.cy1;
+  newTile.cy1 = tile.cx1;
+  newTile.cx2 = tile.cy2;
+  newTile.cy2 = tile.cx2;
+  return newTile;
+}
+
+function transposeFull(tile) {
+  return transpose(transposeImg(tile));
+}
+
 
 export function rotateTile(tile) {
+  // return transposeImg(resizeTile(transposeImg(tile), tile));
   return transpose(resizeTile(tile, transpose(tile)));
 }
 
