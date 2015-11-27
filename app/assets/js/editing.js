@@ -19,26 +19,29 @@ function intent(DOM) {
   let mouseUp$ = DOM.select(':root').events('mouseup');
   let mouseMove$ = DOM.select(':root').events('mousemove').map(helpers.cancel);
   let mouseMoveCoord$ = mouseMove$.map(eventToCoord);
-  let edgeDown$ = DOM.select('.move-mosaic').events('mousedown')
-    .filter(ev => _.contains(ev.target.classList, 'move-mosaic'));
+  // let edgeDown$ = DOM.select('.move-mosaic').events('mousedown')
+  //   .filter(ev => _.contains(ev.target.classList, 'move-mosaic'));
+  let edgeDown$ = DOM.select('.node').events('mousedown').map(helpers.cancel);
 
   let remove$ = helpers.btn(DOM, '#remove-btn');
   let cancelBtn$ = helpers.btn(DOM, '#cancel-btn');
   let rotate$ = helpers.btn(DOM, '#rotate-btn');
   let cover$ = helpers.btn(DOM, '#add-cover-btn');
 
-  let clickEdge$ = edgeDown$.map(ev => _.extend(ev.target, {
-    x: ev.offsetX/ev.target.offsetWidth,
-    y: ev.offsetY/ev.target.offsetHeight,
-    page: ev.target['data-page']
+  let clickEdge$ = edgeDown$.map(ev => ({
+    x: ev.target.offsetLeft/ev.target.parentNode.offsetWidth,
+    y: ev.target.offsetTop/ev.target.parentNode.offsetHeight,
+    w: ev.target.parentNode.offsetWidth,
+    h: ev.target.parentNode.offsetHeight,
+    page: ev.target.parentNode['data-page'],
   }));
 
   let dragEdge$ = clickEdge$.flatMapLatest(down =>
     mouseMove$.takeUntil(mouseUp$)
     .pairwise()
     .map(([prev,move]) => ({
-      dx: (move.screenX - prev.screenX) / down.offsetWidth,
-      dy: (move.screenY - prev.screenY) / down.offsetHeight,
+      dx: (move.screenX - prev.screenX) / down.w,
+      dy: (move.screenY - prev.screenY) / down.h,
       down
     })));
 

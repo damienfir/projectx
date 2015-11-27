@@ -39,25 +39,6 @@ function transpose(tile) {
   return newTile;
 }
 
-function transposeImg(tile) {
-  let newTile = _.clone(tile);
-  newTile.cx1 = tile.cy1;
-  newTile.cy1 = tile.cx1;
-  newTile.cx2 = tile.cy2;
-  newTile.cy2 = tile.cx2;
-  return newTile;
-}
-
-function transposeFull(tile) {
-  return transpose(transposeImg(tile));
-}
-
-
-export function rotateTile(tile) {
-  // return transposeImg(resizeTile(transposeImg(tile), tile));
-  return transpose(resizeTile(tile, transpose(tile)));
-}
-
 
 export function swapTiles(album, [page1,idx1], [page2,idx2]) {
   var tile1 = album[page1].tiles[idx1];
@@ -65,131 +46,6 @@ export function swapTiles(album, [page1,idx1], [page2,idx2]) {
   album[page2].tiles[idx2] = resizeTile(tile1, tile2);
   album[page1].tiles[idx1] = resizeTile(tile2, tile1);
   return album;
-}
-
-
-function isOutOfBounds(position, bounds) {
-  return position[0] < bounds[0] || position[1] < bounds[1] || position[0] > bounds[2] || position[1] > bounds[3];
-}
-
-
-export function moveTiles(targets, orientation, bounds, dx, dy, tiles) {
-  var newcoord_tl = targets.topleft.map(idx => [
-      tiles[idx].tx1 + dx * orientation[0],
-      tiles[idx].ty1 + dy * orientation[1]
-  ]);
-
-  var newcoord_br = targets.bottomright.map(idx => [
-      tiles[idx].tx2 + dx * orientation[0],
-      tiles[idx].ty2 + dy * orientation[1]
-  ]);
-
-  var allcoord = newcoord_tl.concat(newcoord_br);
-  var allindices = targets.topleft.concat(targets.bottomright);
-
-  var is_out = allcoord.map(coord => isOutOfBounds(coord, bounds))
-    .reduce((res, current) => res || current);
-
-  if (is_out) return tiles;
-
-  return tiles.map((tile,index) => {
-    let i = targets.topleft.indexOf(index);
-    if (i !== -1) {
-      return resizeTile(_.clone(tile), _.extend(tile, {
-        tx1: newcoord_tl[i][0],
-        ty1: newcoord_tl[i][1],
-      }));
-    }
-
-    let j = targets.bottomright.indexOf(index);
-    if (j !== -1) {
-      return resizeTile(_.clone(tile), _.extend(tile, {
-        tx2: newcoord_br[j][0],
-        ty2: newcoord_br[j][1]
-      }));
-    }
-
-    return tile;
-  });
-}
-
-function getOrientation(tiles, indices, prop) {
-  return indices.map(function(idx) {
-    return tiles[idx][prop];
-  }).reduce(function(prev, curr) {
-    return (prev === curr) ? prev : false;
-  }) ? [1,0] : [0,1];
-}
-
-
-export function findOrientation(tl, br, tiles) {
-  if (Math.min(tl.length, br.length) === 0) return [0,0];
-  if (tl.length === br.length && tl.length === 1) {
-    var tile_tl = tiles[tl[0]];
-    var tile_br = tiles[br[0]];
-    return (Math.abs(tile_tl.ty1-tile_br.ty2) < Math.abs(tile_tl.tx1-tile_br.tx2)) ? [0,1] : [1,0];
-  }
-
-  if (tl.length >= br.length) {
-    return getOrientation(tiles, tl, 'tx1');
-  } else {
-    return getOrientation(tiles, br, 'tx2');
-  }
-}
-
-export function findTargets(xn, yn, tiles) {
-  var tl_targets = [];
-  var br_targets = [];
-  var best1 = Infinity,
-  best2 = Infinity;
-
-  for (var i = 0; i < tiles.length; i++) {
-    var dy1 = Math.abs(yn - tiles[i].ty1);
-    var dx1 = Math.abs(xn - tiles[i].tx1);
-    var dy2 = Math.abs(yn - tiles[i].ty2);
-    var dx2 = Math.abs(xn - tiles[i].tx2);
-    var min1 = Math.min(dy1, dx1);
-    var min2 = Math.min(dy2, dx2);
-
-    if (min1 < min2) {
-      if (min1 < best1) {
-        tl_targets = [];
-        best1 = min1;
-      }
-      if (min1 == best1) {
-        tl_targets.push(i);
-      }
-    } else {
-      if (min2 < best2) {
-        br_targets = [];
-        best2 = min2;
-      }
-      if (min2 == best2) {
-        br_targets.push(i);
-      }
-    }
-  }
-
-  return {
-    'topleft': tl_targets,
-    'bottomright': br_targets,
-  };
-}
-
-function compare_min(a,b) { return a-b; }
-function compare_max(a,b) { return b-a; }
-
-export function findBounds(tl, br, orientation, tiles) {
-  var tl_tiles = tl.map(function(i){ return tiles[i]; });
-  var br_tiles = br.map(function(i){ return tiles[i]; });
-
-  var m = 0.05;
-  return [
-    (br_tiles.map(function(tile){ return tile.tx1; }).sort(compare_max)[0] + m) * orientation[0],
-    (br_tiles.map(function(tile){ return tile.ty1; }).sort(compare_max)[0] + m) * orientation[1],
-    Math.max((tl_tiles.map(function(tile){ return tile.tx2; }).sort(compare_min)[0] - m), 1-orientation[0]),
-    Math.max((tl_tiles.map(function(tile){ return tile.ty2; }).sort(compare_min)[0] - m), 1-orientation[1])
-  ];
 }
 
 
@@ -204,4 +60,31 @@ export function move(tile, offset, prop1, prop2) {
     out[prop2] = loc + original_size;
   }
   return out;
+}
+
+
+let margin = 0.05;
+
+export function getParams(tiles, x, y) {
+  let tiles2 = tiles.map((t,i) => ({t,i}));
+  let move_x_tl = tiles2.filter(({t,i}) => Math.abs(t.tx1-x) < margin).map(({t,i}) => i);
+  let move_x_br = tiles2.filter(({t,i}) => Math.abs(t.tx2-x) < margin).map(({t,i}) => i);
+  let move_y_tl = tiles2.filter(({t,i}) => Math.abs(t.ty1-y) < margin).map(({t,i}) => i);
+  let move_y_br = tiles2.filter(({t,i}) => Math.abs(t.ty2-y) < margin).map(({t,i}) => i);
+  return {move_x_tl, move_y_tl, move_x_br, move_y_br};
+}
+
+let d = 0.15;
+
+export function dragTiles(tiles, params, dx, dy) {
+  let newTiles = tiles
+    .map((t,i) => _.contains(params.move_x_tl,i) ? _.extend(_.clone(t), {tx1: t.tx1+dx}) : t)
+    .map((t,i) => _.contains(params.move_x_br,i) ? _.extend(_.clone(t), {tx2: t.tx2+dx}) : t)
+    .map((t,i) => _.contains(params.move_y_tl,i) ? _.extend(_.clone(t), {ty1: t.ty1+dy}) : t)
+    .map((t,i) => _.contains(params.move_y_br,i) ? _.extend(_.clone(t), {ty2: t.ty2+dy}) : t);
+
+  if (_.some(newTiles.map(t => [t.tx2-t.tx1, t.ty2-t.ty1]), ([w,h]) => w < d || h < d))
+    return tiles;
+
+  return _.zip(tiles, newTiles).map(([a,b]) => resizeTile(a,b));
 }

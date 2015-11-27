@@ -99,6 +99,20 @@ let renderHover = (editing, page) =>
     h('.page-hover', {'data-page': page.index, 'data-idx': 0}, h('h2.center', "Move photo to this page")) : ''
 
 
+let drawNode = (x, y) => h('button.node.shadow', {style: {
+    'top': percent(y), 'left': percent(x)
+  }}, ' ');
+
+let shift = 0.3e-2;
+
+let renderNodes = (page) => {
+  let tl = page.tiles.filter(t => t.tx1 > 0.01 && t.ty1 > 0.01).map(t => ({x: t.tx1, y: t.ty1}));
+  let br = page.tiles.filter(t => t.tx2 < 0.99 || t.ty2 < 0.99).map(t => ({x: t.tx2, y: t.ty2}))
+    .filter(a => tl.filter(b => (Math.abs(a.x-b.x) + Math.abs(a.y-b.y)) < 0.1).length === 0);
+  return br.map(c => drawNode(c.x+shift, c.y+shift)).concat(tl.map(c => drawNode(c.x-shift, c.y-shift)));
+}
+
+
 let renderPage = (photos, title, j, editing) => (page, i) => {
   return h('.box-mosaic' + leftOrRight(j*2+i) + moveOrNot(page.tiles),
       {'data-page': page.index}, [
@@ -109,6 +123,7 @@ let renderPage = (photos, title, j, editing) => (page, i) => {
         .concat((page.index === 0) ? renderCover(title, page) : undefined)
         .concat(renderHover(editing, page))
         .concat(renderToolbar(editing, page))
+        .concat(renderNodes(page))
       ]);
 }
 
@@ -170,6 +185,9 @@ function intent(DOM, HTTP) {
 }
 
 
+let params = [];
+
+
 function model(DOMactions, actions, collection, editing) {
   actions.downloadedAlbum$.subscribe(res => {
     window.open("/storage/generated/" + res.text);
@@ -213,19 +231,14 @@ function model(DOMactions, actions, collection, editing) {
       return album;
     });
 
-  let clickEdge$ = editing.actions.clickEdge$.map(({ev,x,y,page}) => album => {
-    let tiles = album[page].tiles;
-    let targets = utils.findTargets(x, y, tiles);
-    let orientation = utils.findOrientation(targets.topleft, targets.bottomright, tiles);
-    let bounds = utils.findBounds(targets.topleft, targets.bottomright, orientation, tiles);
-    album[page].move = {targets, orientation, bounds, page};
+  let clickEdge$ = editing.actions.clickEdge$.map(ev => album => {
+    params = _.extend(utils.getParams(album[ev.page].tiles, ev.x, ev.y), {page: ev.page});
     return album;
   });
 
   let dragEdge$ = editing.actions.dragEdge$.map(drag => album => {
-    let params = album[drag.down.page].move;
-    let newtiles = utils.moveTiles(params.targets, params.orientation, params.bounds, drag.dx, drag.dy, album[params.page].tiles);
-    album[params.page].tiles = newtiles;
+    let newTiles = utils.dragTiles(album[params.page].tiles, params, drag.dx, drag.dy);
+    album[params.page].tiles = newTiles;
     return album;
   });
 
