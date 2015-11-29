@@ -61,12 +61,12 @@ html, body {
 
 
 .box-mosaic .node {
-  border-radius: 30px;
+  border-radius: 40px;
   border: 0;
   background-color: ;
   opacity: 0.0;
-  height: 30px;
-  width: 30px;
+  height: 40px;
+  width: 40px;
   position: absolute;
   transform: translate(-50%, -50%);
 }

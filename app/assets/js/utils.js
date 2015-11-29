@@ -74,14 +74,17 @@ export function getParams(tiles, x, y) {
   return {move_x_tl, move_y_tl, move_x_br, move_y_br};
 }
 
-let d = 0.15;
+let d = 0.1;
+
 
 export function dragTiles(tiles, params, dx, dy) {
+  let canMoveX = params.move_x_tl.length > 0 && params.move_x_br.length > 0;;
+  let canMoveY = params.move_y_tl.length > 0 && params.move_y_br.length > 0;;
   let newTiles = tiles
-    .map((t,i) => _.contains(params.move_x_tl,i) ? _.extend(_.clone(t), {tx1: t.tx1+dx}) : t)
-    .map((t,i) => _.contains(params.move_x_br,i) ? _.extend(_.clone(t), {tx2: t.tx2+dx}) : t)
-    .map((t,i) => _.contains(params.move_y_tl,i) ? _.extend(_.clone(t), {ty1: t.ty1+dy}) : t)
-    .map((t,i) => _.contains(params.move_y_br,i) ? _.extend(_.clone(t), {ty2: t.ty2+dy}) : t);
+    .map((t,i) => _.contains(params.move_x_tl,i) && canMoveX ? _.extend(_.clone(t), {tx1: t.tx1+dx}) : t)
+    .map((t,i) => _.contains(params.move_x_br,i) && canMoveX ? _.extend(_.clone(t), {tx2: t.tx2+dx}) : t)
+    .map((t,i) => _.contains(params.move_y_tl,i) && canMoveY ? _.extend(_.clone(t), {ty1: t.ty1+dy}) : t)
+    .map((t,i) => _.contains(params.move_y_br,i) && canMoveY ? _.extend(_.clone(t), {ty2: t.ty2+dy}) : t);
 
   if (_.some(newTiles.map(t => [t.tx2-t.tx1, t.ty2-t.ty1]), ([w,h]) => w < d || h < d))
     return tiles;

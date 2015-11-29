@@ -46,7 +46,7 @@ let renderTile = (tile, tileindex, page, editing) => {
     (editing.selected.page === page && editing.selected.idx === tileindex ? '.tile-selected' : '.tile-unselected') : '';
 
   return h('.ui-tile' + selectedClass,
-      {
+      _.extend({
         'style': {
         height: percent(tile.ty2 - tile.ty1),
         width: percent(tile.tx2 - tile.tx1),
@@ -54,7 +54,15 @@ let renderTile = (tile, tileindex, page, editing) => {
         left: percent(tile.tx1)
         },
         'data-page': page,
-        'data-idx': tileindex}, [
+        'data-idx': tileindex
+      },
+      (editing.selectedTile ? {} : {'attributes' : {
+          'data-toggle': 'tooltip',
+          'data-placement': 'top',
+          'title': "Click"
+        }
+      })
+      ), [
           h('img' + (tile.rot ? '.rotate'+tile.rot : ''), {
             'src': "/storage/thumbs/"+tile.hash,
             'draggable': false,
@@ -99,17 +107,37 @@ let renderHover = (editing, page) =>
     h('.page-hover', {'data-page': page.index, 'data-idx': 0}, h('h2.center', "Move photo to this page")) : ''
 
 
-let drawNode = (x, y) => h('button.node.shadow', {style: {
-    'top': percent(y), 'left': percent(x)
-  }}, ' ');
+let Node = (x,y) => ({x,y});
 
-let shift = 0.3e-2;
+let drawNode = (shift, dragged) => (node, key) => h('button.node.shadow', _.extend({
+  // key,
+  style: {
+      'top': percent(node.y + shift),
+      'left': percent(node.x + shift),
+    }
+  },
+  dragged ? {} : {'attributes': {
+    'data-toggle': 'tooltip',
+    'data-placement': 'top',
+    'title': 'Drag'
+  }}
+  ), ' ');
 
-let renderNodes = (page) => {
-  let tl = page.tiles.filter(t => t.tx1 > 0.01 && t.ty1 > 0.01).map(t => ({x: t.tx1, y: t.ty1}));
-  let br = page.tiles.filter(t => t.tx2 < 0.99 || t.ty2 < 0.99).map(t => ({x: t.tx2, y: t.ty2}))
-    .filter(a => tl.filter(b => (Math.abs(a.x-b.x) + Math.abs(a.y-b.y)) < 0.1).length === 0);
-  return br.map(c => drawNode(c.x+shift, c.y+shift)).concat(tl.map(c => drawNode(c.x-shift, c.y-shift)));
+let shift = 0.2e-2;
+
+let renderNodes = (page, editing) => {
+  let topleft = page.tiles
+    .filter(t => t.tx1 > 0.01 || t.ty1 > 0.01)
+    .map(t => Node(t.tx1, t.ty1));
+  let bottomright = page.tiles
+    .filter(a => topleft
+        .filter(b => a.tx1 === b.x && a.ty1 === b.y).length === 0)
+    .filter(t => t.tx2 < 0.99 || t.ty2 < 0.99)
+    .map(t => Node(t.tx2, t.ty2))
+    .filter(a => topleft
+        .filter(b => (Math.abs(a.x-b.x) + Math.abs(a.y-b.y)) < 0.1).length === 0);
+  return bottomright.map(drawNode(shift, editing.draggedNode))
+    .concat(topleft.map(drawNode(shift, editing.draggedNode)));
 }
 
 
@@ -123,18 +151,32 @@ let renderPage = (photos, title, j, editing) => (page, i) => {
         .concat((page.index === 0) ? renderCover(title, page) : undefined)
         .concat(renderHover(editing, page))
         .concat(renderToolbar(editing, page))
-        .concat(renderNodes(page))
+        .concat(renderNodes(page, editing))
       ]);
 }
 
 let renderToolbar = (editing, page) => {
   return (editing.selected && editing.selected.page === page.index) ?
           h('.btn-group.toolbar', [
-            h('button.btn.btn-info.btn-lg#remove-btn', [
-              h('i.fa.fa-trash-o')]),
+            h('button.btn.btn-info.btn-lg#remove-btn',
+              {'attributes': {
+                'data-toggle': 'tooltip',
+                'data-placement': 'top',
+                'title': 'Remove image'
+              }},
+              h('i.fa.fa-trash-o')),
             // h('li', h('button.btn.btn-warning.navbar-btn#rotate-btn', [h('i.fa.fa-rotate-right')])),
-            editing.selected.page !== 0 ? h('button.btn.btn-info.btn-lg#add-cover-btn', [h('i.fa.fa-book')]) : '',
-            h('button.btn.btn-info.btn-lg#cancel-btn', [h('i.fa.fa-times')])
+            editing.selected.page !== 0 ? h('button.btn.btn-info.btn-lg#add-cover-btn', {'attributes': {
+                'data-toggle': 'tooltip',
+                'data-placement': 'top',
+                'title': 'Add to album cover'
+              }},
+              [h('i.fa.fa-book')]) : '',
+            h('button.btn.btn-info.btn-lg#cancel-btn', {'attributes': {
+                'data-toggle': 'tooltip',
+                'data-placement': 'top',
+                'title': 'Cancel'
+              }}, [h('i.fa.fa-times')])
         ]) : ''
 }
 
@@ -143,7 +185,7 @@ let renderBtn = (j) => (page, i) => {
   return h(leftOrRight(p), [
       h('span.page', {'data-page': page.index}, p === 0 ? 'Cover page ' : "Page "+(p-1)+' '),
       page.tiles.length ? h('.btn-group', [
-        h('button.btn.btn-primary.btn-xs.shuffle-btn', {'data-page': page.index}, [h('i.fa.fa-refresh'), " Shuffle"]),
+        h('button.btn.btn-primary.btn-xs.shuffle-btn', {'data-page': page.index}, [h('i.fa.fa-refresh'), " Shuffle"]), 
         h('button.btn.btn-primary.btn-xs.incr-btn', {'data-page': page.index}, [h('i.fa.fa-plus'), " More"]),
         h('button.btn.btn-primary.btn-xs.decr-btn', {'data-page': page.index}, [h('i.fa.fa-minus'), " Less"])
       ]) : ''

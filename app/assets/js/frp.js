@@ -57,6 +57,8 @@ function view(collection, album, upload, order, save, editing) {
       Elements.renderToolbar);
   let buttonDOM = collection.state$.map(Elements.renderStartPage);
 
+  $('body').tooltip({selector: '[data-toggle="tooltip"]'});
+
   return Observable.combineLatest(toolbarDOM, upload.DOM, album.DOM, order.DOM, buttonDOM, save.DOM, editing.DOM,
       (toolbarVTree, uploadVTree, albumVTree, orderVTree, buttonVTree, saveVTree, editingVTree) =>
       h('div.theme-blue', [

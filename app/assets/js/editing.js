@@ -82,12 +82,18 @@ function intent(DOM) {
 }
 
 function model(actions) {
+
+  actions.clickEdge$.subscribe(ev => $('.node').tooltip('destroy'));
+  actions.selected$.subscribe(ev => $('.ui-tile').tooltip('destroy'));
+
   return Rx.Observable.merge(
       actions.selected$.map(down => state => _.extend(state, {selected: down})),
+      actions.selected$.take(1).map(ev => state => _.extend(state, {selectedTile: true})),
+      actions.clickEdge$.take(1).map(ev => state => _.extend(state, {draggedNode: true})),
       Rx.Observable.merge(
         actions.swap$,
         actions.move$,
-        actions.cancel$).map(x => state => ({}))
+        actions.cancel$).map(x => state => _.extend(state, {selected: undefined}))
     )
     .startWith({})
     .scan(helpers.apply);
