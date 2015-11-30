@@ -132,9 +132,24 @@ class Collections @Inject()(usersDAO: UsersDAO, compositionDAO: CompositionDAO, 
   }
 
 
-  def generatePage(id: Long, pageID: Long, index: Int) = Action.async(parse.json) { request =>
+  def shufflePage(id: Long, pageID: Long, index: Int) = Action.async(parse.json) { request =>
     shuffleComposition(pageID, request.body.as[List[DBModels.Photo]], index)
       .map(page => Ok(Json.toJson(page)))
+  }
+
+
+  def generatePage(id: Long, index: Int) = Action.async(parse.json) { request =>
+    val photos = request.body.as[List[DBModels.Photo]]
+    
+      // val pagesWithCover = if (index == 0) {
+      //   (List(photos(Random.nextInt(photos.size))), 0) :: pages.map({case (p,i) => (p,i+1)})
+      // } else { pages }
+      // Future.sequence {
+      //   pagesWithCover.map({case (subset, index) => generateComposition(id, subset, startindex+index)})
+      // }.map(pages => Ok(Json.toJson(pages)))
+    // }
+
+    generateComposition(id, photos, index) map (page => Ok(Json.toJson(page)))
   }
 
   def save(json: JsValue) = {
@@ -154,19 +169,6 @@ class Collections @Inject()(usersDAO: UsersDAO, compositionDAO: CompositionDAO, 
   def emailLink(id: Long, hash: String) = Action.async(parse.json) { request =>
     val email = (request.body \ "email").as[String]
     emailService.sendLink(email, hash) map (Ok(_))
-  }
-
-
-  def generatePages(id: Long, startindex: Int) = Action.async(parse.json) { request =>
-    val photos = request.body.as[List[DBModels.Photo]]
-    val pages = divideIntoPages(photos)
-    val pagesWithCover = if (startindex == 0) {
-      (List(photos(Random.nextInt(photos.size))), 0) :: pages.map({case (p,i) => (p,i+1)})
-    } else { pages }
-
-    Future.sequence {
-      pagesWithCover.map({case (subset, index) => generateComposition(id, subset, startindex+index)})
-    }.map(pages => Ok(Json.toJson(pages)))
   }
 
 

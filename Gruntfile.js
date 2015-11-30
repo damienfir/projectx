@@ -24,7 +24,7 @@ module.exports = function(grunt) {
         // }
       },
       dev: {
-        src: './app/assets/js/frp.js',
+        src: './app/assets/js/main.js',
         dest: './public/js/bundle.js'
       }
     },
@@ -46,7 +46,7 @@ module.exports = function(grunt) {
       //   tasks: ['less']
       // },
       js: {
-        files: ['app/assets/js/*.js'],
+        files: ['app/assets/js/**/*.js'],
         // tasks: ['js']
         tasks: ['browserify']
       }

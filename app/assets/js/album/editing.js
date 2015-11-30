@@ -1,6 +1,6 @@
 import Rx from 'rx';
 import {h} from '@cycle/dom';
-import helpers from './helpers'
+import helpers from '../helpers'
 
 let pageAndIndex = (ev) => ({page: ev.target.parentNode['data-page'], index: ev.target.parentNode['data-idx']})
 
@@ -22,6 +22,8 @@ function intent(DOM) {
   // let edgeDown$ = DOM.select('.move-mosaic').events('mousedown')
   //   .filter(ev => _.contains(ev.target.classList, 'move-mosaic'));
   let edgeDown$ = DOM.select('.node').events('mousedown').map(helpers.cancel);
+
+  let cancelExt$ = new Rx.Subject();
 
   let remove$ = helpers.btn(DOM, '#remove-btn');
   let cancelBtn$ = helpers.btn(DOM, '#cancel-btn');
@@ -49,9 +51,10 @@ function intent(DOM) {
     .flatMapLatest(down => mouseMove$
         .takeUntil(mouseUp$)
         .take(1))
-    .merge(remove$)
+    // .merge(remove$)
     .merge(cancelBtn$)
-    .merge(cover$)
+    // .merge(cover$)
+    .merge(cancelExt$)
     .map(false);
 
   let selected$ = tileDown$
@@ -78,8 +81,9 @@ function intent(DOM) {
         idx: down.idx,
       })));
 
-  return {swap$, move$, drag$, selected$, cancel$, clickEdge$, dragEdge$, remove$, rotate$, cover$};
+  return {swap$, move$, drag$, selected$, cancel$, clickEdge$, dragEdge$, remove$, rotate$, cover$, cancelExt$};
 }
+
 
 function model(actions) {
 
@@ -93,10 +97,11 @@ function model(actions) {
       Rx.Observable.merge(
         actions.swap$,
         actions.move$,
-        actions.cancel$).map(x => state => _.extend(state, {selected: undefined}))
+        actions.cancel$
+      ).map(x => state => _.extend(state, {selected: undefined}))
     )
     .startWith({})
-    .scan(helpers.apply);
+    .scan(helpers.apply).do(x => console.log(x));
 }
 
 

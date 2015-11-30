@@ -1,4 +1,5 @@
 import Rx from 'rx';
+import Immutable from 'immutable';
 import {h} from '@cycle/dom';
 import helpers from './helpers'
 
@@ -52,19 +53,29 @@ function events(DOMactions, actions) {
 }
 
 
+let initial = Immutable.Map({photos: Immutable.List(), size: 0});
+
 function model(actions, DOMactions) {
 
   let startedFunc$ = actions.startUpload$.map(([files,collection]) =>
-      upload => _.extend(upload, {files: [], size: files.length}));
+      upload => upload.set('size', files.length));
 
-  let uploadedFunc$ = actions.fileUpload$.map(files =>
-      upload => _.extend(upload, {files: files}));
+  let uploadedFunc$ = actions.fileUpload$
+    .map(files => upload => upload.set('photos', Immutable.fromJS(files)));
+
+  // let uploadedFunc$ = actions.fileUpload$
+  //   .bufferWithCount(npics)
+  //   .merge(actions.fileUpload$.take(1).map(f => [f]))
+  //   .merge(actions.uploadedFiles$
+  //       .filter(f => f.length < npics)
+  //       .map(files => files.slice(-(files.length % npics))))
+  //   .map(files => upload => upload.updateIn('photos', v => v.push(files)));
 
   let finishedFunc$ = actions.uploadedFiles$.map(files =>
-      upload => ({}));
+      upload => upload.set('size', 0));
 
   return Rx.Observable.merge(startedFunc$, uploadedFunc$, finishedFunc$)
-    .startWith({})
+    .startWith(initial)
     .scan(helpers.apply);
 }
 

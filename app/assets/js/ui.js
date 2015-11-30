@@ -85,8 +85,8 @@ export function renderStartPage(collection) {
 
 
 function renderProgressbar(upload) {
-  if (upload.size) {
-    let progress = (upload.files && upload.size) ? 100 * upload.files.length / upload.size : 0;
+  if (upload.get('size', 0) > 0) {
+    let progress = (upload.get('files') && upload.get('size')) ? 100 * upload.get('files').size / upload.get('size') : 0;
     return [
       h('li', 
         h('span.navbar-text', progress < 100 ? 'Uploading...' : 'Processing...')),

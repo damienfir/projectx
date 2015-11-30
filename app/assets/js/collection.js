@@ -49,7 +49,7 @@ function model(actions, DOMactions) {
 }
 
 
-function requests(DOMactions, upload, user, collection$) {
+function requests(DOMactions, user, collection$) {
   return {
     createCollection$: DOMactions.selectFiles$
       .flatMapLatest(files => user.state$.filter(hasID).take(1).map(user => [files,user]))
@@ -74,10 +74,10 @@ function requests(DOMactions, upload, user, collection$) {
 }
 
 
-module.exports = function(DOM, HTTP, DOMactions, user, upload) {
+module.exports = function(DOM, HTTP, DOMactions, user) {
   let actions = intent(DOM, HTTP);
   let state$ = model(actions, DOMactions);
-  let requests$ = requests(DOMactions, upload, user, state$);
+  let requests$ = requests(DOMactions, user, state$);
 
   events(DOMactions, actions);
 

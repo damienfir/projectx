@@ -1,5 +1,3 @@
-import demo from './demo'
-
 
 let UI = {
   initial: 1 << 0,
@@ -97,5 +95,6 @@ module.exports = {
   hashMap,
   toArray,
   UI,
-  demoID
+  demoID,
+  ascIndex
 }
