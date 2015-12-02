@@ -27,7 +27,7 @@ class ImageService @Inject()() {
   }
 
   def resize(filename: String): String = {
-    val cmd = Seq("convert", photoFile(filename), "-resize", "500x500", thumbFile(filename))
+    val cmd = Seq("convert", photoFile(filename), "-resize", "800x800", thumbFile(filename))
     cmd.! match {
       case 0 => filename
       case _ => throw new Exception()

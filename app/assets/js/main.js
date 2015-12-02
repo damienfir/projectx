@@ -57,6 +57,25 @@ function view(collection, album, upload, order, save, editing) {
   let buttonDOM = collection.state$.map(Elements.renderStartPage);
 
   $('body').tooltip({selector: '[data-toggle="tooltip"]'});
+  $(window).on('scroll', () =>
+    !$(document).scrollTop() ?
+      $('#nav').removeClass('shadow-lg') :
+      $('#nav').addClass('shadow-lg')
+			); 
+
+	$('a[href*="#"]:not([href="#"])').click(function() {
+		console.log('ok');
+		if (location.pathname.replace(/^\//,'') == this.pathname.replace(/^\//,'') && location.hostname == this.hostname) {
+			var target = $(this.hash);
+		target = target.length ? target : $('[name=' + this.hash.slice(1) +']');
+		if (target.length) {
+			$('html,body').animate({
+				scrollTop: target.offset().top
+			}, 1000);
+			return false;
+		}
+	}
+	});
 
   return Observable.combineLatest(toolbarDOM, upload.DOM, album.DOM, order.DOM, buttonDOM, save.DOM, editing.DOM,
       (toolbarVTree, uploadVTree, albumVTree, orderVTree, buttonVTree, saveVTree, editingVTree) =>

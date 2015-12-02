@@ -3,8 +3,10 @@
 
 html, body {
   /* font-family: 'Open Sans', sans-serif; */
+  /* padding-top: 60px; */
   height: 100%;
   /* overflow-x: hidden; */
+  background-color: #4A89DC;
 }
 
 #app { height: 100%; position: relative; }
@@ -41,6 +43,19 @@ html, body {
 }
 
 .navbar-transparent {
+  background-color: #4A89DC;
+}
+
+.navbar-transparent .navbar-brand {
+  color: #fff;
+  font-weight: bold;
+  background-color: transparent;
+}
+.navbar-transparent .navbar-brand:hover {
+  opacity: 0.8;
+  background-color: transparent;
+}
+.navbar-transparent .navbar-brand:active {
   background-color: transparent;
 }
 
@@ -141,16 +156,10 @@ html, body {
 }
 
 .spread {
+  position: relative;
   margin-bottom: 70px;
 }
 
-.spread-cover {
-  width: 60%;
-  text-align: center;
-  position: relative;
-  left: 50%;
-  transform: translate(-50%,0);
-}
 
 .spread-cover-unselected .ui-tile {
   opacity: 0.5;
@@ -160,13 +169,19 @@ html, body {
   padding: 5px;
   background-color: #fff;
   border-radius: 3px;
-  margin: 0 auto;
+  margin-bottom: 10px;
+  /* margin: 0 auto; */
 }
 
 .spread-btn {
-  margin-top: 10px;
+  /* margin-top: 10px; */
   /* padding: 5px 15px 0px 15px; */
   /* color: #aaa; */
+}
+
+.spread-anchor {
+  position:absolute;
+  top: -70px;
 }
 
 .spread-btn .page {
@@ -232,13 +247,23 @@ html, body {
 }
 
 .album {
-  margin-top: 70px;
-  max-width: 1400px;
+  /* margin-top: 70px; */
+  margin: 70px 20px 0 20px;
+  /* max-width: 1400px; */
   text-align: center;
 }
 
+.spread-arrow a {
+  color: #fff;
+  opacity: 0.2;
+}
+.spread-arrow a:hover {
+  color: #fff;
+  opacity: 0.7;
+}
+
 .start-buttons {
-  margin-top: 30px;
+  padding-top: 90px;
   text-align: center;
 }
 
@@ -248,33 +273,22 @@ html, body {
   margin-bottom: 50px;
 }
 
-.step1 {
+.step-disabled {
+  opacity: 0.5;
+}
+
+.step1, .step2 {
+  font-size: 36px;
   margin-bottom: 30px;
 }
 
-.step-disabled {
-  opacity: 0.7;
-}
-
-.start-buttons .or {
-  font-size: 18px;
-  font-weight: bold;
-  margin: 0 20px;
-}
-
-.btn-step {
-  margin: 10px;
-  padding: 20px;
+#step2 {
+  margin-top: 70px;
 }
 
 .start-buttons button i {
   display: block;
   margin-bottom: 10px;
-}
-
-.step2 {
-  margin-top: 80px;
-  margin-bottom: 30px;
 }
 
 .step2-title {
@@ -283,7 +297,7 @@ html, body {
   color: #333;
   height: 75px;
   padding: 20px;
-  width: 80%;
+  /* width: 80%; */
   border: 0;
   outline: none;
   border-radius: 5px;
@@ -294,10 +308,11 @@ html, body {
 }
 
 #title-btn {
-  margin-left: 20px;
-  height: 75px;
-  font-size: 24px;
-  padding: 0 20px;
+  margin: 8px 0;
+  /* margin-left: 20px; */
+  /* height: 75px; */
+  /* font-size: 24px; */
+  /* padding: 0 20px; */
 }
 
 #title-btn i {
@@ -374,14 +389,14 @@ html, body {
 }
 
 .tile-selected {
-  opacity: 1;
+  opacity: 0.5;
 }
 
 .tile-unselected {
-  opacity: 0.3;
+  opacity: 1;
 }
 .tile-unselected:hover {
-  opacity: 1;
+  opacity: 0.5;
 }
 
 .cover-title {
@@ -420,8 +435,8 @@ html, body {
 .toolbar {
   box-shadow: 0px 2px 15px rgba(0,0,0,0.3);
   position: absolute;
-  top: -40px;
-  right: 10px;
+  top: -50px;
+  right: 30%;
 }
 
 #file-input { opacity: 0; height: 0; }
@@ -438,6 +453,7 @@ html, body {
 #overlay-mosaic { opacity: 0.7; }
 
 .shadow { box-shadow: 1px 1px 4px rgba(0,0,0,0.3); }
+.shadow-lg { box-shadow: 1px 1px 25px rgba(0,0,0,0.3); }
 .limited-width { max-width: 1400px; }
 .centered { text-align: center; }
 .hide { display: none; }

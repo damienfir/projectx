@@ -101,7 +101,7 @@ function model(actions) {
       ).map(x => state => _.extend(state, {selected: undefined}))
     )
     .startWith({})
-    .scan(helpers.apply).do(x => console.log(x));
+    .scan(helpers.apply);
 }
 
 
