@@ -4,7 +4,7 @@ import play.PlayImport.PlayKeys.playRunHooks
 
 name := """projectx"""
 
-version := "0.5.1"
+version := "0.6"
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
