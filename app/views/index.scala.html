@@ -26,10 +26,13 @@
 
 <!-- div.nav> -->
 
-<div class="navbar navbar-default navbar-fixed-top">
-	<div class="navbar-header">
+<div class="navbar navbar-blue navbar-static-top">
+	<div class="navbar-header navbar-left">
 		<a href="/" class="navbar-brand">bigpiq</a>
 	</div>
+  <ul class="nav navbar-nav navbar-right hidden-xs">
+  	<li><a class="btn navbar-btn btn-link" href="#about">About</a></li>
+  </ul>
 </div>
 
 <div class="container-fluid row-blue container-main">
@@ -37,11 +40,22 @@
   <!-- <div class="img-cover"></div> -->
   <!-- <div class="gradient"></div> -->
   <div class="container try">
-    <h3 class="phrase text-shadow">Print your next photo album.</h3>
-    <a href="/ui" class="btn btn-primary btn-lg"><i class="fa-book"></i> Try it now</a>
-    <a href="/ui/@demoID" class="btn btn-info btn-lg"><i class="fa-rocket"></i> View a sample</a>
+    <div class="row">
+    	<div class="col-lg-12">
+        <h3 class="phrase text-shadow">Print your next photo album.</h3>
+      </div>
+    </div>
+    <div class="row try-btn">
+    	<!-- <div class="col-lg-3 col-lg-offset-3 text-center"> -->
+        <a href="/ui" class="btn btn-primary btn-lg"><i class="fa-book fa-lg"></i> Try it now</a>
+      <!-- </div> -->
+    	<!-- <div class="col-lg-3 col-lg-offset-3 text-center"> -->
+        <a href="/ui/@demoID" class="btn btn-info btn-lg"><i class="fa-rocket fa-lg"></i> Example</a>
+      <!-- </div> -->
+    </div>
   </div>
 
+  <div class="row album-row">
   <div class="album-demo sliding">
     <div class="spread cover-page">
       <img src="/assets/images/album/2263.jpg">
@@ -64,6 +78,7 @@
       <img src="/assets/images/album/2265.jpg">
     </div>
   </div>
+  </div>
 </div>
 
 <!-- <div class="container-fluid division row-bittersweet"> -->
@@ -79,13 +94,13 @@
 
 
 
-<div class="container-fluid division">
-  <!-- <a href="#about" class="arrow arrow-down btn btn-default"><i class="fa fa-angle-down fa-3x"></i></a> -->
+<div class="container-fluid division row-white">
+  <a id="about"></a>
   <div class="container about">
     <div class="row">
       <div class="col-md-6">
         <h3>About us</h3>
-        <h5>info@@bigpiq.com</h5>
+        <h5><a href="mailto:info@@bigpiq.com">info@@bigpiq.com</a></h5>
         <p>
         We consider ourselves to be the curators of your pictures. Our mission is to help you manage your growing collection of photos and enjoy them in ways that you have not experienced before.
         </p>

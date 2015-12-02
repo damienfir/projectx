@@ -32,6 +32,15 @@ function intent(DOM, DOMactions, collection) {
         .take(1)
         .map(c => [files, c]));
 
+  startUpload$.subscribe(ev => {
+    $('#album-title-front').focus();
+    if ($('#step2').offset()) {
+    $('html,body').animate({
+      scrollTop: $('#step2').offset().top
+    }, 1000)
+    }
+  });
+
   let fileUpload$ = startUpload$.flatMap(([files, collection]) =>
       Rx.Observable.from(files)
         .flatMap(file => makeUploadRequest(file, collection))

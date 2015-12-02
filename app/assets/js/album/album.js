@@ -38,23 +38,10 @@ function model(DOMactions, actions, collection, editing, upload) {
     .map(pages => album => pages);
 
   let albumUpdated$ = actions.createdAlbum$
-    .map(newpage => album => {
-      // album[newpage.index] = newpage;
-      return album.concat(newpage).sort(ascIndex);
-    });
+    .map(newpage => album => album.concat(newpage).sort(ascIndex));
   
   let clearAlbum$ = DOMactions.reset$
     .map(x => item => []);
-
-  // let coverPage$ = upload.actions.photosGroups$
-  //   .map(photos => album => {
-  //     if (album.length === 0) album.concat({});
-  //     return album;
-  //   })
-  //   .take(1);
-
-  // let uploadedPhotos$ = coverPage$.concat(upload.actions.photosGroups$
-  //   .map(p => album => album.concat({})));
 
   let createdCover$ = actions.createdAlbum$
     .filter(pages => pages.index === 0);
@@ -103,7 +90,6 @@ function model(DOMactions, actions, collection, editing, upload) {
       dragPhoto$,
       rotatePhoto$,
       clickEdge$,
-      // uploadedPhotos$,
       dragEdge$)
     .startWith([])
     .scan(apply)
@@ -162,8 +148,8 @@ function requests(DOMactions, actions, album$, collection, photos, upload, editi
       upload.actions.fileUpload$
         .filter(files => files.length === ev.length)
         .map(files => files.slice(-(files.length % npics)))
-        .filter(f => f.length > 0)
-   )).do(x => console.log(x));
+        .filter(f => f.length <= npics)
+   ));
 
   let index = 0;
   DOMactions.reset$.subscribe(ev => index = 0);

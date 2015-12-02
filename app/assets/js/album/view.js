@@ -37,10 +37,10 @@ let renderTile = (tile, tileindex, page, editing) => {
   return h('.ui-tile' + selectedClass,
       _.extend({
         'style': {
-        height: percent(tile.ty2 - tile.ty1),
-        width: percent(tile.tx2 - tile.tx1),
-        top: percent(tile.ty1),
-        left: percent(tile.tx1)
+          height: percent(tile.ty2 - tile.ty1),
+          width: percent(tile.tx2 - tile.tx1),
+          top: percent(tile.ty1),
+          left: percent(tile.tx1)
         },
         'data-page': page,
         'data-idx': tileindex
@@ -51,23 +51,20 @@ let renderTile = (tile, tileindex, page, editing) => {
           // 'title': "Click"
         }
       })), [
-          h('img' + (tile.rot ? '.rotate'+tile.rot : ''), {
-            'src': "/storage/thumbs/"+tile.hash,
-            'draggable': false,
-            'style': {
-              height: percent(scaleY),
-              width: percent(scaleX),
-              top: percent(-tile.cy1 * scaleY),
-              left: percent(-tile.cx1 * scaleX)
-            }}),
+        h('img' + (tile.rot ? '.rotate'+tile.rot : ''), {
+          'src': "/storage/thumbs/"+tile.hash,
+          'draggable': false,
+          'style': {
+            height: percent(scaleY),
+            width: percent(scaleX),
+            top: percent(-tile.cy1 * scaleY),
+            left: percent(-tile.cx1 * scaleX)
+          }}),
           // (editing.selected &&
           //  editing.selected.page == page &&
           //  editing.selected.idx !== tileindex) ? h('h2.center', "Swap photo") : ''
-  // h('button.btn.btn-danger.delete-btn', h('i.fa.fa-ban'))
-    // h('button.btn.btn-primary.hover-btn.cover-btn',
-    //   {'data-id': tile.photoID},
-    //   (page === 0) ? h('i.fa.fa-minus') : h('i.fa.fa-plus'))
-  ]);
+        renderToolbar(editing, page, tileindex)
+      ]);
 }
 
 
@@ -139,15 +136,13 @@ let renderPage = (photos, title, j, editing) => (page, i) => {
             .map((tile, index) => renderTile(tile, index, page.index, editing))
         .concat((page.index === 0) ? renderCover(title, page) : undefined)
         .concat(renderHover(editing, page))
-        .concat(renderToolbar(editing, page))
         .concat(renderNodes(page, editing))
       ]);
 }
 
 
-let renderToolbar = (editing, page) => {
-  console.log(editing);
-  return (editing.selected && editing.selected.page === page.index) ?
+let renderToolbar = (editing, page, tileindex) => {
+  return (editing.selected && editing.selected.page === page.index && editing.selected.idx === tileindex) ?
           h('.btn-group.toolbar', [
             h('button.btn.btn-info.btn-lg#remove-btn',
               {'attributes': {
@@ -177,21 +172,29 @@ let renderBtn = (j) => (page, i) => {
       h('span.page', {'data-page': page.index}, p === 0 ? 'Cover page ' : "Page "+(p-1)+' '),
       page.tiles.length ? h('.btn-group', [
         h('button.btn.btn-primary.btn-xs.shuffle-btn', {'data-page': page.index}, [h('i.fa.fa-refresh'), " Shuffle"]), 
-        h('button.btn.btn-primary.btn-xs.incr-btn', {'data-page': page.index}, [h('i.fa.fa-plus'), " More"]),
-        h('button.btn.btn-primary.btn-xs.decr-btn', {'data-page': page.index}, [h('i.fa.fa-minus'), " Less"])
+        // h('button.btn.btn-primary.btn-xs.incr-btn', {'data-page': page.index}, [h('i.fa.fa-plus'), " More"]),
+        // h('button.btn.btn-primary.btn-xs.decr-btn', {'data-page': page.index}, [h('i.fa.fa-minus'), " Less"])
       ]) : ''
   ])
 }
 
 
 let renderSpread = (photos, title, editing) => (spread, i) => {
-  let cover = (spread.length === 1 && spread[0].index == 0) ?
+  let isCover = (spread.length === 1 && spread[0].index == 0);
+  let cover = isCover ?
       '.spread-cover' + (editing.selected ? '' : '.spread-cover-unselected') :
       '';
 
-  return h('.spread' + cover, [
-      h('.spread-paper.shadow.clearfix', spread.map(renderPage(photos, title, i, editing))), 
-      h('.spread-btn.clearfix', spread.map(renderBtn(i)))
+  return h('.row.spread' + cover, [
+      h('a.spread-anchor', {name: 'spread'+i}),
+      isCover ? '' : h('.col-xs-1.spread-arrow',
+        h('a.btn.btn-link', {href: '#spread'+(i-1)}, h('i.fa.fa-chevron-left.fa-3x'))),
+      h('.spread-paper.shadow.clearfix' + (isCover ? '.col-xs-6.col-xs-offset-3' : '.col-xs-10'),
+        spread.map(renderPage(photos, title, i, editing))), 
+      h('.col-xs-1.spread-arrow',
+        h('a.btn.btn-link', {href: '#spread'+(i+1)}, h('i.fa.fa-chevron-right.fa-3x'))),
+      h('.spread-btn.clearfix' + (isCover ? '.col-xs-6.col-xs-offset-3' : '.col-xs-10.col-xs-offset-1'),
+        spread.map(renderBtn(i))),
   ]);
 }
 

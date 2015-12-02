@@ -12,10 +12,10 @@ function resizeTile(tile, tile2) {
   newTile.cy1 = 0;
   if (arImg2 > 1) {
     newTile.cy2 = 1/arImg2;
-    newTile.cx2 = newTile.cy2*arImg2;
+    newTile.cx2 = 1.0;
   } else {
     newTile.cx2 = arImg2;
-    newTile.cy2 = newTile.cx2/arImg2;
+    newTile.cy2 = 1.0;
   }
 
   var dx = Math.min(1-newTile.cx2, Math.max(0, center[0]-newTile.cx2/2));

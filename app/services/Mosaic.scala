@@ -45,6 +45,19 @@ class MosaicService @Inject()() {
     )
   }
 
+  def tilesToDB(photos: Seq[DBModels.Photo])(tile: MosaicModels.Tile2): DBModels.Tile = {
+    DBModels.Tile(
+      photoID=photos.filter(_.hash.equals((tile.imfile).split("/").last)).head.id.get,
+      cx1=tile.cx1,
+      cx2=tile.cx2,
+      cy1=tile.cy1,
+      cy2=tile.cy2,
+      tx1=tile.tx1,
+      tx2=tile.tx2,
+      ty1=tile.ty1,
+      ty2=tile.ty2
+    )
+  }
 
   def tilesToMosaic(tiles: List[DBModels.Tile], photos: Seq[DBModels.Photo]): (MosaicModels.Cluster, List[MosaicModels.Tile]) = {
     val gists = tiles.map(t => photos.find(_.id == Some(t.photoID)).get.hash).map(gistFile)
@@ -69,12 +82,13 @@ class MosaicService @Inject()() {
 
 
   def preprocess(filename: String): String =  {
-    val out = gistFile(filename)
-    val cmd = Seq(binary, "--preprocess", photoFile(filename), out)
-    cmd.! match {
-      case 0 => out
-      case _ => throw new Exception
-    }
+    photoFile(filename)
+    // val out = gistFile(filename)
+    // val cmd = Seq(binary, "--preprocess", photoFile(filename), out)
+    // cmd.! match {
+    //   case 0 => out
+    //   case _ => throw new Exception
+    // }
   }
 
   def preprocessAll(filenames: Seq[String]): Future[Seq[String]] = Future {
@@ -104,13 +118,26 @@ class MosaicService @Inject()() {
   //   println(cmd)
   //   cmd !
   // }
+  
+  def tilesPython(photos: Seq[String], id: String) = Future {
+    val out = matchFile(id) 
+    val cmd = binary +: "1.414" +: photos.map(photoFile) :+ out
+    // println(cmd)
+    cmd ! match {
+      case 0 => Json.parse(Source.fromFile(out).mkString).as[List[MosaicModels.Tile2]]
+      case _ => throw new Exception
+    }
+  }
 
   def generateComposition(compositionID: Long, photos: Seq[DBModels.Photo]): Future[List[DBModels.Tile]] = {
     val id = compositionID.toString
+    // for {
+    //   clu <- cluster(photos.map(_.hash), id)
+    //   tiles <- assign(id, id, id)
+    // } yield tiles.map(tilesToDB(clu, photos))
     for {
-      clu <- cluster(photos.map(_.hash), id)
-      tiles <- assign(id, id, id)
-    } yield tiles.map(tilesToDB(clu, photos))
+      tiles <- tilesPython(photos.map(_.hash), id)
+    } yield tiles.map(tilesToDB(photos))
   }
 
 
