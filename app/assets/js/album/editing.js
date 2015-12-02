@@ -51,9 +51,7 @@ function intent(DOM) {
     .flatMapLatest(down => mouseMove$
         .takeUntil(mouseUp$)
         .take(1))
-    // .merge(remove$)
     .merge(cancelBtn$)
-    // .merge(cover$)
     .merge(cancelExt$)
     .map(false);
 
@@ -85,7 +83,7 @@ function intent(DOM) {
 }
 
 
-function model(actions) {
+function model(actions, DOMactions) {
 
   actions.clickEdge$.subscribe(ev => $('.node').tooltip('destroy'));
   actions.selected$.subscribe(ev => $('.ui-tile').tooltip('destroy'));
@@ -98,7 +96,8 @@ function model(actions) {
         actions.swap$,
         actions.move$,
         actions.cancel$
-      ).map(x => state => _.extend(state, {selected: undefined}))
+      ).map(x => state => _.extend(state, {selected: undefined})),
+      DOMactions.reset$.map(ev => state => ({}))
     )
     .startWith({})
     .scan(helpers.apply);
@@ -119,10 +118,10 @@ function view(state$) {
 }
 
 
-module.exports = function(DOM) {
+module.exports = function(DOM, DOMactions) {
 
   let actions = intent(DOM);
-  let state$ = model(actions);
+  let state$ = model(actions, DOMactions);
 
   return {
     DOM: view(state$),

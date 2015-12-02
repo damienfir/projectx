@@ -5,7 +5,7 @@ import helpers from './helpers'
 
 
 export function renderToolbar(collection, album, upload) {
-  let loaded = album && album.length > 1 && collection.id !== helpers.demoID && collection.name !== null;
+  let loaded = album && album.length > 1 && collection.hash !== helpers.demoID && collection.name !== null;
   return h('div#nav.navbar.navbar-transparent.navbar-fixed-top', [
       h('div.container-fluid', [
 
@@ -28,10 +28,10 @@ export function renderToolbar(collection, album, upload) {
             //     h('i.fa.fa-undo'), ' Redo'])),
           ]) : '',
 
-        collection.id === helpers.demoID ? h('.ul.nav.navbar-nav', [
+        collection.hash === helpers.demoID ? h('.ul.nav.navbar-nav', [
           h('li',
-            h('button.btn.btn-primary.navbar-btn#reset-btn', [
-              h('i.fa.fa-angle-left'), ' Back'
+            h('button.btn.navbar-btn.btn-info#reset-btn', [
+              h('i.fa.fa-flask'), ' Try with my photos'
             ]))
         ]) : '',
           
@@ -61,11 +61,11 @@ export function renderStartPage(collection) {
       h('.row' + (!_.isUndefined(collection.id) ? '.step-disabled' : ''), [
         h('.col-lg-12.text-center.step1', "Step 1."),
         h('.col-lg-12.text-center',
-          h('button.btn.btn-primary.btn-lg.btn-step#create-btn',
+          h('button.btn.btn-info.btn-lg.btn-step#create-btn',
             {
               disabled: !_.isUndefined(collection.id)
             }, 
-            [h('i.fa.fa-book.fa-3x'), 'Upload multiple photos']
+            [h('i.fa.fa-camera.fa-3x'), 'Select multiple photos']
         ))
       ]),
       h('#step2.row' + (_.isUndefined(collection.id) ? '.step-disabled' : ''), [
@@ -75,7 +75,7 @@ export function renderStartPage(collection) {
             h('input.form-control.input-lg.shadow.step2-title#album-title-front', {
               disabled: _.isUndefined(collection.id),
               type: 'text',
-              placeholder: 'Type your album title',
+              placeholder: 'Choose a title for your album',
               maxLength: 50,
               autocomplete: 'off'
             })

@@ -98,7 +98,7 @@ function main({DOM, HTTP}) {
   let collection = Collection(DOM, HTTP, DOMactions, user);
   let upload = Upload(DOM, DOMactions, collection);
   let photos = Photos(DOMactions, upload, collection);
-  let editing = Editing(DOM);
+  let editing = Editing(DOM, DOMactions);
   let album = Album(DOM, HTTP, DOMactions, collection, photos, upload, editing);
   let order = Order(DOM, HTTP, user, collection);
   let save = Save(DOM, HTTP, user, collection, album);

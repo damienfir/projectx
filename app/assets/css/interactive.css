@@ -131,6 +131,7 @@ html, body {
   left: 50%;
   transform: translate(-50%, -50%);
   font-size: 2em;
+  font-weight: bold;
   color: #ddd;
   /* font-weight: bold; */
 }
@@ -185,7 +186,7 @@ html, body {
 }
 
 .spread-btn .page {
-  font-size: 0.85em;
+  /* font-size: 1em; */
   margin-right: 5px;
 }
 
@@ -280,6 +281,10 @@ html, body {
 .step1, .step2 {
   font-size: 36px;
   margin-bottom: 30px;
+}
+
+.btn-step {
+  padding: 30px;
 }
 
 #step2 {

@@ -84,7 +84,7 @@ let renderCover = (title, page) => {
 
 
 let renderBackside = () => {
-  return h('.backside', "Empty page");
+  return h('.backside', "bigpiq");
 }
 
 let renderHover = (editing, page) => 
@@ -170,8 +170,8 @@ let renderBtn = (j) => (page, i) => {
   let p = j*2+i;
   return h(leftOrRight(p), [
       h('span.page', {'data-page': page.index}, p === 0 ? 'Cover page ' : "Page "+(p-1)+' '),
-      page.tiles.length ? h('.btn-group', [
-        h('button.btn.btn-primary.btn-xs.shuffle-btn', {'data-page': page.index}, [h('i.fa.fa-refresh'), " Shuffle"]), 
+      page.tiles.length>1 ? h('.btn-group', [
+        h('button.btn.btn-primary.shuffle-btn', {'data-page': page.index}, [h('i.fa.fa-refresh'), " Shuffle"]), 
         // h('button.btn.btn-primary.btn-xs.incr-btn', {'data-page': page.index}, [h('i.fa.fa-plus'), " More"]),
         // h('button.btn.btn-primary.btn-xs.decr-btn', {'data-page': page.index}, [h('i.fa.fa-minus'), " Less"])
       ]) : ''
