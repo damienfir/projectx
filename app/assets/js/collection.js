@@ -67,9 +67,9 @@ function requests(DOMactions, user, collection$) {
 
     storedAlbum$: DOMactions.hasHash$
       .flatMapLatest(hash => user.state$
-          .filter(user => user.id)
+          // .filter(user => user.id)
           .take(1)
-          .map(user => '/users/'+user.id+'/albums/'+ hash))
+          .map(user => '/users/'+(user.id || 0)+'/albums/'+ hash))
   }
 }
 
