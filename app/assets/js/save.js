@@ -80,7 +80,7 @@ module.exports = function(DOM, HTTP, user, collection, album) {
       method: 'POST',
       eager: true,
       send: {collection, album}
-    })).filter(req => req.send.collection.id && req.send.collection.id !== helpers.demoID && req.send.album),
+    })).filter(req => req.send.collection.id && req.send.collection.hash !== helpers.demoID && req.send.album),
   }
   
   return {

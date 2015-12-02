@@ -21,7 +21,7 @@ let cancelDefault = (ev) => {
   return ev;
 }
 
-let demoID = parseInt(document.getElementById("demo-id").value);
+let demoID = document.getElementById("demo-id").value;
 
 let isNotEmpty = obj => !_.isEmpty(obj)
 
