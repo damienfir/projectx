@@ -2,7 +2,7 @@
 
 html, body {
   height: 100%;
-  background-color: #5D9CEC;
+  background-color: #4A89DC;
 }
 
 .navbar-right {
@@ -10,8 +10,8 @@ html, body {
 }
 
 .navbar-blue {
-  background-color: #5D9CEC;
-  border-color: #5D9CEC;
+  background-color: #4A89DC;
+  border-color: #4A89DC;
 }
 .navbar-blue .navbar-brand {
   color: #fff;
@@ -161,7 +161,7 @@ html, body {
   color: #fff;
 }
 .btn-blue:hover {
-  background-color: #4A89DC;
+  background-color: #48CFAD;
 }
 
 
@@ -182,7 +182,7 @@ html, body {
 }
 
 .row-blue {
-  background-color: #5D9CEC;
+  /* background-color: #5D9CEC; */
   color: #fff;
 }
 

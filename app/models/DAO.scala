@@ -41,7 +41,9 @@ class CollectionDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProv
 
   def get(id: Long) = db.run(collections.filter(_.id === id).result) map (_.headOption)
 
-  def update(collection: Collection) = db.run(collections.filter(_.id === collection.id.get).update(collection).asTry)
+  def update(collection: Collection) = db.run {
+    collections.filter(_.id === collection.id.get).update(collection)
+  }
 
   def withUser(id: Long): Future[Collection] =
     // for {
@@ -93,7 +95,17 @@ class CompositionDAO @Inject()(protected val dbConfigProvider: DatabaseConfigPro
   def get(id: Long) = db.run(compositions.filter(_.id === id).result).map(_.head)
 
   def updateAll(comps: List[Composition]) = Future.sequence {
-     comps.filter(_.collectionID != -1).map(comp => db.run(compositions.filter(_.id === comp.id.get).update(comp).asTry))
+     comps.map(comp => db.run(compositions.returning(compositions).insertOrUpdate(comp)))
+  }
+
+  def removeUnused(collection: Collection, comps: List[Composition]) = {
+    db.run(compositions.filter(_.collectionID === collection.id).result) flatMap { allcomp =>
+      Future.sequence {
+        allcomp.filter(c => !comps.map(_.id).contains(c.id))
+          .map(c => compositions.filter(_.id === c.id).delete)
+          .map(db.run(_))
+      }
+    }
   }
 
   def allFromCollection(id: Long) = db.run(compositions.filter(_.collectionID === id).result)

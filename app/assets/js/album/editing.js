@@ -2,7 +2,6 @@ import Rx from 'rx';
 import {h} from '@cycle/dom';
 import helpers from '../helpers'
 
-let pageAndIndex = (ev) => ({page: ev.target.parentNode['data-page'], index: ev.target.parentNode['data-idx']})
 
 let eventToCoord = (ev) => ({
     'x': ev.screenX,
@@ -67,7 +66,8 @@ function intent(DOM) {
   
   let mouseOver$ = selected$.flatMapLatest(from => tileUp$.take(1).takeUntil(cancel$).map(to => ({from,to})));
   let swap$ = mouseOver$.filter(({from,to}) => from.page === to.page);
-  let move$ = mouseOver$.filter(({from,to}) => from.page !== to.page);
+  let move$ = mouseOver$
+    .filter(({from,to}) => from.page !== to.page);
 
   let drag$ = tileDown$.flatMapLatest(down => mouseMoveCoord$
       .takeUntil(mouseUp$)

@@ -33,37 +33,37 @@ object Tables {
   import PostgresDriverExt.api._
 
   class Users(tag: Tag) extends Table[User](tag, "users") {
-    def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
-    def email = column[String]("email")
-    def * = (id.?, email.?) <> (User.tupled, User.unapply)
+    def id = column[Option[Long]]("id", O.PrimaryKey, O.AutoInc)
+    def email = column[Option[String]]("email")
+    def * = (id, email) <> (User.tupled, User.unapply)
   }
   val users = TableQuery[Users]
 
 
   class Collections(tag: Tag) extends Table[Collection](tag, "collections") {
-    def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
-    def name = column[String]("name")
+    def id = column[Option[Long]]("id", O.PrimaryKey, O.AutoInc)
+    def name = column[Option[String]]("name")
     def hash = column[String]("hash")
-    def * = (id.?, name.?, hash) <> (Collection.tupled, Collection.unapply)
+    def * = (id, name, hash) <> (Collection.tupled, Collection.unapply)
   }
   val collections = TableQuery[Collections]
 
 
   class Photos(tag: Tag) extends Table[Photo](tag, "photos") {
-    def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
+    def id = column[Option[Long]]("id", O.PrimaryKey, O.AutoInc)
     def collectionID = column[Long]("collection_id")
     def hash = column[String]("hash")
-    def * = (id.?, collectionID, hash) <> (Photo.tupled, Photo.unapply)
+    def * = (id, collectionID, hash) <> (Photo.tupled, Photo.unapply)
   }
   val photos = TableQuery[Photos]
 
 
   class Compositions(tag: Tag) extends Table[Composition](tag, "compositions") {
-    def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
+    def id = column[Option[Long]]("id", O.PrimaryKey, O.AutoInc)
     def collectionID = column[Long]("collection_id")
     def index = column[Int]("index")
     def tiles = column[List[Tile]]("tiles")
-    def * = (id.?, collectionID, index, tiles) <> (Composition.tupled, Composition.unapply)
+    def * = (id, collectionID, index, tiles) <> (Composition.tupled, Composition.unapply)
   }
   val compositions = TableQuery[Compositions]
 
@@ -72,8 +72,8 @@ object Tables {
     def userID = column[Long]("user_id")
     def collectionID = column[Long]("collection_id")
     def * = (userID, collectionID)
-    def user = foreignKey("user_fk", userID, users)(_.id)
-    def collection = foreignKey("collection_fk", collectionID, collections)(_.id)
+    def user = foreignKey("user_fk", userID, users)(_.id.get)
+    def collection = foreignKey("collection_fk", collectionID, collections)(_.id.get)
   }
   val usercollectionrelations = TableQuery[UserCollectionRelations]
 }

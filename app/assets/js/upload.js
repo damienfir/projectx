@@ -25,7 +25,9 @@ function intent(DOM, DOMactions, collection) {
     .map(helpers.cancel)
     .subscribe(ev => {ev.dataTransfer.dropEffect = 'copy'; return ev;});
 
-  let toggleUpload$ = helpers.btn(DOM, '#upload-btn').merge(helpers.btn(DOM, '#create-btn'));
+  let toggleUpload$ = helpers.btn(DOM, '#upload-btn')
+    .merge(helpers.btn(DOM, '#create-btn'))
+    .merge(helpers.btn(DOM, '#addmore-btn'));
 
   let startUpload$ = DOMactions.selectFiles$
     .flatMapLatest(files => collection.state$.filter(helpers.hasID)

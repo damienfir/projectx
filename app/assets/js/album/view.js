@@ -4,7 +4,7 @@ import helpers from '../helpers'
 
 let blankpage = {
   tiles: [],
-  index: -1
+  index: -2
 }
 
 let leftOrRight = (index) => index % 2 ? '.pull-right' : '.pull-left';
@@ -127,16 +127,24 @@ let renderNodes = (page, editing) => {
 }
 
 
+let renderAddPhotos = (page) => {
+  return page.tiles.length ? '' : h('.newpage', h('button.btn.btn-primary.center#addmore-btn', [
+      h('i.fa.fa-cloud-upload'), ' Add more photos']))
+}
+
+
 let renderPage = (photos, title, j, editing) => (page, i) => {
-  return h('.box-mosaic' + leftOrRight(j*2+i) + moveOrNot(page.tiles),
+
+  return h('.box-mosaic' + leftOrRight(j*2+i),
       {'data-page': page.index}, [
         (j === 1 && i === 0) ? renderBackside() :
           page.tiles
             .map(t => _.extend(t, {hash: photos[t.photoID]}))
             .map((tile, index) => renderTile(tile, index, page.index, editing))
         .concat((page.index === 0) ? renderCover(title, page) : undefined)
-        .concat(renderHover(editing, page))
         .concat(renderNodes(page, editing))
+        .concat(renderAddPhotos(page))
+        .concat(renderHover(editing, page))
       ]);
 }
 
@@ -165,6 +173,7 @@ let renderToolbar = (editing, page, tileindex) => {
               }}, [h('i.fa.fa-times')])
         ]) : ''
 }
+
 
 let renderBtn = (j) => (page, i) => {
   let p = j*2+i;
@@ -200,9 +209,16 @@ let renderSpread = (photos, title, editing) => (spread, i) => {
 
 
 function renderAlbum(album, photos, title, editing) {
-  return album
-    .reduce(splitIntoSpreads, [])
-    .filter(spread => !_.some(spread, _.isEmpty))
+  let spreads = album
+    .reduce(splitIntoSpreads, []);
+
+  if (_.last(spreads).length < 2) {
+    spreads[spreads.length-1] = spreads[spreads.length-1].concat(blankpage);
+  } else {
+    spreads = spreads.concat([[blankpage]]);
+  }
+
+  return spreads.filter(spread => !_.some(spread, _.isEmpty))
     .map(renderSpread(photos, title, editing));
 }
 

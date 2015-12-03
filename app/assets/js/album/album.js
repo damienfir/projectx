@@ -117,16 +117,17 @@ function requests(DOMactions, actions, album$, collection, photos, upload, editi
     to: {page: 0}
   }));
 
-  let moveTile$ = editing.actions.move$.merge(cover$).withLatestFrom(album$, photos.state$, (move, album, photos) => {
+  let [moveTile$, addPage$] = editing.actions.move$.merge(cover$).withLatestFrom(album$, photos.state$, (move, album, photos) => {
       let photosA = photosFromTiles(photos, album[move.from.page].tiles);
-      let photosB = photosFromTiles(photos, album[move.to.page].tiles);
+      let photosB = move.to.page < 0 ? [] : photosFromTiles(photos, album[move.to.page].tiles);
       let photoID = album[move.from.page].tiles[move.from.idx].photoID;
       return [
         {page: move.to.page, photos: _.uniq(photosB.concat(photos.filter(p => p.id === photoID)))}
       ].concat(move.to.page !== 0 ? {page: move.from.page, photos: photosA.filter(p => p.id !== photoID)} : [])
     })
     .filter(([a,b]) => b ? b.photos.length > 0 : true)
-    .flatMap(reqs => Rx.Observable.fromArray(reqs));
+    .flatMap(reqs => Rx.Observable.fromArray(reqs))
+    .partition(req => req.page > 0);
 
   let removeTile$ = editing.actions.remove$
     .withLatestFrom(album$, photos.state$, editing.state$, (ev, album, photos, {selected}) => ({
@@ -155,7 +156,7 @@ function requests(DOMactions, actions, album$, collection, photos, upload, editi
   DOMactions.reset$.subscribe(ev => index = 0);
 
   return {
-    createAlbum$: photosGroups$.withLatestFrom(collection.state$, album$,
+    createAlbum$: photosGroups$.merge(addPage$.pluck('photos')).withLatestFrom(collection.state$, album$,
         (photos, collection, album) => {
           if (index === 0) index = album.length;
           index += 1;

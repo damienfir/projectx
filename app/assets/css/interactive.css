@@ -350,9 +350,9 @@ html, body {
   content: '';
 }
 
-.move-mosaic {
-  cursor: pointer;
-}
+/* .move-mosaic { */
+/*   cursor: pointer; */
+/* } */
 
 .ui-tile {
   position: absolute;
@@ -442,6 +442,13 @@ html, body {
   position: absolute;
   top: -50px;
   right: 30%;
+}
+
+.newpage {
+  position: absolute;
+  top: 5px; left: 5px; bottom: 5px; right: 5px;
+  background-color: #eee;
+  border-radius: 4px;
 }
 
 #file-input { opacity: 0; height: 0; }

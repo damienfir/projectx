@@ -17,9 +17,9 @@ export function renderToolbar(collection, album, upload) {
             h('li',
               h('button.btn.btn-primary.navbar-btn#upload-btn', [
                 h('i.fa.fa-cloud-upload'), 'Add more photos'])),
-            h('li',
-              h('button.btn.btn-primary.navbar-btn#reset-btn', [
-                h('i.fa.fa-refresh'), ' Start over'])),
+            // h('li',
+            //   h('button.btn.btn-primary.navbar-btn#reset-btn', [
+            //     h('i.fa.fa-refresh'), ' Start over'])),
             // h('li',
             //   h('button.btn.btn-primary.navbar-btn#undo-btn', [
             //     h('i.fa.fa-undo'), ' Undo'])),

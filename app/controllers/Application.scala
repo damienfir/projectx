@@ -158,6 +158,7 @@ class Collections @Inject()(usersDAO: UsersDAO, compositionDAO: CompositionDAO, 
     for {
       col <- collectionDAO.update(collection)
       album <- compositionDAO.updateAll(compositions)
+      res <- compositionDAO.removeUnused(collection, compositions)
     } yield Ok(Json.toJson(collection))
   }
 
