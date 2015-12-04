@@ -2,6 +2,7 @@ import Rx from 'rx';
 import Immutable from 'immutable';
 import {h} from '@cycle/dom';
 import helpers from './helpers'
+import i18 from './i18n'
 
 
 function makeUploadRequest(file, collection) {
@@ -96,7 +97,7 @@ function view(state$) {
       h('.modal.fade#upload-modal',
       h('.modal-dialog',
         h('.modal-content#upload-area',
-          h('.modal-body', [h('.message', "Drag to upload or click here"), h('.fa.fa-download.fa-3x')]))))
+          h('.modal-body', [h('.message', i18('upload.dragclick')), h('.fa.fa-download.fa-3x')]))))
   );
 }
 

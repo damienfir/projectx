@@ -1,6 +1,7 @@
 import Rx from 'rx';
 import {h} from '@cycle/dom';
 import helpers from './helpers'
+import i18 from './i18n'
 
 
 
@@ -16,7 +17,7 @@ export function renderToolbar(collection, album, upload) {
           h('ul.nav.navbar-nav', [
             h('li',
               h('button.btn.btn-primary.navbar-btn#upload-btn', [
-                h('i.fa.fa-cloud-upload'), 'Add more photos'])),
+                h('i.fa.fa-cloud-upload'), i18('nav.add')])),
             // h('li',
             //   h('button.btn.btn-primary.navbar-btn#reset-btn', [
             //     h('i.fa.fa-refresh'), ' Start over'])),
@@ -30,8 +31,8 @@ export function renderToolbar(collection, album, upload) {
 
         collection.hash === helpers.demoID ? h('.ul.nav.navbar-nav', [
           h('li',
-            h('button.btn.navbar-btn.btn-info#reset-btn', [
-              h('i.fa.fa-flask'), ' Try with my photos'
+            h('a.btn.navbar-btn.btn-info', {href: '/ui'}, [
+              h('i.fa.fa-flask'), ' '+i18('nav.try')
             ]))
         ]) : '',
           
@@ -45,9 +46,9 @@ export function renderToolbar(collection, album, upload) {
               // h('li', h('button.btn.btn-primary.navbar-btn#download-btn', [
               //   h('i.fa.fa-cloud-download'), 'Download album'])),
               h('li', h('button.btn.btn-primary.navbar-btn#save-btn', [
-                h('i.fa.fa-heart-o'), 'Save for later'])),
+                h('i.fa.fa-heart-o'), i18('nav.save')])),
               h('li', h('button.btn.btn-primary.navbar-btn#order-btn', [
-                h('i.fa.fa-shopping-cart'), 'Order album'])),
+                h('i.fa.fa-shopping-cart'), i18('nav.order')])),
           ]) : ''
       ]),
 
@@ -59,23 +60,23 @@ export function renderToolbar(collection, album, upload) {
 export function renderStartPage(collection) {
   return h('.container.start-buttons', [
       h('.row' + (!_.isUndefined(collection.id) ? '.step-disabled' : ''), [
-        h('.col-lg-12.text-center.step1', "Step 1."),
+        h('.col-lg-12.text-center.step1', i18('front.step1')),
         h('.col-lg-12.text-center',
           h('button.btn.btn-info.btn-lg.btn-step#create-btn',
             {
               disabled: !_.isUndefined(collection.id)
             }, 
-            [h('i.fa.fa-camera.fa-3x'), 'Select multiple photos']
+            [h('i.fa.fa-camera.fa-3x'), i18('front.upload')]
         ))
       ]),
       h('#step2.row' + (_.isUndefined(collection.id) ? '.step-disabled' : ''), [
-        h('.col-lg-12.step2', "Step 2."),
+        h('.col-lg-12.step2', i18('front.step2')),
         h('.col-lg-7.col-lg-offset-2', 
           h('.form-group', 
             h('input.form-control.input-lg.shadow.step2-title#album-title-front', {
               disabled: _.isUndefined(collection.id),
               type: 'text',
-              placeholder: 'Choose a title for your album',
+              placeholder: i18('front.title'),
               maxLength: 50,
               autocomplete: 'off'
             })
@@ -94,7 +95,7 @@ function renderProgressbar(upload) {
     let progress = (upload.get('files') && upload.get('size')) ? 100 * upload.get('files').size / upload.get('size') : 0;
     return [
       h('li', 
-        h('span.navbar-text', progress < 100 ? 'Uploading...' : 'Processing...')),
+        h('span.navbar-text', progress < 100 ? i18('ui.uploading') : i18('ui.processing'))),
       h('li', 
         h('.progress.navbar-text',
           progress === 0 ?

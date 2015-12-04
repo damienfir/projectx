@@ -1,8 +1,8 @@
-@(demoID: String)
+@(demoID: String)(implicit messages: Messages, lang: Lang)
 
 <!DOCTYPE html>
 
-<html>
+<html lang="@lang.language">
     <head>
         <title>bigpiq - Sweet memories</title>
 
@@ -31,7 +31,7 @@
 		<a href="/" class="navbar-brand">bigpiq</a>
 	</div>
   <ul class="nav navbar-nav navbar-right hidden-xs">
-  	<li><a class="btn navbar-btn btn-link" href="#about">About</a></li>
+  	<li><a class="btn navbar-btn btn-link" href="#about">@messages("about")</a></li>
   </ul>
 </div>
 
@@ -42,15 +42,15 @@
   <div class="container try">
     <div class="row">
     	<div class="col-lg-12">
-        <h3 class="phrase text-shadow">Print your next photo album.</h3>
+        <h3 class="phrase text-shadow">@messages("home.print")</h3>
       </div>
     </div>
     <div class="row try-btn">
     	<!-- <div class="col-lg-3 col-lg-offset-3 text-center"> -->
-        <a href="/ui" class="btn btn-blue btn-lg"><i class="fa fa-flask fa-lg"></i> Try it now</a>
+        <a href="/ui" class="btn btn-blue btn-lg"><i class="fa fa-flask fa-lg"></i> @messages("home.try")</a>
       <!-- </div> -->
     	<!-- <div class="col-lg-3 col-lg-offset-3 text-center"> -->
-        <a href="/ui/@demoID" class="btn btn-info btn-lg"><i class="fa fa-rocket fa-lg"></i> Example</a>
+        <a href="/ui/@demoID" class="btn btn-info btn-lg"><i class="fa fa-rocket fa-lg"></i> @messages("home.example")</a>
       <!-- </div> -->
     </div>
   </div>
@@ -59,7 +59,7 @@
   <div class="album-demo sliding">
     <div class="spread cover-page">
       <img src="/assets/images/album/2263.jpg">
-      <div class="title">Sweet memories... </div>
+      <div class="title">@messages("home.title")... </div>
     </div>
     <div class="spread">
       <img src="/assets/images/album/2264.jpg">
@@ -99,13 +99,13 @@
   <div class="container about">
     <div class="row">
       <div class="col-md-6">
-        <h3>About us</h3>
+        <h3>@messages("home.about-us")</h3>
         <h5><a href="mailto:info@@bigpiq.com">info@@bigpiq.com</a></h5>
         <p>
-        We consider ourselves to be the curators of your pictures. Our mission is to help you manage your growing collection of photos and enjoy them in ways that you have not experienced before.
+        @messages("home.about.message")
         </p>
         <!-- <a href="#" data-toggle="modal" data-target="#contact-modal" data-from="contact-link">Contact</a><br/> -->
-        <a href="#" data-toggle="modal" data-target="#terms-modal" data-from="terms-link">Terms and Conditions</a><br />
+        <a href="#" data-toggle="modal" data-target="#terms-modal" data-from="terms-link">@messages("home.terms")</a><br />
         <!-- <a href="#" data-toggle="modal" data-target="#jobs-modal" data-from="jobs-link">Jobs</a> -->
       </div>
       <!-- <div class="col-md-3"> -->

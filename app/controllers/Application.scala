@@ -8,6 +8,7 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.concurrent.Future
 import scala.util.Random
 import scala.util.{Try, Success, Failure}
+import play.api.i18n._
 
 import models._
 import services._
@@ -15,14 +16,14 @@ import services._
 import play.api.libs.json._
 
 
-class Application extends Controller {
+class Application @Inject()(val messagesApi: MessagesApi) extends Controller with I18nSupport {
 
-  def index = Action {
+  def index(lang: Option[String]) = Action { implicit request =>
     val id = Play.current.configuration.getString("px.demoID").get
     Ok(views.html.index(id))
   }
 
-  def ui = Action {
+  def ui = Action { implicit request =>
     val id = Play.current.configuration.getString("px.demoID").get
     Ok(views.html.interactive(id))
   }

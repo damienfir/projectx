@@ -62,4 +62,4 @@ POST /order @controllers.Payment.submitOrder
 
 GET     /ui                         @controllers.Application.ui
 GET     /ui/:hash                   @controllers.Application.uiWithHash(hash: String)
-GET     /                           @controllers.Application.index
+GET     /                           @controllers.Application.index(lang: Option[String])

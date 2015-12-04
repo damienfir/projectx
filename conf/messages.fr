@@ -1,0 +1,5 @@
+about=A propos
+
+home.print=Imprime ton prochain album photo.
+home.try=Essayer maintenant
+home.example=Example

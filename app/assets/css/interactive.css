@@ -42,6 +42,14 @@ html, body {
   /* overflow: hidden; */
 }
 
+.navbar a.btn-info {
+  padding: 7px 10px;
+}
+.navbar a.btn-info:hover, .navbar a.btn-info:active {
+  background-color: #48cfad;
+  border-color: #48cfad;
+}
+
 .navbar-transparent {
   background-color: #4A89DC;
 }

@@ -1,5 +1,6 @@
 import {h} from '@cycle/dom';
 import helpers from '../helpers'
+import i18 from '../i18n'
 
 
 let blankpage = {
@@ -70,10 +71,13 @@ let renderTile = (tile, tileindex, page, editing) => {
 let renderCover = (title, page) => {
   return h('input.cover-title#album-title', {
     'type': 'text',
-    'placeholder': 'Click here to change the album title...',
+    'placeholder': i18('ui.title'),
     'maxLength': 50,
     'value': title,
-    'autocomplete': 'off'
+    'autocomplete': 'off',
+    'style': {
+      'font-size': $('.spread-cover .box-mosaic').width()/20+'px'
+    }
   })
 }
 
@@ -84,7 +88,7 @@ let renderBackside = () => {
 
 let renderHover = (editing, page) => 
   (editing.selected && editing.selected.page !== page.index) ?
-    h('.page-hover', {'data-page': page.index, 'data-idx': 0}, h('h2.center', "Move photo to this page")) : ''
+    h('.page-hover', {'data-page': page.index, 'data-idx': 0}, h('h2.center', i18('ui.move'))) : ''
 
 
 let Node = (x,y) => ({x,y});
@@ -111,8 +115,8 @@ let renderNodes = (page, editing) => {
     .filter(t => t.tx1 > 0.01 || t.ty1 > 0.01)
     .map(t => Node(t.tx1, t.ty1));
   let bottomright = page.tiles
-    .filter(a => topleft
-        .filter(b => a.tx1 === b.x && a.ty1 === b.y).length === 0)
+    // .filter(a => topleft
+    //     .filter(b => a.tx1 === b.x && a.ty1 === b.y).length === 0)
     .filter(t => t.tx2 < 0.99 || t.ty2 < 0.99)
     .map(t => Node(t.tx2, t.ty2))
     .filter(a => topleft
@@ -124,7 +128,7 @@ let renderNodes = (page, editing) => {
 
 let renderAddPhotos = (page) => {
   return page.tiles.length ? '' : h('.newpage', h('button.btn.btn-primary.center#addmore-btn', [
-      h('i.fa.fa-cloud-upload'), ' Add more photos']))
+      h('i.fa.fa-cloud-upload'), ' '+i18('ui.add')]))
 }
 
 
@@ -152,20 +156,20 @@ let renderToolbar = (editing, page, tileindex) => {
               {'attributes': {
                 'data-toggle': 'tooltip',
                 'data-placement': 'top',
-                'title': 'Remove image'
+                'title': i18('toolbar.remove')
               }},
               h('i.fa.fa-trash-o')),
             // h('li', h('button.btn.btn-warning.navbar-btn#rotate-btn', [h('i.fa.fa-rotate-right')])),
             editing.selected.page !== 0 ? h('button.btn.btn-info.btn-lg#add-cover-btn', {'attributes': {
                 'data-toggle': 'tooltip',
                 'data-placement': 'top',
-                'title': 'Add to album cover'
+                'title': i18('toolbar.cover')
               }},
               [h('i.fa.fa-book')]) : '',
             h('button.btn.btn-info.btn-lg#cancel-btn', {'attributes': {
                 'data-toggle': 'tooltip',
                 'data-placement': 'top',
-                'title': 'Cancel'
+                'title': i18('toolbar.cancel')
               }}, [h('i.fa.fa-times')])
         ]) : ''
 }
@@ -174,9 +178,9 @@ let renderToolbar = (editing, page, tileindex) => {
 let renderBtn = (j) => (page, i) => {
   let p = j*2+i;
   return h(leftOrRight(p), [
-      h('span.page', {'data-page': page.index}, p === 0 ? 'Cover page ' : "Page "+(p-1)+' '),
+      h('span.page', {'data-page': page.index}, (p === 0 ? i18('ui.cover') : i18('ui.page')+" "+(p-1))+' '),
       page.tiles.length>1 ? h('.btn-group', [
-        h('button.btn.btn-primary.shuffle-btn', {'data-page': page.index}, [h('i.fa.fa-refresh'), " Shuffle"]), 
+        h('button.btn.btn-primary.shuffle-btn', {'data-page': page.index}, [h('i.fa.fa-refresh'), " "+i18('ui.shuffle')]), 
         // h('button.btn.btn-primary.btn-xs.incr-btn', {'data-page': page.index}, [h('i.fa.fa-plus'), " More"]),
         // h('button.btn.btn-primary.btn-xs.decr-btn', {'data-page': page.index}, [h('i.fa.fa-minus'), " Less"])
       ]) : ''

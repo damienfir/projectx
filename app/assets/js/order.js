@@ -2,6 +2,7 @@ import Rx from 'rx';
 import {h} from '@cycle/dom';
 import {jsonPOST, jsonGET, apply} from './helpers'
 import helpers from './helpers'
+import i18 from './i18n'
 let Observable = Rx.Observable;
 
 
@@ -120,32 +121,32 @@ function view(state$) {
             h('form.panel-body#order-form', [
               h('.row', [
                 h('.col-lg-3.form-group' + check('firstName'), [
-                  h('label', {'for': 'firstName'}, 'First Name'),
+                  h('label', {'for': 'firstName'}, i18('order.firstname')),
                   h('input.form-control', {'name': 'firstName', 'placeholder': ''})]),
                 h('.col-lg-3.form-group' + check('lastName'), [
-                  h('label', {'for': 'lastName'}, 'Last Name'),
+                  h('label', {'for': 'lastName'}, i18('order.lastname')),
                   h('input.form-control', {'name': 'lastName', 'placeholder': ''})]),
                 h('.col-lg-6.form-group' + check('email'), [
-                  h('label', {'for': 'email'}, 'Email'),
+                  h('label', {'for': 'email'}, i18('order.email')),
                   h('.input-group', [
                     h('span.input-group-addon', '@'),
-                    h('input.form-control', {'name': 'email', 'type': 'email', 'placeholder': 'name@example.com'})]),
+                    h('input.form-control', {'name': 'email', 'type': 'email', 'placeholder': i18('order.email-placeholder')})]),
                 ])
               ]),
               h('.row', [
                 h('.col-lg-12.form-group' + check('address'), [
-                  h('label', {'for': 'address'}, 'Address'),
-                  h('input.form-control', {'name': 'address', 'placeholder': 'Street & number'})]),
+                  h('label', {'for': 'address'}, i18('order.address')),
+                  h('input.form-control', {'name': 'address', 'placeholder': i18('order.street')})]),
               ]),
               h('.row', [
                 h('.col-lg-2.form-group' + check('zip'), [
-                  h('label', {'for': 'zip'}, 'Zip Code'),
+                  h('label', {'for': 'zip'}, i18('order.zip')),
                   h('input.form-control', {'name': 'zip', 'placeholder': ''})]),
                 h('.col-lg-5.form-group' + check('city'), [
-                  h('label', {'for': 'city'}, 'City'),
+                  h('label', {'for': 'city'}, i18('order.city')),
                   h('input.form-control', {'name': 'city', 'placeholder': ''})]),
                 h('.col-lg-5.form-group' + check('country'), [
-                  h('label', {'for': 'country'}, "Country"),
+                  h('label', {'for': 'country'}, i18('order.country')),
                   h('input.form-control',
                     {'name': 'country', 'disabled': true, 'placeholder': '', 'value': 'CH'})]),
               ])
@@ -158,7 +159,7 @@ function view(state$) {
                     h('div#payment-form'),
                     h('button.btn.btn-info.pull-right#verify-btn',
                       {'disabled': _.isUndefined(state.ready)},
-                      "Validate payment method")
+                      i18('order.validate'))
                   ]))
               ]),
 
@@ -182,8 +183,8 @@ function view(state$) {
                         // ]),
                     ])),
                   h('.col-lg-9', [
-                      h('p.text-muted', 'This price includes printing and shipping.'),
-                      h('p', 'You will not be charged until your order is processed and printed.')
+                      h('p.text-muted', i18('order.desc1')),
+                      h('p', i18('order.desc2'))
                     ])
                   ])
               ])
@@ -196,21 +197,21 @@ function view(state$) {
                       ['Purchase ', h('i.fa.fa-check')]),
                   h('button.btn.btn-default.pull-left.close-btn.order-cancel-btn',
                     {'data-target': '#order-modal'},
-                    ['Not now ', h('i.fa.fa-times')])
+                    [i18('order.notnow')+' ', h('i.fa.fa-times')])
                 ]) :
                 h('.alert.alert-info.clearfix', 
                   state.status === -1 ?
                   [
                     h('i.fa.fa-spin.fa-circle-o-notch.pull-right'),
-                    " Submitting your order..."
+                    " "+i18('order.submitting')
                   ] :
                   [
                     h('.fa.fa-2x.fa-smile-o.pull-right'),
-                    h('p', "Your album has been ordered!"),
-                    h('p', "You will receive an email to confirm your order, and will be notified when your order has been processed. Thank you!"),
+                    h('p', i18('order.ordered')),
+                    h('p', i18('order.confirmation')),
                     h('div', h('button.btn.btn-primary.pull-right.close-btn',
                         {'data-target': '#order-modal'},
-                        ["Close ", h('i.fa.fa-times')]))
+                        [i18('order.close')+" ", h('i.fa.fa-times')]))
                   ]
                 )
             ])
