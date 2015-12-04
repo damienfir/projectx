@@ -46,7 +46,7 @@ function intent(DOM, DOMactions, collection) {
   let fileUpload$ = startUpload$.flatMap(([files, collection]) =>
       Rx.Observable.from(files)
         .flatMap(file => makeUploadRequest(file, collection))
-        .scan((acc,el) => acc.concat(el)))
+        .scan((acc,el) => acc.concat(el), []))
       .share();
 
   let uploadedFiles$ = fileUpload$.withLatestFrom(startUpload$,

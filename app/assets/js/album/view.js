@@ -61,25 +61,20 @@ let renderTile = (tile, tileindex, page, editing) => {
             left: percent(-tile.cx1 * scaleX)
           }}),
           // (editing.selected &&
-          //  editing.selected.page == page &&
-          //  editing.selected.idx !== tileindex) ? h('h2.center', "Swap photo") : ''
-        renderToolbar(editing, page, tileindex)
+          //  editing.selected.page === page &&
+          // editing.selected.idx === tileindex) ? h('h2.center', "Click on") : ''
       ]);
 }
 
 
 let renderCover = (title, page) => {
-  return page.tiles.length === 0 ?
-      h('.nocover',
-          h('h6.cover-message.center', "Select images from the album to appear on the cover.")) :
-      h('input.cover-title#album-title',
-          {
-            'type': 'text',
-            'placeholder': 'Click here to change the album title...',
-            'maxLength': 50,
-            'value': title,
-            'autocomplete': 'off'
-          })
+  return h('input.cover-title#album-title', {
+    'type': 'text',
+    'placeholder': 'Click here to change the album title...',
+    'maxLength': 50,
+    'value': title,
+    'autocomplete': 'off'
+  })
 }
 
 
@@ -109,7 +104,7 @@ let drawNode = (shift, dragged) => (node, key) => h('button.node.shadow', _.exte
   // }}
   ), ' ');
 
-let shift = 0.2e-2;
+let shift = 0.3e-2;
 
 let renderNodes = (page, editing) => {
   let topleft = page.tiles
@@ -123,7 +118,7 @@ let renderNodes = (page, editing) => {
     .filter(a => topleft
         .filter(b => (Math.abs(a.x-b.x) + Math.abs(a.y-b.y)) < 0.1).length === 0);
   return bottomright.map(drawNode(shift, editing.draggedNode))
-    .concat(topleft.map(drawNode(shift, editing.draggedNode)));
+    .concat(topleft.map(drawNode(-shift, editing.draggedNode)));
 }
 
 
@@ -145,12 +140,13 @@ let renderPage = (photos, title, j, editing) => (page, i) => {
         .concat(renderNodes(page, editing))
         .concat(renderAddPhotos(page))
         .concat(renderHover(editing, page))
+        .concat(renderToolbar(editing, page.index))
       ]);
 }
 
 
 let renderToolbar = (editing, page, tileindex) => {
-  return (editing.selected && editing.selected.page === page.index && editing.selected.idx === tileindex) ?
+  return (editing.selected && editing.selected.page === page) ?// && editing.selected.idx === tileindex) ?
           h('.btn-group.toolbar', [
             h('button.btn.btn-info.btn-lg#remove-btn',
               {'attributes': {
@@ -227,6 +223,8 @@ module.exports = function(album$, photos$, collection$, editing$) {
   let photosDict$ = photos$.map(helpers.hashMap);
   return album$.combineLatest(photosDict$, collection$, editing$,
       (album, photos, collection, editing) => {
+        // console.log(album);
+        // console.log(collection);
         return album.length > 1 && collection.name !== null ?
         h('div.container-fluid.album', renderAlbum(album, photos, collection.name, editing)) :
         undefined

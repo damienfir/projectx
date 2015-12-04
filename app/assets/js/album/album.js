@@ -9,6 +9,8 @@ let Observable = Rx.Observable;
 
 
 
+
+
 function intent(DOM, HTTP) {
   return {
     createdAlbum$: jsonPOST(HTTP, /\/collections\/\d+\/pages\?index=.*/),
@@ -18,7 +20,7 @@ function intent(DOM, HTTP) {
     shuffle$: helpers.btn(DOM, '.shuffle-btn').map(ev => ev.target['data-page']),
     incrPhotos$: helpers.btn(DOM, '.incr-btn').map(ev => ev.target['data-page']),
     decrPhotos$: helpers.btn(DOM, '.decr-btn').map(ev => ev.target['data-page']),
-    addPhotoCover$: helpers.btn(DOM, '.cover-btn').map(ev => ev.target['data-id']),
+    removeLastPage$: new Rx.Subject()
   }
 }
 
@@ -27,11 +29,11 @@ let params = [];
 
 
 function model(DOMactions, actions, collection, editing, upload) {
-  actions.downloadedAlbum$.subscribe(res => {
-    window.open("/storage/generated/" + res.text);
-  });
+  // actions.downloadedAlbum$.subscribe(res => {
+  //   window.open("/storage/generated/" + res.text);
+  // });
 
-  actions.shuffledPage$.subscribe(ev => editing.actions.cancelExt$.onNext(false));
+  actions.shuffledPage$.merge(actions.removeLastPage$).subscribe(ev => editing.actions.cancelExt$.onNext(false));
 
   let demoAlbum$ = collection.actions.storedAlbum$
     .map(demo => _.sortBy(demo.pages, 'index'))
@@ -40,16 +42,17 @@ function model(DOMactions, actions, collection, editing, upload) {
   let albumUpdated$ = actions.createdAlbum$
     .map(newpage => album => album.concat(newpage).sort(ascIndex));
   
-  let clearAlbum$ = DOMactions.reset$
-    .map(x => item => []);
+  // let clearAlbum$ = DOMactions.reset$
+  //   .map(x => item => []);
 
-  let createdCover$ = actions.createdAlbum$
-    .filter(pages => pages.index === 0);
+  let removeLastPage$ = actions.removeLastPage$.map(p => album => {album.pop(); return album});
 
   let albumPageShuffled$ = actions.shuffledPage$
     .map(page => album =>
         { album[page.index] = page; return album; });
 
+
+  // Editing
   let swapTiles$ = editing.actions.swap$
     .map(swap => album => 
       utils.swapTiles(album, [swap.from.page, swap.from.idx], [swap.to.page, swap.to.idx]));
@@ -83,11 +86,12 @@ function model(DOMactions, actions, collection, editing, upload) {
 
   return Observable.merge(
       albumUpdated$,
-      clearAlbum$,
+      // clearAlbum$,
       demoAlbum$,
       albumPageShuffled$,
       swapTiles$,
       dragPhoto$,
+      removeLastPage$,
       rotatePhoto$,
       clickEdge$,
       dragEdge$)
@@ -102,147 +106,120 @@ function requests(DOMactions, actions, album$, collection, photos, upload, editi
 
   let photosFromTiles = (photos, tiles) => _.filter(photos, p => _.where(tiles, {'photoID': p.id}).length > 0);
 
-  let addOrRemove = (array, item) =>
-    _.isUndefined(item) ? array :
-      ((array.map(p => p.id).indexOf(item.id) === -1) ?
-        array.concat(item) : array.filter(el => el.id !== item.id));
-
-  let getOtherPage = (page1, N) =>  {
-    let page2 = (page1 % 2) ? page1 - 1 : page1 + 1;
-    return page2 < 1 ? page2 + 2 : (page2 >= N ? page2 - 2 : page2);
-  }
-
   let cover$ = editing.actions.cover$.withLatestFrom(editing.state$, (ev, {selected}) => ({
     from: selected,
     to: {page: 0}
   }));
 
-  let [moveTile$, addPage$] = editing.actions.move$.merge(cover$).withLatestFrom(album$, photos.state$, (move, album, photos) => {
-      let photosA = photosFromTiles(photos, album[move.from.page].tiles);
-      let photosB = move.to.page < 0 ? [] : photosFromTiles(photos, album[move.to.page].tiles);
+
+  let [moveTile$, addPage$] = editing.actions.move$.merge(cover$)
+    .withLatestFrom(album$, photos.state$, (move, album, photos) => {
       let photoID = album[move.from.page].tiles[move.from.idx].photoID;
-      return [
-        {page: move.to.page, photos: _.uniq(photosB.concat(photos.filter(p => p.id === photoID)))}
-      ].concat(move.to.page !== 0 ? {page: move.from.page, photos: photosA.filter(p => p.id !== photoID)} : [])
+      let photosA = _.uniq(photosFromTiles(photos, album[move.from.page].tiles)
+        .filter(p => p.id !== photoID));
+      let photosB = (move.to.page < 0 ? [] : photosFromTiles(photos, album[move.to.page].tiles))
+          .concat(photos.filter(p => p.id === photoID));
+      
+      let reqs = [{page: move.to.page, photos: photosB}];
+      if (move.to.page !== 0) reqs.push({page: move.from.page, photos: photosA});
+      return reqs;
     })
-    .filter(([a,b]) => b ? b.photos.length > 0 : true)
+    .filter(([a,b]) => b ? b.photos.length > 0 : true) // stop if source page has only one image
     .flatMap(reqs => Rx.Observable.fromArray(reqs))
-    .partition(req => req.page > 0);
+    .partition(req => req.page >= 0);
+
 
   let removeTile$ = editing.actions.remove$
-    .withLatestFrom(album$, photos.state$, editing.state$, (ev, album, photos, {selected}) => ({
-      page: selected.page,
-      photos: photosFromTiles(photos, album[selected.page].tiles)
-        .filter(p => p.id !== album[selected.page].tiles[selected.idx].photoID)
-    }));
+    .withLatestFrom(album$, photos.state$, editing.state$, (ev, album, photos, {selected}) => {
+      if (_.isUndefined(selected) || _.isUndefined(album[selected.page])) return false;
+      return {
+        page: selected.page,
+        photos: photosFromTiles(photos, album[selected.page].tiles)
+          .filter(p => p.id !== album[selected.page].tiles[selected.idx].photoID)
+      }
+    })
+  .filter(_.identity);
+
+  let shufflePage$ = actions.shuffle$
+    .withLatestFrom(collection.state$, photos.state$, album$,
+        (page, collection, photos, album) => {
+          if (_.isUndefined(album[page])) return {};
+          return {
+            page,
+            photos: photosFromTiles(photos, album[page].tiles)
+          }
+        })
+    .filter(_.identity);
 
 
-  let npics = 3;
-  let photosGroups$ = upload.actions.startUpload$.flatMapLatest(([ev,collection]) => Rx.Observable.merge(
-      upload.actions.fileUpload$
-        .bufferWithCount(npics)
-        .map(files => files[npics-1].slice(-npics)),
-      upload.actions.fileUpload$
-        .take(1)
-        .withLatestFrom(album$, helpers.argArray).filter(([p,a]) => a.length === 0)
-        .map(([p,a]) => p),
-      upload.actions.fileUpload$
-        .filter(files => files.length === ev.length)
-        .map(files => files.slice(-(files.length % npics)))
-        .filter(f => f.length <= npics)
-   ));
+  let photosGroups$ = upload.actions.startUpload$.withLatestFrom(album$, helpers.argArray)
+    .flatMapLatest(([[ev,collection], album]) => {
+      let page = album.length;
+      return upload.actions.fileUpload$
+        .scan((prev, files) => {
+          let newPhoto = files.slice(-1);
+          if (page === 0) return {
+            npics: 1,
+            photos: newPhoto,
+            page: page++
+          }
+          else if (prev.photos && prev.photos.length < prev.npics) {
+            if (files.length === ev.length) return {
+              npics: prev.photos.length+1,
+              photos: prev.photos.concat(newPhoto),
+              page: prev.page
+            }
+            else return {
+              npics: prev.npics,
+              photos: prev.photos.concat(newPhoto),
+              page: prev.page
+            }
+          }
+          else return {
+            npics: page === 1 ? 3 : Math.floor(Math.random()*4 + 1),
+            photos: newPhoto,
+            page: page++
+          }
+        }, {})
+    })
+    .do(x => console.log(x))
+    .filter(({npics, photos}) => photos.length === npics)
 
-  let index = 0;
-  DOMactions.reset$.subscribe(ev => index = 0);
+
+  removeTile$.filter(x => !x.photos.length).pluck('page')//.merge(editing.actions.move$.pluck('from.page'))
+    .withLatestFrom(album$, (page,album) => page === album.length-1).filter(_.identity)
+    .subscribe(r => actions.removeLastPage$.onNext());
+
 
   return {
-    createAlbum$: photosGroups$.merge(addPage$.pluck('photos')).withLatestFrom(collection.state$, album$,
-        (photos, collection, album) => {
-          if (index === 0) index = album.length;
-          index += 1;
+    createAlbum$: photosGroups$.merge(addPage$)
+      .withLatestFrom(collection.state$, album$,
+        (group, collection, album) => {
+          if (group.page < 0) group.page = album.length;
           return {
-            url: '/collections/'+collection.id+'/pages?index='+(index-1),
+            url: '/collections/'+collection.id+'/pages?index='+group.page,
             method: 'POST',
-            send: photos
+            send: group.photos
           }
         }),
 
-    downloadAlbum$: DOMactions.download$.withLatestFrom(collection.state$, album$,
-        (x, collection, album) => ({
-          url: '/collections/' + collection.id + '/download',
-          method: 'POST',
-          send: {collection, album}
-        })),
-
-    shufflePage$: actions.shuffle$.withLatestFrom(collection.state$, photos.state$, album$,
-        (page, collection, photos, album) => ({
-          url: '/collections/'+collection.id+'/page/'+album[page].id+'?index='+page,
-          method: 'POST',
-          send: photosFromTiles(photos, album[page].tiles)
-        })),
-
-    generatePage$: moveTile$.merge(removeTile$).withLatestFrom(collection.state$, album$, (req, collection, album) => ({
+    generatePage$: moveTile$.merge(removeTile$).merge(shufflePage$)
+      .filter(req => req.photos.length)
+      .withLatestFrom(collection.state$, album$, (req, collection, album) => ({
         url: '/collections/'+collection.id+'/page/'+album[req.page].id+'?index='+req.page,
         method: 'POST',
         send: req.photos
       })),
 
-    incrDecrPhotos$: actions.incrPhotos$.filter(p => p !== 0).withLatestFrom(album$, (page1, album) => {
-        return [page1, getOtherPage(page1, album.length)];
-      }).merge(actions.decrPhotos$.filter(p => p !== 0).withLatestFrom(album$, (page2, album) => {
-        return [getOtherPage(page2, album.length), page2];
-      }))
-      .withLatestFrom(album$, ([incr, decr], album) => ({'incr': album[incr], 'decr': album[decr]}))
-      .withLatestFrom(photos.state$, ({incr, decr}, photos) => {
-        let photos1 = photosFromTiles(photos, incr.tiles);
-        let photos2 = photosFromTiles(photos, decr.tiles);
-        if (photos2.length > 1) photos1.unshift(photos2.pop())
-        return [
-          {'page': incr, 'photos': photos1},
-          {'page': decr, 'photos': photos2}
-        ]
-      })
-      .flatMap(pages => Observable.fromArray(pages).withLatestFrom(collection.state$, ({page, photos}, collection) => ({
-        url: '/collections/' + collection.id + '/page/' + page.id + '?index=' + page.index,
-        method: 'POST',
-        send: photos
-      }))),
-
-    incrDecrCover$: actions.incrPhotos$.filter(p => p === 0).map(p => 1)
-      .merge(actions.decrPhotos$.filter(p => p === 0).map(p => -1))
-      .withLatestFrom(collection.state$, album$, photos.state$, (delta, collection, album, photos) => {
-        let page = album[0];
-        let coverPhotos = photosFromTiles(photos, page.tiles);
-        let coverIDs = coverPhotos.map(p => p.id)
-        let allIDs = photos.map(p => p.id)
-        let allowedIDs = _.difference(allIDs, coverIDs);
-        if (delta > 0) {
-          if (allowedIDs.length > 0) coverPhotos.push(photos[allIDs.indexOf(_.sample(allowedIDs))])
-        } else {
-          if (coverPhotos.length > 1) coverPhotos.pop()
-        }
-        return {
+    downloadAlbum$: DOMactions.download$
+      .withLatestFrom(collection.state$, album$,
+        (x, collection, album) => ({
+          url: '/collections/' + collection.id + '/download',
           method: 'POST',
-          url: '/collections/' + collection.id + '/page/' + page.id + '?index=' + page.index,
-          eager: true,
-          send: coverPhotos
-        }
-      }),
-    
-    editPhotoCover$: actions.addPhotoCover$.withLatestFrom(collection.state$, photos.state$, album$,
-      (photoID, collection, photos, album) => {
-        let cover = album[0];
-        return {
-          url: '/collections/' + collection.id + '/page/' + cover.id + '?index=' + 0,
-          method: 'POST',
-          send: addOrRemove(photosFromTiles(photos, cover.tiles), photos.filter(p => p.id === photoID).shift())
-        };
-      })
-      .filter(req => req.send.length > 0)
+          send: {collection, album}
+        })),
   };
 }
-
-
 
 
 

@@ -5,12 +5,13 @@ let Observable = Rx.Observable;
 
 module.exports = function(DOMactions, upload, collection) {
     let demoPhotos$ = collection.actions.storedAlbum$.map(demo => y => demo.photos);
-    let newPhotos$ = upload.actions.uploadedFiles$.map(files => photos => photos.concat(files));
+    let newPhotos$ = upload.actions.fileUpload$.map(files => photos => photos.concat(files.slice(-1)));
     let clearPhotos$ = DOMactions.reset$.map(x => y => []);
 
     let state$ = Observable.merge(newPhotos$, clearPhotos$, demoPhotos$)
       .startWith(initial.photos)
-      .scan(apply);
+      .scan(apply)
+      // .do(x => console.log(x));
 
     return {
       state$

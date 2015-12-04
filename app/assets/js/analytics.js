@@ -30,9 +30,9 @@ module.exports = function(DOMactions, user, collection, upload, album, order) {
 
     album.actions.shuffle$.debounce(2000).map(page => ({c: 'album', a: 'shuffle', l: page})),
 
-    album.actions.incrPhotos$.debounce(1000).map(page => ({c: 'album', a: 'increment', l: page})),
-    album.actions.decrPhotos$.debounce(1000).map(page => ({c: 'album', a: 'decrement', l: page})),
-    album.actions.addPhotoCover$.debounce(1000).map(id => ({c: 'album', a: 'add-to-cover', l: id})),
+    // album.actions.incrPhotos$.debounce(1000).map(page => ({c: 'album', a: 'increment', l: page})),
+    // album.actions.decrPhotos$.debounce(1000).map(page => ({c: 'album', a: 'decrement', l: page})),
+    // album.actions.addPhotoCover$.debounce(1000).map(id => ({c: 'album', a: 'add-to-cover', l: id})),
 
     // composition.actions.crop.drag$.debounce(1000).map(
     //   drag => ({c: 'album', a: 'crop', l: drag.page, v: drag.idx})),

@@ -84,6 +84,9 @@ html, body {
   width: 40px;
   position: absolute;
   transform: translate(-50%, -50%);
+  transition: opacity 0.4s;
+  -moz-transition: opacity 0.4s;
+  -webkit-transition: opacity 0.4s;
 }
 
 .box-mosaic:hover .node {
@@ -146,6 +149,10 @@ html, body {
   background-color: white;
   color: #000;
   opacity: 0.0;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  -webkit-transition: opacity 0.2s;
+  -moz-transition: opacity 0.2s;
 }
 
 .page-hover:hover {
@@ -164,6 +171,9 @@ html, body {
 
 .spread-cover-unselected .ui-tile {
   opacity: 0.5;
+  animation: none;
+  -moz-animation: none;
+  -webkit-animation: none;
 }
 
 .spread-paper {
@@ -359,7 +369,14 @@ html, body {
   /* border: 1px solid #ccc; */
   overflow: hidden;
   cursor: move;
+  transition: opacity 0.2s;
+  -moz-transition: opacity 0.2s;
+  -webkit-transition: opacity 0.2s;
+  animation: fadein 0.5s;
+  -moz-animation: fadein 0.5s;
+  -webkit-animation: fadein 0.5s;
 }
+
 
 .ui-tile img {
   position: absolute;
@@ -367,6 +384,9 @@ html, body {
 
 .ui-tile img:hover {
   opacity: 0.85;
+  transition: opacity 0.2s;
+  -webkit-transition: opacity 0.2s;
+  -moz-transition: opacity 0.2s;
 }
 
 .hover-btn {
@@ -381,9 +401,9 @@ html, body {
   /* color: #e74c3c; */
 }
 
-.ui-tile:hover .hover-btn {
-  display: block;
-}
+/* .ui-tile:hover .hover-btn { */
+/*   display: block; */
+/* } */
 
 .ui-tile h2 {
   opacity: 1;
@@ -402,6 +422,7 @@ html, body {
 }
 .tile-unselected:hover {
   opacity: 0.5;
+  cursor: pointer;
 }
 
 .cover-title {
@@ -440,8 +461,8 @@ html, body {
 .toolbar {
   box-shadow: 0px 2px 15px rgba(0,0,0,0.3);
   position: absolute;
-  top: -50px;
-  right: 30%;
+  top: 0px;
+  right: 5px;
 }
 
 .newpage {
@@ -489,15 +510,15 @@ html, body {
   to {opacity: 1}
 }
 
-@keyframes fadeout {
-  from {opacity: 1}
-  to {opacity: 0}
-}
+/* @keyframes fade { */
+/*   from {opacity: 1} */
+/*   to {opacity: 0} */
+/* } */
 
-.fadein {
-  animation: fadein 1s linear 0s, fadeout 1s linear 2s;
-  animation-fill-mode: forwards;
-}
+/* .fade { */
+/*   animation: fade 1s linear 0s, fadeout 1s linear 2s; */
+/*   animation-fill-mode: forwards; */
+/* } */
 
 
 .rotate90 { transform: rotate(90deg); }
