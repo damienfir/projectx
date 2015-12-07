@@ -191,7 +191,7 @@ let renderBtn = (j) => (page, i) => {
 let renderSpread = (photos, title, editing) => (spread, i) => {
   let isCover = (spread.length === 1 && spread[0].index == 0);
   let cover = isCover ?
-      '.spread-cover' + (editing.selected ? '' : '.spread-cover-unselected') :
+      '.spread-cover' :// + (editing.selected ? '' : '.spread-cover-unselected') :
       '';
 
   return h('.row.spread' + cover, [

@@ -101,6 +101,17 @@ function model(DOMactions, actions, collection, editing, upload) {
     .shareReplay(1);
 }
 
+function makeUploadRequest(file, collection) {
+  var fd = new FormData();
+  fd.append("image", file);
+  return Rx.Observable.fromPromise($.ajax({
+    url: "/collections/"+collection.id+"/photos",
+    method: 'POST',
+    data: fd,
+    processData: false,
+    contentType: false
+  }));
+}
 
 function requests(DOMactions, actions, album$, collection, photos, upload, editing) {
 
@@ -152,18 +163,22 @@ function requests(DOMactions, actions, album$, collection, photos, upload, editi
     .filter(_.identity);
 
 
-  let photosGroups$ = upload.actions.startUpload$.withLatestFrom(album$, helpers.argArray)
+  let chooseNPics = (page) => {
+    if (page === 0) return 1;
+    else if (page === 1) return 3;
+    else return Math.floor(Math.random()*4 + 1);
+  }
+
+
+  let photosGroups$ = upload.actions.startUpload$.do(x => console.log(x)).withLatestFrom(album$, helpers.argArray)
     .flatMapLatest(([[ev,collection], album]) => {
       let page = album.length;
       return upload.actions.fileUpload$
+        .do(x => console.log(x))
         .scan((prev, files) => {
           let newPhoto = files.slice(-1);
-          if (page === 0) return {
-            npics: 1,
-            photos: newPhoto,
-            page: page++
-          }
-          else if (prev.photos && prev.photos.length < prev.npics) {
+          let remainingPhotos = ev.length - files.length + 1;
+          if (prev.photos && prev.photos.length < prev.npics) {
             if (files.length === ev.length) return {
               npics: prev.photos.length+1,
               photos: prev.photos.concat(newPhoto),
@@ -176,14 +191,21 @@ function requests(DOMactions, actions, album$, collection, photos, upload, editi
             }
           }
           else return {
-            npics: page === 1 ? 3 : Math.floor(Math.random()*4 + 1),
+            npics: Math.min(chooseNPics(page), remainingPhotos),
             photos: newPhoto,
             page: page++
           }
         }, {})
+      .filter(({npics, photos}) => photos.length === npics)
+      .concatMap((obj) => {
+        return Rx.Observable.fromArray(obj.photos)
+          .flatMap(photo => makeUploadRequest(photo, collection)
+              .tap(p => photos.actions.uploadedPhoto$.onNext(p)))
+          .reduce((photos, photo) => photos.concat(photo), [])
+          .map(photos => ({page: obj.page, photos}))
+      })
     })
-    .do(x => console.log(x))
-    .filter(({npics, photos}) => photos.length === npics)
+    .share();
 
 
   removeTile$.filter(x => !x.photos.length).pluck('page')//.merge(editing.actions.move$.pluck('from.page'))
@@ -199,7 +221,8 @@ function requests(DOMactions, actions, album$, collection, photos, upload, editi
           return {
             url: '/collections/'+collection.id+'/pages?index='+group.page,
             method: 'POST',
-            send: group.photos
+            send: group.photos,
+            eager: true
           }
         }),
 

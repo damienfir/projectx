@@ -33,7 +33,9 @@ function intent(DOM, DOMactions, collection) {
   let startUpload$ = DOMactions.selectFiles$
     .flatMapLatest(files => collection.state$.filter(helpers.hasID)
         .take(1)
-        .map(c => [files, c]));
+        .map(c => [files, c]))
+    .share();
+
 
   startUpload$.subscribe(ev => {
     $('#album-title-front').focus();
@@ -46,7 +48,7 @@ function intent(DOM, DOMactions, collection) {
 
   let fileUpload$ = startUpload$.flatMap(([files, collection]) =>
       Rx.Observable.from(files)
-        .flatMap(file => makeUploadRequest(file, collection))
+        // .flatMap(file => makeUploadRequest(file, collection))
         .scan((acc,el) => acc.concat(el), []))
       .share();
 
@@ -72,8 +74,8 @@ function model(actions, DOMactions) {
   let startedFunc$ = actions.startUpload$.map(([files,collection]) =>
       upload => upload.set('size', files.length));
 
-  let uploadedFunc$ = actions.fileUpload$
-    .map(files => upload => upload.set('photos', Immutable.fromJS(files)));
+  // let uploadedFunc$ = actions.fileUpload$
+  //   .map(files => upload => upload.set('photos', Immutable.fromJS(files)));
 
   // let uploadedFunc$ = actions.fileUpload$
   //   .bufferWithCount(npics)
@@ -86,7 +88,11 @@ function model(actions, DOMactions) {
   let finishedFunc$ = actions.uploadedFiles$.map(files =>
       upload => upload.set('size', 0));
 
-  return Rx.Observable.merge(startedFunc$, uploadedFunc$, finishedFunc$)
+  return Rx.Observable.merge(
+      startedFunc$,
+      // uploadedFunc$,
+      finishedFunc$
+    )
     .startWith(initial)
     .scan(helpers.apply);
 }

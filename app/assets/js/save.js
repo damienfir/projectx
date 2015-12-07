@@ -43,11 +43,22 @@ module.exports = function(DOM, HTTP, user, collection, album) {
     albumSaved$: helpers.jsonPOSTResponse(HTTP, /\/save/)
   }
 
+  let waitingForProcessing$ = Rx.Observable.merge(
+      album.HTTP.createAlbum$.map(1),
+      album.actions.createdAlbum$.map(-1)
+    )
+    .startWith(0)
+    .scan((acc, v) => acc + v)
+    .do(x => console.log(x))
+  
+
   actions.save$ = Rx.Observable.merge(
       album.state$.filter(a => a.length > 1 && !_.some(a, _.isEmpty)),
       collection.state$.skip(2),
       actions.submit$)
     .debounce(2000)
+    .withLatestFrom(waitingForProcessing$, (save, waiting) => waiting <= 0)
+    .filter(_.identity);
 
   actions.modal$.subscribe(ev => {
     $('#save-modal').modal('show');
