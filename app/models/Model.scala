@@ -22,7 +22,8 @@ object DBModels {
   case class Photo (
     id: Option[Long],
     collectionID: Long,
-    hash: String
+    hash: String,
+    data: Array[Byte]
   )
 
   case class Composition (

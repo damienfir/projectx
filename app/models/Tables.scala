@@ -53,7 +53,8 @@ object Tables {
     def id = column[Option[Long]]("id", O.PrimaryKey, O.AutoInc)
     def collectionID = column[Long]("collection_id")
     def hash = column[String]("hash")
-    def * = (id, collectionID, hash) <> (Photo.tupled, Photo.unapply)
+    def data = column[Array[Byte]]("data")
+    def * = (id, collectionID, hash, data) <> (Photo.tupled, Photo.unapply)
   }
   val photos = TableQuery[Photos]
 

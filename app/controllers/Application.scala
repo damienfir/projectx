@@ -103,12 +103,13 @@ class Collections @Inject()(usersDAO: UsersDAO, compositionDAO: CompositionDAO, 
 
 
   def addToCollection(id: Long) = Action.async(parse.multipartFormData) { request =>
-    val list = for {
-      names <- imageService.saveImages(request.body.files.map(_.ref))
-      photos <- photoDAO.addToCollection(id, names)
-      processed <- mosaicService.preprocessAll(names)
-    } yield photos
-    list map (items => Ok(Json.toJson(items)))
+    // val list = for {
+    //   photo <- photoDAO.addToCollection(id, imageService.bytesFromTemp(request.body.files.head.ref))
+    //   // processed <- mosaicService.preprocessAll(names)
+    // } yield photos
+    // list map (items => Ok(Json.toJson(items)))
+    photoDAO.addToCollection(id, imageService.save(request.body.files.head.ref))
+      .map(photo => Ok(Json.toJson(photo.copy(data=Array()))))
   }
 
 

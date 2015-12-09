@@ -15,6 +15,8 @@ import org.apache.commons.codec.binary.Hex;
 import java.security.MessageDigest
 import collection.JavaConversions._
 
+import models._
+
 
 class ImageService @Inject()() {
   def photoFile(id: String) = Play.current.configuration.getString("px.dir_photos").get + s"/$id"
@@ -61,21 +63,31 @@ class ImageService @Inject()() {
 //     // Success(filename)
 //     filename
 //   }
+  
+  
+  def bytesFromTemp(uploaded: TemporaryFile) : DBModels.Photo = {
+    val data = FileUtils.readFileToByteArray(uploaded.file)
+    val hash = hashFromContent(data)
+    DBModels.Photo(None, 0, hash, data)
+  }
 
-  def save(uploaded: TemporaryFile): String = {
-    val filename = hashFromContent(FileUtils.readFileToByteArray(uploaded.file))
-    val newFile = new File(photoFile(filename))
+
+  def save(uploaded: TemporaryFile): DBModels.Photo = {
+    val data = FileUtils.readFileToByteArray(uploaded.file)
+    val hash = hashFromContent(data)
+    val newFile = new File(photoFile(hash))
     uploaded.moveTo(newFile)
     newFile.setReadable(true, false)
     newFile.setExecutable(true, false)
-    val thumbFilename = resize(filename)
-    val thumb = new File(thumbFile(thumbFilename))
-    thumb.setReadable(true, false)
-    thumb.setExecutable(true, false)
-    thumbFilename
+    DBModels.Photo(None, 0, hash, data)
+    // val thumbFilename = resize(filename)
+    // val thumb = new File(thumbFile(thumbFilename))
+    // thumb.setReadable(true, false)
+    // thumb.setExecutable(true, false)
+    // thumbFilename
   }
 
-  def saveImages(newImages: Seq[TemporaryFile]): Future[Seq[String]] = Future {
-    newImages.filter(_.file.length > 4).map(save)
-  }
+  // def saveImages(newImages: Seq[TemporaryFile]): Future[Seq[String]] = Future {
+  //   newImages.filter(_.file.length > 4).map(save)
+  // }
 }
