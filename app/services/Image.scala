@@ -34,6 +34,24 @@ class ImageService @Inject()() {
     }
   }
 
+  def getSizeOpt(size: String) = if (size == "full") ""
+      else if (size.startsWith("pct:")) "-resize " + size.stripPrefix("pct:") + "%"
+      else if (size.startsWith("!")) "-resize " + size.stripPrefix("!").split(",").mkString("x")
+      else "-resize " + (size.split(",") match {
+        case Array(w) => w
+        case Array("",h) => "x" + h
+        case Array(w,h) => w + "x" + h + "!"
+      })
+
+  def convert(hash: String, region: String, size: String, rotation: String, quality: String, format: String) = Future {
+    val converted = new ByteArrayOutputStream()
+    val opts = Array(getSizeOpt(size)).mkString(" ")
+    println(opts)
+    val cmd = s"convert - $opts -" #< new File(photoFile(hash)) #> converted
+    cmd.!
+    converted.toByteArray
+  }
+
 //   def save(data: Array[Byte]): String = {
 //     val filename = hashFromContent(data)
 //     val file = new File(photoFile(filename))

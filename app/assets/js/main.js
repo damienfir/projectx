@@ -1,3 +1,5 @@
+/* @flow */
+
 import Rx from 'rx';
 import {run} from '@cycle/core';
 import {makeDOMDriver, h} from '@cycle/dom';

@@ -52,8 +52,8 @@ let renderTile = (tile, tileindex, page, editing) => {
           // 'title': "Click"
         }
       })), [
-        h('img' + (tile.rot ? '.rotate'+tile.rot : ''), {
-          'src': "/storage/thumbs/"+tile.hash,
+        h('img', {
+          'src': "/photos/"+tile.photoID+"/full/800,/0/default.jpg",
           'draggable': false,
           'style': {
             height: percent(scaleY),
@@ -138,7 +138,6 @@ let renderPage = (photos, title, j, editing) => (page, i) => {
       {'data-page': page.index}, [
         (j === 1 && i === 0) ? renderBackside() :
           page.tiles
-            .map(t => _.extend(t, {hash: photos[t.photoID]}))
             .map((tile, index) => renderTile(tile, index, page.index, editing))
         .concat((page.index === 0) ? renderCover(title, page) : undefined)
         .concat(renderNodes(page, editing))

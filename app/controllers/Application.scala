@@ -184,3 +184,13 @@ class Collections @Inject()(usersDAO: UsersDAO, compositionDAO: CompositionDAO, 
         .map(Ok(_))
   }
 }
+
+
+class Photos @Inject()(imageService: ImageService, photoDAO: PhotoDAO) extends Controller {
+  def get(photoID: Long, region: String, size: String, rotation: String, quality: String, format: String) = Action.async {
+    photoDAO.get(photoID) flatMap { photo =>
+        imageService.convert(photo.hash, region, size, rotation, quality, format)
+      .map(file => Ok(file))
+    }
+  }
+}

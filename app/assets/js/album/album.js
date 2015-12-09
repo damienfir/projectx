@@ -1,3 +1,5 @@
+/* @flow */
+
 import Rx from 'rx';
 import Immutable from 'immutable';
 import {h} from '@cycle/dom';
