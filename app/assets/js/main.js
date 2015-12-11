@@ -5,30 +5,30 @@ import {run} from '@cycle/core';
 import {makeDOMDriver, h} from '@cycle/dom';
 import {makeHTTPDriver} from '@cycle/http';
 
-import * as Elements from './ui'
+import * as Elements from './ui';
 
-import helpers from './helpers'
-import User from './user'
-import Collection from './collection'
-import Upload from './upload'
-import Photos from './photos'
-import Album from './album/album'
-import Editing from './album/editing'
-import UserInterface from './userinterface'
-import Order from './order'
-import Save from './save'
-import Analytics from './analytics'
+import helpers from './helpers';
+import User from './user';
+import Collection from './collection';
+import Upload from './upload';
+import Photos from './photos';
+import Album from './album/album';
+import Editing from './album/editing';
+import UserInterface from './userinterface';
+import Order from './order';
+import Save from './save';
+import Analytics from './analytics';
 
 let Observable = Rx.Observable;
 
 
 function intent(DOM, HTTP) {
-  let cancelDefault = (ev) => { ev.preventDefault(); ev.stopPropagation(); return ev; }
-  let btn = (selector) => DOM.select(selector).events('click').map(cancelDefault)
+  let cancelDefault = (ev) => { ev.preventDefault(); ev.stopPropagation(); return ev; };
+  let btn = (selector) => DOM.select(selector).events('click').map(cancelDefault);
 
   let drop$ = DOM.select("#upload-area").events('drop')
     .map(helpers.cancel)
-    .map(ev => helpers.toArray(ev.dataTransfer.files))
+    .map(ev => helpers.toArray(ev.dataTransfer.files));
   let filedialog$ = DOM.select('#file-input').events('change').map(ev => helpers.toArray(ev.target.files));
   let selectFiles$ = filedialog$.merge(drop$);
 
@@ -44,7 +44,7 @@ function intent(DOM, HTTP) {
     ready$: Observable.just({}),
     hasHash$: Observable.just(window.location.pathname.split('/'))
       .filter(url => url.length > 2).map(url => url.pop()).shareReplay(1),
-  }
+  };
 
   return actions;
 }
@@ -85,7 +85,7 @@ function view(collection, album, upload, order, save, editing) {
         toolbarVTree,
         uploadVTree,
         orderVTree,
-        albumVTree || buttonVTree,
+        albumVTree,
         saveVTree,
         editingVTree
       ])

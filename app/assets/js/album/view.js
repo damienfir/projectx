@@ -1,12 +1,17 @@
 import {h} from '@cycle/dom';
-import helpers from '../helpers'
-import i18 from '../i18n'
+import helpers from '../helpers';
+import i18 from '../i18n';
 
+
+let coverpage = {
+  tiles: [],
+  index: 0
+};
 
 let blankpage = {
   tiles: [],
   index: -2
-}
+};
 
 let leftOrRight = (index) => index % 2 ? '.pull-right' : '.pull-left';
 let moveOrNot = (tiles) => tiles.length === 0 ? '.nomove' : '.move-mosaic';
@@ -23,10 +28,10 @@ let splitIntoSpreads = (spreads, page) => {
     spreads.push([page]);
   }
   return spreads;
-}
+};
 
 
-let percent = (x) => x*100 + "%"
+let percent = (x) => x*100 + "%";
 
 let renderTile = (tile, tileindex, page, editing) => {
   var scaleX = 1 / (tile.cx2 - tile.cx1);
@@ -65,30 +70,30 @@ let renderTile = (tile, tileindex, page, editing) => {
           //  editing.selected.page === page &&
           // editing.selected.idx === tileindex) ? h('h2.center', "Click on") : ''
       ]);
-}
+};
 
 
-let renderCover = (title, page) => {
-  return h('input.cover-title#album-title', {
+let renderTitle = (collection, page) => {
+  return !_.isUndefined(collection.id) && page.index === 0 ? h('input.cover-title#album-title', {
     'type': 'text',
     'placeholder': i18('ui.title'),
     'maxLength': 50,
-    'value': title,
+    'value': collection.name,
     'autocomplete': 'off',
     'style': {
-      'font-size': $('.spread-cover .box-mosaic').width()/20+'px'
+      // 'font-size': $('.spread-cover .box-mosaic').width()/20+'px'
     }
-  })
-}
+  }) : '';
+};
 
 
 let renderBackside = () => {
   return h('.backside', "bigpiq");
-}
+};
 
 let renderHover = (editing, page) => 
   (editing.selected && editing.selected.page !== page.index) ?
-    h('.page-hover', {'data-page': page.index, 'data-idx': 0}, h('h2.center', i18('ui.move'))) : ''
+    h('.page-hover', {'data-page': page.index, 'data-idx': 0}, h('h2.center', i18('ui.move'))) : '';
 
 
 let Node = (x,y) => ({x,y});
@@ -123,29 +128,33 @@ let renderNodes = (page, editing) => {
         .filter(b => (Math.abs(a.x-b.x) + Math.abs(a.y-b.y)) < 0.1).length === 0);
   return bottomright.map(drawNode(shift, editing.draggedNode))
     .concat(topleft.map(drawNode(-shift, editing.draggedNode)));
-}
+};
 
 
 let renderAddPhotos = (page) => {
-  return page.tiles.length ? '' : h('.newpage', h('button.btn.btn-primary.center#addmore-btn', [
-      h('i.fa.fa-cloud-upload'), ' '+i18('ui.add')]))
-}
+  return page.tiles.length ? '' : 
+      page.index === 0 ?
+        h('button.btn.btn-info.btn-lg.btn-step.center.shadow#create-btn', [
+          h('i.fa.fa-camera.fa-3x'), i18('front.upload')]) :
+        h('.newpage', h('button.btn.btn-primary.center#addmore-btn', [
+          h('i.fa.fa-cloud-upload'), ' '+i18('ui.add')]));
+};
 
 
-let renderPage = (photos, title, j, editing) => (page, i) => {
+let renderPage = (collection, j, editing) => (page, i) => {
 
   return h('.box-mosaic' + leftOrRight(j*2+i),
       {'data-page': page.index}, [
         (j === 1 && i === 0) ? renderBackside() :
           page.tiles
             .map((tile, index) => renderTile(tile, index, page.index, editing))
-        .concat((page.index === 0) ? renderCover(title, page) : undefined)
+        .concat(renderTitle(collection, page))
         .concat(renderNodes(page, editing))
         .concat(renderAddPhotos(page))
         .concat(renderHover(editing, page))
         .concat(renderToolbar(editing, page.index))
       ]);
-}
+};
 
 
 let renderToolbar = (editing, page, tileindex) => {
@@ -170,8 +179,8 @@ let renderToolbar = (editing, page, tileindex) => {
                 'data-placement': 'top',
                 'title': i18('toolbar.cancel')
               }}, [h('i.fa.fa-times')])
-        ]) : ''
-}
+        ]) : '';
+};
 
 
 let renderBtn = (j) => (page, i) => {
@@ -183,54 +192,54 @@ let renderBtn = (j) => (page, i) => {
         // h('button.btn.btn-primary.btn-xs.incr-btn', {'data-page': page.index}, [h('i.fa.fa-plus'), " More"]),
         // h('button.btn.btn-primary.btn-xs.decr-btn', {'data-page': page.index}, [h('i.fa.fa-minus'), " Less"])
       ]) : ''
-  ])
-}
+  ]);
+};
 
 
-let renderSpread = (photos, title, editing) => (spread, i) => {
-  let isCover = (spread.length === 1 && spread[0].index == 0);
-  let cover = isCover ?
-      '.spread-cover' :// + (editing.selected ? '' : '.spread-cover-unselected') :
-      '';
+let renderSpread = (collection, editing) => (spread, i) => {
+  let isCover = (spread.length === 1 && spread[0].index === 0);
+  let cover = isCover ? '.spread-cover' : '';
 
   return h('.row.spread' + cover, [
       h('a.spread-anchor', {name: 'spread'+i}),
+
       isCover ? '' : h('.col-xs-1.spread-arrow',
         h('a.btn.btn-link', {href: '#spread'+(i-1)}, h('i.fa.fa-chevron-left.fa-3x'))),
+
       h('.spread-paper.shadow.clearfix' + (isCover ? '.col-xs-6.col-xs-offset-3' : '.col-xs-10'),
-        spread.map(renderPage(photos, title, i, editing))), 
+        spread.map(renderPage(collection, i, editing))), 
+
       h('.col-xs-1.spread-arrow',
         h('a.btn.btn-link', {href: '#spread'+(i+1)}, h('i.fa.fa-chevron-right.fa-3x'))),
+
       h('.spread-btn.clearfix' + (isCover ? '.col-xs-6.col-xs-offset-3' : '.col-xs-10.col-xs-offset-1'),
         spread.map(renderBtn(i))),
   ]);
-}
+};
 
 
-function renderAlbum(album, photos, title, editing) {
-  let spreads = album
-    .reduce(splitIntoSpreads, []);
+function renderAlbum(album, collection, editing) {
+  let spreads = album.reduce(splitIntoSpreads, []);
 
-  if (_.last(spreads).length < 2) {
+  if (!spreads.length) {
+    spreads = [[coverpage]];
+  } else if (_.last(spreads).length < 2) {
     spreads[spreads.length-1] = spreads[spreads.length-1].concat(blankpage);
   } else {
     spreads = spreads.concat([[blankpage]]);
   }
 
   return spreads.filter(spread => !_.some(spread, _.isEmpty))
-    .map(renderSpread(photos, title, editing));
+    .map(renderSpread(collection, editing));
 }
 
 
-module.exports = function(album$, photos$, collection$, editing$) {
-  let photosDict$ = photos$.map(helpers.hashMap);
-  return album$.combineLatest(photosDict$, collection$, editing$,
-      (album, photos, collection, editing) => {
-        // console.log(album);
-        // console.log(collection);
-        return album.length > 1 && collection.name !== null ?
-        h('div.container-fluid.album', renderAlbum(album, photos, collection.name, editing)) :
-        undefined
+module.exports = function(album$, collection$, editing$) {
+  return album$.combineLatest(collection$, editing$,
+      (album, collection, editing) => {
+        // return !_.isUndefined(collection.id) ?
+        return h('div.container-fluid.album', renderAlbum(album, collection, editing));
+        // undefined;
       }
     );
-}
+};

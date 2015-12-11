@@ -97,7 +97,7 @@ class Collections @Inject()(usersDAO: UsersDAO, compositionDAO: CompositionDAO, 
       collection <- collectionDAO.getByHash(userID, hash)
       pages <- compositionDAO.allFromCollection(collection.id.get)
       photos <- photoDAO.allFromCollection(collection.id.get)
-    } yield Json.obj("collection" -> collection, "pages" -> pages, "photos" -> photos)
+    } yield Json.obj("collection" -> collection, "pages" -> pages, "photos" -> photos.map(_.copy(data=Array())))
     album.map(obj => Ok(Json.toJson(obj)))
   }
 

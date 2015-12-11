@@ -1,12 +1,14 @@
 import Rx from 'rx';
 import {h} from '@cycle/dom';
-import helpers from './helpers'
-import i18 from './i18n'
+import helpers from './helpers';
+import i18 from './i18n';
 
 
 
 export function renderToolbar(collection, album, upload) {
   let loaded = album && album.length > 1 && collection.hash !== helpers.demoID && collection.name !== null;
+  // console.log(collection);
+  // console.log(album);
   return h('div#nav.navbar.navbar-transparent.navbar-fixed-top', [
       h('div.container-fluid', [
 
@@ -60,7 +62,7 @@ export function renderToolbar(collection, album, upload) {
 export function renderStartPage(collection) {
   return h('.container.start-buttons', [
       h('.row' + (!_.isUndefined(collection.id) ? '.step-disabled' : ''), [
-        h('.col-lg-12.text-center.step1', i18('front.step1')),
+        // h('.col-lg-12.text-center.step1', i18('front.step1')),
         h('.col-lg-12.text-center',
           h('button.btn.btn-info.btn-lg.btn-step#create-btn',
             {
@@ -69,22 +71,22 @@ export function renderStartPage(collection) {
             [h('i.fa.fa-camera.fa-3x'), i18('front.upload')]
         ))
       ]),
-      h('#step2.row' + (_.isUndefined(collection.id) ? '.step-disabled' : ''), [
-        h('.col-lg-12.step2', i18('front.step2')),
-        h('.col-lg-7.col-lg-offset-2', 
-          h('.form-group', 
-            h('input.form-control.input-lg.shadow.step2-title#album-title-front', {
-              disabled: _.isUndefined(collection.id),
-              type: 'text',
-              placeholder: i18('front.title'),
-              maxLength: 50,
-              autocomplete: 'off'
-            })
-          ),
-          ),
-        h('.col-lg-1',
-          h('button.btn.btn-info.btn-block.btn-lg.shadow#title-btn',  h('i.fa.fa-arrow-right.fa-2x'))),
-      ])
+      // h('#step2.row' + (_.isUndefined(collection.id) ? '.step-disabled' : ''), [
+      //   h('.col-lg-12.step2', i18('front.step2')),
+      //   h('.col-lg-7.col-lg-offset-2', 
+      //     h('.form-group', 
+      //       h('input.form-control.input-lg.shadow.step2-title#album-title-front', {
+      //         disabled: _.isUndefined(collection.id),
+      //         type: 'text',
+      //         placeholder: i18('front.title'),
+      //         maxLength: 50,
+      //         autocomplete: 'off'
+      //       })
+      //     ),
+      //   ),
+      //   h('.col-lg-1',
+      //     h('button.btn.btn-info.btn-block.btn-lg.shadow#title-btn',  h('i.fa.fa-arrow-right.fa-2x'))),
+      // ])
   ]);
 }
 

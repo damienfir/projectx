@@ -1,6 +1,6 @@
 import Rx from 'rx';
 import {h} from '@cycle/dom';
-import helpers from '../helpers'
+import helpers from '../helpers';
 
 
 let eventToCoord = (ev) => ({
@@ -9,7 +9,7 @@ let eventToCoord = (ev) => ({
     'img': ev.target,
     'idx': (ev.target['data-idx'] + 1 || ev.target.parentNode['data-idx'] + 1) - 1,
     'page': (ev.target['data-page'] + 1 || ev.target.parentNode['data-page'] + 1) -1
-})
+});
 
 
 function intent(DOM) {
@@ -51,8 +51,8 @@ function intent(DOM) {
         .takeUntil(mouseUp$)
         .take(1))
     .merge(cancelBtn$)
-    .merge(cancelExt$)
-    .map(false);
+    .map(false)
+    .share();
 
   let selected$ = tileDown$
     .flatMapLatest(down => mouseMove$
@@ -62,12 +62,14 @@ function intent(DOM) {
         .map(down))
     .merge(cancel$)
     .scan((prev, x) => prev ? false : x, false)
-    .filter(_.identity);
+    .filter(_.identity)
+    .share();
   
-  let mouseOver$ = selected$.flatMapLatest(from => tileUp$.take(1).takeUntil(cancel$).map(to => ({from,to})));
-  let swap$ = mouseOver$.filter(({from,to}) => from.page === to.page);
-  let move$ = mouseOver$
-    .filter(({from,to}) => from.page !== to.page);
+  let [swap$, move$] = selected$.flatMapLatest(from =>
+      tileUp$.take(1)
+        .takeUntil(cancel$)
+        .map(to => ({from,to})))
+    .partition(({from,to}) => from.page === to.page);
 
   let drag$ = tileDown$.flatMapLatest(down => mouseMoveCoord$
       .takeUntil(mouseUp$)
@@ -95,7 +97,8 @@ function model(actions, DOMactions) {
       Rx.Observable.merge(
         actions.swap$,
         actions.move$,
-        actions.cancel$
+        actions.cancel$,
+        actions.cancelExt$
       ).map(x => state => _.extend(state, {selected: undefined})),
       DOMactions.reset$.map(ev => state => ({}))
     )
@@ -114,7 +117,7 @@ function view(state$) {
             state.selected.page !== 0 ? h('button.btn.btn-info.btn-lg#add-cover-btn', [h('i.fa.fa-book')]) : '',
             h('button.btn.btn-info.btn-lg#cancel-btn', [h('i.fa.fa-times')])
         ]) : ''
-  )
+  );
 }
 
 
@@ -127,5 +130,5 @@ module.exports = function(DOM, DOMactions) {
     DOM: view(state$),
     state$,
     actions
-  }
-}
+  };
+};
