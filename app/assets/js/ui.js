@@ -94,8 +94,8 @@ export function renderStartPage(collection) {
 
 function renderProgressbar(upload) {
   if (upload.get('size', 0) > 0) {
-    let progress = (upload.get('files') && upload.get('size')) ? 100 * upload.get('files').size / upload.get('size') : 0;
-    return [
+    let progress = 100 * upload.get('files', []).size / upload.get('size');
+    return progress < 100 ? [
       h('li', 
         h('span.navbar-text', progress < 100 ? i18('ui.uploading') : i18('ui.processing'))),
       h('li', 
@@ -107,6 +107,6 @@ function renderProgressbar(upload) {
             // style: {'width': '50%'}
           })
         ))
-      ];
+      ] : '';
     }
 }

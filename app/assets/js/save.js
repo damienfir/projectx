@@ -48,8 +48,7 @@ module.exports = function(DOM, HTTP, user, collection, album) {
       album.actions.createdAlbum$.map(-1)
     )
     .startWith(0)
-    .scan((acc, v) => acc + v)
-    .do(x => console.log(x))
+    .scan((acc, v) => acc + v);
   
 
   actions.save$ = Rx.Observable.merge(

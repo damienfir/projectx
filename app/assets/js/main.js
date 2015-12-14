@@ -79,15 +79,14 @@ function view(collection, album, upload, order, save, editing) {
 	}
 	});
 
-  return Observable.combineLatest(toolbarDOM, upload.DOM, album.DOM, order.DOM, buttonDOM, save.DOM, editing.DOM,
-      (toolbarVTree, uploadVTree, albumVTree, orderVTree, buttonVTree, saveVTree, editingVTree) =>
+  return Observable.combineLatest(toolbarDOM, upload.DOM, album.DOM, order.DOM, buttonDOM, save.DOM,
+      (toolbarVTree, uploadVTree, albumVTree, orderVTree, buttonVTree, saveVTree) =>
       h('div.theme-blue', [
         toolbarVTree,
         uploadVTree,
         orderVTree,
         albumVTree,
-        saveVTree,
-        editingVTree
+        saveVTree
       ])
   );
 }

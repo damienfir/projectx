@@ -1,8 +1,11 @@
-function resizeTile(tile, tile2) {
-  var arTile = (tile.tx2-tile.tx1) / (tile.ty2-tile.ty1);
-  var arTile2 = (tile2.tx2-tile2.tx1) / (tile2.ty2-tile2.ty1);
-  var arImg = (tile.cx2-tile.cx1) / (tile.cy2-tile.cy1);
-  var arImg2 = arTile2 * arImg / arTile;
+var arPaper = Math.sqrt(2);
+
+function resizeTile(tile, tile2, transpose) {
+  var arTile = arPaper * (tile.tx2-tile.tx1) / (tile.ty2-tile.ty1);
+  var arImg = arTile / ((tile.cx2-tile.cx1) / (tile.cy2-tile.cy1));
+
+  var arTile2 = arPaper * (tile2.tx2-tile2.tx1) / (tile2.ty2-tile2.ty1);
+  if (transpose) arImg = 1/arImg;
 
   var center = [(tile.cx2+tile.cx1)/2, (tile.cy2+tile.cy1)/2];
   var newTile = _.clone(tile2);
@@ -10,13 +13,15 @@ function resizeTile(tile, tile2) {
 
   newTile.cx1 = 0;
   newTile.cy1 = 0;
-  if (arImg2 > 1) {
-    newTile.cy2 = 1/arImg2;
+  if (arImg < arTile2) {
     newTile.cx2 = 1.0;
+    newTile.cy2 = arImg/arTile2;
   } else {
-    newTile.cx2 = arImg2;
+    newTile.cx2 = arTile2/arImg;
     newTile.cy2 = 1.0;
   }
+
+  // console.log(newTile.cx2 + " - "+ newTile.cy2);
 
   var dx = Math.min(1-newTile.cx2, Math.max(0, center[0]-newTile.cx2/2));
   newTile.cx1 += dx;
@@ -30,7 +35,7 @@ function resizeTile(tile, tile2) {
 }
 
 
-function transpose(tile) {
+function transposeTile(tile) {
   let newTile = _.clone(tile);
   newTile.tx1 = tile.ty1;
   newTile.ty1 = tile.tx1;
@@ -39,12 +44,29 @@ function transpose(tile) {
   return newTile;
 }
 
+function transposeAll(tile) {
+  let newTile = transposeTile(tile);
+  newTile.cx1 = tile.cy1;
+  newTile.cy1 = tile.cx1;
+  newTile.cx2 = tile.cy2;
+  newTile.cy2 = tile.cx2;
+  return newTile;
+}
+
+export function rotateTile(tile) {
+  // tile = transposeAll(resizeTile(tile, transposeTile(tile), true));
+  tile = resizeTile(tile, tile, true);
+  tile.rot = ((tile.rot || 0) + 90) % 360;
+  return tile;
+}
 
 export function swapTiles(album, [page1,idx1], [page2,idx2]) {
   var tile1 = album[page1].tiles[idx1];
   var tile2 = album[page2].tiles[idx2];
-  album[page2].tiles[idx2] = resizeTile(tile1, tile2);
-  album[page1].tiles[idx1] = resizeTile(tile2, tile1);
+  if (tile1 && tile2) {
+    album[page2].tiles[idx2] = resizeTile(tile1, tile2);
+    album[page1].tiles[idx1] = resizeTile(tile2, tile1);
+  }
   return album;
 }
 
@@ -78,8 +100,8 @@ let d = 0.1;
 
 
 export function dragTiles(tiles, params, dx, dy) {
-  let canMoveX = params.move_x_tl.length > 0 && params.move_x_br.length > 0;;
-  let canMoveY = params.move_y_tl.length > 0 && params.move_y_br.length > 0;;
+  let canMoveX = params.move_x_tl.length > 0 && params.move_x_br.length > 0;
+  let canMoveY = params.move_y_tl.length > 0 && params.move_y_br.length > 0;
   let newTiles = tiles
     .map((t,i) => _.contains(params.move_x_tl,i) && canMoveX ? _.extend(_.clone(t), {tx1: t.tx1+dx}) : t)
     .map((t,i) => _.contains(params.move_x_br,i) && canMoveX ? _.extend(_.clone(t), {tx2: t.tx2+dx}) : t)

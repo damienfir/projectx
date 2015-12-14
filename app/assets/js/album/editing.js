@@ -107,18 +107,18 @@ function model(actions, DOMactions) {
 }
 
 
-function view(state$) {
-  return state$.map(state =>
-    state.selected ?
-          h('.btn-group.toolbar', [
-            h('button.btn.btn-info.btn-lg#remove-btn', [
-              h('i.fa.fa-trash-o')]),
-            // h('li', h('button.btn.btn-warning.navbar-btn#rotate-btn', [h('i.fa.fa-rotate-right')])),
-            state.selected.page !== 0 ? h('button.btn.btn-info.btn-lg#add-cover-btn', [h('i.fa.fa-book')]) : '',
-            h('button.btn.btn-info.btn-lg#cancel-btn', [h('i.fa.fa-times')])
-        ]) : ''
-  );
-}
+// function view(state$) {
+//   return state$.map(state =>
+//     state.selected ?
+//           h('.btn-group.toolbar', [
+//             h('button.btn.btn-info.btn-lg#remove-btn', [
+//               h('i.fa.fa-trash-o')]),
+//             // h('li', h('button.btn.btn-warning.navbar-btn#rotate-btn', [h('i.fa.fa-rotate-right')])),
+//             state.selected.page !== 0 ? h('button.btn.btn-info.btn-lg#add-cover-btn', [h('i.fa.fa-book')]) : '',
+//             h('button.btn.btn-info.btn-lg#cancel-btn', [h('i.fa.fa-times')])
+//         ]) : ''
+//   );
+// }
 
 
 module.exports = function(DOM, DOMactions) {
@@ -127,7 +127,7 @@ module.exports = function(DOM, DOMactions) {
   let state$ = model(actions, DOMactions);
 
   return {
-    DOM: view(state$),
+    // DOM: view(state$),
     state$,
     actions
   };

@@ -36,28 +36,29 @@ function intent(DOM, DOMactions, collection) {
         .map(c => [files, c]))
     .share();
 
-
   startUpload$.subscribe(ev => {
-    $('#album-title-front').focus();
-    if ($('#step2').offset()) {
-    $('html,body').animate({
-      scrollTop: $('#step2').offset().top
-    }, 1000)
-    }
+    $('#album-title').focus();
+    // if ($('#step2').offset()) {
+    // $('html,body').animate({
+    //   scrollTop: $('#step2').offset().top
+    // }, 1000)
+    // }
   });
 
-  let fileUpload$ = startUpload$.flatMap(([files, collection]) =>
+  let fileUpload$ = startUpload$.flatMapLatest(([files, collection]) =>
       Rx.Observable.from(files)
-        // .flatMap(file => makeUploadRequest(file, collection))
         .scan((acc,el) => acc.concat(el), []))
-      .share();
+      .publish();
 
   let uploadedFiles$ = fileUpload$.withLatestFrom(startUpload$,
       (uploaded, [files, collection]) => ({uploaded, files}))
     .filter(({uploaded, files}) => uploaded.length === files.length)
     .map(({uploaded, files}) => uploaded);
 
-  return {toggleUpload$, startUpload$, fileUpload$, uploadedFiles$};
+  let uploaded$ = new Rx.Subject();
+  let finished$ = new Rx.Subject();
+
+  return {toggleUpload$, startUpload$, fileUpload$, uploadedFiles$, uploaded$, finished$};
 }
 
 
@@ -67,31 +68,24 @@ function events(DOMactions, actions) {
 }
 
 
-let initial = Immutable.Map({photos: Immutable.List(), size: 0});
+let initial = Immutable.fromJS({'files': [], 'size': 0});
 
 function model(actions, DOMactions) {
 
   let startedFunc$ = actions.startUpload$.map(([files,collection]) =>
       upload => upload.set('size', files.length));
 
-  // let uploadedFunc$ = actions.fileUpload$
-  //   .map(files => upload => upload.set('photos', Immutable.fromJS(files)));
+  let uploadedFunc$ = actions.uploaded$.map(photo =>
+      upload => upload.update('files', Immutable.List(), f => f.push(photo)));
 
-  // let uploadedFunc$ = actions.fileUpload$
-  //   .bufferWithCount(npics)
-  //   .merge(actions.fileUpload$.take(1).map(f => [f]))
-  //   .merge(actions.uploadedFiles$
-  //       .filter(f => f.length < npics)
-  //       .map(files => files.slice(-(files.length % npics))))
-  //   .map(files => upload => upload.updateIn('photos', v => v.push(files)));
-
-  let finishedFunc$ = actions.uploadedFiles$.map(files =>
-      upload => upload.set('size', 0));
+  // let finishedFunc$ = actions.finished$.map(files =>
+  //     upload => initial);
 
   return Rx.Observable.merge(
       startedFunc$,
       // uploadedFunc$,
-      finishedFunc$
+      uploadedFunc$
+      // finishedFunc$
     )
     .startWith(initial)
     .scan(helpers.apply);

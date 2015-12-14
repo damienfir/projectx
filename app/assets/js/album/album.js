@@ -6,7 +6,7 @@ import {h} from '@cycle/dom';
 import view from './view';
 import {apply, argArray, asc, ascIndex, initial, jsonPOST, jsonPOSTResponse, cancelDefault} from '../helpers';
 import helpers from '../helpers';
-import * as utils from '../utils';
+import * as utils from './utils';
 let Observable = Rx.Observable;
 
 
@@ -65,10 +65,8 @@ function model(DOMactions, actions, collection, editing, upload) {
 
   let rotatePhoto$ = editing.actions.rotate$
     .withLatestFrom(editing.state$, (ev, editing) => album => {
-      // let tile = album[editing.selected.page].tiles[editing.selected.idx];
-      // tile = utils.rotateTile(tile);
-      // tile.rot = ((tile.rot || 0) + 90) % 360;
-      // album[editing.selected.page].tiles[editing.selected.idx] = tile;
+      let tile = utils.rotateTile(album[editing.selected.page].tiles[editing.selected.idx]);
+      album[editing.selected.page].tiles[editing.selected.idx] = tile;
       return album;
     });
 
@@ -99,6 +97,7 @@ function model(DOMactions, actions, collection, editing, upload) {
     .map(album => album.sort((a,b) => a.index-b.index))
     .shareReplay(1);
 }
+
 
 function makeUploadRequest(file, collection) {
   var fd = new FormData();
@@ -136,17 +135,17 @@ function requests(DOMactions, actions, album$, collection, photos, upload, editi
 
   let moveTile$ = editing.actions.move$.merge(cover$)
     .withLatestFrom(album$, photos.state$, (move, album, photos) => {
-      let photoID = album[move.from.page].tiles[move.from.idx].photoID;
-      let photosA = _.uniq(photosFromTiles(photos, album[move.from.page].tiles)
+      let from = {page: album[move.from.page]};
+      let to = {page: album[move.to.page]};
+      let photoID = from.page.tiles[move.from.idx].photoID;
+
+      from.photos =_.uniq(photosFromTiles(photos, from.page.tiles)
         .filter(p => p.id !== photoID));
-      let photosB = (move.to.page < 0 ? [] : photosFromTiles(photos, album[move.to.page].tiles))
+      to.photos = (_.isUndefined(to.page) ? [] : photosFromTiles(photos, to.page.tiles))
           .concat(photos.filter(p => p.id === photoID));
 
-      if (photosA.length > 0 || move.from.page === album.length-1) {
-        return [
-          {page: move.to.page, photos: photosB},
-          {page: move.from.page, photos: photosA}
-        ];
+      if (from.photos.length > 0 || from.page.index === album.length-1) {
+        return [from, to];
       } else {
         return false;
       }
@@ -155,15 +154,15 @@ function requests(DOMactions, actions, album$, collection, photos, upload, editi
     .flatMap(reqs => Rx.Observable.fromArray(reqs))
     .share();
 
-  let addPage$ = moveTile$.filter(req => req.page < 0);
 
   let removeTile$ = editing.actions.remove$
     .withLatestFrom(album$, photos.state$, editing.state$, (ev, album, photos, {selected}) => {
       if (_.isUndefined(selected) || _.isUndefined(album[selected.page])) return false;
+      let page = album[selected.page];
       return {
-        page: selected.page,
-        photos: photosFromTiles(photos, album[selected.page].tiles)
-          .filter(p => p.id !== album[selected.page].tiles[selected.idx].photoID)
+        page,
+        photos: photosFromTiles(photos, page.tiles)
+          .filter(p => p.id !== page.tiles[selected.idx].photoID)
       };
     })
   .filter(_.identity);
@@ -171,24 +170,26 @@ function requests(DOMactions, actions, album$, collection, photos, upload, editi
   let shufflePage$ = actions.shuffle$
     .withLatestFrom(collection.state$, photos.state$, album$,
         (page, collection, photos, album) => {
-          if (_.isUndefined(album[page])) return {};
+          if (_.isUndefined(page)) return {};
           return {
             page,
-            photos: photosFromTiles(photos, album[page].tiles)
+            photos: photosFromTiles(photos, page.tiles)
           };
         })
     .filter(_.identity);
 
 
-  let generatePage$ = moveTile$.filter(req => req.page >= 0)
-    .merge(removeTile$)
+  let [pageExist$, pageNew$] = moveTile$.partition(req => !_.isUndefined(req.page));
+  let generatePage$ = pageExist$.merge(removeTile$)
     .merge(shufflePage$);
 
+  let addPage$ = pageNew$.map(({page, photos}) => ({photos, page: -1}));
 
   let photosGroups$ = upload.actions.startUpload$.withLatestFrom(album$, helpers.argArray)
     .flatMapLatest(([[ev,collection], album]) => {
       let page = album.length;
-      return upload.actions.fileUpload$
+      return Rx.Observable.from(ev)
+        .scan((acc,el) => acc.concat(el), [])
         .scan((prev, files) => {
           let newPhoto = files.slice(-1);
           let remainingPhotos = ev.length - files.length + 1;
@@ -214,6 +215,7 @@ function requests(DOMactions, actions, album$, collection, photos, upload, editi
       .concatMap((obj) => {
         return Rx.Observable.fromArray(obj.photos)
           .flatMap(photo => makeUploadRequest(photo, collection)
+              .tap(p => upload.actions.uploaded$.onNext(p))
               .tap(p => photos.actions.uploadedPhoto$.onNext(p)))
           .reduce((photos, photo) => photos.concat(photo), [])
           .map(photos => ({page: obj.page, photos}));
@@ -224,7 +226,7 @@ function requests(DOMactions, actions, album$, collection, photos, upload, editi
 
   // remove last page if empty
   generatePage$
-    .withLatestFrom(album$, (req, album) => req.page === album.length-1 && req.photos.length === 0)
+    .withLatestFrom(album$, (req, album) => req.page.index === album.length-1 && req.photos.length === 0)
     .filter(_.identity)
     .subscribe(r => actions.removeLastPage$.onNext());
 
@@ -243,9 +245,9 @@ function requests(DOMactions, actions, album$, collection, photos, upload, editi
         }),
 
     generatePage$: generatePage$
-      .filter(req => req.photos.length > 0)
+      .filter(req => req.photos.length > 0 && !_.isUndefined(req.page))
       .withLatestFrom(collection.state$, album$, (req, collection, album) => ({
-        url: '/collections/'+collection.id+'/page/'+album[req.page].id+'?index='+req.page,
+        url: '/collections/'+collection.id+'/page/'+req.page.id+'?index='+req.page.index,
         method: 'POST',
         send: req.photos
       })),

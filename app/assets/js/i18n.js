@@ -1,6 +1,6 @@
 let messages = {
   'fr': {
-    'front.upload': 'Selectionnez vos photos',
+    'front.upload': 'Sélectionnez des photos pour commencer votre album',
     'front.title': 'Choisissez un titre pour votre album',
     'front.step1': "Etape 1.",
     'front.step2': "Etape 2.",
@@ -15,7 +15,7 @@ let messages = {
 
     'ui.move': "Déplacer la photo sur cette page",
     'ui.add': 'Ajouter des photos',
-    'ui.shuffle': "Réarranger",
+    'ui.shuffle': "Mélanger",
     'ui.title': 'Cliquez ici pour changer le titre...',
     'ui.cover': 'Page de couverture',
     'ui.page': 'Page',
@@ -46,7 +46,7 @@ let messages = {
   },
 
   'en': {
-    'front.upload': 'Select multiple photos',
+    'front.upload': 'Upload some photos to start your album',
     'front.title': 'Choose a title for your album',
     'front.step1': "Step 1.",
     'front.step2': "Step 2.",
@@ -90,7 +90,7 @@ let messages = {
     'order.close': "Close",
     'order.notnow': "Not now"
   }
-}
+};
 
 
 function getLang() {
@@ -99,7 +99,7 @@ function getLang() {
 
   return function(key) {
     return messages[lang][key] || messages[def][key] || '';
-  }
+  };
 }
 
-module.exports = getLang()
+module.exports = getLang();

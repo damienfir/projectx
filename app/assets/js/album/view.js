@@ -18,11 +18,7 @@ let moveOrNot = (tiles) => tiles.length === 0 ? '.nomove' : '.move-mosaic';
 
 
 let splitIntoSpreads = (spreads, page) => {
-  if (!spreads.length) {
-    spreads.push([page]);
-  } else if (spreads.length === 1) {
-    spreads.push([blankpage, page]);
-  } else if(spreads.length && spreads[spreads.length-1].length < 2) {
+  if(spreads.length && spreads.length > 1 && _.last(spreads).length < 2) {
     spreads[spreads.length-1].push(page);
   } else {
     spreads.push([page]);
@@ -58,7 +54,7 @@ let renderTile = (tile, tileindex, page, editing) => {
         }
       })), [
         h('img', {
-          'src': "/photos/"+tile.photoID+"/full/800,/0/default.jpg",
+          'src': "/photos/"+tile.photoID+"/full/800,/"+(tile.rot || 0)+"/default.jpg",
           'draggable': false,
           'style': {
             height: percent(scaleY),
@@ -131,18 +127,23 @@ let renderNodes = (page, editing) => {
 };
 
 
-let renderAddPhotos = (page) => {
-  return page.tiles.length ? '' : 
-      page.index === 0 ?
+let renderAddPhotos = (page, collection) => {
+  if (!page.tiles.length) {
+    if (page.index === 0 && _.isUndefined(collection.id)) {
+      return [
+        // h('.add-background'),
         h('button.btn.btn-info.btn-lg.btn-step.center.shadow#create-btn', [
-          h('i.fa.fa-camera.fa-3x'), i18('front.upload')]) :
-        h('.newpage', h('button.btn.btn-primary.center#addmore-btn', [
-          h('i.fa.fa-cloud-upload'), ' '+i18('ui.add')]));
+            h('i.fa.fa-camera.fa-3x'), i18('front.upload')]),
+      ];
+    } else if(page.index == -2) {
+      return h('.newpage', h('button.btn.btn-primary.center#addmore-btn', [
+            h('i.fa.fa-cloud-upload'), ' '+i18('ui.add')]));
+    }
+  }
 };
 
 
 let renderPage = (collection, j, editing) => (page, i) => {
-
   return h('.box-mosaic' + leftOrRight(j*2+i),
       {'data-page': page.index}, [
         (j === 1 && i === 0) ? renderBackside() :
@@ -150,30 +151,31 @@ let renderPage = (collection, j, editing) => (page, i) => {
             .map((tile, index) => renderTile(tile, index, page.index, editing))
         .concat(renderTitle(collection, page))
         .concat(renderNodes(page, editing))
-        .concat(renderAddPhotos(page))
+        .concat(renderAddPhotos(page, collection))
         .concat(renderHover(editing, page))
-        .concat(renderToolbar(editing, page.index))
+        .concat(renderToolbar(editing, page))
       ]);
 };
 
 
-let renderToolbar = (editing, page, tileindex) => {
-  return (editing.selected && editing.selected.page === page) ?// && editing.selected.idx === tileindex) ?
+let renderToolbar = (editing, page) => {
+  return (editing.selected && editing.selected.page === page.index) ?
           h('.btn-group.toolbar', [
-            h('button.btn.btn-info.btn-lg#remove-btn',
+            (page.tiles.length <= 1 ? '' : h('button.btn.btn-info.btn-lg#remove-btn',
               {'attributes': {
                 'data-toggle': 'tooltip',
                 'data-placement': 'top',
                 'title': i18('toolbar.remove')
               }},
-              h('i.fa.fa-trash-o')),
-            // h('li', h('button.btn.btn-warning.navbar-btn#rotate-btn', [h('i.fa.fa-rotate-right')])),
-            editing.selected.page !== 0 ? h('button.btn.btn-info.btn-lg#add-cover-btn', {'attributes': {
+              h('i.fa.fa-trash-o'))),
+            h('button.btn.btn-info.btn-lg#rotate-btn', [h('i.fa.fa-rotate-right')]),
+            (editing.selected.page !== 0 ? h('button.btn.btn-info.btn-lg#add-cover-btn', {'attributes': {
                 'data-toggle': 'tooltip',
                 'data-placement': 'top',
                 'title': i18('toolbar.cover')
               }},
-              [h('i.fa.fa-book')]) : '',
+              [h('i.fa.fa-book')])
+              : ''),
             h('button.btn.btn-info.btn-lg#cancel-btn', {'attributes': {
                 'data-toggle': 'tooltip',
                 'data-placement': 'top',
@@ -219,15 +221,14 @@ let renderSpread = (collection, editing) => (spread, i) => {
 
 
 function renderAlbum(album, collection, editing) {
-  let spreads = album.reduce(splitIntoSpreads, []);
-
-  if (!spreads.length) {
-    spreads = [[coverpage]];
-  } else if (_.last(spreads).length < 2) {
-    spreads[spreads.length-1] = spreads[spreads.length-1].concat(blankpage);
+  let pages = _.clone(album);
+  if (!pages.length) {
+    pages.push(coverpage);
   } else {
-    spreads = spreads.concat([[blankpage]]);
+    pages = [_.first(pages), blankpage].concat(_.rest(pages)).concat([blankpage]);
   }
+
+  let spreads = pages.reduce(splitIntoSpreads, []);
 
   return spreads.filter(spread => !_.some(spread, _.isEmpty))
     .map(renderSpread(collection, editing));
