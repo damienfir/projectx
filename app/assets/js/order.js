@@ -3,6 +3,7 @@ import {h} from '@cycle/dom';
 import {jsonPOST, jsonGET, apply} from './helpers'
 import helpers from './helpers'
 import i18 from './i18n'
+import countries from './countries';
 let Observable = Rx.Observable;
 
 
@@ -108,6 +109,11 @@ function requests(actions, state$) {
 
 let checkFields = (fields) => (key) => _.isUndefined(fields) ? '' : (fields[key] ? '' : '.has-error')
 
+let countriesOptions = [h('option', {'value':''}, "")]
+  .concat(countries.map(c => 
+    h('option', {'value': c['Alpha2']}, c['Name'])
+  ));
+
 function view(state$) {
   return state$.map(state => {
     let check = checkFields(state.valid)
@@ -147,8 +153,8 @@ function view(state$) {
                   h('input.form-control', {'name': 'city', 'placeholder': ''})]),
                 h('.col-lg-5.form-group' + check('country'), [
                   h('label', {'for': 'country'}, i18('order.country')),
-                  h('input.form-control',
-                    {'name': 'country', 'disabled': true, 'placeholder': '', 'value': 'CH'})]),
+                  h('select.form-control',
+                    {'name': 'country'}, countriesOptions)]),
               ])
             ])),
 
