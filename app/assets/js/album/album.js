@@ -169,7 +169,8 @@ function requests(DOMactions, actions, album$, collection, photos, upload, editi
 
   let shufflePage$ = actions.shuffle$
     .withLatestFrom(collection.state$, photos.state$, album$,
-        (page, collection, photos, album) => {
+        (index, collection, photos, album) => {
+          let page = album[index];
           if (_.isUndefined(page)) return {};
           return {
             page,
