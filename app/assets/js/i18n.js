@@ -14,15 +14,17 @@ let messages = {
     'nav.add': "Ajouter des photos",
 
     'ui.move': "Déplacer la photo sur cette page",
+    'ui.copy': "Copier la photo sur cette page",
     'ui.add': 'Ajouter des photos',
     'ui.shuffle': "Mélanger",
     'ui.title': 'Cliquez ici pour changer le titre...',
     'ui.cover': 'Page de couverture',
     'ui.page': 'Page',
 
-    'toolbar.cover': 'Ajouter à la couverture',
+    'toolbar.cover': 'Ajouter la photo à la couverture',
     'toolbar.remove': 'Supprimer la photo',
     'toolbar.cancel': 'Annuler',
+    'toolbar.rotate': 'Tourner la photo',
 
     'upload.dragclick': "Glissez et déposez les photos, ou cliquez ici",
 
@@ -60,15 +62,17 @@ let messages = {
     'nav.add': 'Add more photos',
 
     'ui.move': "Move photo to this page",
+    'ui.copy': "Copy photo to this page",
     'ui.add': 'Add more photos',
     'ui.shuffle': "Shuffle",
     'ui.title': 'Click here to change the album title...',
     'ui.cover': 'Cover page',
     'ui.page': 'Page',
 
-    'toolbar.cover': 'Add to album cover',
-    'toolbar.remove': 'Remove image',
+    'toolbar.cover': 'Add photo to album cover',
+    'toolbar.remove': 'Remove photo',
     'toolbar.cancel': 'Cancel',
+    'toolbar.rotate': 'Rotate photo',
 
     'upload.dragclick': "Drag to upload or click here",
 

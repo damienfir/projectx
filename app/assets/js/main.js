@@ -62,11 +62,9 @@ function view(collection, album, upload, order, save, editing) {
   $(window).on('scroll', () =>
     !$(document).scrollTop() ?
       $('#nav').removeClass('shadow-lg') :
-      $('#nav').addClass('shadow-lg')
-			); 
+      $('#nav').addClass('shadow-lg')); 
 
 	$('a[href*="#"]:not([href="#"])').click(function() {
-		console.log('ok');
 		if (location.pathname.replace(/^\//,'') == this.pathname.replace(/^\//,'') && location.hostname == this.hostname) {
 			var target = $(this.hash);
 		target = target.length ? target : $('[name=' + this.hash.slice(1) +']');

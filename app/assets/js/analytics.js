@@ -19,7 +19,7 @@ module.exports = function(DOMactions, user, collection, upload, album, order) {
         (files, collection) => ({c: 'files', a: 'upload', l: 'dialog', v: files.length})),
 
     DOMactions.drop$.withLatestFrom(collection.state$,
-      (ev, collection) => ({c: 'files', a: 'upload', l: 'drop', v: files.length})),
+      (files, collection) => ({c: 'files', a: 'upload', l: 'drop', v: files.length})),
 
 
 // album modifications

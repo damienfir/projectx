@@ -6,9 +6,7 @@ import i18 from './i18n';
 
 
 export function renderToolbar(collection, album, upload) {
-  let loaded = album && album.length > 1 && collection.hash !== helpers.demoID && collection.name !== null;
-  // console.log(collection);
-  // console.log(album);
+  let loaded = album && album.length > 1 && collection.hash !== helpers.demoID && !_.isUndefined(collection.id);
   return h('div#nav.navbar.navbar-transparent.navbar-fixed-top', [
       h('div.container-fluid', [
 

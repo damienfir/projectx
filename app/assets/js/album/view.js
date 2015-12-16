@@ -1,29 +1,29 @@
 import {h} from '@cycle/dom';
+import {List, fromJS} from 'immutable';
 import helpers from '../helpers';
 import i18 from '../i18n';
 
 
-let coverpage = {
+let coverpage = fromJS({
   tiles: [],
   index: 0
-};
+});
 
-let blankpage = {
+let blankpage = fromJS({
   tiles: [],
   index: -2
-};
+});
 
 let leftOrRight = (index) => index % 2 ? '.pull-right' : '.pull-left';
 let moveOrNot = (tiles) => tiles.length === 0 ? '.nomove' : '.move-mosaic';
 
 
 let splitIntoSpreads = (spreads, page) => {
-  if(spreads.length && spreads.length > 1 && _.last(spreads).length < 2) {
-    spreads[spreads.length-1].push(page);
+  if(spreads.size > 1 && spreads.last().size < 2) {
+    return spreads.update(spreads.size-1, x => x.push(page));
   } else {
-    spreads.push([page]);
+    return spreads.push(List([page]));
   }
-  return spreads;
 };
 
 
@@ -37,7 +37,8 @@ let renderTile = (tile, tileindex, page, editing) => {
     (editing.selected.page === page && editing.selected.idx === tileindex ? '.tile-selected' : '.tile-unselected') : '';
 
   return h('.ui-tile' + selectedClass,
-      _.extend({
+      // _.extend(
+        {
         'style': {
           height: percent(tile.ty2 - tile.ty1),
           width: percent(tile.tx2 - tile.tx1),
@@ -47,12 +48,13 @@ let renderTile = (tile, tileindex, page, editing) => {
         'data-page': page,
         'data-idx': tileindex
       },
-      (editing.selectedTile ? {} : {'attributes' : {
-          // 'data-toggle': 'tooltip',
-          // 'data-placement': 'top',
-          // 'title': "Click"
-        }
-      })), [
+      // (editing.selectedTile ? {} : {'attributes' : {
+      //     'data-toggle': 'tooltip',
+      //     'data-placement': 'top',
+      //     'title': "Click"
+      //   }
+      // })),
+      [
         h('img', {
           'src': "/photos/"+tile.photoID+"/full/800,/"+(tile.rot || 0)+"/default.jpg",
           'draggable': false,
@@ -89,7 +91,9 @@ let renderBackside = () => {
 
 let renderHover = (editing, page) => 
   (editing.selected && editing.selected.page !== page.index) ?
-    h('.page-hover', {'data-page': page.index, 'data-idx': 0}, h('h2.center', i18('ui.move'))) : '';
+    h('.page-hover',
+        {'data-page': page.index, 'data-idx': 0},
+        h('h2.center', page.index === 0 ? i18('ui.copy') :i18('ui.move'))) : '';
 
 
 let Node = (x,y) => ({x,y});
@@ -168,7 +172,13 @@ let renderToolbar = (editing, page) => {
                 'title': i18('toolbar.remove')
               }},
               h('i.fa.fa-trash-o'))),
-            h('button.btn.btn-info.btn-lg#rotate-btn', [h('i.fa.fa-rotate-right')]),
+            h('button.btn.btn-info.btn-lg#rotate-btn', 
+              {'attributes': {
+                'data-toggle': 'tooltip',
+                'data-placement': 'top',
+                'title': i18('toolbar.rotate')
+              }},
+              h('i.fa.fa-rotate-right')),
             (editing.selected.page !== 0 ? h('button.btn.btn-info.btn-lg#add-cover-btn', {'attributes': {
                 'data-toggle': 'tooltip',
                 'data-placement': 'top',
@@ -221,25 +231,22 @@ let renderSpread = (collection, editing) => (spread, i) => {
 
 
 function renderAlbum(album, collection, editing) {
-  let pages = _.clone(album);
-  if (!pages.length) {
-    pages.push(coverpage);
-  } else {
-    pages = [_.first(pages), blankpage].concat(_.rest(pages)).concat([blankpage]);
-  }
+  let pages = (album.size === 0) ?
+    album.push(coverpage) :
+    List.of(album.first(), blankpage).concat(album.rest()).push(blankpage);
 
-  let spreads = pages.reduce(splitIntoSpreads, []);
-
-  return spreads.filter(spread => !_.some(spread, _.isEmpty))
+  let spreads = pages.reduce(splitIntoSpreads, List());
+    // .filter(spread => !_.some(spread, _.isEmpty))
+  return spreads.map(x => x.toJS())
     .map(renderSpread(collection, editing));
 }
 
 
 module.exports = function(album$, collection$, editing$) {
-  return album$.combineLatest(collection$, editing$,
+  return album$.throttle(300).combineLatest(collection$, editing$,
       (album, collection, editing) => {
         // return !_.isUndefined(collection.id) ?
-        return h('div.container-fluid.album', renderAlbum(album, collection, editing));
+        return h('div.container-fluid.album', renderAlbum(album, collection, editing).toJS());
         // undefined;
       }
     );

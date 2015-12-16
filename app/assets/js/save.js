@@ -52,7 +52,7 @@ module.exports = function(DOM, HTTP, user, collection, album) {
   
 
   actions.save$ = Rx.Observable.merge(
-      album.state$.filter(a => a.length > 1 && !_.some(a, _.isEmpty)),
+      album.state$.filter(a => a.size > 1),// && !_.some(a, _.isEmpty)),
       collection.state$.skip(2),
       actions.submit$)
     .debounce(2000)
@@ -89,7 +89,7 @@ module.exports = function(DOM, HTTP, user, collection, album) {
       url: '/save',
       method: 'POST',
       eager: true,
-      send: {collection, album}
+      send: {collection, album: album.toJS()}
     })).filter(req => req.send.collection.id && req.send.collection.hash !== helpers.demoID && req.send.album),
   }
   

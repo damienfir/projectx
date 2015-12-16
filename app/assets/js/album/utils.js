@@ -1,3 +1,5 @@
+import {List, Map, fromJS} from 'immutable';
+
 var arPaper = Math.sqrt(2);
 
 function resizeTile(tile, tile2, transpose) {
@@ -20,8 +22,6 @@ function resizeTile(tile, tile2, transpose) {
     newTile.cx2 = arTile2/arImg;
     newTile.cy2 = 1.0;
   }
-
-  // console.log(newTile.cx2 + " - "+ newTile.cy2);
 
   var dx = Math.min(1-newTile.cx2, Math.max(0, center[0]-newTile.cx2/2));
   newTile.cx1 += dx;
@@ -89,10 +89,10 @@ let margin = 0.05;
 
 export function getParams(tiles, x, y) {
   let tiles2 = tiles.map((t,i) => ({t,i}));
-  let move_x_tl = tiles2.filter(({t,i}) => Math.abs(t.tx1-x) < margin).map(({t,i}) => i);
-  let move_x_br = tiles2.filter(({t,i}) => Math.abs(t.tx2-x) < margin).map(({t,i}) => i);
-  let move_y_tl = tiles2.filter(({t,i}) => Math.abs(t.ty1-y) < margin).map(({t,i}) => i);
-  let move_y_br = tiles2.filter(({t,i}) => Math.abs(t.ty2-y) < margin).map(({t,i}) => i);
+  let move_x_tl = tiles2.filter(({t,i}) => Math.abs(t.get('tx1')-x) < margin).map(({t,i}) => i);
+  let move_x_br = tiles2.filter(({t,i}) => Math.abs(t.get('tx2')-x) < margin).map(({t,i}) => i);
+  let move_y_tl = tiles2.filter(({t,i}) => Math.abs(t.get('ty1')-y) < margin).map(({t,i}) => i);
+  let move_y_br = tiles2.filter(({t,i}) => Math.abs(t.get('ty2')-y) < margin).map(({t,i}) => i);
   return {move_x_tl, move_y_tl, move_x_br, move_y_br};
 }
 
@@ -100,16 +100,17 @@ let d = 0.1;
 
 
 export function dragTiles(tiles, params, dx, dy) {
-  let canMoveX = params.move_x_tl.length > 0 && params.move_x_br.length > 0;
-  let canMoveY = params.move_y_tl.length > 0 && params.move_y_br.length > 0;
+  let canMoveX = params.move_x_tl.size > 0 && params.move_x_br.size > 0;
+  let canMoveY = params.move_y_tl.size > 0 && params.move_y_br.size > 0;
   let newTiles = tiles
-    .map((t,i) => _.contains(params.move_x_tl,i) && canMoveX ? _.extend(_.clone(t), {tx1: t.tx1+dx}) : t)
-    .map((t,i) => _.contains(params.move_x_br,i) && canMoveX ? _.extend(_.clone(t), {tx2: t.tx2+dx}) : t)
-    .map((t,i) => _.contains(params.move_y_tl,i) && canMoveY ? _.extend(_.clone(t), {ty1: t.ty1+dy}) : t)
-    .map((t,i) => _.contains(params.move_y_br,i) && canMoveY ? _.extend(_.clone(t), {ty2: t.ty2+dy}) : t);
+    .map((t,i) => params.move_x_tl.includes(i) && canMoveX ? t.update('tx1', x => x+dx) : t)
+    .map((t,i) => params.move_x_br.includes(i) && canMoveX ? t.update('tx2', x => x+dx) : t)
+    .map((t,i) => params.move_y_tl.includes(i) && canMoveY ? t.update('ty1', x => x+dy) : t)
+    .map((t,i) => params.move_y_br.includes(i) && canMoveY ? t.update('ty2', x => x+dy) : t);
 
-  if (_.some(newTiles.map(t => [t.tx2-t.tx1, t.ty2-t.ty1]), ([w,h]) => w < d || h < d))
+  if (newTiles.map(t => [t.get('tx2')-t.get('tx1'), t.get('ty2')-t.get('ty1')]).some(([w,h]) => w < d || h < d)) {
     return tiles;
+  }
 
-  return _.zip(tiles, newTiles).map(([a,b]) => resizeTile(a,b));
+  return tiles.map(x => x.toJS()).zip(newTiles.map(x => x.toJS())).map(([a,b]) => fromJS(resizeTile(a,b)));
 }

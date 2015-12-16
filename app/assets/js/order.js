@@ -123,6 +123,32 @@ function view(state$) {
         h('.modal-content', [
           h('.modal-header', ''),
           h('.modal-body', [
+              h('.panel.panel-normal', [
+                  // h('.panel-heading', h('h3.panel-title', "Quantity")),
+                  h('.panel-body.row', [
+                    h('.col-lg-3',
+                      h('.btn-group#qty-selector', {'attributes': {'data-toggle': 'buttons'}}, [
+                        h('label.btn.btn-primary.active', [
+                          h('input#qty1',
+                            {'type': 'radio', 'name': 'qty', 'value': '1', 'autocomplete': 'off', 'checked': 'checked'}),
+                          h('h4', [h('i.fa.fa-book'), " 1"]), "CHF 39.00"
+                        ]),
+                        // h('label.btn.btn-primary', [
+                        //   h('input#qty2', {'type': 'radio', 'name': 'qty', 'value': '3', 'autocomplete': 'off'}),
+                        //   h('h4', "3"), "CHF 99.00"
+                        // ]),
+                        // h('label.btn.btn-primary', [
+                        //   h('input#qty3', {'type': 'radio', 'name': 'qty', 'value': '5', 'autocomplete': 'off'}),
+                        //   h('h4', "5"), "CHF 169.00"
+                        // ]),
+                    ])),
+                  h('.col-lg-9', [
+                      h('p.text-muted', i18('order.desc1')),
+                      h('p', i18('order.desc2'))
+                    ])
+                  ])
+              ]),
+
             h('.panel', 
             h('form.panel-body#order-form', [
               h('.row', [
@@ -169,31 +195,6 @@ function view(state$) {
                   ]))
               ]),
 
-              h('.panel.panel-normal', [
-                  // h('.panel-heading', h('h3.panel-title', "Quantity")),
-                  h('.panel-body.row', [
-                    h('.col-lg-3',
-                      h('.btn-group#qty-selector', {'attributes': {'data-toggle': 'buttons'}}, [
-                        h('label.btn.btn-primary.active', [
-                          h('input#qty1',
-                            {'type': 'radio', 'name': 'qty', 'value': '1', 'autocomplete': 'off', 'checked': 'checked'}),
-                          h('h4', [h('i.fa.fa-book'), " 1"]), "CHF 39.00"
-                        ]),
-                        // h('label.btn.btn-primary', [
-                        //   h('input#qty2', {'type': 'radio', 'name': 'qty', 'value': '3', 'autocomplete': 'off'}),
-                        //   h('h4', "3"), "CHF 99.00"
-                        // ]),
-                        // h('label.btn.btn-primary', [
-                        //   h('input#qty3', {'type': 'radio', 'name': 'qty', 'value': '5', 'autocomplete': 'off'}),
-                        //   h('h4', "5"), "CHF 169.00"
-                        // ]),
-                    ])),
-                  h('.col-lg-9', [
-                      h('p.text-muted', i18('order.desc1')),
-                      h('p', i18('order.desc2'))
-                    ])
-                  ])
-              ])
             ]),
             h('.modal-footer', [
                 _.isUndefined(state.status) ? h('.clearfix', [
