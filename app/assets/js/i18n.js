@@ -88,6 +88,8 @@ let messages = {
     'order.validate': "Validate payment method",
     'order.desc1': 'This price includes printing and shipping.',
     'order.desc2': 'You will not be charged until your order is processed and printed.',
+    'order.desc3': '',
+
     'order.submitting': "Submitting your order...",
     'order.ordered': "Your album has been ordered!",
     'order.confirmation': "You will receive an email to confirm your order, and will be notified when your order has been processed. Thank you!",

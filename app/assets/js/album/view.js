@@ -210,15 +210,22 @@ let renderBtn = (j) => (page, i) => {
 
 let renderSpread = (collection, editing) => (spread, i) => {
   let isCover = (spread.length === 1 && spread[0].index === 0);
-  let cover = isCover ? '.spread-cover' : '';
 
-  return h('.row.spread' + cover, [
-      h('a.spread-anchor', {name: 'spread'+i}),
+  return h('.row.spread' + (isCover ? '.spread-cover' : ''), [
+      h('a.spread-anchor', {
+        name: 'spread'+i
+      }),
 
-      isCover ? '' : h('.col-xs-1.spread-arrow',
-        h('a.btn.btn-link', {href: '#spread'+(i-1)}, h('i.fa.fa-chevron-left.fa-3x'))),
+      isCover ?
+        '' :
+        h('.col-xs-1.spread-arrow',
+          h('a.btn.btn-link', {
+            href: '#spread'+(i-1)
+          },
+          h('i.fa.fa-chevron-left.fa-3x'))),
 
-      h('.spread-paper.shadow.clearfix' + (isCover ? '.col-xs-6.col-xs-offset-3' : '.col-xs-10'),
+      h('.spread-paper.shadow.clearfix' +
+        (isCover ? '.col-xs-6.col-xs-offset-3' : '.col-xs-10'),
         spread.map(renderPage(collection, i, editing))), 
 
       h('.col-xs-1.spread-arrow',
@@ -230,23 +237,26 @@ let renderSpread = (collection, editing) => (spread, i) => {
 };
 
 
-function renderAlbum(album, collection, editing) {
+function renderAlbum(spreads, collection, editing) {
+  return spreads.map(renderSpread(collection, editing));
+}
+
+
+function toSpreads(album) {
   let pages = (album.size === 0) ?
     album.push(coverpage) :
     List.of(album.first(), blankpage).concat(album.rest()).push(blankpage);
 
-  let spreads = pages.reduce(splitIntoSpreads, List());
-    // .filter(spread => !_.some(spread, _.isEmpty))
-  return spreads.map(x => x.toJS())
-    .map(renderSpread(collection, editing));
+  return pages.reduce(splitIntoSpreads, List()).toJS();
 }
 
-
 module.exports = function(album$, collection$, editing$) {
-  return album$.throttle(300).combineLatest(collection$, editing$,
+  return album$
+    .map(toSpreads)
+    .combineLatest(collection$, editing$,
       (album, collection, editing) => {
         // return !_.isUndefined(collection.id) ?
-        return h('div.container-fluid.album', renderAlbum(album, collection, editing).toJS());
+        return h('div.container-fluid.album', renderAlbum(album, collection, editing));
         // undefined;
       }
     );

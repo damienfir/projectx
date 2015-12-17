@@ -24,7 +24,7 @@ function intent(DOM, HTTP) {
 }
 
 
-let params = [];
+let params = {};
 
 let index = page => page.get('index');
 
@@ -72,18 +72,16 @@ function model(DOMactions, actions, collection, editing, upload) {
         params = _.extend(utils.getParams(album.get(ev.page).get('tiles'), ev.x, ev.y), {page: ev.page});
         return album;
     });
-  clickEdge$.subscribe(x => console.log(x));
+  // clickEdge$.subscribe(x => console.log(x));
 
   let dragEdge$ = editing.actions.dragEdge$.map(drag =>
-      album =>
-      album.updateIn([params.page, 'tiles'],
+      album => album.updateIn([params.page, 'tiles'],
         tiles => utils.dragTiles(tiles, params, drag.dx, drag.dy))
   );
-  dragEdge$.subscribe(x => console.log(x));
+  // dragEdge$.subscribe(x => console.log(x));
 
-  return Observable.merge(
+  let state$ = Observable.merge(
       albumUpdated$,
-      // clearAlbum$,
       demoAlbum$,
       albumPageShuffled$,
       swapTiles$,
@@ -94,8 +92,12 @@ function model(DOMactions, actions, collection, editing, upload) {
       dragEdge$
     )
     .startWith(List())
-    .scan(apply)
+    .scan(apply).do(x => console.log(x))
     .shareReplay(1);
+
+  // Observable.merge(clickEdge$, dragEdge$).withLatestFrom(state$, (func, album) => func(album)).subscribe(x => console.log('ok'));
+  
+  return state$;
 }
 
 
@@ -195,9 +197,10 @@ function requests(DOMactions, actions, album$, collection, photos, upload, editi
 
   let addPage$ = pageNew$.map(({page, photos}) => ({photos, page: -1}));
 
-  let photosGroups$ = upload.actions.startUpload$.withLatestFrom(album$, helpers.argArray)
-    .flatMapLatest(([[ev,collection], album]) => {
-      let page = album.size;
+  let albumSize$ = album$.map(album => album.size);
+
+  let photosGroups$ = upload.actions.startUpload$.withLatestFrom(albumSize$, helpers.argArray)
+    .flatMapLatest(([[ev,collection], page]) => {
       return Rx.Observable.from(ev)
         .scan((acc,el) => acc.concat(el), [])
         .scan((prev, files) => {
@@ -234,18 +237,20 @@ function requests(DOMactions, actions, album$, collection, photos, upload, editi
     .share();
 
 
+
+
   // remove last page if empty
   generatePage$
-    .withLatestFrom(album$, (req, album) => req.page.index === album.size-1 && req.photos.length === 0)
+    .withLatestFrom(albumSize$, (req, size) => req.page.index === size-1 && req.photos.length === 0)
     .filter(_.identity)
     .subscribe(r => actions.removeLastPage$.onNext());
 
 
   return {
     createAlbum$: photosGroups$.merge(addPage$)
-      .withLatestFrom(collection.state$, album$,
-        (group, collection, album) => {
-          if (group.page < 0) group.page = album.size;
+      .withLatestFrom(collection.state$, albumSize$,
+        (group, collection, size) => {
+          if (group.page < 0) group.page = size;
           return {
             url: '/collections/'+collection.id+'/pages?index='+group.page,
             method: 'POST',
@@ -256,19 +261,19 @@ function requests(DOMactions, actions, album$, collection, photos, upload, editi
 
     generatePage$: generatePage$
       .filter(req => req.photos.length > 0 && !_.isUndefined(req.page))
-      .withLatestFrom(collection.state$, album$, (req, collection, album) => ({
+      .withLatestFrom(collection.state$, (req, collection) => ({
         url: '/collections/'+collection.id+'/page/'+req.page.id+'?index='+req.page.index,
         method: 'POST',
         send: req.photos
       })),
 
-    downloadAlbum$: DOMactions.download$
-      .withLatestFrom(collection.state$, album$,
-        (x, collection, album) => ({
-          url: '/collections/' + collection.id + '/download',
-          method: 'POST',
-          send: {collection, album: album.toJS()}
-        })),
+    // downloadAlbum$: DOMactions.download$
+    //   .withLatestFrom(collection.state$, album$,
+    //     (x, collection, album) => ({
+    //       url: '/collections/' + collection.id + '/download',
+    //       method: 'POST',
+    //       send: {collection, album: album.toJS()}
+    //     })),
   };
 }
 
