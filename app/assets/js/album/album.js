@@ -28,10 +28,8 @@ let params = {};
 
 let index = page => page.get('index');
 
+
 function model(DOMactions, actions, collection, editing, upload) {
-  // actions.downloadedAlbum$.subscribe(res => {
-  //   window.open("/storage/generated/" + res.text);
-  // });
 
   actions.shuffledPage$.merge(actions.removeLastPage$).subscribe(ev => editing.actions.cancelExt$.onNext(false));
 
@@ -40,14 +38,20 @@ function model(DOMactions, actions, collection, editing, upload) {
 
   let albumUpdated$ = actions.createdAlbum$
     .map(newpage => album => album.push(newpage).sortBy(index));
-  
-  // let clearAlbum$ = DOMactions.reset$
-  //   .map(x => item => []);
 
   let removeLastPage$ = actions.removeLastPage$.map(p => album => album.pop());
 
   let albumPageShuffled$ = actions.shuffledPage$
-    .map(page => album => album.set(page.get('index'), page));
+    .map(page => album => album.update(page.get('index'),
+          p => page.update('tiles',
+            tiles => tiles.map(
+              tile => {
+                let samePhotoID = t => t.get('photoID') === tile.get('photoID');
+                let rot = (p.get('tiles').find(samePhotoID) ||
+                  album.reduce((tiles, page) => tiles.concat(page.get('tiles')), List()).find(samePhotoID) ||
+                  Map({rot: 0})).get('rot');
+                return fromJS(utils.rotateTile(tile.toJS(), rot));
+              }))));
 
 
   // Editing
@@ -64,7 +68,7 @@ function model(DOMactions, actions, collection, editing, upload) {
   let rotatePhoto$ = editing.actions.rotate$
     .withLatestFrom(editing.state$, (ev, editing) => album => 
        album.updateIn([editing.selected.page, 'tiles', editing.selected.idx],
-          tile => utils.rotateTile(tile))
+          tile => fromJS(utils.rotateTile(tile.toJS())))
     );
 
   let clickEdge$ = editing.actions.clickEdge$.map(ev =>
@@ -92,7 +96,7 @@ function model(DOMactions, actions, collection, editing, upload) {
       dragEdge$
     )
     .startWith(List())
-    .scan(apply).do(x => console.log(x))
+    .scan(apply)
     .shareReplay(1);
 
   // Observable.merge(clickEdge$, dragEdge$).withLatestFrom(state$, (func, album) => func(album)).subscribe(x => console.log('ok'));
@@ -127,7 +131,7 @@ function chooseNPics(page) {
 }
 
 
-function requests(DOMactions, actions, album$, collection, photos, upload, editing) {
+function requests(DOMactions, actions, album$, photos, upload, editing) {
 
   let cover$ = editing.actions.cover$.withLatestFrom(editing.state$, (ev, {selected}) => ({
     from: selected,
@@ -138,8 +142,10 @@ function requests(DOMactions, actions, album$, collection, photos, upload, editi
   let moveTile$ = editing.actions.move$.merge(cover$)
     .withLatestFrom(album$, photos.state$, (move, album, photos) => {
       let from = {page: album.get(move.from.page).toJS()};
-      let to = {page: move.to.page > 0 ? album.get(move.to.page).toJS() : undefined};
-      let photoID = from.page.tiles[move.from.idx].photoID;
+      let to = {page: move.to.page >= 0 ? album.get(move.to.page).toJS() : undefined};
+      let tile = from.page.tiles[move.from.idx];
+      if (_.isUndefined(tile)) return false;
+      let photoID = tile.photoID;
 
       let photosFrom = photosFromTiles(photos, from.page.tiles);
       if (_.isUndefined(to.page)) {
@@ -147,16 +153,14 @@ function requests(DOMactions, actions, album$, collection, photos, upload, editi
         from.photos = _.uniq(photosFrom.filter(p => p.id !== photoID));
       } else {
         to.photos = photosFromTiles(photos, to.page.tiles);
-        if (to.page.index === 0) {
-          from.photos = photosFrom;
-        } else {
-          from.photos = _.uniq(photosFrom.filter(p => p.id !== photoID));
-        }
+        from.photos = _.uniq(photosFrom.filter(p => p.id !== photoID));
       }
       to.photos = to.photos.concat(photos.filter(p => p.id === photoID));
 
-      if (from.photos.length > 0 || from.page.index === album.size-1) {
-        return [from, to];
+      if (to.page && to.page.index === 0) {
+        return [to];
+      } else if (from.photos.length > 0 || from.page.index === album.size-1) {
+        return [to, from];
       } else {
         return false;
       }
@@ -179,20 +183,22 @@ function requests(DOMactions, actions, album$, collection, photos, upload, editi
   .filter(_.identity);
 
   let shufflePage$ = actions.shuffle$
-    .withLatestFrom(collection.state$, photos.state$, album$,
-        (index, collection, photos, album) => {
-          let page = album.get(index);
-          if (_.isUndefined(page)) return {};
+    .withLatestFrom(photos.state$, album$,
+        (index, photos, album) => {
+          let page = album.get(index, Map()).toJS();
+          console.log(page);
+          if (!page) return {};
           return {
-            page: page.toJS(),
-            photos: photosFromTiles(photos, page.get('tiles').toJS())
+            page,
+            photos: photosFromTiles(photos, page.tiles)
           };
         })
     .filter(_.identity);
 
 
   let [pageExist$, pageNew$] = moveTile$.partition(req => !_.isUndefined(req.page));
-  let generatePage$ = pageExist$.merge(removeTile$)
+  let generatePage$ = pageExist$
+    .merge(removeTile$)
     .merge(shufflePage$);
 
   let addPage$ = pageNew$.map(({page, photos}) => ({photos, page: -1}));
@@ -237,18 +243,24 @@ function requests(DOMactions, actions, album$, collection, photos, upload, editi
     .share();
 
 
-
-
   // remove last page if empty
   generatePage$
     .withLatestFrom(albumSize$, (req, size) => req.page.index === size-1 && req.photos.length === 0)
     .filter(_.identity)
     .subscribe(r => actions.removeLastPage$.onNext());
 
+  return {
+    createAlbum$: photosGroups$.merge(addPage$),
+    generatePage$: generatePage$.filter(req => req.photos.length > 0 && !_.isUndefined(req.page))
+  };
+}
+
+
+function makeRequests(req, album$, collection) {
+  let albumSize$ = album$.map(album => album.size);
 
   return {
-    createAlbum$: photosGroups$.merge(addPage$)
-      .withLatestFrom(collection.state$, albumSize$,
+    createAlbum$: req.createAlbum$.withLatestFrom(collection.state$, albumSize$,
         (group, collection, size) => {
           if (group.page < 0) group.page = size;
           return {
@@ -259,35 +271,44 @@ function requests(DOMactions, actions, album$, collection, photos, upload, editi
           };
         }),
 
-    generatePage$: generatePage$
-      .filter(req => req.photos.length > 0 && !_.isUndefined(req.page))
-      .withLatestFrom(collection.state$, (req, collection) => ({
+    generatePage$: req.generatePage$.withLatestFrom(collection.state$, (req, collection) => ({
         url: '/collections/'+collection.id+'/page/'+req.page.id+'?index='+req.page.index,
         method: 'POST',
         send: req.photos
-      })),
-
-    // downloadAlbum$: DOMactions.download$
-    //   .withLatestFrom(collection.state$, album$,
-    //     (x, collection, album) => ({
-    //       url: '/collections/' + collection.id + '/download',
-    //       method: 'POST',
-    //       send: {collection, album: album.toJS()}
-    //     })),
+      }))
   };
 }
 
+
+function ui(actions, requests) {
+  let initialState = fromJS({
+    'shuffling': [],
+  });
+
+  let shuffling$ = requests.generatePage$.map(req => req.page.index)
+    .map(page => state => state.update('shuffling', a => a.push(page)))
+    .merge(actions.shuffledPage$.map(page => page.get('index'))
+        .map(page => state => state.update('shuffling', a => a.filter(p => p !== page))));
+
+  let model$ = Rx.Observable.merge(
+    shuffling$
+  );
+
+  return model$.startWith(initialState).scan(apply).shareReplay(1);
+}
 
 
 module.exports = function(DOM, HTTP, DOMactions, collection, photos, upload, editing) {
   let actions = intent(DOM, HTTP);
   let state$ = model(DOMactions, actions, collection, editing, upload);
-  let req = requests(DOMactions, actions, state$, collection, photos, upload, editing);
-  let vtree$ = view(state$, collection.state$, editing.state$);
+  let req = requests(DOMactions, actions, state$, photos, upload, editing);
+  let ui$ = ui(actions, req);
+  let http = makeRequests(req, state$, collection);
+  let vtree$ = view(state$, collection.state$, editing.state$, ui$);
 
   return {
     DOM: vtree$,
-    HTTP: req,
+    HTTP: http,
     state$,
     actions
   };

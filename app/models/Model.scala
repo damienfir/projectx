@@ -36,6 +36,7 @@ object DBModels {
 
   case class Tile(
     photoID: Long,
+    rot: Int,
     cx1: Float,
     cx2: Float,
     cy1: Float,
@@ -91,6 +92,7 @@ object MosaicModels {
 
   case class Tile2(
     imfile: String,
+    rot: Int,
     cx1: Float,
     cx2: Float,
     cy1: Float,

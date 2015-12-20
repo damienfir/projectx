@@ -107,9 +107,9 @@ function main({DOM, HTTP}) {
       .concat(_.values(collection.HTTP))
       .concat(_.values(order.HTTP))
       .concat(_.values(album.HTTP))
-      .concat(_.values(save.HTTP))).do(x => console.log(x));
+      .concat(_.values(save.HTTP)));//.do(x => console.log(x));
 
-  Analytics(DOMactions, user, collection, upload, album, order);
+  // Analytics(DOMactions, user, collection, upload, album, order);
 
   return {
     DOM: view(collection, album, upload, order, save, editing),

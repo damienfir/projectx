@@ -171,6 +171,12 @@ html, body {
   padding: 0;
 }
 
+.shuffling {
+  background-color: #fff;
+  opacity: 0.7;
+  /* animation: fadein 0.3s; */
+}
+
 .spread {
   position: relative;
   margin-bottom: 70px;
@@ -518,13 +524,20 @@ html, body {
 }
 
 
+.full {
+  position: absolute;
+  top: 0; bottom: 0; left: 0; right: 0;
+}
+
 .center {
+  display: block;
   position: absolute;
   margin: 0 auto;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   -webkit-transform: translate(-50%, -50%);
+  -moz-transform: translate(-50%, -50%);
 }
 
 @keyframes fadein {
@@ -532,17 +545,12 @@ html, body {
   to {opacity: 1}
 }
 
-/* @keyframes fade { */
-/*   from {opacity: 1} */
-/*   to {opacity: 0} */
-/* } */
+@keyframes fadeout {
+  from {opacity: 1}
+  to {opacity: 0}
+}
 
 /* .fade { */
 /*   animation: fade 1s linear 0s, fadeout 1s linear 2s; */
 /*   animation-fill-mode: forwards; */
 /* } */
-
-
-.rotate90 { transform: rotate(90deg); }
-.rotate180 { transform: rotate(180deg); }
-.rotate270 { transform: rotate(270deg); }

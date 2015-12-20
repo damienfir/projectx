@@ -140,24 +140,31 @@ let renderAddPhotos = (page, collection) => {
             h('i.fa.fa-camera.fa-3x'), i18('front.upload')]),
       ];
     } else if(page.index == -2) {
-      return h('.newpage', h('button.btn.btn-primary.center#addmore-btn', [
-            h('i.fa.fa-cloud-upload'), ' '+i18('ui.add')]));
+      return h('button.btn.btn-primary.center#addmore-btn', [
+            h('i.fa.fa-cloud-upload'), ' '+i18('ui.add')]);
     }
   }
 };
 
 
-let renderPage = (collection, j, editing) => (page, i) => {
+function renderShuffling() {
+  return [h('i.fa.fa-refresh.fa-spin.fa-4x.center'), h('.shuffling.full')];
+}
+
+let renderPage = (collection, j, editing, ui) => (page, i) => {
   return h('.box-mosaic' + leftOrRight(j*2+i),
-      {'data-page': page.index}, [
-        (j === 1 && i === 0) ? renderBackside() :
-          page.tiles
-            .map((tile, index) => renderTile(tile, index, page.index, editing))
+      {
+        'data-page': page.index
+      }, [
+        (j === 1 && i === 0) ?
+          renderBackside() :
+          page.tiles.map((tile, index) => renderTile(tile, index, page.index, editing))
         .concat(renderTitle(collection, page))
         .concat(renderNodes(page, editing))
         .concat(renderAddPhotos(page, collection))
         .concat(renderHover(editing, page))
         .concat(renderToolbar(editing, page))
+        .concat(ui.get('shuffling').includes(page.index) ? renderShuffling() : '')
       ]);
 };
 
@@ -195,12 +202,16 @@ let renderToolbar = (editing, page) => {
 };
 
 
-let renderBtn = (j) => (page, i) => {
+let renderBtn = (ui, j) => (page, i) => {
   let p = j*2+i;
+  let shuffling = ui.get('shuffling').includes(page.index);
   return h(leftOrRight(p), [
       h('span.page', {'data-page': page.index}, (p === 0 ? i18('ui.cover') : i18('ui.page')+" "+(p-1))+' '),
       page.tiles.length>1 ? h('.btn-group', [
-        h('button.btn.btn-primary.shuffle-btn', {'data-page': page.index}, [h('i.fa.fa-refresh'), " "+i18('ui.shuffle')]), 
+        h('button.btn.btn-primary.shuffle-btn', {
+          'data-page': page.index,
+          'disabled': shuffling
+        }, [h('i.fa.fa-refresh'), " "+i18('ui.shuffle')]), 
         // h('button.btn.btn-primary.btn-xs.incr-btn', {'data-page': page.index}, [h('i.fa.fa-plus'), " More"]),
         // h('button.btn.btn-primary.btn-xs.decr-btn', {'data-page': page.index}, [h('i.fa.fa-minus'), " Less"])
       ]) : ''
@@ -208,7 +219,7 @@ let renderBtn = (j) => (page, i) => {
 };
 
 
-let renderSpread = (collection, editing) => (spread, i) => {
+let renderSpread = (collection, editing, ui) => (spread, i) => {
   let isCover = (spread.length === 1 && spread[0].index === 0);
 
   return h('.row.spread' + (isCover ? '.spread-cover' : ''), [
@@ -226,19 +237,19 @@ let renderSpread = (collection, editing) => (spread, i) => {
 
       h('.spread-paper.shadow.clearfix' +
         (isCover ? '.col-xs-6.col-xs-offset-3' : '.col-xs-10'),
-        spread.map(renderPage(collection, i, editing))), 
+        spread.map(renderPage(collection, i, editing, ui))), 
 
       h('.col-xs-1.spread-arrow',
         h('a.btn.btn-link', {href: '#spread'+(i+1)}, h('i.fa.fa-chevron-right.fa-3x'))),
 
       h('.spread-btn.clearfix' + (isCover ? '.col-xs-6.col-xs-offset-3' : '.col-xs-10.col-xs-offset-1'),
-        spread.map(renderBtn(i))),
+        spread.map(renderBtn(ui, i))),
   ]);
 };
 
 
-function renderAlbum(spreads, collection, editing) {
-  return spreads.map(renderSpread(collection, editing));
+function renderAlbum(spreads, collection, editing, ui) {
+  return spreads.map(renderSpread(collection, editing, ui));
 }
 
 
@@ -250,13 +261,12 @@ function toSpreads(album) {
   return pages.reduce(splitIntoSpreads, List()).toJS();
 }
 
-module.exports = function(album$, collection$, editing$) {
-  return album$
-    .map(toSpreads)
-    .combineLatest(collection$, editing$,
-      (album, collection, editing) => {
+module.exports = function(album$, collection$, editing$, ui$) {
+  return album$.map(toSpreads)
+    .combineLatest(collection$, editing$, ui$,
+      (album, collection, editing, ui) => {
         // return !_.isUndefined(collection.id) ?
-        return h('div.container-fluid.album', renderAlbum(album, collection, editing));
+        return h('div.container-fluid.album', renderAlbum(album, collection, editing, ui));
         // undefined;
       }
     );

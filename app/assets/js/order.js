@@ -176,7 +176,7 @@ function view(state$) {
 
                     h('.row', [
 
-                        h('.col-lg-4.form-group' + check('email'), [
+                        h('.col-lg-6.form-group' + check('email'), [
                           h('label', {
                             'for': 'email'
                           }, i18('order.email')),
@@ -190,7 +190,7 @@ function view(state$) {
                           ]),
                         ]),
 
-                        h('.col-lg-8.form-group' + check('address'), [
+                        h('.col-lg-6.form-group' + check('address'), [
                           h('label', {
                             'for': 'address'
                           }, i18('order.address')),

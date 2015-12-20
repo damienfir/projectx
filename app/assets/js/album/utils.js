@@ -35,28 +35,10 @@ function resizeTile(tile, tile2, transpose) {
 }
 
 
-function transposeTile(tile) {
-  let newTile = _.clone(tile);
-  newTile.tx1 = tile.ty1;
-  newTile.ty1 = tile.tx1;
-  newTile.tx2 = tile.ty2;
-  newTile.ty2 = tile.tx2;
-  return newTile;
-}
-
-function transposeAll(tile) {
-  let newTile = transposeTile(tile);
-  newTile.cx1 = tile.cy1;
-  newTile.cy1 = tile.cx1;
-  newTile.cx2 = tile.cy2;
-  newTile.cy2 = tile.cx2;
-  return newTile;
-}
-
-export function rotateTile(tile) {
-  // tile = transposeAll(resizeTile(tile, transposeTile(tile), true));
+export function rotateTile(tile, deg) {
+  if (deg === 0) return tile;
   tile = resizeTile(tile, tile, true);
-  tile.rot = ((tile.rot || 0) + 90) % 360;
+  tile.rot = ((tile.rot || 0) + (deg || 90)) % 360;
   return tile;
 }
 

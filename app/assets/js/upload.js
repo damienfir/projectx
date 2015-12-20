@@ -88,7 +88,8 @@ function model(actions, DOMactions) {
       // finishedFunc$
     )
     .startWith(initial)
-    .scan(helpers.apply);
+    .scan(helpers.apply)
+    .shareReplay(1);
 }
 
 

@@ -31,23 +31,24 @@ class MosaicService @Inject()() {
   def tileFile(id: String) = Play.current.configuration.getString("px.dir_tile").get + s"/$id"
 
 
-  def tilesToDB(cluster: MosaicModels.Cluster, photos: Seq[DBModels.Photo])(tile: MosaicModels.Tile): DBModels.Tile = {
-    DBModels.Tile(
-      photoID=photos.filter(_.hash.equals(cluster.gists(cluster.sorted(tile.imgindex)).split("/").last)).head.id.get,
-      cx1=tile.cx1,
-      cx2=tile.cx2,
-      cy1=tile.cy1,
-      cy2=tile.cy2,
-      tx1=tile.tx1,
-      tx2=tile.tx2,
-      ty1=tile.ty1,
-      ty2=tile.ty2
-    )
-  }
+  // def tilesToDB(cluster: MosaicModels.Cluster, photos: Seq[DBModels.Photo])(tile: MosaicModels.Tile): DBModels.Tile = {
+  //   DBModels.Tile(
+  //     photoID=photos.filter(_.hash.equals(cluster.gists(cluster.sorted(tile.imgindex)).split("/").last)).head.id.get,
+  //     cx1=tile.cx1,
+  //     cx2=tile.cx2,
+  //     cy1=tile.cy1,
+  //     cy2=tile.cy2,
+  //     tx1=tile.tx1,
+  //     tx2=tile.tx2,
+  //     ty1=tile.ty1,
+  //     ty2=tile.ty2
+  //   )
+  // }
 
   def tilesToDB(photos: Seq[DBModels.Photo])(tile: MosaicModels.Tile2): DBModels.Tile = {
     DBModels.Tile(
       photoID=photos.filter(_.hash.equals((tile.imfile).split("/").last)).head.id.get,
+      rot=tile.rot,
       cx1=tile.cx1,
       cx2=tile.cx2,
       cy1=tile.cy1,
