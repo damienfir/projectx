@@ -192,7 +192,7 @@ class Collections @Inject()(usersDAO: UsersDAO, compositionDAO: CompositionDAO, 
         photoDAO.allFromCollection(collection.id.get)
           .map(photos => photos.map(p => {
             val tile = tiles.find(t => t.photoID == p.id.get)
-            p.id.get -> imageService.bytesToFile(imageService.convert(p.hash, "full", "full", tile.get.rot.get.toString, "default", "jpg"))
+            p.id.get -> imageService.bytesToFile(imageService.convert(p.hash, "full", "full", tile.get.rot.getOrElse(0).toString, "default", "jpg"))
           }).toMap)
           .map(photos => compositions.map(comp => views.html.page(comp, collection, photos).toString))
           .map(svgs => mosaicService.makeAlbumFile(svgs.toList))
