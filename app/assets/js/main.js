@@ -58,7 +58,8 @@ function view(collection, album, upload, order, save, editing) {
       Elements.renderToolbar);
   let buttonDOM = collection.state$.map(Elements.renderStartPage);
 
-  $('body').tooltip({selector: '[data-toggle="tooltip"]'});
+  // $('body').tooltip({selector: '[data-toggle="tooltip"]'});
+
   $(window).on('scroll', () =>
     !$(document).scrollTop() ?
       $('#nav').removeClass('shadow-lg') :
@@ -109,7 +110,7 @@ function main({DOM, HTTP}) {
       .concat(_.values(album.HTTP))
       .concat(_.values(save.HTTP)));//.do(x => console.log(x));
 
-  // Analytics(DOMactions, user, collection, upload, album, order);
+  Analytics(DOMactions, user, collection, upload, album, order);
 
   return {
     DOM: view(collection, album, upload, order, save, editing),

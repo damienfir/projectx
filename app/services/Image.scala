@@ -5,11 +5,13 @@ import play.api.libs.json._
 import play.api.libs.Files.TemporaryFile
 import play.api.Play
 import scala.util.{Try, Success, Failure}
-import scala.concurrent.Future
+import scala.concurrent.{Future, Await}
+import scala.concurrent.duration._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.sys.process._
 
 import java.io._
+import java.nio.file._
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.codec.binary.Hex;
 import java.security.MessageDigest
@@ -19,6 +21,7 @@ import models._
 
 
 class ImageService @Inject()() {
+  def tmp(s: String) = s"/tmp/$s"
   def photoFile(id: String) = Play.current.configuration.getString("px.dir_photos").get + s"/$id"
   def thumbFile(id: String) = Play.current.configuration.getString("px.dir_thumbs").get + s"/$id"
   
@@ -58,6 +61,14 @@ class ImageService @Inject()() {
     val cmd = s"convert - $opts -" #< new File(photoFile(hash)) #> converted
     cmd.!
     converted.toByteArray
+  }
+
+  def bytesToFile(bytes: Future[Array[Byte]]) : String = {
+    val content = Await.result(bytes, 5.seconds)
+    val fname = tmp(hashFromContent(content))
+    val f = Paths.get(fname)
+    Files.write(f, content)
+    fname
   }
 
 //   def save(data: Array[Byte]): String = {

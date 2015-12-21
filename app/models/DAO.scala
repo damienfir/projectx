@@ -109,7 +109,7 @@ class CompositionDAO @Inject()(protected val dbConfigProvider: DatabaseConfigPro
     }
   }
 
-  def allFromCollection(id: Long) = db.run(compositions.filter(_.collectionID === id).result)
+  def allFromCollection(id: Long) = db.run(compositions.filter(_.collectionID === id).result) map (_.sortBy(_.index))
 
   def addWithCollection(id: Long): Future[Composition] = for {
     col <- collectionDAO.get(id)

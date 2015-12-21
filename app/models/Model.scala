@@ -36,7 +36,7 @@ object DBModels {
 
   case class Tile(
     photoID: Long,
-    rot: Int,
+    rot: Option[Int],
     cx1: Float,
     cx2: Float,
     cy1: Float,

@@ -1,5 +1,6 @@
 import Rx from 'rx';
 import {h} from '@cycle/dom';
+import {List, Map, fromJS} from 'immutable';
 import {jsonPOST, jsonGET, apply} from './helpers'
 import helpers from './helpers'
 import i18 from './i18n'
@@ -30,14 +31,26 @@ function intent(DOM, HTTP) {
   let actions = {
     // formSubmit$: DOM.select('#order-form').events('submit').map(cancelDefault),
     orderModal$: btn('#order-btn'),
-    formKeyUp$: DOM.select("#order-form input").events("input").debounce(100).map(ev => extractFields('order-form', fields)),
+
+    formKeyUp$: DOM.select("#order-form input").events("input")
+      .debounce(100)
+      .map(ev => extractFields('order-form', fields)),
+
     formSubmit$: btn('.submit-order-btn'),
-    changeQty$: DOM.select('#qty-selector').events('click').map(helpers.cancel).map(el => getQuantity()),
+    // changeQty$: DOM.select('#qty-selector').events('click').map(helpers.cancel).map(el => getQuantity()),
+    
+    changeQty$: helpers.btn(DOM, '#qty-plus').map(1)
+      .merge(helpers.btn(DOM, '#qty-minus').map(-1))
+      .scan((acc,val) => acc+val, 0),
+
     formSubmitted$: jsonPOST(HTTP, /\/order/),
+
     clientToken$: HTTP.filter(res$ => !_.isUndefined(res$.request.url))
       .filter(res$ => res$.request.url.match(/\/client_token/))
       .mergeAll().map(res => res.text).share(),
+
     nonceReceived$: new Rx.Subject(),
+
     integrationReady$: new Rx.Subject()
   }
 
@@ -48,7 +61,16 @@ function intent(DOM, HTTP) {
 }
 
 
-function model(actions, user, collection) {
+let basePrice = 29.00;
+let tenPagePrice = 5.00;
+let additionalAlbumPrice = 25.00;
+
+function qtyToPrice(qty, pages) {
+  return basePrice + (qty-1)*additionalAlbumPrice;
+}
+
+
+function model(actions, user, collection, album) {
   actions.clientToken$.subscribe(clientToken => {
     braintree.setup(clientToken, "dropin", {
       container: "payment-form",
@@ -57,24 +79,37 @@ function model(actions, user, collection) {
     });
   });
 
-  let initial = {order: {}, info: {}};
+  let initial = fromJS({order: {'qty': 1}, info: {}});
 
-  let updateInfos$ = actions.formKeyUp$.map(info => state => _.extend(state, {info}));
-  let checkForm$ = actions.formKeyUp$.map(formErrors).map(valid => state => _.extend(state, {valid}));
-  let clientToken$ = actions.clientToken$.map(token => state => _.extend(state, {token}));
-  let hasIntegration$ = actions.integrationReady$.map(ready => state => _.extend(state, {ready}));
-  let submitOrder$ = actions.formSubmit$.map(obj => state => _.extend(state, {'status': -1}));
-  let submittedOrder$ = actions.formSubmitted$.map(obj => state => _.extend(state, {'status': obj.status}));
-  let changedQty$ = actions.changeQty$.map(qty => state => _.extend(state, {'order': _.extend(state.order, {qty})}));
+  let updateInfos$ = actions.formKeyUp$.map(info =>
+      state => state.merge({info}));
+
+  let checkForm$ = actions.formKeyUp$.map(formErrors)
+    .map(valid =>
+      state => state.merge({valid}));
+
+  let clientToken$ = actions.clientToken$.map(token =>
+      state => state.merge({token}));
+
+  let hasIntegration$ = actions.integrationReady$.map(ready =>
+      state => state.merge({ready}));
+
+  let submitOrder$ = actions.formSubmit$.map(obj =>
+      state => state.set('status', -1));
+
+  let submittedOrder$ = actions.formSubmitted$.map(obj =>
+      state => state.set('status', obj.status));
+
+  let changedQty$ = actions.changeQty$.map(qty =>
+      state => state.setIn(['order', 'qty'], qty).setIn(['order', 'price'], qtyToPrice(qty)));
 
   let updateNonce$ = actions.nonceReceived$
     .withLatestFrom(user.state$, collection.state$, (obj, user, collection) =>
-        state => _.extend(state, {'order': _.extend(state.order, {
+        state => state.mergeIn(['order'], {
           'nonce': obj.nonce,
           'userID': user.id,
           'collectionID': collection.id,
-          'qty': getQuantity()
-        })}));
+        }));
 
   return Observable.merge(
       clientToken$,
@@ -84,30 +119,33 @@ function model(actions, user, collection) {
       submitOrder$,
       submittedOrder$,
       checkForm$
-    ).startWith(initial).scan(apply);
+    )
+    .startWith(initial)
+    .scan(apply)
+    .shareReplay(1);
 }
 
 
 function requests(actions, state$) {
   return {
     formSubmit$: actions.formSubmit$.withLatestFrom(state$, helpers.argArray)
-      .filter(([ev, state]) => !_.isUndefined(state.valid) && _.every(_.values(state.valid)))
+      .filter(([ev, state]) => !_.isUndefined(state.get('valid')) && state.get('valid').values().every())
       .map(([ev, state]) => ({
         url: '/order',
         method: 'POST',
-        send: {info: state.info, order: state.order},
+        send: {info: state.get('info'), order: state.get('order')},
         eager: true
       })),
 
     clientToken$: actions.orderModal$
-      .withLatestFrom(state$, (ev,state) => state.token)
+      .withLatestFrom(state$, (ev,state) => state.get('token'))
       .filter(_.isUndefined)
       .map({url: '/client_token', 'method': 'GET', 'eager': true})
   }
 }
 
 
-let checkFields = (fields) => (key) => _.isUndefined(fields) ? '' : (fields[key] ? '' : '.has-error')
+let checkFields = (fields) => (key) => _.isEmpty(fields) ? '' : (fields[key] ? '' : '.has-error')
 
 let countriesOptions = [h('option', {'value':''}, "")]
   .concat(countries.map(c => 
@@ -116,23 +154,28 @@ let countriesOptions = [h('option', {'value':''}, "")]
 
 function view(state$) {
   return state$.map(state => {
-    let check = checkFields(state.valid)
+    let check = checkFields(state.get('valid', Map()).toJS());
     return h('.modal.fade#order-modal',
       h('.modal-dialog.modal-lg',
         h('.modal-content', [
           h('.modal-header', ''),
           h('.modal-body',
             h('.row', [
-              h('.col-lg-12', h('.panel.panel-normal', [
-                  // h('.panel-heading', h('h3.panel-title', "Quantity")),
+              h('.col-lg-12', h('.panel.panel-default', [
+                  // h('.panel-heading', h('h3.panel-title', "Album details")),
                   h('.panel-body.row', [
-                    h('.col-lg-3',
-                      h('.btn-group#qty-selector', {'attributes': {'data-toggle': 'buttons'}}, [
-                        h('label.btn.btn-primary.active', [
-                          h('input#qty1',
-                            {'type': 'radio', 'name': 'qty', 'value': '1', 'autocomplete': 'off', 'checked': 'checked'}),
-                          h('h4', [h('i.fa.fa-book'), " 1"]), "CHF 39.00"
-                        ]),
+                    h('.col-lg-3.form-inline', [
+                      h('input.form-control', {
+                        'value': '1'
+                      }),
+                      h('button.btn.btn-primary#qty-minus', h('i.fa.fa-minus')),
+                      h('button.btn.btn-primary#qty-plus', h('i.fa.fa-plus')),
+                      // h('.btn-group#qty-selector', {'attributes': {'data-toggle': 'buttons'}}, [
+                        // h('label.btn.btn-primary.active', [
+                        //   h('input#qty1',
+                        //     {'type': 'radio', 'name': 'qty', 'value': '1', 'autocomplete': 'off', 'checked': 'checked'}),
+                        //   h('h4', [h('i.fa.fa-book'), " 1"]), "CHF 39.00"
+                        // ]),
                         // h('label.btn.btn-primary', [
                         //   h('input#qty2', {'type': 'radio', 'name': 'qty', 'value': '3', 'autocomplete': 'off'}),
                         //   h('h4', "3"), "CHF 99.00"
@@ -141,7 +184,8 @@ function view(state$) {
                         //   h('input#qty3', {'type': 'radio', 'name': 'qty', 'value': '5', 'autocomplete': 'off'}),
                         //   h('h4', "5"), "CHF 169.00"
                         // ]),
-                    ])),
+                    // ])
+                    ]),
                   h('.col-lg-9', [
                       h('p.text-muted', i18('order.desc1')),
                       h('p', i18('order.desc2')),
@@ -150,7 +194,8 @@ function view(state$) {
                   ])
               ])),
 
-              h('.col-lg-8', h('.panel', 
+              h('.col-lg-8', h('.panel.panel-default', [
+                  // h('.panel-heading', h('h3.panel-title', "Delivery address")),
                   h('form.panel-body#order-form', [
                     h('.row', [
 
@@ -229,13 +274,14 @@ function view(state$) {
                             }, i18('order.country')),
                             h('select.form-control', {
                               'name': 'country'
-                            }, countriesOptions)
+                            })//, countriesOptions)
                         ]),
                       ])
-                    ]))),
+                    ])
+                  ])),
 
                     h('.col-lg-4', h('.panel.panel-default', [
-                        // h('.panel-heading', h('h4.panel-title', "Payment information")),
+                        // h('.panel-heading', h('h4.panel-title', "Payment")),
                         h('.panel-body',
                           h('form', [
                             h('div#payment-form'),
@@ -248,9 +294,9 @@ function view(state$) {
 
             h('.modal-footer', [
                 _.isUndefined(state.status) ? h('.clearfix', [
-                   (_.isUndefined(state.order.nonce) || _.isUndefined(state.order.qty)) ? '' :
+                   (_.isUndefined(state.get('order').get('nonce')) || _.isUndefined(state.get('order').get('qty'))) ? '' :
                     h('button.btn.btn-primary.pull-right.submit-order-btn',
-                      {'type': 'button', 'disabled': (_.isUndefined(state.valid) || !_.every(_.values(state.valid)))},
+                      {'type': 'button', 'disabled': (_.isUndefined(state.get('valid')) || !state.valid.values().every())},
                       ['Purchase ', h('i.fa.fa-check')]),
                   h('button.btn.btn-default.pull-left.close-btn.order-cancel-btn',
                     {'data-target': '#order-modal'},

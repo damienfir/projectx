@@ -184,6 +184,22 @@ class Collections @Inject()(usersDAO: UsersDAO, compositionDAO: CompositionDAO, 
         .map(svgs => mosaicService.makeAlbum(svgs))
         .map(Ok(_))
   }
+
+  def pdf(hash: String) = Action.async { request =>
+    collectionDAO.getByHash(0, hash) flatMap { collection => 
+      compositionDAO.allFromCollection(collection.id.get) flatMap { compositions =>
+        val tiles = compositions.map(_.tiles).reduce((acc, t) => acc ++ t)
+        photoDAO.allFromCollection(collection.id.get)
+          .map(photos => photos.map(p => {
+            val tile = tiles.find(t => t.photoID == p.id.get)
+            p.id.get -> imageService.bytesToFile(imageService.convert(p.hash, "full", "full", tile.get.rot.get.toString, "default", "jpg"))
+          }).toMap)
+          .map(photos => compositions.map(comp => views.html.page(comp, collection, photos).toString))
+          .map(svgs => mosaicService.makeAlbumFile(svgs.toList))
+          .map(Ok.sendFile(_))
+      }
+    }
+  }
 }
 
 

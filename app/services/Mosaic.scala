@@ -48,7 +48,7 @@ class MosaicService @Inject()() {
   def tilesToDB(photos: Seq[DBModels.Photo])(tile: MosaicModels.Tile2): DBModels.Tile = {
     DBModels.Tile(
       photoID=photos.filter(_.hash.equals((tile.imfile).split("/").last)).head.id.get,
-      rot=tile.rot,
+      rot=Some(tile.rot),
       cx1=tile.cx1,
       cx2=tile.cx2,
       cy1=tile.cy1,
@@ -180,7 +180,7 @@ class MosaicService @Inject()() {
     height="210mm"></svg>
     """
 
-  def joinPDFs(fnames: List[String]) = {
+  def joinPDFs(fnames: List[String]) : String = {
     val out = UUID.randomUUID.toString + ".pdf"
     "pdfunite " + fnames.mkString(" ") + " " + mosaicFile(out) ! match {
       case 0 => {
@@ -206,6 +206,8 @@ class MosaicService @Inject()() {
   }
 
   def makeAlbum(svgs: List[String]) = joinPDFs(makePDFs(svgs))
+
+  def makeAlbumFile(svgs: List[String]) : File = new File(mosaicFile(makeAlbum(svgs)))
 
   def writeSVG(id: Long, content: String) = {
     val fname = id.toString + ".svg"
