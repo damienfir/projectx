@@ -86,9 +86,11 @@ let messages = {
     'order.city': 'City',
     'order.country': "Country",
     'order.validate': "Validate payment method",
-    'order.desc1': 'This price includes printing and shipping.',
+
+    'order.desc1': 'Dimensions: A4 landscape (297mm x 210mm)',
     'order.desc2': 'You will not be charged until your order is processed and printed.',
     'order.desc3': '',
+    'order.shipping': "(shipping included)",
 
     'order.submitting': "Submitting your order...",
     'order.ordered': "Your album has been ordered!",

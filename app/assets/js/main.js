@@ -4,6 +4,7 @@ import Rx from 'rx';
 import {run} from '@cycle/core';
 import {makeDOMDriver, h} from '@cycle/dom';
 import {makeHTTPDriver} from '@cycle/http';
+import {fromJS, List} from 'immutable';
 
 import * as Elements from './ui';
 
@@ -22,13 +23,24 @@ import Analytics from './analytics';
 let Observable = Rx.Observable;
 
 
+function parseDirectory(dropped) {
+  return _.flatten(dropped
+    .map(f => f.isFile ? f.getAsFile() : f.isDirectory ? parseDirectory(f) : List()));
+}
+
+
 function intent(DOM, HTTP) {
   let cancelDefault = (ev) => { ev.preventDefault(); ev.stopPropagation(); return ev; };
   let btn = (selector) => DOM.select(selector).events('click').map(cancelDefault);
 
   let drop$ = DOM.select("#upload-area").events('drop')
     .map(helpers.cancel)
-    .map(ev => helpers.toArray(ev.dataTransfer.files));
+    .map(ev => helpers.toArray(ev.dataTransfer.items))
+    .map(dropped => {
+      if (dropped.length && dropped[0].webkitGetAsEntry) {
+        return parseDirectory(dropped.map(f => f.webkitGetAsEntry()));
+      } else return dropped.map(d => d.getAsFile()).filter(f => f !== null);
+    });
   let filedialog$ = DOM.select('#file-input').events('change').map(ev => helpers.toArray(ev.target.files));
   let selectFiles$ = filedialog$.merge(drop$);
 

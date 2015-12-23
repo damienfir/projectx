@@ -39,9 +39,8 @@ function intent(DOM, HTTP) {
     formSubmit$: btn('.submit-order-btn'),
     // changeQty$: DOM.select('#qty-selector').events('click').map(helpers.cancel).map(el => getQuantity()),
     
-    changeQty$: helpers.btn(DOM, '#qty-plus').map(1)
-      .merge(helpers.btn(DOM, '#qty-minus').map(-1))
-      .scan((acc,val) => acc+val, 0),
+    changeQty$: btn('#qty-plus').map(1)
+      .merge(btn('#qty-minus').map(-1)),
 
     formSubmitted$: jsonPOST(HTTP, /\/order/),
 
@@ -101,7 +100,7 @@ function model(actions, user, collection, album) {
       state => state.set('status', obj.status));
 
   let changedQty$ = actions.changeQty$.map(qty =>
-      state => state.setIn(['order', 'qty'], qty).setIn(['order', 'price'], qtyToPrice(qty)));
+      state => state.updateIn(['order', 'qty'], q => Math.max(q+qty, 1)));
 
   let updateNonce$ = actions.nonceReceived$
     .withLatestFrom(user.state$, collection.state$, (obj, user, collection) =>
@@ -118,6 +117,7 @@ function model(actions, user, collection, album) {
       hasIntegration$,
       submitOrder$,
       submittedOrder$,
+      changedQty$,
       checkForm$
     )
     .startWith(initial)
@@ -162,39 +162,32 @@ function view(state$) {
           h('.modal-body',
             h('.row', [
               h('.col-lg-12', h('.panel.panel-default', [
-                  // h('.panel-heading', h('h3.panel-title', "Album details")),
-                  h('.panel-body.row', [
-                    h('.col-lg-3.form-inline', [
-                      h('input.form-control', {
-                        'value': '1'
-                      }),
-                      h('button.btn.btn-primary#qty-minus', h('i.fa.fa-minus')),
-                      h('button.btn.btn-primary#qty-plus', h('i.fa.fa-plus')),
-                      // h('.btn-group#qty-selector', {'attributes': {'data-toggle': 'buttons'}}, [
-                        // h('label.btn.btn-primary.active', [
-                        //   h('input#qty1',
-                        //     {'type': 'radio', 'name': 'qty', 'value': '1', 'autocomplete': 'off', 'checked': 'checked'}),
-                        //   h('h4', [h('i.fa.fa-book'), " 1"]), "CHF 39.00"
-                        // ]),
-                        // h('label.btn.btn-primary', [
-                        //   h('input#qty2', {'type': 'radio', 'name': 'qty', 'value': '3', 'autocomplete': 'off'}),
-                        //   h('h4', "3"), "CHF 99.00"
-                        // ]),
-                        // h('label.btn.btn-primary', [
-                        //   h('input#qty3', {'type': 'radio', 'name': 'qty', 'value': '5', 'autocomplete': 'off'}),
-                        //   h('h4', "5"), "CHF 169.00"
-                        // ]),
-                    // ])
+                // h('.panel-heading', h('h3.panel-title', "Album details")),
+                h('.panel-body.row', [
+                  h('.col-lg-4', h('img.img-responsive', {src: '/assets/images/a4.png'})),
+                  h('.col-lg-5', [
+                    // h('p', i18('order.desc1')),
+                    h('p', i18('order.desc2')),
+                    h('p', i18('order.desc3'))
+                  ]),
+                  h('.col-lg-2.text-center', [
+                    h('strong', 'Quantity'),
+                    h('.quantity', [
+                      h('h4', ''+state.get('order').get('qty')),
+                      h('.btn-group', [
+                        h('button.btn.btn-primary#qty-minus', h('i.fa.fa-minus')),
+                        h('button.btn.btn-primary#qty-plus', h('i.fa.fa-plus')),
+                      ]),
                     ]),
-                  h('.col-lg-9', [
-                      h('p.text-muted', i18('order.desc1')),
-                      h('p', i18('order.desc2')),
-                      h('p', i18('order.desc3'))
-                    ])
-                  ])
+                    h('h5', [
+                      "CHF " + qtyToPrice(state.get('order').get('qty')).toFixed(2),
+                    ]),
+                    h('small.text-muted', i18('order.shipping'))
+                  ]),
+                ]),
               ])),
 
-              h('.col-lg-8', h('.panel.panel-default', [
+              h('.col-lg-8', h('div', [
                   // h('.panel-heading', h('h3.panel-title', "Delivery address")),
                   h('form.panel-body#order-form', [
                     h('.row', [

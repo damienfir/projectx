@@ -97,6 +97,7 @@ html, body {
 }
 
 .sliding {
+  -webkit-backface-visibility: hidden;
   animation: sliding 15s ease-in-out 0s infinite alternate, fadein 2s linear 0.5s;
   animation-fill-mode: forwards;
 }

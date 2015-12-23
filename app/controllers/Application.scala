@@ -102,14 +102,17 @@ class Collections @Inject()(usersDAO: UsersDAO, compositionDAO: CompositionDAO, 
   }
 
 
-  def addToCollection(id: Long) = Action.async(parse.multipartFormData) { request =>
+  def addToCollection(id: Long) = Action.async(parse.maxLength(1024*1024*1000*1000, parser=parse.multipartFormData)) { request =>
     // val list = for {
     //   photo <- photoDAO.addToCollection(id, imageService.bytesFromTemp(request.body.files.head.ref))
     //   // processed <- mosaicService.preprocessAll(names)
     // } yield photos
     // list map (items => Ok(Json.toJson(items)))
-    photoDAO.addToCollection(id, imageService.save(request.body.files.head.ref))
-      .map(photo => Ok(Json.toJson(photo.copy(data=Array()))))
+    request.body match {
+      case Left(_) => Future(EntityTooLarge)
+      case Right(body) => photoDAO.addToCollection(id, imageService.save(body.files.head.ref))
+        .map(photo => Ok(Json.toJson(photo.copy(data=Array()))))
+    }
   }
 
 

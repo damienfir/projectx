@@ -23,6 +23,20 @@ html, body {
 .theme-blue .btn-primary:hover { background-color: #48CFAD; border-color: #48CFAD; }
 .theme-blue .btn-primary.active { background-color: #4A89DC; border-color: #4A89DC }
 
+.quantity {
+  display: inline-block;
+  background-color: #5D9CEC;
+  color: #fff; 
+  text-align: center;
+  border-radius: 4px;
+  margin-top: 10px;
+}
+
+.quantity .btn {
+  border-radius: 0 0 4px 4px;
+}
+
+
 @media (min-width: 768px) {
   .modal-md {
     width: 450px;
