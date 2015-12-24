@@ -22,10 +22,26 @@ import Analytics from './analytics';
 
 let Observable = Rx.Observable;
 
+function toArray(list) {
+  return Array.prototype.slice.call(list || [], 0);
+}
 
-function parseDirectory(dropped) {
-  return _.flatten(dropped
-    .map(f => f.isFile ? f.getAsFile() : f.isDirectory ? parseDirectory(f) : List()));
+function parseEntry(f, cb) {
+  if (f.isFile) {
+    cb(f.getAsFile());
+  } else if (f.isDirectory) {
+    let entries = [];
+    let readEntries = (reader) => reader.readEntries((results) => {
+      if (!results.length) {
+        cb(entries);
+      } else {
+        entries = entries.concat(toArray(results));
+        readEntries(reader);
+      }
+    });
+
+    readEntries(f.createReader());
+  } else cb([]);
 }
 
 
@@ -33,14 +49,16 @@ function intent(DOM, HTTP) {
   let cancelDefault = (ev) => { ev.preventDefault(); ev.stopPropagation(); return ev; };
   let btn = (selector) => DOM.select(selector).events('click').map(cancelDefault);
 
+  let listDir = Rx.Observable.fromCallback(parseEntry);
+  let getFile = Rx.Observable.fromCallback((entry, cb) => entry.file(cb));
+
   let drop$ = DOM.select("#upload-area").events('drop')
     .map(helpers.cancel)
-    .map(ev => helpers.toArray(ev.dataTransfer.items))
-    .map(dropped => {
-      if (dropped.length && dropped[0].webkitGetAsEntry) {
-        return parseDirectory(dropped.map(f => f.webkitGetAsEntry()));
-      } else return dropped.map(d => d.getAsFile()).filter(f => f !== null);
-    });
+    .flatMap(ev => Rx.Observable.from(helpers.toArray(ev.dataTransfer.items)))
+    .flatMap(dir => listDir(dir.webkitGetAsEntry ? dir.webkitGetAsEntry() : dir))
+    .map(x => _.flatten(x.filter(f => f !== null)))
+    .flatMap(entries => Rx.Observable.from(entries).flatMap(entry => getFile(entry)).reduce((arr,x) => arr.concat(x), []))
+    .do(x => console.log(x))
   let filedialog$ = DOM.select('#file-input').events('change').map(ev => helpers.toArray(ev.target.files));
   let selectFiles$ = filedialog$.merge(drop$);
 
