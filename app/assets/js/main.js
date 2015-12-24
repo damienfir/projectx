@@ -28,7 +28,7 @@ function toArray(list) {
 
 function parseEntry(f, cb) {
   if (f.isFile) {
-    cb(f.getAsFile());
+    f.getAsFile ? cb([f.getAsFile()]) : cb([f]);
   } else if (f.isDirectory) {
     let entries = [];
     let readEntries = (reader) => reader.readEntries((results) => {
@@ -57,8 +57,7 @@ function intent(DOM, HTTP) {
     .flatMap(ev => Rx.Observable.from(helpers.toArray(ev.dataTransfer.items)))
     .flatMap(dir => listDir(dir.webkitGetAsEntry ? dir.webkitGetAsEntry() : dir))
     .map(x => _.flatten(x.filter(f => f !== null)))
-    .flatMap(entries => Rx.Observable.from(entries).flatMap(entry => getFile(entry)).reduce((arr,x) => arr.concat(x), []))
-    .do(x => console.log(x))
+    .flatMap(entries => Rx.Observable.from(entries).flatMap(entry => getFile(entry)).reduce((arr,x) => arr.concat(x), []));
   let filedialog$ = DOM.select('#file-input').events('change').map(ev => helpers.toArray(ev.target.files));
   let selectFiles$ = filedialog$.merge(drop$);
 
