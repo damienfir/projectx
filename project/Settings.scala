@@ -34,7 +34,7 @@ object Settings {
 
     val react = "0.14.3"
     val jQuery = "1.11.1"
-    val bootstrap = "3.3.2"
+    val bootstrap = "3.3.5"
 
     val playScripts = "0.3.0"
   }
