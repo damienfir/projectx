@@ -6,7 +6,9 @@ import diode.react.ModelProxy
 import diode.react.ReactPot._
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.prefix_<^._
+import monifu.concurrent.Cancelable
 import monifu.concurrent.Implicits.globalScheduler
+import monifu.concurrent.cancelables.BooleanCancelable
 import monifu.reactive.subjects.PublishSubject
 import org.scalajs.dom.raw._
 import org.scalajs.jquery._
@@ -19,6 +21,15 @@ object UI {
   def icon(style: String) = <.i(^.cls := "fa fa-"+style)
 }
 
+case class CoordEvent(x: Double, y: Double, width: Double, height: Double, idx: Int, page: Int)
+object CoordEvent {
+  def apply(page: Int, idx: Int, ev: ReactMouseEvent) = CoordEvent(ev.screenX, ev.screenY,
+    ev.target.attributes.getNamedItem("offsetWidth").value.toDouble,
+    ev.target.attributes.getNamedItem("offsetHeight").value.toDouble,
+    idx, page)
+}
+
+case class Move(dx: Double, dy: Double, coordEvent: CoordEvent)
 
 object Root {
 
@@ -28,9 +39,14 @@ object Root {
       proxy.dispatch(GetFromCookie)
     }
 
+    val mouseUp$ = PublishSubject[Unit]()
+    val mouseMove$ = PublishSubject[CoordEvent]()
+
     def render(proxy: ModelProxy[RootModel]) = {
       <.div(^.className := "theme-blue",
-        proxy.connect(identity)(p => Album(Album.Props(p))),
+        ^.onMouseUp --> Callback(mouseUp$.onNext()),
+        ^.onMouseMove ==> (ev => Callback(mouseMove$.onNext(CoordEvent(0,0,ev)))),
+        proxy.connect(identity)(p => Album(Album.Props(p, mouseUp$, mouseMove$))),
         proxy.connect(identity)(Upload(_))
       )
     }
@@ -92,25 +108,44 @@ object Upload {
 
 
 class AlbumUI($: BackendScope[Album.Props, Album.State], updateAlbum: List[Composition] => Callback) {
-  case class CoordEvent(x: Double, y: Double, img: Node, idx: Int, page: Int)
 
   def tileDown(page: Int, idx: Int)(ev: ReactMouseEvent) = Callback {
-    tileDown$.onNext(CoordEvent(ev.screenX, ev.screenY, ev.target, idx, page))
+    tileDown$.onNext(CoordEvent(page, idx, ev))
   }
 
   val tileDown$ = PublishSubject[CoordEvent]()
   val tileUp$ = PublishSubject[CoordEvent]()
-  val mouseUp$ = PublishSubject[ReactMouseEvent]()
-  val mouseMove$ = PublishSubject[ReactMouseEvent]()
+  val mouseMove$ = PublishSubject[CoordEvent]()
+  val mouseUp$ = PublishSubject[Unit]()
+  $.props.map(_.mouseUp.foreach(_ => mouseUp$.onNext()))
+  $.props.map(_.mouseMove.foreach(ev => mouseMove$.onNext(ev)))
 
-  tileDown$.foreach(ev => {
-    $.props.flatMap(p => p.proxy.dispatch(TestAction)).runNow()
+  var cancelMove = false
+  mouseUp$.doWork(_ => cancelMove = true)
+
+  val drag$ = tileDown$.flatMapLatest(down => {
+    cancelMove = false
+    mouseMove$
+      .takeWhile(_ => !cancelMove)
+      .window(2)
+      .map(_.foldLeft[List[CoordEvent]](Nil)((acc, el) => acc :+ el))
+      .map({case List(prev: CoordEvent, curr: CoordEvent) => Move(
+        dx = (curr.x - prev.x) / down.width,
+        dy = (curr.y - prev.y) / down.height,
+        down
+      )})
   })
+
+
+//  tileDown$.foreach(ev => {
+//    $.props.flatMap(p => p.proxy.dispatch(TestAction)).runNow()
+//  })
+
 }
 
 
 object Album {
-  case class Props(proxy: ModelProxy[RootModel])
+  case class Props(proxy: ModelProxy[RootModel], mouseUp: PublishSubject[Unit], mouseMove: PublishSubject[CoordEvent])
   case class Editing(selected: Option[Composition] = None)
   case class State(editing: Editing)
   case class Node(x: Float, y: Float)
