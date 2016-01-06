@@ -1,7 +1,7 @@
 package bigpiq.client
 
 import bigpiq.shared._
-import diode.data.{Empty, Pot}
+import diode.data.{RefTo, Empty, Pot}
 
 case class RootModel(
   user: Pot[User] = Empty,

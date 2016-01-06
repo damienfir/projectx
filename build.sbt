@@ -40,7 +40,8 @@ lazy val client: Project = (project in file("client"))
       "me.chrons" %%% "diode-react" % "0.3.0",
       "org.scala-js" %%% "scalajs-dom" % "0.8.2",
       "com.lihaoyi" %%% "upickle" % "0.3.6",
-      "be.doeraene" %%% "scalajs-jquery" % "0.8.1"
+      "be.doeraene" %%% "scalajs-jquery" % "0.8.1",
+      "org.monifu" %%% "monifu" % "1.0"
     ),
     // by default we do development build, no eliding
     elideOptions := Seq(),

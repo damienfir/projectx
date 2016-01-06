@@ -113,6 +113,7 @@ case class UpdatePages(pages: Pot[List[Composition]])
 case class UpdateFromHash(stored: Stored)
 case class GetAlbum(hash: String)
 case class GetFromHash()
+case class TestAction()
 
 class FileUploadHandler[M](modelRW: ModelRW[M, RootModel]) extends ActionHandler(modelRW) {
   def uploadFile(file: File, id: Int) = {
@@ -178,6 +179,13 @@ class FileUploadHandler[M](modelRW: ModelRW[M, RootModel]) extends ActionHandler
       }))
       case _ => noChange
     }
+
+    case TestAction => {
+      g.console.log("ok")
+      noChange
+    }
+
+    case UpdateCollection(collection) => updated(value.copy(collection = Ready(collection)))
 
     case UpdateFromHash(stored) => effectOnly {
       Effect(Future(UpdateCollection(stored.collection))) >>
