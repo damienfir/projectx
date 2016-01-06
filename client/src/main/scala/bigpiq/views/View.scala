@@ -21,12 +21,20 @@ object UI {
   def icon(style: String) = <.i(^.cls := "fa fa-"+style)
 }
 
-case class CoordEvent(x: Double, y: Double, width: Double, height: Double, idx: Int, page: Int)
+case class CoordEvent(x: Double, y: Double, w: Double, h: Double, idx: Int, page: Int)
 object CoordEvent {
-  def apply(page: Int, idx: Int, ev: ReactMouseEvent) = CoordEvent(ev.screenX, ev.screenY,
-    ev.target.attributes.getNamedItem("offsetWidth").value.toDouble,
-    ev.target.attributes.getNamedItem("offsetHeight").value.toDouble,
-    idx, page)
+  def apply(page: Int, idx: Int, ev: ReactMouseEvent): CoordEvent = {
+    ev.preventDefault()
+    ev.stopPropagation()
+      CoordEvent(
+        x = ev.screenX,
+        y = ev.screenY,
+        w = jQuery(ev.target).width(),
+        h = jQuery(ev.target).height(),
+        idx = idx,
+        page = page
+      )
+  }
 }
 
 case class Move(dx: Double, dy: Double, coordEvent: CoordEvent)
@@ -34,6 +42,8 @@ case class Move(dx: Double, dy: Double, coordEvent: CoordEvent)
 object Root {
 
   class Backend($: BackendScope[ModelProxy[RootModel], Unit]) {
+    val dataToggle = "data-toggle".reactAttr
+    val dataTarget = "data-target".reactAttr
 
     def mounted(proxy: ModelProxy[RootModel]) = {
       proxy.dispatch(GetFromCookie)
@@ -45,7 +55,8 @@ object Root {
     def render(proxy: ModelProxy[RootModel]) = {
       <.div(^.className := "theme-blue",
         ^.onMouseUp --> Callback(mouseUp$.onNext()),
-        ^.onMouseMove ==> (ev => Callback(mouseMove$.onNext(CoordEvent(0,0,ev)))),
+        ^.onMouseMove ==> ((ev: ReactMouseEvent) => Callback(mouseMove$.onNext(CoordEvent(0, 0, ev)))),
+        <.button(^.cls := "btn btn-primary", dataToggle := "modal", dataTarget := "#upload-modal"),
         proxy.connect(identity)(p => Album(Album.Props(p, mouseUp$, mouseMove$))),
         proxy.connect(identity)(Upload(_))
       )
@@ -67,7 +78,7 @@ object Upload {
   class Backend($: BackendScope[ModelProxy[RootModel], Unit]) {
     def triggerClick() = {
 //      jQuery.apply(fileInput($)).trigger("click")
-      jQuery.apply("#file-input").trigger("click")
+      jQuery(fileInput($).get).trigger("click")
     }
 
     def filelistToList(files: FileList): List[File] = {
@@ -89,7 +100,7 @@ object Upload {
                 ^.`type` := "file",
                 ^.name := "image",
                 ^.multiple := true,
-                ^.ref := Ref("file-input"),
+                ^.ref := Ref("fileInput"),
                 ^.onChange ==> triggerUpload(p)
               )
             )
@@ -109,37 +120,34 @@ object Upload {
 
 class AlbumUI($: BackendScope[Album.Props, Album.State], updateAlbum: List[Composition] => Callback) {
 
-  def tileDown(page: Int, idx: Int)(ev: ReactMouseEvent) = Callback {
-    tileDown$.onNext(CoordEvent(page, idx, ev))
+  var down : Option[CoordEvent] = None
+  var prevMove : Option[CoordEvent] = None
+
+  def mouseDown(ev: CoordEvent) = down = Some(ev)
+
+  def mouseUp() = down = None
+
+  def mouseMove(curr: CoordEvent) : Callback = down match {
+    case Some(down) => prevMove match {
+      case Some(prev) => {
+        prevMove = Some(curr)
+        val m = Move(
+          dx = (curr.x - prev.x) / down.w,
+          dy = (curr.y - prev.y) / down.h,
+          down
+        )
+        $.props.flatMap(p => p.proxy.dispatch(MoveTile(m)))
+      }
+      case None => {
+        prevMove = Some(curr)
+        Callback(None)
+      }
+    }
+    case None => Callback(None)
   }
 
-  val tileDown$ = PublishSubject[CoordEvent]()
-  val tileUp$ = PublishSubject[CoordEvent]()
-  val mouseMove$ = PublishSubject[CoordEvent]()
-  val mouseUp$ = PublishSubject[Unit]()
-  $.props.map(_.mouseUp.foreach(_ => mouseUp$.onNext()))
-  $.props.map(_.mouseMove.foreach(ev => mouseMove$.onNext(ev)))
-
-  var cancelMove = false
-  mouseUp$.doWork(_ => cancelMove = true)
-
-  val drag$ = tileDown$.flatMapLatest(down => {
-    cancelMove = false
-    mouseMove$
-      .takeWhile(_ => !cancelMove)
-      .window(2)
-      .map(_.foldLeft[List[CoordEvent]](Nil)((acc, el) => acc :+ el))
-      .map({case List(prev: CoordEvent, curr: CoordEvent) => Move(
-        dx = (curr.x - prev.x) / down.width,
-        dy = (curr.y - prev.y) / down.height,
-        down
-      )})
-  })
-
-
-//  tileDown$.foreach(ev => {
-//    $.props.flatMap(p => p.proxy.dispatch(TestAction)).runNow()
-//  })
+  $.props.map(_.mouseUp.foreach(_ => mouseUp())).runNow()
+  $.props.map(_.mouseMove.foreach(ev => mouseMove(ev))).runNow()
 
 }
 
@@ -182,11 +190,14 @@ object Album {
       val scaleY = 1.0 / (tile.cy2 - tile.cy1)
 
       < div(^.cls := "ui-tile",
+        ^.key := tile.photoID,
         ^.height := pct(tile.ty2-tile.ty1),
         ^.width  := pct(tile.tx2-tile.tx1),
         ^.top    := pct(tile.ty1),
         ^.left  := pct(tile.tx1),
-        ^.onMouseDown ==> albumUI.tileDown(page, index),
+        ^.onMouseDown ==> ((ev: ReactMouseEvent) => Callback(albumUI.mouseDown(CoordEvent(page, index, ev)))),
+        ^.onMouseMove ==> ((ev: ReactMouseEvent) => albumUI.mouseMove(CoordEvent(page, index, ev))),
+        ^.onMouseUp ==> ((ev: ReactMouseEvent) => Callback(albumUI.mouseUp())),
         < img(^.src := "/photos/"+tile.photoID+"/full/800,/"+tile.rot+"/default.jpg",
           ^.draggable := false,
           ^.height := pct(scaleY),
@@ -200,7 +211,7 @@ object Album {
     def buttons(row: Int)(t: (Composition, Int)) = t match { case (page, col) => {
       val p = row*2+col
       val pull = if ((p % 2) == 0) "pull-left" else "pull-right"
-      <.div(^.cls := pull,
+      <.div(^.cls := pull, ^.key := page.index,
         <.span(^.cls := "page", dataPage := page.index, if (p == 0) "Cover Page" else s"Page ${p-1}"),
         if (page.tiles.length > 1)
           <.div(^.cls := "btn-group",
@@ -310,9 +321,9 @@ object Album {
               spread.zipWithIndex.map({case (page, col) => {
                 val cls = "box-mosaic " + (if ((row*2+col) % 2 == 0) "pull-left" else "pull-right")
                   if (col == 0 && row == 1)
-                    < div( ^.cls := cls, dataPage := page.index, backside())
+                    < div(^.cls := cls, dataPage := page.index, ^.key := page.index, backside())
                   else
-                    < div( ^.cls := cls, dataPage := page.index,
+                    < div(^.cls := cls, dataPage := page.index, ^.key := page.index,
                       page.tiles.zipWithIndex.map(tile(page.index)),
                       if (page.index == 0) p.proxy().collection.render(col => title(col)) else "",
                       nodes(page),

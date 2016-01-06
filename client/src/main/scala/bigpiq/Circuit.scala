@@ -1,5 +1,6 @@
 package bigpiq.client
 
+import bigpiq.client.views.Move
 import bigpiq.shared._
 import diode._
 import diode.data.{Empty, Pot, Ready}
@@ -98,6 +99,22 @@ class PhotoHandler[M](modelRW: ModelRW[M, List[Photo]]) extends ActionHandler(mo
   override def handle = {
     case UpdatePhotos(photos) => updated((value ++ photos).distinct)
     case FileUploaded(photo) => updated(value :+ photo)
+  }
+}
+
+
+case class MoveTile(move: Move)
+
+class AlbumHandler[M](modelRW: ModelRW[M, Pot[List[Composition]]]) extends ActionHandler(modelRW) {
+  def handle = {
+    case MoveTile(move) => updated {
+      Ready(value.get.map {
+        case comp@Composition(_, _, move.coordEvent.page, tiles) =>
+          val oldTile = tiles(move.coordEvent.idx)
+          comp.copy(tiles = tiles.updated(move.coordEvent.idx, AlbumUtil.move(oldTile, move)))
+        case x => x
+      })
+    }
   }
 }
 
@@ -210,6 +227,7 @@ object AppCircuit extends Circuit[RootModel] with ReactConnector[RootModel] {
   override protected def actionHandler = combineHandlers(
     new UserHandler(zoomRW(_.user)((m,v) => m.copy(user = v))),
     new PhotoHandler(zoomRW(_.photos)((m,v) => m.copy(photos = v))),
-    new FileUploadHandler(zoomRW(identity)((m,v) => v))
+    new FileUploadHandler(zoomRW(identity)((m,v) => v)),
+    new AlbumHandler(zoomRW(_.album)((m,v) => m.copy(album = v)))
   )
 }
