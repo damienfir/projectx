@@ -15,7 +15,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{Future, Promise}
 import scala.scalajs.js
 import scala.scalajs.js.Dynamic.{global => g}
-import scala.util.Random
+import scala.util.{Try, Random}
 
 
 object Api {
@@ -49,7 +49,7 @@ object Api {
         throw ex
     })
 
-  def getAlbumHash(): Option[String] = Some("f326de6c-b9b2-4da7-ab21-eebdcf6a5246")
+  def getAlbumHash(): Option[String] =  Some("63cc8b33-c6e8-4fbd-ac6d-6a825fe610d9")
 
   def createCollection(userID: Long) : Future[Pot[Collection]] = postJSON(s"/users/$userID/collections", "{}")
     .map(r => Ready(read[Collection](r)))
@@ -110,8 +110,11 @@ class AlbumHandler[M](modelRW: ModelRW[M, Pot[List[Composition]]]) extends Actio
     case MoveTile(move) => updated {
       Ready(value.get.map {
         case comp@Composition(_, _, move.coordEvent.page, tiles) =>
-          val oldTile = tiles(move.coordEvent.idx)
-          comp.copy(tiles = tiles.updated(move.coordEvent.idx, AlbumUtil.move(oldTile, move)))
+          Try(tiles(move.coordEvent.idx))
+            .map(AlbumUtil.move(_, move))
+            .map(tiles.updated(move.coordEvent.idx, _))
+            .map(tiles => comp.copy(tiles=tiles))
+            .getOrElse(comp)
         case x => x
       })
     }

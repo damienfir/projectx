@@ -5,6 +5,7 @@ import bigpiq.shared._
 import diode.react.ModelProxy
 import diode.react.ReactPot._
 import japgolly.scalajs.react._
+import japgolly.scalajs.react.extra.LogLifecycle
 import japgolly.scalajs.react.vdom.prefix_<^._
 import monifu.concurrent.Cancelable
 import monifu.concurrent.Implicits.globalScheduler
@@ -49,13 +50,13 @@ object Root {
       proxy.dispatch(GetFromCookie)
     }
 
-    val mouseUp$ = PublishSubject[Unit]()
+    val mouseUp$ = PublishSubject[CoordEvent]()
     val mouseMove$ = PublishSubject[CoordEvent]()
 
     def render(proxy: ModelProxy[RootModel]) = {
       <.div(^.className := "theme-blue",
-        ^.onMouseUp --> Callback(mouseUp$.onNext()),
-        ^.onMouseMove ==> ((ev: ReactMouseEvent) => Callback(mouseMove$.onNext(CoordEvent(0, 0, ev)))),
+//        ^.onMouseUp ==> ((ev: ReactMouseEvent) => Callback(mouseUp$.onNext(CoordEvent(0, 0, ev)))),
+//        ^.onMouseMove ==> ((ev: ReactMouseEvent) => Callback(mouseMove$.onNext(CoordEvent(0, 0, ev)))),
         <.button(^.cls := "btn btn-primary", dataToggle := "modal", dataTarget := "#upload-modal"),
         proxy.connect(identity)(p => Album(Album.Props(p, mouseUp$, mouseMove$))),
         proxy.connect(identity)(Upload(_))
@@ -118,16 +119,25 @@ object Upload {
 }
 
 
-class AlbumUI($: BackendScope[Album.Props, Album.State], updateAlbum: List[Composition] => Callback) {
+class AlbumUI($: BackendScope[Album.Props, Album.State], updateAlbum: Move => Callback) {
 
   var down : Option[CoordEvent] = None
   var prevMove : Option[CoordEvent] = None
 
-  def mouseDown(ev: CoordEvent) = down = Some(ev)
+  def mouseDown(ev: CoordEvent) = {
+    g.console.log("mouse down")
+    down = Some(ev)
+  }
 
-  def mouseUp() = down = None
+  def mouseUp(ev: CoordEvent) = {
+    g.console.log("mouse up")
+    down = None
+    prevMove = None
+  }
 
-  def mouseMove(curr: CoordEvent) : Callback = down match {
+  def mouseMove(curr: CoordEvent) : Callback = {
+//    g.console.log("mouse move")
+    down match {
     case Some(down) => prevMove match {
       case Some(prev) => {
         prevMove = Some(curr)
@@ -136,7 +146,8 @@ class AlbumUI($: BackendScope[Album.Props, Album.State], updateAlbum: List[Compo
           dy = (curr.y - prev.y) / down.h,
           down
         )
-        $.props.flatMap(p => p.proxy.dispatch(MoveTile(m)))
+        g.console.log(m.toString)
+        updateAlbum(m)
       }
       case None => {
         prevMove = Some(curr)
@@ -144,16 +155,15 @@ class AlbumUI($: BackendScope[Album.Props, Album.State], updateAlbum: List[Compo
       }
     }
     case None => Callback(None)
-  }
+  }}
 
-  $.props.map(_.mouseUp.foreach(_ => mouseUp())).runNow()
+  $.props.map(_.mouseUp.foreach(ev => mouseUp(ev))).runNow()
   $.props.map(_.mouseMove.foreach(ev => mouseMove(ev))).runNow()
-
 }
 
 
 object Album {
-  case class Props(proxy: ModelProxy[RootModel], mouseUp: PublishSubject[Unit], mouseMove: PublishSubject[CoordEvent])
+  case class Props(proxy: ModelProxy[RootModel], mouseUp: PublishSubject[CoordEvent], mouseMove: PublishSubject[CoordEvent])
   case class Editing(selected: Option[Composition] = None)
   case class State(editing: Editing)
   case class Node(x: Float, y: Float)
@@ -170,14 +180,13 @@ object Album {
     val blankpage = Composition(0, 0, -2, List())
     val coverpage = Composition(0, 0, 0, List())
 
-    def updateAlbum(album: List[Composition]) = $.props flatMap (_.proxy.dispatch(TestAction))
+    def updateAlbum(move: Move) = $.props flatMap (_.proxy.dispatch(MoveTile(move)))
 
     def toSpreads(pages: List[Composition]): List[List[Composition]] = {
       val pages2: List[Composition] = pages match {
         case Nil => List(coverpage)
         case head :: tail => head +: blankpage +: tail :+ blankpage
       }
-
       List(pages2.head) +: pages2.tail.grouped(2).toList
     }
 
@@ -188,7 +197,7 @@ object Album {
     def tile(page: Int)(t: (Tile, Int)) = t match { case (tile, index) => {
       val scaleX = 1.0 / (tile.cx2 - tile.cx1)
       val scaleY = 1.0 / (tile.cy2 - tile.cy1)
-
+      g.console.log("rendering tile "+tile.photoID)
       < div(^.cls := "ui-tile",
         ^.key := tile.photoID,
         ^.height := pct(tile.ty2-tile.ty1),
@@ -197,7 +206,7 @@ object Album {
         ^.left  := pct(tile.tx1),
         ^.onMouseDown ==> ((ev: ReactMouseEvent) => Callback(albumUI.mouseDown(CoordEvent(page, index, ev)))),
         ^.onMouseMove ==> ((ev: ReactMouseEvent) => albumUI.mouseMove(CoordEvent(page, index, ev))),
-        ^.onMouseUp ==> ((ev: ReactMouseEvent) => Callback(albumUI.mouseUp())),
+        ^.onMouseUp ==> ((ev: ReactMouseEvent) => Callback(albumUI.mouseUp(CoordEvent(page, index ,ev)))),
         < img(^.src := "/photos/"+tile.photoID+"/full/800,/"+tile.rot+"/default.jpg",
           ^.draggable := false,
           ^.height := pct(scaleY),
@@ -308,7 +317,7 @@ object Album {
       p.proxy().album.render { pages =>
         toSpreads(pages).zipWithIndex.map({ case (spread, row) => {
           val isCover = spread.length == 1 && spread(0).index == 0
-          < div(^.cls := "row spread "+(if (isCover) "spread-cover" else ""),
+          < div(^.cls := "row spread "+(if (isCover) "spread-cover" else ""), ^.key := row,
 
             < a(^.cls := "spread-anchor",
               ^.name := "spread" + row
@@ -353,10 +362,10 @@ object Album {
     )
   }
 
-  val component = ReactComponentB[Props]("Album")
+  def apply(props: Props) = ReactComponentB[Props]("Album")
     .initialState(State(Editing()))
     .renderBackend[Backend]
+//    .configure(LogLifecycle.short)
     .build
-
-  def apply(props: Props) = component(props)
+    .apply(props)
 }
