@@ -103,23 +103,6 @@ class PhotoHandler[M](modelRW: ModelRW[M, List[Photo]]) extends ActionHandler(mo
 }
 
 
-case class MoveTile(move: Move)
-
-class AlbumHandler[M](modelRW: ModelRW[M, Pot[List[Composition]]]) extends ActionHandler(modelRW) {
-  def handle = {
-    case MoveTile(move) => updated {
-      Ready(value.get.map {
-        case comp@Composition(_, _, move.coordEvent.page, tiles) =>
-          Try(tiles(move.coordEvent.idx))
-            .map(AlbumUtil.move(_, move))
-            .map(tiles.updated(move.coordEvent.idx, _))
-            .map(tiles => comp.copy(tiles=tiles))
-            .getOrElse(comp)
-        case x => x
-      })
-    }
-  }
-}
 
 
 case class CreateCollection(userID: Long)
@@ -132,6 +115,7 @@ case class MakePages(photos: List[Photo], index: Int)
 case class UpdatePages(pages: Pot[List[Composition]])
 case class UpdateFromHash(stored: Stored)
 case class GetAlbum(hash: String)
+case class SetAlbum(album: Pot[List[Composition]])
 case class GetFromHash()
 case class TestAction()
 
@@ -200,8 +184,9 @@ class FileUploadHandler[M](modelRW: ModelRW[M, RootModel]) extends ActionHandler
       case _ => noChange
     }
 
+    case SetAlbum(album) => updated(value.copy(album=album))
+
     case TestAction => {
-      g.console.log("ok")
       noChange
     }
 
@@ -230,7 +215,6 @@ object AppCircuit extends Circuit[RootModel] with ReactConnector[RootModel] {
   override protected def actionHandler = combineHandlers(
     new UserHandler(zoomRW(_.user)((m,v) => m.copy(user = v))),
     new PhotoHandler(zoomRW(_.photos)((m,v) => m.copy(photos = v))),
-    new FileUploadHandler(zoomRW(identity)((m,v) => v)),
-    new AlbumHandler(zoomRW(_.album)((m,v) => m.copy(album = v)))
+    new FileUploadHandler(zoomRW(identity)((m,v) => v))
   )
 }

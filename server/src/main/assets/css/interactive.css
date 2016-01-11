@@ -411,12 +411,12 @@ html, body {
   /* border: 1px solid #ccc; */
   overflow: hidden;
   cursor: move;
-  transition: opacity 0.2s;
+/*  transition: opacity 0.2s;
   -moz-transition: opacity 0.2s;
   -webkit-transition: opacity 0.2s;
   animation: fadein 0.5s;
   -moz-animation: fadein 0.5s;
-  -webkit-animation: fadein 0.5s;
+  -webkit-animation: fadein 0.5s; */
 }
 
 
