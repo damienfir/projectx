@@ -54,14 +54,14 @@ object AlbumUtil {
 
   def edge(album: List[Composition], params: EdgeParams, move: Move): List[Composition] = album map {
     case comp@Composition(_, _, move.coordEvent.page, oldTiles) => {
-      def moveEdge(indices: List[Int], canMove: Boolean, updateTile: Tile => Tile)(t: (Tile, Int)) = t match {
+      def moveEdge(indices: List[Int], canMove: Boolean, updateTile: Tile => Tile)(pair: (Tile, Int)) = pair match {
         case (t,i) => if (canMove && indices.contains(i)) (updateTile(t), i) else (t, i)
       }
 
       g.console.log(params.toString)
 
-      val canMoveX = params.x_tl.length > 0 && params.x_br.length > 0
-      val canMoveY = params.y_tl.length > 0 && params.y_br.length > 0
+      val canMoveX = params.x_tl.nonEmpty && params.x_br.nonEmpty
+      val canMoveY = params.y_tl.nonEmpty && params.y_br.nonEmpty
       val newTiles = oldTiles.zipWithIndex
         .map(moveEdge(params.x_tl, canMoveX, t => t.copy(tx1 = t.tx1 + move.dx.asInstanceOf[Float])))
         .map(moveEdge(params.x_br, canMoveX, t => t.copy(tx2 = t.tx2 + move.dx.asInstanceOf[Float])))
@@ -79,22 +79,24 @@ object AlbumUtil {
     case x => x
   }
 
-  val margin = 0.05;
+  val margin = 0.05
 
 
   def toIndex(t: (Tile, Int)) = t match { case (tile, i) => i }
 
   def getParams(album: List[Composition], ev: CoordEvent): EdgeParams = {
-    def withinMargin(getCoord: Tile => Float, evCoord: CoordEvent => Double)(t: (Tile, Int)) = t match {
-      case (tile, i) => Math.abs(getCoord(tile) - evCoord(ev)) < margin
+    def withinMargin(getCoord: Tile => Float, click: Double)(t: (Tile, Int)) = t match {
+      case (tile, i) => Math.abs(getCoord(tile) - click) < margin
     }
 
+    // val ev = click.copy(x = click.x/click.w, y = click.y/click.h)
+    g.console.log(ev.toString)
     val tiles = album(ev.page).tiles.zipWithIndex
     EdgeParams(
-       x_tl = tiles.filter(withinMargin(_.tx1, _.x)).map(toIndex),
-       y_tl = tiles.filter(withinMargin(_.ty1, _.y)).map(toIndex),
-       x_br = tiles.filter(withinMargin(_.tx2, _.x)).map(toIndex),
-       y_br = tiles.filter(withinMargin(_.ty2, _.y)).map(toIndex)
+       x_tl = tiles.filter(withinMargin(_.tx1, ev.x)).map(toIndex),
+       y_tl = tiles.filter(withinMargin(_.ty1, ev.y)).map(toIndex),
+       x_br = tiles.filter(withinMargin(_.tx2, ev.x)).map(toIndex),
+       y_br = tiles.filter(withinMargin(_.ty2, ev.y)).map(toIndex)
     )
   }
 }

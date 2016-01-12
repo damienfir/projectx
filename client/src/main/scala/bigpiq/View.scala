@@ -14,6 +14,7 @@ import org.scalajs.dom.raw._
 import org.scalajs.jquery._
 
 import scala.collection.immutable.Range
+import scala.scalajs.js.Dynamic
 import scala.scalajs.js.Dynamic.{global => g}
 
 
@@ -21,14 +22,6 @@ object UI {
   def icon(style: String) = <.i(^.cls := "fa fa-"+style)
 }
 
-
-//sealed trait MoveEv {
-//  val x: Double
-//  val y: Double
-//  val w: Double
-//  val h: Double
-//  val page: Int
-//}
 
 case class EdgeParams(x_tl: List[Int], y_tl: List[Int], x_br: List[Int], y_br: List[Int])
 
@@ -46,23 +39,43 @@ object CoordEvent {
       page = page
     )
   }
+
+  def edgeClick(page: Int, ev: ReactMouseEvent): CoordEvent = {
+    ev.preventDefault()
+    ev.stopPropagation()
+    val parent = jQuery(ev.target).parent(".box-mosaic")
+    val pos = jQuery(ev.target).position().asInstanceOf[Dynamic]
+    val w = parent.width()
+    val h = parent.height()
+    CoordEvent(
+      x = pos.selectDynamic("left").asInstanceOf[Double] / w,
+      y = pos.selectDynamic("top").asInstanceOf[Double] / h,
+      w = w,
+      h = h,
+      page = page,
+      idx = 0
+    )
+  }
 }
 
-//case class EdgeEvent(x: Double, y: Double, w: Double, h: Double, page: Int) extends MoveEv
-//object EdgeEvent {
-//  def apply(page: Int, ev: ReactMouseEvent): EdgeEvent = {
-//    ev.preventDefault()
-//    ev.stopPropagation()
-//    val el = jQuery(ev.target).parent(".box-mosaic")
-//    EdgeEvent(
-//      x = ev.screenX,
-//      y = ev.screenY,
-//      w = el.width,
-//      h = el.height,
-//      page = page
-//    )
-//  }
-//}
+// case class EdgeClick(x: Double, y: Double, w: Double, h: Double, page: Int)
+// object EdgeClick {
+//   def apply(page: Int, ev: ReactMouseEvent): EdgeClick = {
+//     ev.preventDefault()
+//     ev.stopPropagation()
+//     val parent = jQuery(ev.target).parent(".box-mosaic")
+//     val pos = jQuery(ev.target).position().asInstanceOf[Dynamic]
+//     val w = parent.width()
+//     val h = parent.height()
+//     EdgeClick(
+//       x = pos.selectDynamic("left")().asInstanceOf[Double] / w,
+//       y = pos.selectDynamic("top").asInstanceOf[Double] / h,
+//       w = w,
+//       h = h,
+//       page = page
+//     )
+//   }
+// }
 
 case class Move(dx: Double, dy: Double, coordEvent: CoordEvent)
 
@@ -103,7 +116,7 @@ object Upload {
   val fileInput = Ref[HTMLInputElement]("fileInput")
 
   class Backend($: BackendScope[ModelProxy[RootModel], Unit]) {
-    def triggerClick() = {
+    def triggerClick = {
 //      jQuery.apply(fileInput($)).trigger("click")
       jQuery(fileInput($).get).trigger("click")
     }
@@ -119,7 +132,8 @@ object Upload {
     def render(p: ModelProxy[RootModel]) = {
       <.div(^.className := "modal fade", ^.id := "upload-modal",
         <.div(^.className := "modal-dialog",
-          <.div(^.className := "modal-content", ^.id := "upload-area", ^.onClick --> Callback(triggerClick),
+          <.div(^.className := "modal-content", ^.id := "upload-area",
+            ^.onClick --> Callback(triggerClick),
             <.div(^.className := "modal-body",
               <.div(^.className := "message", "Click here to upload"),
               <.i(^.className := "fa fa-download fa-3x"),
@@ -169,7 +183,7 @@ class Drag {
         Some(Move(
           dx = (curr.x - prev.x) / down.w,
           dy = (curr.y - prev.y) / down.h,
-          down
+          coordEvent = down
         ))
       }
       case None => {
@@ -208,7 +222,7 @@ object Album {
 
     def moveAlbum(maybeMove: Option[Move]) = maybeMove.map(move =>
       $.modState(s => s.copy(album = Ready(AlbumUtil.move(s.album.get, move))))
-    ) getOrElse (Callback(None))
+    ) getOrElse Callback(None)
 
     def getParams(ev: CoordEvent) = $.modState(s =>
       s.copy(edge = Some(AlbumUtil.getParams(s.album.get, ev)))
@@ -220,9 +234,9 @@ object Album {
 
     def moveEdge(maybeMove: Option[Move]) = maybeMove map { move =>
       $.modState(s => s.copy(album = Ready(AlbumUtil.edge(s.album.get, s.edge.get, move))))
-    } getOrElse (Callback(None))
+    } getOrElse Callback(None)
 
-    def updateAlbum: Callback = for {
+    def updateAlbum(): Callback = for {
       s <- $.state
       p <- $.props
     } yield p.proxy.dispatch(SetAlbum(s.album))
@@ -305,7 +319,7 @@ object Album {
         ^.top := pct(node.y + shift),
         ^.left := pct(node.x + shift),
         ^.onMouseDown ==> ((ev: ReactMouseEvent) =>
-          getParams(edgeDrag.mouseDown(CoordEvent(page, 0, ev, jQuery(ev.target).parent(".box-mosaic"))))),
+          getParams(edgeDrag.mouseDown(CoordEvent.edgeClick(page, ev)))),
         ^.onMouseMove ==> ((ev: ReactMouseEvent) =>
           moveEdge(edgeDrag.mouseMove(CoordEvent(page, 0, ev, jQuery(ev.target).parent(".box-mosaic"))))),
         ^.onMouseUp ==> ((ev: ReactMouseEvent) =>
@@ -371,7 +385,7 @@ object Album {
     def render(p: Props, s: State) = <.div(^.cls:="container-fluid album",
       s.album.render { pages =>
         toSpreads(pages).zipWithIndex.map({ case (spread, row) => {
-          val isCover = spread.length == 1 && spread(0).index == 0
+          val isCover = spread.length == 1 && spread.head.index == 0
           < div(^.cls := "row spread "+(if (isCover) "spread-cover" else ""), ^.key := row,
 
             < a(^.cls := "spread-anchor",
