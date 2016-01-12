@@ -89,15 +89,15 @@ object Root {
       proxy.dispatch(GetFromCookie)
     }
 
-    val mouseUp$ = PublishSubject[CoordEvent]()
-    val mouseMove$ = PublishSubject[CoordEvent]()
+    // val mouseUp$ = PublishSubject[CoordEvent]()
+    // val mouseMove$ = PublishSubject[CoordEvent]()
 
     def render(proxy: ModelProxy[RootModel]) = {
       <.div(^.className := "theme-blue",
-        ^.onMouseUp ==> ((ev: ReactMouseEvent) => Callback(mouseUp$.onNext(CoordEvent(0, 0, ev, jQuery(ev.target))))),
-        ^.onMouseMove ==> ((ev: ReactMouseEvent) => Callback(mouseMove$.onNext(CoordEvent(0, 0, ev, jQuery(ev.target))))),
+        // ^.onMouseUp ==> ((ev: ReactMouseEvent) => Callback(mouseUp$.onNext(CoordEvent(0, 0, ev, jQuery(ev.target))))),
+        // ^.onMouseMove ==> ((ev: ReactMouseEvent) => Callback(mouseMove$.onNext(CoordEvent(0, 0, ev, jQuery(ev.target))))),
         <.button(^.cls := "btn btn-primary", dataToggle := "modal", dataTarget := "#upload-modal"),
-        proxy.connect(identity)(p => Album(Album.Props(p, mouseUp$, mouseMove$))),
+        proxy.connect(identity)(p => Album(Album.Props(p))),
         proxy.connect(identity)(Upload(_))
       )
     }
@@ -170,10 +170,9 @@ class Drag {
     ev
   }
 
-  def mouseUp(ev: CoordEvent) = {
+  def mouseUp = {
     down = None
     prevMove = None
-    ev
   }
 
   def mouseMove(curr: CoordEvent): Option[Move] = down match {
@@ -194,15 +193,15 @@ class Drag {
     case None => None
   }
 
-  def setProps(props: CallbackTo[Album.Props], up: => Callback, move: Option[Move] => Callback) =  {
-    props.map(_.mouseUp.foreach(ev => (Callback(mouseUp(ev)) >> up).runNow())).runNow()
-    props.map(_.mouseMove.foreach(ev => move(mouseMove(ev)).runNow())).runNow()
-  }
+  // def setProps(props: CallbackTo[Album.Props], up: => Callback, move: Option[Move] => Callback) =  {
+  //   props.map(_.mouseUp.foreach(ev => (Callback(mouseUp)) >> up).runNow())).runNow()
+  //   props.map(_.mouseMove.foreach(ev => move(mouseMove(ev)).runNow())).runNow()
+  // }
 }
 
 
 object Album {
-  case class Props(proxy: ModelProxy[RootModel], mouseUp: PublishSubject[CoordEvent], mouseMove: PublishSubject[CoordEvent])
+  case class Props(proxy: ModelProxy[RootModel])//, mouseUp: PublishSubject[CoordEvent], mouseMove: PublishSubject[CoordEvent])
   case class Editing(selected: Composition)
   case class State(album: Pot[List[Composition]] = Empty, editing: Option[Editing] = None, edge: Option[EdgeParams] = None)
   case class Node(x: Float, y: Float)
@@ -220,21 +219,30 @@ object Album {
     val blankpage = Composition(0, 0, -2, List())
     val coverpage = Composition(0, 0, 0, List())
 
-    def moveAlbum(maybeMove: Option[Move]) = maybeMove.map(move =>
+    def imageMouseDown(page: Int, index: Int)(ev: ReactMouseEvent) = 
+      Callback(imageDrag.mouseDown(CoordEvent(page, index, ev, jQuery(ev.target))))
+
+    def moveAlbum(page: Int, index: Int)(ev: ReactMouseEvent) = 
+      imageDrag.mouseMove(CoordEvent(page, index, ev, jQuery(ev.target))) map (move =>
       $.modState(s => s.copy(album = Ready(AlbumUtil.move(s.album.get, move))))
     ) getOrElse Callback(None)
 
-    def getParams(ev: CoordEvent) = $.modState(s =>
-      s.copy(edge = Some(AlbumUtil.getParams(s.album.get, ev)))
-    )
+    def getParams(page: Int)(ev: ReactMouseEvent) = {
+      val coordEvent = CoordEvent.edgeClick(page, ev)
+      Callback(edgeDrag.mouseDown(coordEvent)) >>
+      $.modState(s =>
+        s.copy(edge = Some(AlbumUtil.getParams(s.album.get, coordEvent)))
+      )
+    }
 
     def freeParams = $.modState(s =>
       s.copy(edge = None)
     ) >> updateAlbum
 
-    def moveEdge(maybeMove: Option[Move]) = maybeMove map { move =>
-      $.modState(s => s.copy(album = Ready(AlbumUtil.edge(s.album.get, s.edge.get, move))))
-    } getOrElse Callback(None)
+    def moveEdge(page: Int)(ev: ReactMouseEvent) =
+      edgeDrag.mouseMove(CoordEvent(page, 0, ev, jQuery(ev.target).parent(".box-mosaic"))) map { move =>
+        $.modState(s => s.copy(album = Ready(AlbumUtil.edge(s.album.get, s.edge.get, move))))
+      } getOrElse Callback(None)
 
     def updateAlbum(): Callback = for {
       s <- $.state
@@ -262,12 +270,9 @@ object Album {
         ^.width  := pct(tile.tx2-tile.tx1),
         ^.top    := pct(tile.ty1),
         ^.left  := pct(tile.tx1),
-        ^.onMouseDown ==> ((ev: ReactMouseEvent) =>
-          Callback(imageDrag.mouseDown(CoordEvent(page, index, ev, jQuery(ev.target))))),
-        ^.onMouseMove ==> ((ev: ReactMouseEvent) =>
-          moveAlbum(imageDrag.mouseMove(CoordEvent(page, index, ev, jQuery(ev.target))))),
-        ^.onMouseUp ==> ((ev: ReactMouseEvent) =>
-          Callback(imageDrag.mouseUp(CoordEvent(page, index ,ev, jQuery(ev.target)))) >> updateAlbum),
+        ^.onMouseDown ==> imageMouseDown(page, index),
+        ^.onMouseMove ==> ((ev: ReactMouseEvent) => moveAlbum(page, index)(ev) >> moveEdge(page)(ev)),
+        ^.onMouseUp --> (Callback(imageDrag.mouseUp) >> Callback(edgeDrag.mouseUp) >> updateAlbum),
         < img(^.src := "/photos/"+tile.photoID+"/full/800,/"+tile.rot+"/default.jpg",
           ^.draggable := false,
           ^.height := pct(scaleY),
@@ -318,14 +323,9 @@ object Album {
         ^.cls := "node shadow",
         ^.top := pct(node.y + shift),
         ^.left := pct(node.x + shift),
-        ^.onMouseDown ==> ((ev: ReactMouseEvent) =>
-          getParams(edgeDrag.mouseDown(CoordEvent.edgeClick(page, ev)))),
-        ^.onMouseMove ==> ((ev: ReactMouseEvent) =>
-          moveEdge(edgeDrag.mouseMove(CoordEvent(page, 0, ev, jQuery(ev.target).parent(".box-mosaic"))))),
-        ^.onMouseUp ==> ((ev: ReactMouseEvent) =>
-          Callback(edgeDrag.mouseUp(CoordEvent(page, 0, ev, jQuery(ev.target).parent(".box-mosaic"))))
-            >> freeParams
-            >> updateAlbum)
+        ^.onMouseDown ==> getParams(page) ,
+        ^.onMouseMove ==> moveEdge(page),
+        ^.onMouseUp --> (Callback(edgeDrag.mouseUp) >> freeParams >> updateAlbum)
       )
 
     def nodes(page: Composition) = {
@@ -431,8 +431,8 @@ object Album {
     )
 
     def willMount(props: Props) = {
-      imageDrag.setProps($.props, updateAlbum, moveAlbum)
-      edgeDrag.setProps($.props, freeParams, moveEdge)
+      // imageDrag.setProps($.props, updateAlbum, moveAlbum)
+      // edgeDrag.setProps($.props, freeParams, moveEdge)
       $.setState(State(props.proxy().album, None, None))
     }
   }

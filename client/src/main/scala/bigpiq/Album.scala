@@ -8,11 +8,8 @@ import scala.util.Try
 
 object AlbumUtil {
   def moveCoord(c: (Float, Float), offset: Double): (Float, Float) = {
-//    g.console.log(offset.asInstanceOf[Float])
     val new1 = Math.max(0, c._1 - offset.asInstanceOf[Float])
-//    g.console.log(new1)
     val new2 = new1 + (c._2 - c._1)
-//    g.console.log(new2)
     if (new2 > 1) c else (new1, new2)
   }
 
@@ -40,7 +37,7 @@ object AlbumUtil {
     val arImg = arTile / ((a.cx2-a.cx1) / (a.cy2-a.cy1))
     val arTile2 = arPaper * (b.tx2-b.tx1) / (b.ty2-b.ty1)
 
-    val center = ((a.cx2-a.cx1)/2.0, (a.cy2-a.cy1)/2.0)
+    val center = ((a.cx2+a.cx1)/2.0, (a.cy2+a.cy1)/2.0)
 
     val c = if (arImg < arTile2) b.copy(cx2 = 1, cy2 = arImg/arTile2, cx1 = 0, cy1 = 0)
       else b.copy(cx2 = arTile2/arImg, cy2 = 1, cx1 = 0, cy1 = 0)
@@ -79,7 +76,7 @@ object AlbumUtil {
     case x => x
   }
 
-  val margin = 0.05
+  val margin = 0.08
 
 
   def toIndex(t: (Tile, Int)) = t match { case (tile, i) => i }
@@ -90,7 +87,6 @@ object AlbumUtil {
     }
 
     // val ev = click.copy(x = click.x/click.w, y = click.y/click.h)
-    g.console.log(ev.toString)
     val tiles = album(ev.page).tiles.zipWithIndex
     EdgeParams(
        x_tl = tiles.filter(withinMargin(_.tx1, ev.x)).map(toIndex),
