@@ -1,6 +1,6 @@
 package bigpiq.client
 
-import bigpiq.client.views.{CoordEvent, EdgeParams, Move}
+import bigpiq.client.views.{CoordEvent, EdgeParams, Move, Selected}
 import bigpiq.shared.{Composition, Tile}
 
 import scala.scalajs.js.Dynamic.{global => g}
@@ -30,9 +30,21 @@ object AlbumUtil {
     case x => x
   }
 
+  def swapTiles(album: List[Composition], from: Selected, to: Selected): List[Composition] = album map {
+    case comp@Composition(_, _, from.page, oldTiles) => {
+      val fromTile = oldTiles(from.index)
+      val toTile = oldTiles(to.index)
+      comp.copy(tiles = oldTiles
+        .updated(to.index, resizeTile(fromTile, toTile))
+        .updated(from.index, resizeTile(toTile, fromTile))
+      )
+    }
+    case x => x
+  }
+
   val arPaper = Math.sqrt(2).asInstanceOf[Float]
 
-  def resizeTile(t: (Tile, Tile)): Tile = t match { case (a, b) =>
+  def resizeTile(a: Tile, b: Tile): Tile = {
     val arTile = arPaper * ((a.tx2-a.tx1) / (a.ty2-a.ty1))
     val arImg = arTile / ((a.cx2-a.cx1) / (a.cy2-a.cy1))
     val arTile2 = arPaper * (b.tx2-b.tx1) / (b.ty2-b.ty1)
@@ -44,18 +56,16 @@ object AlbumUtil {
 
     val dx = Math.min(1-c.cx2, Math.max(0, center._1-c.cx2/2.0)).asInstanceOf[Float]
     val dy = Math.min(1-c.cy2, Math.max(0, center._2-c.cy2/2.0)).asInstanceOf[Float]
-    c.copy(cx1 = c.cx1+dx, cx2 = c.cx2+dx, cy1 = c.cy1+dy, cy2 = c.cy2+dy)
+    c.copy(cx1 = c.cx1+dx, cx2 = c.cx2+dx, cy1 = c.cy1+dy, cy2 = c.cy2+dy, photoID = a.photoID)
   }
 
-  val d = 0.1;
+  val d = 0.1
 
   def edge(album: List[Composition], params: EdgeParams, move: Move): List[Composition] = album map {
     case comp@Composition(_, _, move.coordEvent.page, oldTiles) => {
       def moveEdge(indices: List[Int], canMove: Boolean, updateTile: Tile => Tile)(pair: (Tile, Int)) = pair match {
         case (t,i) => if (canMove && indices.contains(i)) (updateTile(t), i) else (t, i)
       }
-
-      g.console.log(params.toString)
 
       val canMoveX = params.x_tl.nonEmpty && params.x_br.nonEmpty
       val canMoveY = params.y_tl.nonEmpty && params.y_br.nonEmpty
@@ -69,14 +79,14 @@ object AlbumUtil {
       comp.copy(tiles = if (newTiles map (t => (t.tx2-t.tx1, t.ty2-t.ty1)) exists (dim => dim._1 < d || dim._2 < d)) {
         oldTiles
       } else {
-        oldTiles.zip(newTiles).map(resizeTile)
+        oldTiles.zip(newTiles).map({ case (a,b) => resizeTile(a,b)})
       })
     }
 
     case x => x
   }
 
-  val margin = 0.08
+  val margin = 0.05
 
 
   def toIndex(t: (Tile, Int)) = t match { case (tile, i) => i }

@@ -1,6 +1,6 @@
 package bigpiq.client
 
-import bigpiq.client.views.Move
+import bigpiq.client.views.{Move, Selected}
 import bigpiq.shared._
 import diode._
 import diode.data.{Empty, Pot, Ready}
@@ -12,11 +12,14 @@ import org.scalajs.jquery.{JQueryAjaxSettings, _}
 import upickle.default._
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import collection.breakOut
 import scala.concurrent.{Future, Promise}
 import scala.scalajs.js
 import scala.scalajs.js.Dynamic.{global => g}
 import scala.util.{Try, Random}
 
+
+case class Save(album: List[Composition], collection: Collection)
 
 object Api {
   def postJSON(url: String, data: String) = Ajax.post(
@@ -64,7 +67,15 @@ object Api {
 
   def makePages(photos: List[Photo], collectionID: Long, index: Int) : Future[Pot[List[Composition]]] =
     postJSON(s"/collections/$collectionID/pages?index=$index", write(photos))
-      .map(v => Ready(read[List[Composition]](v)))
+      .map(v => Ready(List(read[Composition](v)))).recover({
+      case ex: Exception =>
+        g.console.log(ex.toString)
+        Empty
+    })
+
+  def save(toSave: Save) = {
+    postJSON(s"/save", write(toSave))
+  }
 }
 
 case class CreateUser()
@@ -84,8 +95,8 @@ class UserHandler[M](modelRW: ModelRW[M, Pot[User]]) extends ActionHandler(model
     case GetUser(id) => effectOnly(Effect(Api.getUser(id).map(u => UpdateUser(u))))
 //    case CreateUser => effectOnly(UserApi.createUser())
     case GetFromCookie => effectOnly {
-      Effect(Future(Api.getUserFromCookie().map(GetUser(_))).map(_.getOrElse(None))) >>
-      Effect(Future(GetFromHash))
+      Effect(Future(Api.getUserFromCookie().map(GetUser)).map(_.getOrElse(None))) >>
+      Effect.action(GetFromHash)
     }
   }
 }
@@ -109,6 +120,43 @@ case class CreateCollection(userID: Long)
 case class UpdateCollection(collection: Collection)
 case class UpdateCollectionThenUpload(collection: Pot[Collection], files: List[File])
 
+case class AddToCover(selected: Selected)
+case class MoveTile(from: Selected, to: Selected)
+
+class AlbumHandler[M](modelRW: ModelRW[M, RootModel]) extends ActionHandler(modelRW) {
+
+  def getPhotos(index: Int) =
+    value.photos.filter(p => value.album.get(index).tiles.exists(_.photoID == p.id))
+
+  override def handle = {
+
+    case AddToCover(selected) => {
+      g.console.log("add to cover")
+      noChange
+    }
+
+    case MoveTile(from, to) => {
+      val fromPhotos = getPhotos(from.page)
+      val toPhotos = getPhotos(to.page)
+      val photoID = value.album.get(from.page).tiles(from.index).photoID
+
+      if (value.album.get(from.page).tiles.length == 1) {
+        if (from.page == value.album.get.length-1) {
+          val lastPage = value.album.get(from.page).copy(tiles = Nil)
+          effectOnly(Effect(Api.makePages(toPhotos ++ fromPhotos, value.collection.get.id, to.page)
+            .map(pages => UpdatePages(Ready(pages.get :+ lastPage)))))
+        } else noChange
+      } else effectOnly {
+        Effect(Api.makePages(fromPhotos.filter(_.id != photoID), value.collection.get.id, from.page).map(UpdatePages)) +
+        Effect(Api.makePages(toPhotos ++ fromPhotos.filter(_.id == photoID), value.collection.get.id, to.page).map(UpdatePages))
+      }
+    }
+
+    case SetAlbum(album) => {
+      updated(value.copy(album = album))
+    }
+  }
+}
 
 case class UploadFiles(files: List[File], index: Int = 0)
 case class MakePages(photos: List[Photo], index: Int)
@@ -118,6 +166,8 @@ case class GetAlbum(hash: String)
 case class SetAlbum(album: Pot[List[Composition]])
 case class GetFromHash()
 case class TestAction()
+case class SaveAlbum()
+
 
 class FileUploadHandler[M](modelRW: ModelRW[M, RootModel]) extends ActionHandler(modelRW) {
   def uploadFile(file: File, id: Int) = {
@@ -144,11 +194,11 @@ class FileUploadHandler[M](modelRW: ModelRW[M, RootModel]) extends ActionHandler
           case _: List[_] =>
             val (fileSet, rest) =
               if (index == 0) (files.take(1), files)
-              else files.splitAt(Math.min((new Random()).nextInt(3)+1, files.length))
+              else files.splitAt(Math.min(new Random().nextInt(3)+1, files.length))
             effectOnly {
               Effect(Future.sequence(fileSet.map(f => uploadFile(f, collection.id)))
                 .map(photos => MakePages(photos, index))) >>
-              Effect(Future(UploadFiles(rest, index+1) ))
+              Effect.action(UploadFiles(rest, index+1))
             }
         }
         case Empty => effectOnly(Effect(Api.createCollection(user.id)
@@ -167,24 +217,27 @@ class FileUploadHandler[M](modelRW: ModelRW[M, RootModel]) extends ActionHandler
     }
 
     case UpdateUserThenUpload(user, files) =>
-      updated(value.copy(user = user), Effect(Future(UploadFiles(files))))
+      updated(value.copy(user = user), Effect.action(UploadFiles(files)))
 
     case UpdateCollectionThenUpload(col, files) =>
-      updated(value.copy(collection = col), Effect(Future(UploadFiles(files))))
+      updated(value.copy(collection = col), Effect.action(UploadFiles(files)))
 
     case MakePages(photos, index) => effectOnly {
       Effect(Api.makePages(photos, value.collection.get.id, index).map(p => UpdatePages(p)))
     }
 
-    case UpdatePages(pages) => pages match {
-      case Ready(newPages) => updated(value.copy(album = value.album match {
-        case Ready(existingPages) => Ready((existingPages ++ newPages).sortBy(_.index))
-        case _ => Ready(newPages)
-      }))
+    case UpdatePages(pages) => {
+      g.console.log("update pages")
+      pages match {
+      case Ready(newPages) => updated(value.copy(album = Ready(value.album match {
+        case Ready(existingPages) => existingPages
+          .filter(p => !newPages.exists(_.index == p.index)) ++ newPages
+        case _ => newPages
+      })
+        .map(_.filter(_.tiles.nonEmpty).groupBy(_.index).map(_._2.head).toList.sortBy(_.index))),
+        Effect.action(SaveAlbum))
       case _ => noChange
-    }
-
-    case SetAlbum(album) => updated(value.copy(album=album))
+    }}
 
     case TestAction => {
       noChange
@@ -205,6 +258,10 @@ class FileUploadHandler[M](modelRW: ModelRW[M, RootModel]) extends ActionHandler
     case GetFromHash => effectOnly {
       Effect(Future(Api.getAlbumHash().map(h => GetAlbum(h))).map(_.getOrElse(None)))
     }
+
+    case SaveAlbum => effectOnly {
+      Effect(Api.save(Save(value.album.get, value.collection.get)))
+    }
   }
 }
 
@@ -215,6 +272,7 @@ object AppCircuit extends Circuit[RootModel] with ReactConnector[RootModel] {
   override protected def actionHandler = combineHandlers(
     new UserHandler(zoomRW(_.user)((m,v) => m.copy(user = v))),
     new PhotoHandler(zoomRW(_.photos)((m,v) => m.copy(photos = v))),
-    new FileUploadHandler(zoomRW(identity)((m,v) => v))
+    new FileUploadHandler(zoomRW(identity)((m,v) => v)),
+    new AlbumHandler(zoomRW(identity)((m,v) => v))
   )
 }

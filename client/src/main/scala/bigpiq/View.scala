@@ -24,6 +24,7 @@ object UI {
 
 
 case class EdgeParams(x_tl: List[Int], y_tl: List[Int], x_br: List[Int], y_br: List[Int])
+case class Selected(page: Int, index: Int)
 
 case class CoordEvent(x: Double, y: Double, w: Double, h: Double, idx: Int, page: Int)
 object CoordEvent {
@@ -165,14 +166,17 @@ class Drag {
   var prevMove : Option[CoordEvent] = None
 
   def mouseDown(ev: CoordEvent) = {
-    prevMove = Some(ev)
     down = Some(ev)
     ev
   }
 
-  def mouseUp = {
+  def mouseUp: Option[CoordEvent] = {
     down = None
-    prevMove = None
+    val prevMoveSave = prevMove
+    prevMoveSave map { p =>
+      prevMove = None
+      p
+    }
   }
 
   def mouseMove(curr: CoordEvent): Option[Move] = down match {
@@ -200,10 +204,10 @@ class Drag {
 }
 
 
+
 object Album {
   case class Props(proxy: ModelProxy[RootModel])//, mouseUp: PublishSubject[CoordEvent], mouseMove: PublishSubject[CoordEvent])
-  case class Editing(selected: Composition)
-  case class State(album: Pot[List[Composition]] = Empty, editing: Option[Editing] = None, edge: Option[EdgeParams] = None)
+  case class State(album: Pot[List[Composition]] = Empty, editing: Option[Either[Selected, Selected]] = None, edge: Option[EdgeParams] = None)
   case class Node(x: Float, y: Float)
 
   val imageDrag = new Drag()
@@ -219,15 +223,42 @@ object Album {
     val blankpage = Composition(0, 0, -2, List())
     val coverpage = Composition(0, 0, 0, List())
 
+    def swapOrMoveTile(to: Selected): Callback = $.state.flatMap{s =>
+      s.editing.map({
+        case Left(selected) => $.setState(s.copy(editing = Some(Right(selected))))
+        case Right(selected) => selected match {
+          case Selected(to.page, to.index) => $.setState(s.copy(editing = None))
+          case from@Selected(to.page, _) => $.setState(s.copy(album = Ready(AlbumUtil.swapTiles(s.album.get, from, to)), editing = None))// >> updateAlbum
+          case from => to match {
+            case Selected(0, _) => $.props.flatMap(_.proxy.dispatch(AddToCover(from))) >>
+              $.modState(_.copy(editing = None))
+            case _ => $.props.flatMap(_.proxy.dispatch(MoveTile(from, to))) >>
+              $.modState(_.copy(editing = None))
+          }
+        }
+      }) getOrElse Callback(None)
+    }
+
     def imageMouseDown(page: Int, index: Int)(ev: ReactMouseEvent) = 
-      Callback(imageDrag.mouseDown(CoordEvent(page, index, ev, jQuery(ev.target))))
+      Callback(imageDrag.mouseDown(CoordEvent(page, index, ev, jQuery(ev.target)))) >>
+      $.modState(s => s.copy(editing = Some(s.editing.getOrElse(Left(Selected(page, index))))))
 
-    def moveAlbum(page: Int, index: Int)(ev: ReactMouseEvent) = 
-      imageDrag.mouseMove(CoordEvent(page, index, ev, jQuery(ev.target))) map (move =>
-      $.modState(s => s.copy(album = Ready(AlbumUtil.move(s.album.get, move))))
-    ) getOrElse Callback(None)
+    def imageMouseMove(page: Int, index: Int)(ev: ReactMouseEvent) =
+      $.state.flatMap(s => s.editing match {
+        case Some(Right(editing)) => Callback(None)
+        case selected =>
+          imageDrag.mouseMove(CoordEvent(page, index, ev, jQuery(ev.target))).map(move =>
+            $.modState(s => s.copy(album = Ready(AlbumUtil.move(s.album.get, move))))
+          ).getOrElse(Callback(None)) >>
+          nodeMouseMove(page)(ev) >>
+          selected.map(_ => $.modState (s => s.copy(editing = None))).getOrElse(Callback(None))
+      })
 
-    def getParams(page: Int)(ev: ReactMouseEvent) = {
+    def imageMouseUp(page: Int, index: Int) = 
+      (imageDrag.mouseUp orElse edgeDrag.mouseUp).map(_ => updateAlbum).getOrElse(Callback(None)) >>
+      swapOrMoveTile(Selected(page, index))
+
+    def nodeMouseDown(page: Int)(ev: ReactMouseEvent) = {
       val coordEvent = CoordEvent.edgeClick(page, ev)
       Callback(edgeDrag.mouseDown(coordEvent)) >>
       $.modState(s =>
@@ -235,19 +266,19 @@ object Album {
       )
     }
 
-    def freeParams = $.modState(s =>
-      s.copy(edge = None)
-    ) >> updateAlbum
-
-    def moveEdge(page: Int)(ev: ReactMouseEvent) =
+    def nodeMouseMove(page: Int)(ev: ReactMouseEvent) =
       edgeDrag.mouseMove(CoordEvent(page, 0, ev, jQuery(ev.target).parent(".box-mosaic"))) map { move =>
         $.modState(s => s.copy(album = Ready(AlbumUtil.edge(s.album.get, s.edge.get, move))))
       } getOrElse Callback(None)
 
-    def updateAlbum(): Callback = for {
-      s <- $.state
-      p <- $.props
-    } yield p.proxy.dispatch(SetAlbum(s.album))
+    def nodeMouseUp = Callback(edgeDrag.mouseUp) >>
+      $.modState(s =>
+        s.copy(edge = None)
+      ) >> updateAlbum
+
+    def updateAlbum: Callback = {
+      $.state flatMap (s => $.props flatMap (p => p.proxy.dispatch(SetAlbum(s.album))))
+    }
 
     def toSpreads(pages: List[Composition]): List[List[Composition]] = {
       val pages2: List[Composition] = pages match {
@@ -261,18 +292,23 @@ object Album {
 
     def backside() = <.div(^.cls := "backside", "bigpiq")
 
-    def tile(page: Int)(t: (Tile, Int)) = t match { case (tile, index) => {
+    def tile(page: Int, selected: Option[Either[Selected, Selected]])(t: (Tile, Int)) = t match { case (tile, index) => {
       val scaleX = 1.0 / (tile.cx2 - tile.cx1)
       val scaleY = 1.0 / (tile.cy2 - tile.cy1)
-      < div(^.cls := "ui-tile",
-        ^.key := tile.photoID,
+      val selClass = selected.map({
+        case Right(Selected(`page`, `index`)) => ".tile-selected"
+        case Right(Selected(_,_)) => ".tile-unselected"
+        case Left(_) => ""
+      }) getOrElse ""
+      < div(^.cls := "ui-tile " + selClass,
+//        ^.key := tile.photoID,
         ^.height := pct(tile.ty2-tile.ty1),
         ^.width  := pct(tile.tx2-tile.tx1),
         ^.top    := pct(tile.ty1),
         ^.left  := pct(tile.tx1),
         ^.onMouseDown ==> imageMouseDown(page, index),
-        ^.onMouseMove ==> ((ev: ReactMouseEvent) => moveAlbum(page, index)(ev) >> moveEdge(page)(ev)),
-        ^.onMouseUp --> (Callback(imageDrag.mouseUp) >> Callback(edgeDrag.mouseUp) >> updateAlbum),
+        ^.onMouseMove ==> imageMouseMove(page, index),
+        ^.onMouseUp --> imageMouseUp(page, index),
         < img(^.src := "/photos/"+tile.photoID+"/full/800,/"+tile.rot+"/default.jpg",
           ^.draggable := false,
           ^.height := pct(scaleY),
@@ -323,9 +359,9 @@ object Album {
         ^.cls := "node shadow",
         ^.top := pct(node.y + shift),
         ^.left := pct(node.x + shift),
-        ^.onMouseDown ==> getParams(page) ,
-        ^.onMouseMove ==> moveEdge(page),
-        ^.onMouseUp --> (Callback(edgeDrag.mouseUp) >> freeParams >> updateAlbum)
+        ^.onMouseDown ==> nodeMouseDown(page),
+        ^.onMouseMove ==> nodeMouseMove(page),
+        ^.onMouseUp --> nodeMouseUp
       )
 
     def nodes(page: Composition) = {
@@ -377,8 +413,7 @@ object Album {
 
     def hover(page: Composition) =
       <.div(^.cls := "page-hover",
-        dataPage := page.index,
-        dataIdx := 0,
+        ^.onMouseUp --> imageMouseUp(page.index, 0),
         <.h2(^.cls := "center", if (page.index == 0) "Copy here" else "Move here")
       )
 
@@ -402,7 +437,7 @@ object Album {
                     < div(^.cls := cls, dataPage := page.index, ^.key := page.index, backside())
                   else
                     < div(^.cls := cls, dataPage := page.index, ^.key := page.index,
-                      page.tiles.zipWithIndex.map(tile(page.index)),
+                      page.tiles.zipWithIndex.map(tile(page.index, s.editing)),
                       if (page.index == 0) p.proxy().collection.render(col => title(col)) else "",
                       nodes(page),
                       if (page.tiles.isEmpty) {
@@ -411,11 +446,13 @@ object Album {
                         else
                           p.proxy().collection.render(addPhotosEnd)
                       } else "",
-                      s.editing.map(e =>
-                        if (e.selected.index == page.index) toolbar(page)
-                        else hover(page)
-                    ).getOrElse("")
-                  )
+                      s.editing.map({
+                        case Left(_) => <.div()
+                        case Right(e) =>
+                          if (e.page == page.index) toolbar(page)
+                          else hover(page)
+                      }).getOrElse("")
+                    )
               }})
               ),
 
