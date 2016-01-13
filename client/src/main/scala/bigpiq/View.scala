@@ -296,8 +296,8 @@ object Album {
       val scaleX = 1.0 / (tile.cx2 - tile.cx1)
       val scaleY = 1.0 / (tile.cy2 - tile.cy1)
       val selClass = selected.map({
-        case Right(Selected(`page`, `index`)) => ".tile-selected"
-        case Right(Selected(_,_)) => ".tile-unselected"
+        case Right(Selected(`page`, `index`)) => "tile-selected"
+        case Right(Selected(_,_)) => "tile-unselected"
         case Left(_) => ""
       }) getOrElse ""
       < div(^.cls := "ui-tile " + selClass,
@@ -327,7 +327,7 @@ object Album {
         if (page.tiles.length > 1)
           <.div(^.cls := "btn-group",
             <.button(^.cls := "btn btn-primary shuffle-btn",
-              dataPage := page.index,
+              ^.onMouseUp --> $.props.flatMap(_.proxy.dispatch(ShufflePage(page.index))),
               ^.disabled := false,
               UI.icon("refresh"),
               " Shuffle"

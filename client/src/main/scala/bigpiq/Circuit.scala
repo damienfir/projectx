@@ -5,6 +5,7 @@ import bigpiq.shared._
 import diode._
 import diode.data.{Empty, Pot, Ready}
 import diode.react.ReactConnector
+import org.scalajs.dom
 import org.scalajs.dom.File
 import org.scalajs.dom.ext.Ajax
 import org.scalajs.dom.raw.FormData
@@ -20,6 +21,37 @@ import scala.util.{Try, Random}
 
 
 case class Save(album: List[Composition], collection: Collection)
+
+
+// Actions
+
+case class CreateUser()
+case class GetUser(id: Long)
+case class UpdateUser(user: Pot[User])
+case class UpdateUserThenUpload(user: Pot[User], files: List[File])
+case class GetFromCookie()
+
+case class CreateCollection(userID: Long)
+case class UpdateCollection(collection: Collection)
+case class UpdateCollectionThenUpload(collection: Pot[Collection], files: List[File])
+
+case class FileUploaded(photo: Photo)
+case class UpdatePhotos(photos: List[Photo])
+
+case class AddToCover(selected: Selected)
+case class MoveTile(from: Selected, to: Selected)
+
+case class UploadFiles(files: List[File], index: Int = 0)
+case class MakePages(photos: List[Photo], index: Int)
+case class ShufflePage(index: Int)
+case class UpdatePages(pages: Pot[List[Composition]])
+case class UpdateFromHash(stored: Stored)
+case class GetAlbum(hash: String)
+case class SetAlbum(album: Pot[List[Composition]])
+case class GetFromHash()
+case class SaveAlbum()
+
+
 
 object Api {
   def postJSON(url: String, data: String) = Ajax.post(
@@ -52,7 +84,8 @@ object Api {
         throw ex
     })
 
-  def getAlbumHash(): Option[String] =  Some("63cc8b33-c6e8-4fbd-ac6d-6a825fe610d9")
+  def getAlbumHash(): Option[String] =
+    Some(dom.window.location.pathname.split("/")).filter(_.length > 2).map(_.last)
 
   def createCollection(userID: Long) : Future[Pot[Collection]] = postJSON(s"/users/$userID/collections", "{}")
     .map(r => Ready(read[Collection](r)))
@@ -73,16 +106,18 @@ object Api {
         Empty
     })
 
+  def shufflePage(photos: List[Photo], collectionID: Long, pageID: Long, index: Int): Future[Pot[List[Composition]]] = {
+    postJSON(s"/collections/$collectionID/page/$pageID?index=$index", write(photos))
+      .map(v => Ready(List(read[Composition](v))))
+  }
+
   def save(toSave: Save) = {
     postJSON(s"/save", write(toSave))
   }
 }
 
-case class CreateUser()
-case class GetUser(id: Long)
-case class UpdateUser(user: Pot[User])
-case class UpdateUserThenUpload(user: Pot[User], files: List[File])
-case class GetFromCookie()
+
+// Handlers
 
 class UserHandler[M](modelRW: ModelRW[M, Pot[User]]) extends ActionHandler(modelRW) {
 
@@ -102,9 +137,6 @@ class UserHandler[M](modelRW: ModelRW[M, Pot[User]]) extends ActionHandler(model
 }
 
 
-case class FileUploaded(photo: Photo)
-case class UpdatePhotos(photos: List[Photo])
-
 class PhotoHandler[M](modelRW: ModelRW[M, List[Photo]]) extends ActionHandler(modelRW) {
 
   override def handle = {
@@ -113,15 +145,6 @@ class PhotoHandler[M](modelRW: ModelRW[M, List[Photo]]) extends ActionHandler(mo
   }
 }
 
-
-
-
-case class CreateCollection(userID: Long)
-case class UpdateCollection(collection: Collection)
-case class UpdateCollectionThenUpload(collection: Pot[Collection], files: List[File])
-
-case class AddToCover(selected: Selected)
-case class MoveTile(from: Selected, to: Selected)
 
 class AlbumHandler[M](modelRW: ModelRW[M, RootModel]) extends ActionHandler(modelRW) {
 
@@ -147,26 +170,21 @@ class AlbumHandler[M](modelRW: ModelRW[M, RootModel]) extends ActionHandler(mode
             .map(pages => UpdatePages(Ready(pages.get :+ lastPage)))))
         } else noChange
       } else effectOnly {
-        Effect(Api.makePages(fromPhotos.filter(_.id != photoID), value.collection.get.id, from.page).map(UpdatePages)) +
-        Effect(Api.makePages(toPhotos ++ fromPhotos.filter(_.id == photoID), value.collection.get.id, to.page).map(UpdatePages))
+        (Effect(Api.makePages(fromPhotos.filter(_.id != photoID), value.collection.get.id, from.page).map(UpdatePages)) +
+        Effect(Api.makePages(toPhotos ++ fromPhotos.filter(_.id == photoID), value.collection.get.id, to.page).map(UpdatePages))) >> Effect.action(SaveAlbum)
       }
     }
 
     case SetAlbum(album) => {
       updated(value.copy(album = album))
     }
+
+    case ShufflePage(index: Int) => effectOnly {
+      val page = value.album.get(index)
+      Effect(Api.shufflePage(getPhotos(index), value.collection.get.id, page.id, page.index).map(UpdatePages))
+    }
   }
 }
-
-case class UploadFiles(files: List[File], index: Int = 0)
-case class MakePages(photos: List[Photo], index: Int)
-case class UpdatePages(pages: Pot[List[Composition]])
-case class UpdateFromHash(stored: Stored)
-case class GetAlbum(hash: String)
-case class SetAlbum(album: Pot[List[Composition]])
-case class GetFromHash()
-case class TestAction()
-case class SaveAlbum()
 
 
 class FileUploadHandler[M](modelRW: ModelRW[M, RootModel]) extends ActionHandler(modelRW) {
@@ -192,13 +210,17 @@ class FileUploadHandler[M](modelRW: ModelRW[M, RootModel]) extends ActionHandler
         case Ready(collection) => files match {
           case Nil => noChange
           case _: List[_] =>
+            val updatedIndex = value.album match {
+              case Ready(pages) => if (index == 0) pages.length else index
+              case _ => index
+            }
             val (fileSet, rest) =
-              if (index == 0) (files.take(1), files)
+              if (updatedIndex == 0) (files.take(1), files)
               else files.splitAt(Math.min(new Random().nextInt(3)+1, files.length))
             effectOnly {
               Effect(Future.sequence(fileSet.map(f => uploadFile(f, collection.id)))
-                .map(photos => MakePages(photos, index))) >>
-              Effect.action(UploadFiles(rest, index+1))
+                .map(photos => MakePages(photos, updatedIndex))) >>
+              Effect.action(UploadFiles(rest, updatedIndex+1))
             }
         }
         case Empty => effectOnly(Effect(Api.createCollection(user.id)
@@ -226,21 +248,14 @@ class FileUploadHandler[M](modelRW: ModelRW[M, RootModel]) extends ActionHandler
       Effect(Api.makePages(photos, value.collection.get.id, index).map(p => UpdatePages(p)))
     }
 
-    case UpdatePages(pages) => {
-      g.console.log("update pages")
-      pages match {
+    case UpdatePages(pages) => pages match {
       case Ready(newPages) => updated(value.copy(album = Ready(value.album match {
         case Ready(existingPages) => existingPages
           .filter(p => !newPages.exists(_.index == p.index)) ++ newPages
         case _ => newPages
       })
-        .map(_.filter(_.tiles.nonEmpty).groupBy(_.index).map(_._2.head).toList.sortBy(_.index))),
-        Effect.action(SaveAlbum))
+        .map(_.filter(_.tiles.nonEmpty).groupBy(_.index).map(_._2.head).toList.sortBy(_.index))))
       case _ => noChange
-    }}
-
-    case TestAction => {
-      noChange
     }
 
     case UpdateCollection(collection) => updated(value.copy(collection = Ready(collection)))
