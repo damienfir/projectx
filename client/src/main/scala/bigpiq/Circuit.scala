@@ -40,6 +40,7 @@ case class UpdatePhotos(photos: List[Photo])
 
 case class AddToCover(selected: Selected)
 case class MoveTile(from: Selected, to: Selected)
+case class RemoveTile(tile: Selected)
 
 case class UploadFiles(files: List[File], index: Int = 0)
 case class MakePages(photos: List[Photo], index: Int)
@@ -106,8 +107,9 @@ object Api {
         Empty
     })
 
-  def shufflePage(photos: List[Photo], collectionID: Long, pageID: Long, index: Int): Future[Pot[List[Composition]]] = {
-    postJSON(s"/collections/$collectionID/page/$pageID?index=$index", write(photos))
+  def shufflePage(photos: List[Photo], collectionID: Long, pageID: Long, index: Int): Future[Pot[List[Composition]]] = photos match {
+    case Nil => Future(Empty)
+    case _ => postJSON(s"/collections/$collectionID/page/$pageID?index=$index", write(photos))
       .map(v => Ready(List(read[Composition](v))))
   }
 
@@ -151,17 +153,23 @@ class AlbumHandler[M](modelRW: ModelRW[M, RootModel]) extends ActionHandler(mode
   def getPhotos(index: Int) =
     value.photos.filter(p => value.album.get(index).tiles.exists(_.photoID == p.id))
 
+  def getID(selected: Selected) = value.album.get(selected.page).tiles(selected.index).photoID
+
+  def shuffle(photos: List[Photo], selected: Selected) =
+    Api.shufflePage(photos, value.collection.get.id, value.album.get(selected.page).id, selected.page)
+
   override def handle = {
 
-    case AddToCover(selected) => {
-      g.console.log("add to cover")
-      noChange
+    case AddToCover(selected) => effectOnly {
+      val photoToAdd = getPhotos(selected.page).filter(_.id == getID(selected))
+      Effect(Api.shufflePage(getPhotos(0) ++ photoToAdd, value.collection.get.id, value.album.get(0).id, 0)
+        .map(UpdatePages))
     }
 
     case MoveTile(from, to) => {
       val fromPhotos = getPhotos(from.page)
       val toPhotos = getPhotos(to.page)
-      val photoID = value.album.get(from.page).tiles(from.index).photoID
+      val photoID = getID(from)
 
       if (value.album.get(from.page).tiles.length == 1) {
         if (from.page == value.album.get.length-1) {
@@ -182,6 +190,10 @@ class AlbumHandler[M](modelRW: ModelRW[M, RootModel]) extends ActionHandler(mode
     case ShufflePage(index: Int) => effectOnly {
       val page = value.album.get(index)
       Effect(Api.shufflePage(getPhotos(index), value.collection.get.id, page.id, page.index).map(UpdatePages))
+    }
+
+    case RemoveTile(selected) => effectOnly {
+      Effect(shuffle(getPhotos(selected.page).filter(_.id != getID(selected)), selected).map(UpdatePages))
     }
   }
 }

@@ -223,6 +223,8 @@ object Album {
     val blankpage = Composition(0, 0, -2, List())
     val coverpage = Composition(0, 0, 0, List())
 
+    def cancelSelected = $.modState(s => s.copy(editing = None))
+
     def swapOrMoveTile(to: Selected): Callback = $.state.flatMap{s =>
       s.editing.map({
         case Left(selected) => $.setState(s.copy(editing = Some(Right(selected))))
@@ -231,9 +233,9 @@ object Album {
           case from@Selected(to.page, _) => $.setState(s.copy(album = Ready(AlbumUtil.swapTiles(s.album.get, from, to)), editing = None))// >> updateAlbum
           case from => to match {
             case Selected(0, _) => $.props.flatMap(_.proxy.dispatch(AddToCover(from))) >>
-              $.modState(_.copy(editing = None))
+              cancelSelected
             case _ => $.props.flatMap(_.proxy.dispatch(MoveTile(from, to))) >>
-              $.modState(_.copy(editing = None))
+              cancelSelected
           }
         }
       }) getOrElse Callback(None)
@@ -266,9 +268,15 @@ object Album {
       )
     }
 
+    def rotateSelected = $.modState(s => s.editing match {
+      case Some(Right(selected)) => s.copy(album = Ready(AlbumUtil.rotate(s.album.get, selected)))
+      case _ => s
+    })
+
     def nodeMouseMove(page: Int)(ev: ReactMouseEvent) =
       edgeDrag.mouseMove(CoordEvent(page, 0, ev, jQuery(ev.target).parent(".box-mosaic"))) map { move =>
-        $.modState(s => s.copy(album = Ready(AlbumUtil.edge(s.album.get, s.edge.get, move))))
+        $.modState(s => s.copy(album =
+          s.edge.map(edge => Ready(AlbumUtil.edge(s.album.get, edge, move))).getOrElse(s.album)))
       } getOrElse Callback(None)
 
     def nodeMouseUp = Callback(edgeDrag.mouseUp) >>
@@ -279,6 +287,8 @@ object Album {
     def updateAlbum: Callback = {
       $.state flatMap (s => $.props flatMap (p => p.proxy.dispatch(SetAlbum(s.album))))
     }
+
+    def onChangeTitle(ev: ReactEventI) = ev.target.value
 
     def toSpreads(pages: List[Composition]): List[List[Composition]] = {
       val pages2: List[Composition] = pages match {
@@ -346,6 +356,7 @@ object Album {
 
     def title(collection: Collection) =
       <.input(^.cls := "cover-title",  ^.id := "album-title",
+        ^.onChange ==> onChangeTitle,
         ^.`type` := "text",
         ^.placeholder := "Album title",
         ^.maxLength := 50,
@@ -391,22 +402,26 @@ object Album {
         UI.icon("cloud-upload"), "Upload more photos"
       )
 
-    def toolbar(page: Composition) =
+    def toolbar(page: Composition, selected: Selected) =
       <.div(^.cls := "btn-group toolbar",
         if (page.tiles.length > 1)
           <.button(^.cls := "btn btn-info btn-lg", ^.id := "remove-btn",
+            ^.onClick --> ($.props.flatMap(_.proxy.dispatch(RemoveTile(selected))) >> cancelSelected),
             UI.icon("trash-o")
           )
         else "",
         <.button(^.cls := "btn btn-info btn-lg", ^.id := "rotate-btn",
+          ^.onClick --> rotateSelected,
           UI.icon("rotate-right")
         ),
         if (page.index != 0)
           <.button(^.cls := "btn btn-info btn-lg", ^.id := "add-cover-btn",
+            ^.onClick --> ($.props.flatMap(_.proxy.dispatch(AddToCover(selected))) >> cancelSelected),
             UI.icon("book")
           )
         else "",
         <.button(^.cls := "btn btn-info btn-lg", ^.id := "cancel-btn",
+          ^.onClick --> cancelSelected,
           UI.icon("times")
         )
       )
@@ -434,9 +449,9 @@ object Album {
               spread.zipWithIndex.map({case (page, col) => {
                 val cls = "box-mosaic " + (if ((row*2+col) % 2 == 0) "pull-left" else "pull-right")
                   if (col == 0 && row == 1)
-                    < div(^.cls := cls, dataPage := page.index, ^.key := page.index, backside())
+                    < div(^.cls := cls, ^.key := page.index, backside())
                   else
-                    < div(^.cls := cls, dataPage := page.index, ^.key := page.index,
+                    < div(^.cls := cls, ^.key := page.index,
                       page.tiles.zipWithIndex.map(tile(page.index, s.editing)),
                       if (page.index == 0) p.proxy().collection.render(col => title(col)) else "",
                       nodes(page),
@@ -449,7 +464,7 @@ object Album {
                       s.editing.map({
                         case Left(_) => <.div()
                         case Right(e) =>
-                          if (e.page == page.index) toolbar(page)
+                          if (e.page == page.index) toolbar(page, e)
                           else hover(page)
                       }).getOrElse("")
                     )

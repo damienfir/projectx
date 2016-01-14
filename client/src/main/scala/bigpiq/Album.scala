@@ -30,6 +30,15 @@ object AlbumUtil {
     case x => x
   }
 
+  def rotateTile(tile: Tile): Tile =
+    resizeTile(tile, tile, transpose = true).copy(rot = (tile.rot+90) % 360)
+
+  def rotate(album: List[Composition], selected: Selected): List[Composition] = album map {
+    case comp@Composition(_, _, selected.page, tiles) =>
+      comp.copy(tiles = tiles.updated(selected.index, rotateTile(tiles(selected.index))))
+    case x => x
+  }
+
   def swapTiles(album: List[Composition], from: Selected, to: Selected): List[Composition] = album map {
     case comp@Composition(_, _, from.page, oldTiles) => {
       val fromTile = oldTiles(from.index)
@@ -44,15 +53,16 @@ object AlbumUtil {
 
   val arPaper = Math.sqrt(2).asInstanceOf[Float]
 
-  def resizeTile(a: Tile, b: Tile): Tile = {
+  def resizeTile(a: Tile, b: Tile, transpose: Boolean = false): Tile = {
     val arTile = arPaper * ((a.tx2-a.tx1) / (a.ty2-a.ty1))
     val arImg = arTile / ((a.cx2-a.cx1) / (a.cy2-a.cy1))
     val arTile2 = arPaper * (b.tx2-b.tx1) / (b.ty2-b.ty1)
+    val arImg2 = if (transpose) 1/arImg else arImg
 
     val center = ((a.cx2+a.cx1)/2.0, (a.cy2+a.cy1)/2.0)
 
-    val c = if (arImg < arTile2) b.copy(cx2 = 1, cy2 = arImg/arTile2, cx1 = 0, cy1 = 0)
-      else b.copy(cx2 = arTile2/arImg, cy2 = 1, cx1 = 0, cy1 = 0)
+    val c = if (arImg2 < arTile2) b.copy(cx2 = 1, cy2 = arImg2/arTile2, cx1 = 0, cy1 = 0)
+      else b.copy(cx2 = arTile2/arImg2, cy2 = 1, cx1 = 0, cy1 = 0)
 
     val dx = Math.min(1-c.cx2, Math.max(0, center._1-c.cx2/2.0)).asInstanceOf[Float]
     val dy = Math.min(1-c.cy2, Math.max(0, center._2-c.cy2/2.0)).asInstanceOf[Float]

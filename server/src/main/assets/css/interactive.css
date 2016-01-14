@@ -462,6 +462,7 @@ html, body {
 .tile-unselected {
   opacity: 1;
 }
+
 .tile-unselected:hover {
   opacity: 0.5;
   cursor: pointer;
