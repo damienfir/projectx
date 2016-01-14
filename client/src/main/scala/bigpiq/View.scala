@@ -97,7 +97,8 @@ object Root {
       <.div(^.className := "theme-blue",
         // ^.onMouseUp ==> ((ev: ReactMouseEvent) => Callback(mouseUp$.onNext(CoordEvent(0, 0, ev, jQuery(ev.target))))),
         // ^.onMouseMove ==> ((ev: ReactMouseEvent) => Callback(mouseMove$.onNext(CoordEvent(0, 0, ev, jQuery(ev.target))))),
-        <.button(^.cls := "btn btn-primary", dataToggle := "modal", dataTarget := "#upload-modal"),
+//        <.button(^.cls := "btn btn-primary", dataToggle := "modal", dataTarget := "#upload-modal"),
+        proxy.connect(identity)(Nav(_)),
         proxy.connect(identity)(p => Album(Album.Props(p))),
         proxy.connect(identity)(Upload(_))
       )
@@ -110,6 +111,75 @@ object Root {
     .build
 
   def apply(proxy: ModelProxy[RootModel]) = component(proxy)
+}
+
+
+object Nav {
+  class Backend($: BackendScope[ModelProxy[RootModel], Unit]) {
+    val dataToggle = "data-toggle".reactAttr
+    val dataTarget = "data-target".reactAttr
+
+    def onSave = $.props.flatMap(_.dispatch(SaveAlbum))
+
+    def render(proxy: ModelProxy[RootModel]) = {
+      val isDemo = proxy().collection match {
+          case Ready(Collection(_, _, hash)) => hash.equals("")
+          case _ => false
+        }
+      val loaded = proxy().album match {
+        case Ready(album) => album.nonEmpty && !isDemo
+        case _ => false
+      }
+      <.div(^.cls := "nav navbar-transparent navbar-fixed-top", ^.id := "nav",
+        <.div(^.cls := "container-fluid",
+          <.ul(^.cls := "nav navbar-nav",
+            <.li(<.a(^.cls := "navbar-brand", ^.href := "/", "bigpiq"))
+          ),
+
+          if (loaded) {
+            <.ul(^.cls := "nav navbar-nav",
+              <.li(
+                <.button(^.cls := "btn btn-primary navbar-btn", ^.id := "upload-btn",
+                  dataToggle := "modal",
+                  dataTarget := "#upload-modal",
+                  UI.icon("cloud-upload"), " Upload more photos"
+                )
+              )
+            )
+          } else "",
+
+          if (isDemo) {
+            <.li(
+              <.a(^.cls := "btn navbar-btn btn-info",
+                ^.href := "/ui",
+                UI.icon("flask"),
+                " Try"
+            ))
+          } else "",
+
+          if (loaded) {
+            <.ul(^.cls := "nav navbar-nav navbar-right",
+              <.li(
+                <.button(^.cls := "btn btn-primary navbar-btn",
+                  ^.onClick --> onSave,
+                  UI.icon("heart-o"), " Save"
+                )
+              ),
+              <.li(
+                <.button(^.cls := "btn btn-primary navbar-btn",
+                  UI.icon("shopping-cart"), " Buy"
+                )
+              )
+            )
+          } else ""
+        )
+      )
+    }
+  }
+
+  def apply(proxy: ModelProxy[RootModel]) = ReactComponentB[ModelProxy[RootModel]]("Nav")
+    .renderBackend[Backend]
+    .build.apply(proxy)
 }
 
 
@@ -215,8 +285,6 @@ object Album {
 
   class Backend($: BackendScope[Props, State]) {
 
-    val dataPage = "data-page".reactAttr
-    val dataIdx = "data-index".reactAttr
     val dataToggle = "data-toggle".reactAttr
     val dataTarget = "data-target".reactAttr
 
@@ -288,7 +356,7 @@ object Album {
       $.state flatMap (s => $.props flatMap (p => p.proxy.dispatch(SetAlbum(s.album))))
     }
 
-    def onChangeTitle(ev: ReactEventI) = ev.target.value
+    def onChangeTitle(ev: ReactEventI) = Callback(None)
 
     def toSpreads(pages: List[Composition]): List[List[Composition]] = {
       val pages2: List[Composition] = pages match {
@@ -333,7 +401,7 @@ object Album {
       val p = row*2+col
       val pull = if ((p % 2) == 0) "pull-left" else "pull-right"
       <.div(^.cls := pull, ^.key := page.index,
-        <.span(^.cls := "page", dataPage := page.index, if (p == 0) "Cover Page" else s"Page ${p-1}"),
+        <.span(^.cls := "page", if (p == 0) "Cover Page" else s"Page ${p-1}"),
         if (page.tiles.length > 1)
           <.div(^.cls := "btn-group",
             <.button(^.cls := "btn btn-primary shuffle-btn",
