@@ -41,6 +41,7 @@ case class UpdatePhotos(photos: List[Photo])
 case class AddToCover(selected: Selected)
 case class MoveTile(from: Selected, to: Selected)
 case class RemoveTile(tile: Selected)
+case class RemoveLastPage()
 
 case class UploadFiles(files: List[File], index: Int = 0)
 case class MakePages(photos: List[Photo], index: Int)
@@ -142,7 +143,7 @@ class UserHandler[M](modelRW: ModelRW[M, Pot[User]]) extends ActionHandler(model
 class PhotoHandler[M](modelRW: ModelRW[M, List[Photo]]) extends ActionHandler(modelRW) {
 
   override def handle = {
-    case UpdatePhotos(photos) => updated((value ++ photos).distinct)
+    case UpdatePhotos(photos) => updated(value ++ photos)
     case FileUploaded(photo) => updated(value :+ photo)
   }
 }
@@ -166,20 +167,27 @@ class AlbumHandler[M](modelRW: ModelRW[M, RootModel]) extends ActionHandler(mode
         .map(UpdatePages))
     }
 
+    case RemoveLastPage => effectOnly(
+      Effect.action(UpdatePages(value.album.map(al => List(al.last.copy(tiles = Nil)))))
+    )
+
     case MoveTile(from, to) => {
       val fromPhotos = getPhotos(from.page)
       val toPhotos = getPhotos(to.page)
       val photoID = getID(from)
+      val fromComposition = value.album.get(from.page)
+      val toComposition = value.album.get(to.page)
 
-      if (value.album.get(from.page).tiles.length == 1) {
-        if (from.page == value.album.get.length-1) {
-          val lastPage = value.album.get(from.page).copy(tiles = Nil)
-          effectOnly(Effect(Api.makePages(toPhotos ++ fromPhotos, value.collection.get.id, to.page)
-            .map(pages => UpdatePages(Ready(pages.get :+ lastPage)))))
+      if (fromPhotos.length == 1) {
+        if (from.page == value.album.get.length-1) effectOnly {
+          Effect(Api.shufflePage(toPhotos ++ fromPhotos, value.collection.get.id, fromComposition.id, to.page)
+            .map(UpdatePages)) +
+          Effect.action(RemoveLastPage())
         } else noChange
+
       } else effectOnly {
-        (Effect(Api.makePages(fromPhotos.filter(_.id != photoID), value.collection.get.id, from.page).map(UpdatePages)) +
-        Effect(Api.makePages(toPhotos ++ fromPhotos.filter(_.id == photoID), value.collection.get.id, to.page).map(UpdatePages))) >> Effect.action(SaveAlbum)
+        Effect(Api.shufflePage(fromPhotos.filter(_.id != photoID), value.collection.get.id, fromComposition.id, from.page).map(UpdatePages)) +
+        Effect(Api.shufflePage(toPhotos ++ fromPhotos.filter(_.id == photoID), value.collection.get.id, toComposition.id, to.page).map(UpdatePages))
       }
     }
 

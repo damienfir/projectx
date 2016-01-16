@@ -14,8 +14,11 @@ import org.scalajs.dom.raw._
 import org.scalajs.jquery._
 
 import scala.collection.immutable.Range
+import scala.scalajs.js
 import scala.scalajs.js.Dynamic
 import scala.scalajs.js.Dynamic.{global => g}
+
+import Bootstrap._
 
 
 object UI {
@@ -136,7 +139,7 @@ object Nav {
             <.li(<.a(^.cls := "navbar-brand", ^.href := "/", "bigpiq"))
           ),
 
-          if (loaded) {
+//          if (loaded) {
             <.ul(^.cls := "nav navbar-nav",
               <.li(
                 <.button(^.cls := "btn btn-primary navbar-btn", ^.id := "upload-btn",
@@ -145,8 +148,8 @@ object Nav {
                   UI.icon("cloud-upload"), " Upload more photos"
                 )
               )
-            )
-          } else "",
+            ),
+//          } else "",
 
           if (isDemo) {
             <.li(
@@ -183,6 +186,7 @@ object Nav {
 }
 
 
+
 object Upload {
   val fileInput = Ref[HTMLInputElement]("fileInput")
 
@@ -196,8 +200,9 @@ object Upload {
       new Range(0, files.length, 1).toList.map(files(_))
     }
 
-    def triggerUpload(proxy: ModelProxy[RootModel])(ev: ReactEventI) = {
-      proxy.dispatch(UploadFiles(filelistToList(ev.target.files)))
+    def triggerUpload(ev: ReactEventI) = {
+      jQuery($.getDOMNode()).modal("hide")
+      $.props.flatMap(_.dispatch(UploadFiles(filelistToList(ev.target.files))))
     }
 
     def render(p: ModelProxy[RootModel]) = {
@@ -213,7 +218,7 @@ object Upload {
                 ^.name := "image",
                 ^.multiple := true,
                 ^.ref := Ref("fileInput"),
-                ^.onChange ==> triggerUpload(p)
+                ^.onChange ==> triggerUpload
               )
             )
           )
@@ -405,7 +410,7 @@ object Album {
         if (page.tiles.length > 1)
           <.div(^.cls := "btn-group",
             <.button(^.cls := "btn btn-primary shuffle-btn",
-              ^.onMouseUp --> $.props.flatMap(_.proxy.dispatch(ShufflePage(page.index))),
+              ^.onClick --> $.props.flatMap(_.proxy.dispatch(ShufflePage(page.index))),
               ^.disabled := false,
               UI.icon("refresh"),
               " Shuffle"
