@@ -1,126 +1,21 @@
 package bigpiq.client
 
+
 import bigpiq.client.views.{Move, Selected}
 import bigpiq.shared._
 import diode._
 import diode.data.{Empty, Pot, Ready}
 import diode.react.ReactConnector
-import org.scalajs.dom
-import org.scalajs.dom.File
-import org.scalajs.dom.ext.Ajax
-import org.scalajs.dom.raw.FormData
-import org.scalajs.jquery.{JQueryAjaxSettings, _}
-import upickle.default._
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import collection.breakOut
 import scala.concurrent.{Future, Promise}
-import scala.scalajs.js
-import scala.scalajs.js.Dynamic.{global => g}
+import collection.breakOut
 import scala.util.{Try, Random}
 
 
 case class Save(album: List[Composition], collection: Collection)
 
 
-// Actions
-
-case class CreateUser()
-case class GetUser(id: Long)
-case class UpdateUser(user: Pot[User])
-case class UpdateUserThenUpload(user: Pot[User], files: List[File])
-case class GetFromCookie()
-
-case class CreateCollection(userID: Long)
-case class UpdateCollection(collection: Collection)
-case class UpdateCollectionThenUpload(collection: Pot[Collection], files: List[File])
-
-case class FileUploaded(photo: Photo)
-case class UpdatePhotos(photos: List[Photo])
-
-case class AddToCover(selected: Selected)
-case class MoveTile(from: Selected, to: Selected)
-case class RemoveTile(tile: Selected)
-case class RemoveLastPage()
-
-case class UploadFiles(files: List[File], index: Int = 0)
-case class MakePages(photos: List[Photo], index: Int)
-case class ShufflePage(index: Int)
-case class UpdatePages(pages: Pot[List[Composition]])
-case class UpdateFromHash(stored: Stored)
-case class GetAlbum(hash: String)
-case class SetAlbum(album: Pot[List[Composition]])
-case class GetFromHash()
-case class SaveAlbum()
-
-
-
-object Api {
-  def postJSON(url: String, data: String) = Ajax.post(
-    url=url,
-    data=data,
-    responseType="text", // uPickle can't parse js.Object
-    headers = Map("Content-Type" -> "application/json")
-  ).map(r => r.responseText)
-
-  def getUser(id: Long): Future[Pot[User]] = Ajax.get(s"/users/$id")
-    .map(r => Ready(read[User](r.responseText)))
-
-  def createUser(): Future[Pot[User]] = postJSON(s"/users", "{}")
-    .map(v => Ready(read[User](v)))
-    .recover({
-      case ex: upickle.Invalid.Json =>
-        g.console.log("json failed: " + ex.msg + " -> " + ex.input)
-        Empty
-      case ex: upickle.Invalid.Data =>
-        g.console.log("data failed: " + ex.msg + " -> " + ex.data)
-        Empty
-    })
-
-  def getUserFromCookie(): Option[Long] = Some(93)
-
-  def getAlbumFromHash(userID: Long, hash: String): Future[Stored] = Ajax.get(s"/users/$userID/albums/$hash")
-    .map(r => read[Stored](r.responseText))
-    .recover({case ex =>
-        g.console.log(ex.toString)
-        throw ex
-    })
-
-  def getAlbumHash(): Option[String] =
-    Some(dom.window.location.pathname.split("/")).filter(_.length > 2).map(_.last)
-
-  def createCollection(userID: Long) : Future[Pot[Collection]] = postJSON(s"/users/$userID/collections", "{}")
-    .map(r => Ready(read[Collection](r)))
-    .recover({
-      case ex: upickle.Invalid.Json =>
-        g.console.log("json failed: " + ex.msg + " -> " + ex.input)
-        Empty
-      case ex: upickle.Invalid.Data =>
-        g.console.log("data failed: " + ex.msg + " -> " + ex.data)
-        Empty
-    })
-
-  def makePages(photos: List[Photo], collectionID: Long, index: Int) : Future[Pot[List[Composition]]] =
-    postJSON(s"/collections/$collectionID/pages?index=$index", write(photos))
-      .map(v => Ready(List(read[Composition](v)))).recover({
-      case ex: Exception =>
-        g.console.log(ex.toString)
-        Empty
-    })
-
-  def shufflePage(photos: List[Photo], collectionID: Long, pageID: Long, index: Int): Future[Pot[List[Composition]]] = photos match {
-    case Nil => Future(Empty)
-    case _ => postJSON(s"/collections/$collectionID/page/$pageID?index=$index", write(photos))
-      .map(v => Ready(List(read[Composition](v))))
-  }
-
-  def save(toSave: Save) = {
-    postJSON(s"/save", write(toSave))
-  }
-}
-
-
-// Handlers
 
 class UserHandler[M](modelRW: ModelRW[M, Pot[User]]) extends ActionHandler(modelRW) {
 
@@ -208,21 +103,6 @@ class AlbumHandler[M](modelRW: ModelRW[M, RootModel]) extends ActionHandler(mode
 
 
 class FileUploadHandler[M](modelRW: ModelRW[M, RootModel]) extends ActionHandler(modelRW) {
-  def uploadFile(file: File, id: Int) = {
-    var fd = new FormData()
-    fd.append("image", file)
-    val p = Promise[Photo]()
-    jQuery.ajax(js.Dynamic.literal(
-      url = s"/collections/$id/photos",
-      method = "POST",
-      data = fd,
-      processData = false,
-      contentType = false,
-      dataType = "text",
-      success = (data: String) => p.success(read[Photo](data))
-    ).asInstanceOf[JQueryAjaxSettings])
-    p.future
-  }
 
   def handle = {
     case UploadFiles(files, index) => value.user match {
@@ -238,7 +118,7 @@ class FileUploadHandler[M](modelRW: ModelRW[M, RootModel]) extends ActionHandler
               if (updatedIndex == 0) (files.take(1), files)
               else files.splitAt(Math.min(new Random().nextInt(3)+1, files.length))
             effectOnly {
-              Effect(Future.sequence(fileSet.map(f => uploadFile(f, collection.id)))
+              Effect(Future.sequence(fileSet.map(f => Api.uploadFile(f, collection.id)))
                 .map(photos => MakePages(photos, updatedIndex))) >>
               Effect.action(UploadFiles(rest, updatedIndex+1))
             }
