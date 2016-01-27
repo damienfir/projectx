@@ -13,7 +13,12 @@ import play.api.i18n._
 import models._
 import services._
 
-import play.api.libs.json._
+import bigpiq.shared._
+
+// import play.api.libs.json._
+import upickle.default._
+import upickle.Js
+import upickle.json
 
 
 class Application @Inject()(val messagesApi: MessagesApi) extends Controller with I18nSupport {
@@ -33,51 +38,60 @@ class Application @Inject()(val messagesApi: MessagesApi) extends Controller wit
 
 
 class Payment @Inject()(braintree: Braintree, email: Email) extends Controller {
-  implicit val orderFormat = Json.format[APIModels.Order]
-  implicit val infoFormat = Json.format[APIModels.Info]
+  // implicit val orderFormat = Json.format[APIModels.Order]
+  // implicit val infoFormat = Json.format[APIModels.Info]
 
   def getToken = Action.async {
     braintree.token.map(token => Ok(token))
   }
 
-  def submitOrder = Action.async(parse.json) { request =>
-    (request.body \ "order").asOpt[APIModels.Order] flatMap { order =>
-      (request.body \ "info").asOpt[APIModels.Info] map { info =>
-        braintree.order(order, info) map { trans =>
-          email.confirmOrder(order, info) map (println(_))
-          Ok(Json.obj("status" -> 1))
-          } recover {
-            case ex => BadRequest(ex.getMessage)
-          }
-      }
-    } getOrElse { Future(BadRequest) }
+  def submitOrder = Action.async(parse.tolerantText) { request =>
+    val obj = json.read(request.body)
+    val order = readJs[Order](obj("order"))
+    val info = readJs[Info](obj("info"))
+    braintree.order(order, info) map { trans =>
+      email.confirmOrder(order, info) map (println(_))
+      Ok(write(Map("status" -> 1)))
+    } recover {
+      case ex => BadRequest(ex.getMessage)
+    }
   }
 }
 
 
-class Users @Inject()(usersDAO: UsersDAO) extends Controller with CRUDActions[DBModels.User] {
-  implicit val format = Json.format[DBModels.User]
-  
-  def get(id: Long) = getAction(usersDAO.get(id))
-  def save = saveAction(usersDAO.insert, usersDAO.update)
+class Users @Inject()(usersDAO: UsersDAO) extends Controller {
+
+  def get(id: Long) = Action.async {
+    usersDAO.get(id) map {
+      case Some(item) => Ok(write(item))
+      case None => NotFound
+    }
+  }
+
+  def save = Action.async(parse.tolerantText) { request =>
+    val item = read[User](request.body)
+    (item.id match {
+      case Some(id) => usersDAO.update(item)
+      case None => usersDAO.insert(item) map (Success(_))
+    }) map {
+      case Success(newItem: User) => Ok(write(newItem))
+      case Success(_) => Ok(write(item))
+      case Failure(_) => BadRequest
+    }
+  }
 }
 
 
 class Collections @Inject()(usersDAO: UsersDAO, compositionDAO: CompositionDAO, collectionDAO: CollectionDAO, photoDAO: PhotoDAO, imageService: ImageService, mosaicService: MosaicService, emailService: Email) extends Controller {
-  implicit val collectionFormat = Json.format[DBModels.Collection]
-  implicit val userFormat = Json.format[DBModels.User]
-  implicit val photoFormat = Json.format[DBModels.Photo]
-  implicit val compositionFormat = Json.format[DBModels.Composition]
-
 
   def fromUser(id: Long) = Action.async {
-    collectionDAO.fromUser(id) map (items => Ok(Json.toJson(items)))
+    collectionDAO.fromUser(id) map (items => Ok(write(items)))
   }
 
 
   def withUser(id: Long) = Action.async {
     collectionDAO.withUser(id) map { item =>
-      Ok(Json.toJson(item))
+      Ok(write(item))
     } recover {
       case _ => NotFound
     }
@@ -88,8 +102,8 @@ class Collections @Inject()(usersDAO: UsersDAO, compositionDAO: CompositionDAO, 
       collection <- collectionDAO.get(id)
       pages <- compositionDAO.allFromCollection(collection.get.id.get)
       photos <- photoDAO.allFromCollection(collection.get.id.get)
-    } yield Json.obj("collection" -> collection, "pages" -> pages, "photos" -> photos)
-    album.map(obj => Ok(Json.toJson(obj)))
+    } yield Stored(collection.get, pages.toList, photos.toList)
+    album.map(obj => Ok(write(obj)))
   }
 
   def getAlbumFromHash(userID: Long, hash: String) = Action.async {
@@ -97,8 +111,8 @@ class Collections @Inject()(usersDAO: UsersDAO, compositionDAO: CompositionDAO, 
       collection <- collectionDAO.getByHash(userID, hash)
       pages <- compositionDAO.allFromCollection(collection.id.get)
       photos <- photoDAO.allFromCollection(collection.id.get)
-    } yield Json.obj("collection" -> collection, "pages" -> pages, "photos" -> photos.map(_.copy(data=Array())))
-    album.map(obj => Ok(Json.toJson(obj)))
+    } yield Stored(collection, pages.toList, photos.toList.map(_.copy(data=Array())))
+    album.map(obj => Ok(write(obj)))
   }
 
 
@@ -111,16 +125,16 @@ class Collections @Inject()(usersDAO: UsersDAO, compositionDAO: CompositionDAO, 
     request.body match {
       case Left(_) => Future(EntityTooLarge)
       case Right(body) => photoDAO.addToCollection(id, imageService.save(body.files.head.ref))
-        .map(photo => Ok(Json.toJson(photo.copy(data=Array()))))
+        .map(photo => Ok(write(photo.copy(data=Array()))))
     }
   }
 
 
-  def divideIntoPages(photos: List[DBModels.Photo]): List[(List[DBModels.Photo],Int)] =
+  def divideIntoPages(photos: List[Photo]): List[(List[Photo],Int)] =
     photos.grouped(3).toList.zipWithIndex
 
 
-  def generateComposition(id: Long, photos: List[DBModels.Photo], index: Int): Future[DBModels.Composition] = {
+  def generateComposition(id: Long, photos: List[Photo], index: Int): Future[Composition] = {
     for {
       comp <- compositionDAO.addWithCollection(id)
       tiles <- mosaicService.generateComposition(comp.id.get, photos)
@@ -129,23 +143,24 @@ class Collections @Inject()(usersDAO: UsersDAO, compositionDAO: CompositionDAO, 
   }
 
 
-  def shuffleComposition(id: Long, photos: List[DBModels.Photo], index: Int): Future[DBModels.Composition] = {
+  def shuffleComposition(id: Long, photos: List[Photo]): Future[Composition] = {
     for {
       comp <- compositionDAO.get(id)
       tiles <- mosaicService.generateComposition(id, photos)
-    } yield comp.copy(tiles = tiles, index = index)
+    } yield comp.copy(tiles = tiles)
   }
 
 
-  def shufflePage(id: Long, pageID: Long, index: Int) = Action.async(parse.json) { request =>
-    shuffleComposition(pageID, request.body.as[List[DBModels.Photo]], index)
-      .map(page => Ok(Json.toJson(page)))
+  def shufflePage(id: Long, pageID: Long) = Action.async(parse.tolerantText) { request =>
+    shuffleComposition(pageID, read[List[Photo]](request.body))
+      .map(page => Ok(write(page)))
   }
 
 
-  def generatePage(id: Long, index: Int) = Action.async(parse.json) { request =>
-    val photos = request.body.as[List[DBModels.Photo]]
-    
+  def generatePage(id: Long, index: Int) = Action.async(parse.tolerantText) { request =>
+    // val photos = request.body.as[List[Photo]]
+    val photos = read[List[Photo]](request.body)
+    println(photos)
       // val pagesWithCover = if (index == 0) {
       //   (List(photos(Random.nextInt(photos.size))), 0) :: pages.map({case (p,i) => (p,i+1)})
       // } else { pages }
@@ -154,33 +169,33 @@ class Collections @Inject()(usersDAO: UsersDAO, compositionDAO: CompositionDAO, 
       // }.map(pages => Ok(Json.toJson(pages)))
     // }
 
-    generateComposition(id, photos, index) map (page => Ok(Json.toJson(page)))
+    generateComposition(id, photos, index) map (page => Ok(write(page)))
   }
 
-  def save(json: JsValue) = {
-    val collection = (json \ "collection").as[DBModels.Collection]
-    val compositions = (json \ "album").as[List[DBModels.Composition]]
+
+  def saveAlbum = Action.async(parse.tolerantText) { request =>
+    val obj = json.read(request.body)
+    val collection = readJs[Collection](obj("collection"))
+    val compositions = readJs[List[Composition]](obj("album"))
     for {
       col <- collectionDAO.update(collection)
       album <- compositionDAO.updateAll(compositions)
       res <- compositionDAO.removeUnused(collection, compositions)
-    } yield Ok(Json.toJson(collection))
-  }
-
-  def saveAlbum = Action.async(parse.json) { request =>
-    save(request.body)
+    } yield Ok(write(collection))
   }
 
 
-  def emailLink(id: Long, hash: String) = Action.async(parse.json) { request =>
-    val email = (request.body \ "email").as[String]
+  def emailLink(id: Long, hash: String) = Action.async(parse.tolerantText) { request =>
+    // val email = (request.body \ "email").as[String]
+    val email = json.read(request.body)("email").asInstanceOf[String]
     emailService.sendLink(email, hash) map (Ok(_))
   }
 
 
-  def download(id: Long) = Action.async(parse.json) { request =>
-    val collection = (request.body \ "collection").as[DBModels.Collection]
-    val compositions = (request.body \ "album").as[List[DBModels.Composition]]
+  def download(id: Long) = Action.async(parse.tolerantText) { request =>
+    val obj = json.read(request.body)
+    val collection = readJs[Collection](obj("collection"))
+    val compositions = readJs[List[Composition]](obj("album"))
     photoDAO.allFromCollection(id)
         .map(photos => photos.map(p => p.id.get -> mosaicService.photoFile(p.hash)).toMap)
         .map(photos => compositions.map(comp => views.html.page(comp, collection, photos).toString))

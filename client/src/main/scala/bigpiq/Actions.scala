@@ -1,9 +1,9 @@
 package bigpiq.client
 
-import org.scalajs.dom.File
-import diode.data.{Empty, Pot, Ready}
+import bigpiq.client.components.Selected
 import bigpiq.shared._
-import bigpiq.client.views.{Move, Selected}
+import diode.data.Pot
+import org.scalajs.dom.File
 
 
 case class CreateUser()
@@ -15,6 +15,7 @@ case class GetFromCookie()
 case class CreateCollection(userID: Long)
 case class UpdateCollection(collection: Collection)
 case class UpdateCollectionThenUpload(collection: Pot[Collection], files: List[File])
+case class UpdateTitle(title: String)
 
 case class FileUploaded(photo: Photo)
 case class UpdatePhotos(photos: List[Photo])

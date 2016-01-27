@@ -7,6 +7,7 @@ import play.api.Play
 import play.api.libs.ws._
 
 import models._
+import bigpiq.shared._
 
 
 class Email @Inject()(ws: WSClient) {
@@ -36,7 +37,7 @@ Damien & RK""")))
     })
   }
 
-  def confirmOrder(order: APIModels.Order, info: APIModels.Info) = {
+  def confirmOrder(order: Order, info: Info) = {
     val res = message
       .post(Map(
         "from" -> Seq(fromEmail),

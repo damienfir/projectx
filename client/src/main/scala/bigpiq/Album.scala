@@ -1,6 +1,6 @@
 package bigpiq.client
 
-import bigpiq.client.views.{CoordEvent, EdgeParams, Move, Selected}
+import bigpiq.client.components.{CoordEvent, EdgeParams, Move, Selected}
 import bigpiq.shared.{Composition, Tile}
 
 import scala.scalajs.js.Dynamic.{global => g}
@@ -33,7 +33,7 @@ object AlbumUtil {
   }
 
   def rotateTile(tile: Tile): Tile =
-    resizeTile(tile, tile, transpose = true).copy(rot = (tile.rot+90) % 360)
+    resizeTile(tile, tile, transpose = true).copy(rot = Some((tile.rot.getOrElse(0)+90) % 360))
 
   def rotate(album: List[Composition], selected: Selected): List[Composition] = album map {
     case comp@Composition(_, _, selected.page, tiles) =>

@@ -8,7 +8,7 @@ import scala.concurrent.Future
 import com.braintreegateway._;
 import scala.collection.JavaConversions._
 
-import models.APIModels
+import bigpiq.shared._
 
 @Singleton
 class Braintree {
@@ -31,7 +31,7 @@ class Braintree {
 
   def token = Future(gateway.clientToken().generate())
 
-  def order(order: APIModels.Order, info: APIModels.Info) : Future[Transaction] = {
+  def order(order: Order, info: Info) : Future[Transaction] = {
 
     val customerRequest = new CustomerRequest()
       .id(order.userID.toString)

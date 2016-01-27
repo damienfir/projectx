@@ -14,6 +14,7 @@ import play.api.libs.Files.TemporaryFile
 import java.io._
 
 import models._
+import bigpiq.shared._
 
 
 class MosaicService @Inject()() {
@@ -45,8 +46,8 @@ class MosaicService @Inject()() {
   //   )
   // }
 
-  def tilesToDB(photos: Seq[DBModels.Photo])(tile: MosaicModels.Tile2): DBModels.Tile = {
-    DBModels.Tile(
+  def tilesToDB(photos: Seq[Photo])(tile: MosaicModels.Tile2): Tile = {
+    Tile(
       photoID=photos.filter(_.hash.equals((tile.imfile).split("/").last)).head.id.get,
       rot=Some(tile.rot),
       cx1=tile.cx1,
@@ -60,7 +61,7 @@ class MosaicService @Inject()() {
     )
   }
 
-  def tilesToMosaic(tiles: List[DBModels.Tile], photos: Seq[DBModels.Photo]): (MosaicModels.Cluster, List[MosaicModels.Tile]) = {
+  def tilesToMosaic(tiles: List[Tile], photos: Seq[Photo]): (MosaicModels.Cluster, List[MosaicModels.Tile]) = {
     val gists = tiles.map(t => photos.find(_.id == Some(t.photoID)).get.hash).map(gistFile)
     val newTiles = tiles.zipWithIndex.map({ case (tile,i) => MosaicModels.Tile(
       tileindex = i,
@@ -130,7 +131,7 @@ class MosaicService @Inject()() {
     }
   }
 
-  def generateComposition(compositionID: Long, photos: Seq[DBModels.Photo]): Future[List[DBModels.Tile]] = {
+  def generateComposition(compositionID: Long, photos: Seq[Photo]): Future[List[Tile]] = {
     val id = compositionID.toString
     // for {
     //   clu <- cluster(photos.map(_.hash), id)
@@ -167,7 +168,7 @@ class MosaicService @Inject()() {
     writeFile(filename, content.toString)
   }
 
-  def renderComposition(composition: DBModels.Composition, photos: Seq[DBModels.Photo]): Future[String] = {
+  def renderComposition(composition: Composition, photos: Seq[Photo]): Future[String] = {
     val id = composition.id.get.toString
     val (cluster,mosaictiles) = tilesToMosaic(composition.tiles, photos)
     writeJson(clusterFile(id), Json.toJson(cluster))

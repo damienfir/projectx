@@ -18,6 +18,7 @@ import java.security.MessageDigest
 import collection.JavaConversions._
 
 import models._
+import bigpiq.shared._
 
 
 class ImageService @Inject()() {
@@ -82,21 +83,21 @@ class ImageService @Inject()() {
 //   }
   
   
-  def bytesFromTemp(uploaded: TemporaryFile) : DBModels.Photo = {
+  def bytesFromTemp(uploaded: TemporaryFile) : Photo = {
     val data = FileUtils.readFileToByteArray(uploaded.file)
     val hash = hashFromContent(data)
-    DBModels.Photo(None, 0, hash, data)
+    Photo(None, 0, hash, data)
   }
 
 
-  def save(uploaded: TemporaryFile): DBModels.Photo = {
+  def save(uploaded: TemporaryFile): Photo = {
     val data = FileUtils.readFileToByteArray(uploaded.file)
     val hash = hashFromContent(data)
     val newFile = new File(photoFile(hash))
     uploaded.moveTo(newFile)
     newFile.setReadable(true, false)
     newFile.setExecutable(true, false)
-    DBModels.Photo(None, 0, hash, data)
+    Photo(None, 0, hash, data)
     // val thumbFilename = resize(filename)
     // val thumb = new File(thumbFile(thumbFilename))
     // thumb.setReadable(true, false)

@@ -10,34 +10,26 @@ import slick.driver.JdbcProfile
 import slick.backend.DatabaseConfig
 import java.util.UUID
 
-import PostgresDriverExt.api._
-import DBModels._
+import slick.driver.PostgresDriver.api._
+import bigpiq.shared._
 import Tables._
 
-
-object Queries {
-  implicit class QueryExtensions(val q: Query[Users, User, Seq]) {
-    def one(id: Long) = q.filter(_.id === id)
-  }
-
-}
 
 
 @Singleton
 class UsersDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvider) extends HasDatabaseConfigProvider[JdbcProfile] {
-  import Queries._
+  def one(id: Long) = users.filter(_.id === id)
 
-  def get(id: Long) = db.run(users.one(id).result).map(_.headOption)
+  def get(id: Long) = db.run(one(id).result).map(_.headOption)
   def list = db.run(users.result)
-  def update(item: User) = db.run(users.one(item.id.get).update(item).asTry)
+  def update(item: User) = db.run(one(item.id.get).update(item).asTry)
   def insert(item: User) = db.run((users returning users) += item)
-  def delete(id: Long) = dbConfig.db.run(users.one(id).delete)
+  def delete(id: Long) = dbConfig.db.run(one(id).delete)
 }
 
 
 @Singleton
-class CollectionDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvider) extends HasDatabaseConfigProvider[JdbcProfile] {
-  import Queries._
+class CollectionDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvider, usersDAO: UsersDAO) extends HasDatabaseConfigProvider[JdbcProfile] {
 
   def get(id: Long) = db.run(collections.filter(_.id === id).result) map (_.headOption)
 
@@ -52,7 +44,7 @@ class CollectionDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProv
     // r <- db.run(usercollectionrelations += (u.get.id.get, c.id.get))
   // } yield c
 
-    db.run(users.one(id).result) map (_.headOption) flatMap {
+    db.run(usersDAO.one(id).result) map (_.headOption) flatMap {
       case Some(u) => db.run((collections returning collections) += Collection(None, None, UUID.randomUUID.toString)) flatMap { c =>
         db.run(usercollectionrelations += (u.id.get, c.id.get)) map (_ => c)
       }
@@ -61,13 +53,13 @@ class CollectionDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProv
   
 
   def fromUserQuery(id: Long) = for {
-    r <- usercollectionrelations.filter(_.userID === id) if users.one(id).exists
+    r <- usercollectionrelations.filter(_.userID === id) if usersDAO.one(id).exists
     c <- collections if c.id === r.collectionID
   } yield (c)
 
   def fromUser(id: Long) = db.run(fromUserQuery(id).result)
 
-  def getByHash(userID: Long, hash: String) : Future[DBModels.Collection] = {
+  def getByHash(userID: Long, hash: String) : Future[Collection] = {
     val query = for {
       // r <- usercollectionrelations.filter(_.userID === userID)
       col <- collections if (col.hash === hash)// && col.id === r.collectionID)

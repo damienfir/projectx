@@ -49,7 +49,7 @@ POST    /collections/:id/photos     @controllers.Collections.addToCollection(id:
 # DELETE  /collections/:id/photos/:photos_id  controllers.Collections.removePhoto(id, photo_id)
 
 # GET     /collections/:id/pages      @controllers.Collections.getPages(id: Long)
-POST    /collections/:id/page/:pageID     @controllers.Collections.shufflePage(id: Long, pageID: Long, index: Int)
+POST    /collections/:id/page/:pageID     @controllers.Collections.shufflePage(id: Long, pageID: Long)
 POST    /collections/:id/pages    @controllers.Collections.generatePage(id: Long, index: Int)
 # POST    /mosaics/generate           @controllers.Collections.generate
 #

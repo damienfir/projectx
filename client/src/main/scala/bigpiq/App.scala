@@ -1,7 +1,7 @@
 package bigpiq.client
 
-import bigpiq.client.views.Root
-import japgolly.scalajs.react.{ReactComponentB, ReactDOM}
+import bigpiq.client.components.Root
+import japgolly.scalajs.react.ReactDOM
 import org.scalajs.dom
 
 import scala.scalajs.js
