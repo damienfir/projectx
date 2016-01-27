@@ -13,8 +13,15 @@ import scala.scalajs.js
 import scala.scalajs.js.Dynamic.{global => g}
 // import org.scalajs.dom.ext.Ajax
 import bigpiq.shared._
-import upickle.default._
 
+import upickle.default._
+import upickle.Js
+import autowire._
+
+
+// object AjaxClient extends autowire.Client[Js.Value, Reader, Writer] {
+//   override def doCall(req: Request): Future[Js.Value] = Ajax.post
+// }
 
 
 object Api {
@@ -44,10 +51,12 @@ object Api {
   def getUser(id: Long): Future[Pot[User]] = Ajax.get(s"/users/$id")
     .map(r => Ready(read[User](r.responseText)))
 
-  def createUser(): Future[Pot[User]] = postJSON(s"/users", "{}")
+  def createUser(): Future[Pot[User]] = postJSON(s"/users", write(User()))
     .map(v => Ready(read[User](v)))
 
-  def getUserFromCookie(): Option[Long] = Some(93)
+  def getUserIDFromCookie(): Option[Long] = {
+    dom.document.cookie.split(";").map(_.trim).map(_.split("=")).map(l => (l.head, l.tail.head)).toMap.get("bigpiquser").map(_.toInt)
+  }
 
   def getAlbumFromHash(userID: Long, hash: String): Future[Stored] = Ajax.get(s"/users/$userID/albums/$hash")
     .map(r => read[Stored](r.responseText))
@@ -70,5 +79,9 @@ object Api {
 
   def save(toSave: Save) = {
     postJSON(s"/save", write(toSave))
+  }
+
+  def emailLink(userID: Long, email: String, hash: String): Future[String] = {
+    postJSON(s"/users/$userID/link/$hash", write(Map("email" -> email)))
   }
 }

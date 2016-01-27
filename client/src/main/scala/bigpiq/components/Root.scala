@@ -27,7 +27,8 @@ object Root {
         proxy.connect(identity)(Nav(_)),
         proxy.connect(identity)(p => Album(Album.Props(p))),
         proxy.connect(identity)(p => Order(Order.Props(p))),
-        proxy.connect(identity)(Upload(_))
+        proxy.connect(identity)(Upload(_)),
+        proxy.connect(identity)(p => Save(Save.Props(p)))
       )
     }
   }

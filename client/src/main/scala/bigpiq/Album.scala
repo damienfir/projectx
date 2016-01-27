@@ -91,7 +91,7 @@ object AlbumUtil {
       comp.copy(tiles = if (newTiles map (t => (t.tx2-t.tx1, t.ty2-t.ty1)) exists (dim => dim._1 < d || dim._2 < d)) {
         oldTiles
       } else {
-        oldTiles.zip(newTiles).map({ case (a,b) => resizeTile(a,b)})
+        oldTiles.zip(newTiles).map({ case (a,b) => resizeTile(a,b) })
       })
     }
 
@@ -101,20 +101,17 @@ object AlbumUtil {
   val margin = 0.05
 
 
-  def toIndex(t: (Tile, Int)) = t match { case (tile, i) => i }
-
   def getParams(album: List[Composition], ev: CoordEvent): EdgeParams = {
-    def withinMargin(getCoord: Tile => Float, click: Double)(t: (Tile, Int)) = t match {
+    def closeEnough(getCoord: Tile => Float, click: Double)(t: (Tile, Int)) = t match {
       case (tile, i) => Math.abs(getCoord(tile) - click) < margin
     }
 
-    // val ev = click.copy(x = click.x/click.w, y = click.y/click.h)
     val tiles = album(ev.page).tiles.zipWithIndex
     EdgeParams(
-       x_tl = tiles.filter(withinMargin(_.tx1, ev.x)).map(toIndex),
-       y_tl = tiles.filter(withinMargin(_.ty1, ev.y)).map(toIndex),
-       x_br = tiles.filter(withinMargin(_.tx2, ev.x)).map(toIndex),
-       y_br = tiles.filter(withinMargin(_.ty2, ev.y)).map(toIndex)
+       x_tl = tiles.filter(closeEnough(_.tx1, ev.x)).map(_._2),
+       y_tl = tiles.filter(closeEnough(_.ty1, ev.y)).map(_._2),
+       x_br = tiles.filter(closeEnough(_.tx2, ev.x)).map(_._2),
+       y_br = tiles.filter(closeEnough(_.ty2, ev.y)).map(_._2)
     )
   }
 }

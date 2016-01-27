@@ -67,7 +67,9 @@ object Nav {
             <.ul(^.cls := "nav navbar-nav navbar-right",
               <.li(
                 <.button(^.cls := "btn btn-primary navbar-btn",
-                  ^.onClick --> onSave,
+                  // ^.onClick --> onSave,
+                  dataToggle := "modal",
+                  dataTarget := "#save-modal",
                   UI.icon("heart-o"), " Save"
                 )
               ),

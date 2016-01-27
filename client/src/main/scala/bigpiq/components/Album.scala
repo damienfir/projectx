@@ -6,6 +6,7 @@ import diode.data._
 import diode.react._
 import diode.react.ReactPot._
 import scala.scalajs.js._
+import org.scalajs.dom
 import org.scalajs.jquery.jQuery
 import org.scalajs.jquery.JQuery
 import japgolly.scalajs.react.Callback
@@ -87,11 +88,6 @@ class Drag {
     }
     case None => None
   }
-
-  // def setProps(props: CallbackTo[Album.Props], up: => Callback, move: Option[Move] => Callback) =  {
-  //   props.map(_.mouseUp.foreach(ev => (Callback(mouseUp)) >> up).runNow())).runNow()
-  //   props.map(_.mouseMove.foreach(ev => move(mouseMove(ev)).runNow())).runNow()
-  // }
 }
 
 
@@ -376,6 +372,9 @@ object Album {
     def willMount(props: Props) = {
       // imageDrag.setProps($.props, updateAlbum, moveAlbum)
       // edgeDrag.setProps($.props, freeParams, moveEdge)
+      props.proxy().collection.map { col =>
+        dom.history.pushState("", "", s"/ui/${col.hash}")
+      }
       $.setState(State(props.proxy().album, None, None))
     }
   }

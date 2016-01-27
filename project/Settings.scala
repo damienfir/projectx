@@ -28,6 +28,7 @@ object Settings {
     val scalaCSS = "0.3.1"
     val log4js = "1.4.10"
     val autowire = "0.2.5"
+    val upickle = "0.3.6"
 //    val booPickle = "1.1.0"
     val diode = "0.3.0"
     val uTest = "0.3.1"
@@ -48,7 +49,8 @@ object Settings {
       "com.github.tminglei" %% "slick-pg" % "0.9.1",
       "com.braintreepayments.gateway" % "braintree-java" % "2.52.0",
       "com.vmunier" %% "play-scalajs-scripts" % "0.3.0",
-      "com.lihaoyi" %%% "upickle" % "0.3.6",
+      "com.lihaoyi" %%% "upickle" % versions.upickle,
+      "com.lihaoyi" %%% "autowire" % versions.autowire,
       "org.webjars" % "font-awesome" % "4.3.0-1" % Provided,
       "org.webjars" % "bootstrap" % "3.3.2" % Provided
     ))
@@ -60,7 +62,8 @@ object Settings {
       "me.chrons" %%% "diode" % "0.3.0",
       "me.chrons" %%% "diode-react" % "0.3.0",
       "org.scala-js" %%% "scalajs-dom" % "0.8.2",
-      "com.lihaoyi" %%% "upickle" % "0.3.6",
+      "com.lihaoyi" %%% "upickle" % versions.upickle,
+      "com.lihaoyi" %%% "autowire" % versions.autowire,
       "be.doeraene" %%% "scalajs-jquery" % "0.8.1"
     ))
 

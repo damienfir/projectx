@@ -20,14 +20,10 @@ class UserHandler[M](modelRW: ModelRW[M, Pot[User]]) extends ActionHandler(model
 
   override def handle = {
     case UpdateUser(user) => updated(user)
-//    case UpdateUserThenUpload(user, files) =>
-//      g.console.log("update then upload")
-//      updated(Ready(user),
-//      Effect(Future(UploadFiles(files, Empty, Ready(user)))))
     case GetUser(id) => effectOnly(Effect(Api.getUser(id).map(u => UpdateUser(u))))
 //    case CreateUser => effectOnly(UserApi.createUser())
     case GetFromCookie => effectOnly {
-      Effect(Future(Api.getUserFromCookie().map(GetUser)).map(_.getOrElse(None))) >>
+      Effect(Future(Api.getUserIDFromCookie().map(GetUser)).map(_.getOrElse(None))) >>
       Effect.action(GetFromHash)
     }
   }
@@ -37,7 +33,7 @@ class UserHandler[M](modelRW: ModelRW[M, Pot[User]]) extends ActionHandler(model
 class PhotoHandler[M](modelRW: ModelRW[M, List[Photo]]) extends ActionHandler(modelRW) {
 
   override def handle = {
-    case UpdatePhotos(photos) => updated(value ++ photos)
+    case UpdatePhotos(photos) => updated((value ++ photos).groupBy(_.id).map(_._2.head).toList)
     case FileUploaded(photo) => updated(value :+ photo)
   }
 }
@@ -53,15 +49,16 @@ class AlbumHandler[M](modelRW: ModelRW[M, RootModel]) extends ActionHandler(mode
   def shuffle(photos: List[Photo], selected: Selected) =
     Api.shufflePage(photos, value.collection.get.id.get, value.album.get(selected.page).id.get)
 
+
   override def handle = {
 
     case AddToCover(selected) => effectOnly {
-      val photoToAdd = getPhotos(selected.page).filter(_.id == getID(selected))
+      val photoToAdd = getPhotos(selected.page).filter(_.id.get == getID(selected))
       Effect(Api.shufflePage(getPhotos(0) ++ photoToAdd, value.collection.get.id.get, value.album.get(0).id.get)
         .map(UpdatePages))
     }
 
-    case RemoveLastPage => effectOnly{
+    case RemoveLastPage => effectOnly {
       println("remove last page")
       Effect.action(UpdatePages(value.album.map(al => List(al.last.copy(tiles = Nil)))))
     }
@@ -145,10 +142,14 @@ class FileUploadHandler[M](modelRW: ModelRW[M, RootModel]) extends ActionHandler
         ))
         case _ => noChange
       }
-      case Empty => effectOnly(Effect(Api.createUser().map({
-          case user: Ready[_] => UpdateUserThenUpload(user, files)
-          case _ => None
-        })))
+      case Empty =>  effectOnly {
+        Effect(Api.getUserIDFromCookie.map(id => Api.getUser(id))
+          .getOrElse(Api.createUser) map {
+            case user: Ready[_] => UpdateUserThenUpload(user, files)
+            case _ => None
+          }
+        )
+      }
       case _ => noChange
     }
 
@@ -159,7 +160,8 @@ class FileUploadHandler[M](modelRW: ModelRW[M, RootModel]) extends ActionHandler
       updated(value.copy(collection = col), Effect.action(UploadFiles(files)))
 
     case MakePages(photos, index) => effectOnly {
-      Effect(Api.makePages(photos, value.collection.get.id.get, index).map(p => UpdatePages(p)))
+      Effect(Api.makePages(photos, value.collection.get.id.get, index).map(p => UpdatePages(p))) >>
+      Effect.action(UpdatePhotos(photos))
     }
 
     case UpdatePages(pages) => pages match {
@@ -181,7 +183,7 @@ class FileUploadHandler[M](modelRW: ModelRW[M, RootModel]) extends ActionHandler
     }
 
     case GetAlbum(hash) => effectOnly {
-      Effect(Api.getAlbumFromHash(0, hash).map(s => UpdateFromHash(s)).recover({case ex => None}))
+      Effect(Api.getAlbumFromHash(value.user.map(_.id.get).getOrElse(0), hash).map(s => UpdateFromHash(s)).recover({case ex => None}))
     }
 
     case GetFromHash => effectOnly {
@@ -191,6 +193,11 @@ class FileUploadHandler[M](modelRW: ModelRW[M, RootModel]) extends ActionHandler
     case SaveAlbum => effectOnly {
       Effect(Api.save(Save(value.album.get, value.collection.get)))
     }
+
+    case EmailAndSave(email) => effectOnly {
+      Effect.action(SaveAlbum) >>
+      Effect(Api.emailLink(value.user.get.id.get, email, value.collection.get.hash).map(_ => None))
+    }
   }
 }
 
@@ -198,7 +205,7 @@ class FileUploadHandler[M](modelRW: ModelRW[M, RootModel]) extends ActionHandler
 object AppCircuit extends Circuit[RootModel] with ReactConnector[RootModel] {
   override protected var model: RootModel = RootModel()
 
-  override protected def actionHandler = combineHandlers(
+  override protected def actionHandler = combineHandlers (
     new UserHandler(zoomRW(_.user)((m,v) => m.copy(user = v))),
     new PhotoHandler(zoomRW(_.photos)((m,v) => m.copy(photos = v))),
     new FileUploadHandler(zoomRW(identity)((m,v) => v)),

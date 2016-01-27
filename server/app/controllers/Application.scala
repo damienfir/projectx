@@ -30,7 +30,8 @@ class Application @Inject()(val messagesApi: MessagesApi) extends Controller wit
 
   def ui = Action { implicit request =>
     val id = Play.current.configuration.getString("px.demoID").get
-    Ok(views.html.interactive(id))
+    val url = Play.current.configuration.getString("px.paypal-url").get
+    Ok(views.html.interactive(id, url))
   }
 
   def uiWithHash(hash: String) = ui
@@ -38,9 +39,6 @@ class Application @Inject()(val messagesApi: MessagesApi) extends Controller wit
 
 
 class Payment @Inject()(braintree: Braintree, email: Email) extends Controller {
-  // implicit val orderFormat = Json.format[APIModels.Order]
-  // implicit val infoFormat = Json.format[APIModels.Info]
-
   def getToken = Action.async {
     braintree.token.map(token => Ok(token))
   }
@@ -50,7 +48,7 @@ class Payment @Inject()(braintree: Braintree, email: Email) extends Controller {
     val order = readJs[Order](obj("order"))
     val info = readJs[Info](obj("info"))
     braintree.order(order, info) map { trans =>
-      email.confirmOrder(order, info) map (println(_))
+      email.confirmOrder(order, info)
       Ok(write(Map("status" -> 1)))
     } recover {
       case ex => BadRequest(ex.getMessage)
@@ -60,6 +58,8 @@ class Payment @Inject()(braintree: Braintree, email: Email) extends Controller {
 
 
 class Users @Inject()(usersDAO: UsersDAO) extends Controller {
+
+  def makeCookie(id: Long) = Cookie("bigpiquser", id.toString, maxAge=Some(315360000), httpOnly=false)
 
   def get(id: Long) = Action.async {
     usersDAO.get(id) map {
@@ -74,8 +74,8 @@ class Users @Inject()(usersDAO: UsersDAO) extends Controller {
       case Some(id) => usersDAO.update(item)
       case None => usersDAO.insert(item) map (Success(_))
     }) map {
-      case Success(newItem: User) => Ok(write(newItem))
-      case Success(_) => Ok(write(item))
+      case Success(newItem: User) => Ok(write(newItem)).withCookies(makeCookie(newItem.id.get))
+      case Success(_) => Ok(write(item)).withCookies(makeCookie(item.id.get))
       case Failure(_) => BadRequest
     }
   }
@@ -158,17 +158,7 @@ class Collections @Inject()(usersDAO: UsersDAO, compositionDAO: CompositionDAO, 
 
 
   def generatePage(id: Long, index: Int) = Action.async(parse.tolerantText) { request =>
-    // val photos = request.body.as[List[Photo]]
     val photos = read[List[Photo]](request.body)
-    println(photos)
-      // val pagesWithCover = if (index == 0) {
-      //   (List(photos(Random.nextInt(photos.size))), 0) :: pages.map({case (p,i) => (p,i+1)})
-      // } else { pages }
-      // Future.sequence {
-      //   pagesWithCover.map({case (subset, index) => generateComposition(id, subset, startindex+index)})
-      // }.map(pages => Ok(Json.toJson(pages)))
-    // }
-
     generateComposition(id, photos, index) map (page => Ok(write(page)))
   }
 
@@ -186,8 +176,7 @@ class Collections @Inject()(usersDAO: UsersDAO, compositionDAO: CompositionDAO, 
 
 
   def emailLink(id: Long, hash: String) = Action.async(parse.tolerantText) { request =>
-    // val email = (request.body \ "email").as[String]
-    val email = json.read(request.body)("email").asInstanceOf[String]
+    val email = readJs[String](json.read(request.body)("email"))
     emailService.sendLink(email, hash) map (Ok(_))
   }
 

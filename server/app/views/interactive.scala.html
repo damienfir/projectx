@@ -1,4 +1,4 @@
-@(demoID: String)(implicit lang: Lang, messages: Messages)
+@(demoID: String, url: String)(implicit lang: Lang, messages: Messages)
 
 <html lang="@lang.language">
 <head>
@@ -21,6 +21,7 @@
 <body>
 
   <input type="hidden" id="demo-id" value="@demoID">
+  <input type="hidden" id="url" value="@url">
 
   <div id="app"></div>
 

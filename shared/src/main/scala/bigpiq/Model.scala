@@ -5,8 +5,8 @@ trait HasID{
 }
 
 case class User (
-  id: Option[Long],
-  email: Option[String]
+  id: Option[Long] = None,
+  email: Option[String] = None
 ) extends HasID
 
 case class Collection (
