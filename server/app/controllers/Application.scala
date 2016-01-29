@@ -17,7 +17,6 @@ import bigpiq.server.db
 import bigpiq.shared._
 
 // import play.api.libs.json._
-// import upickle._
 import upickle.default._
 import upickle.Js
 import upickle.json
@@ -29,7 +28,7 @@ object Router extends autowire.Server[Js.Value, Reader, Writer] {
 }
 
 
-class Application @Inject()(serverApi: ServerApi) extends Controller with I18nSupport {
+class Application @Inject()(val messagesApi: MessagesApi, serverApi: ServerApi) extends Controller with I18nSupport {
 
   def makeCookie(id: Long) = Cookie("bigpiquser", id.toString, maxAge=Some(315360000), httpOnly=false)
 

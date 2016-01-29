@@ -11,143 +11,131 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.Random
 
-
-case class Save(album: List[Composition], collection: Collection)
-
+case class RootModel(user: Pot[User] = Empty, album: Pot[Album] = Empty)
 
 
 class UserHandler[M](modelRW: ModelRW[M, Pot[User]]) extends ActionHandler(modelRW) {
 
   override def handle = {
     case UpdateUser(user) => updated(user)
-    case GetUser(id) => effectOnly(Effect(Api.getUser(id).map(u => UpdateUser(u))))
+    case GetUser(id) => effectOnly(Effect(AjaxClient[Api].getUser(id).map(UpdateUser(_))))
 //    case CreateUser => effectOnly(UserApi.createUser())
     case GetFromCookie => effectOnly {
-      Effect(Future(Api.getUserIDFromCookie().map(GetUser)).map(_.getOrElse(None))) >>
+      Effect(Future(Helper.getUserIDFromCookie.map(GetUser).getOrElse(None))) >>
       Effect.action(GetFromHash)
     }
   }
 }
 
 
-class PhotoHandler[M](modelRW: ModelRW[M, List[Photo]]) extends ActionHandler(modelRW) {
-
-  override def handle = {
-    case UpdatePhotos(photos) => updated((value ++ photos).groupBy(_.id).map(_._2.head).toList)
-    case FileUploaded(photo) => updated(value :+ photo)
-  }
-}
 
 
-class AlbumHandler[M](modelRW: ModelRW[M, RootModel]) extends ActionHandler(modelRW) {
+class AlbumHandler[M](modelRW: ModelRW[M, Pot[Album]]) extends ActionHandler(modelRW) {
 
-  def getPhotos(index: Int) =
-    value.photos.filter(p => value.album.get(index).tiles.exists(_.photoID == p.id.get))
+  def getPhotos(index: Int): List[Photo] =
+    value.get.pages(index).tiles.map(_.photo)
+//    value.photos.filter(p => value.album.get(index).tiles.exists(_.photoID == p.id.get))
 
-  def getID(selected: Selected) = value.album.get(selected.page).tiles(selected.index).photoID
-
-  def shuffle(photos: List[Photo], selected: Selected) =
-    Api.shufflePage(photos, value.collection.get.id.get, value.album.get(selected.page).id.get)
+  def getID(selected: Selected) = value.get.pages(selected.page).tiles(selected.index).photo.id
 
 
   override def handle = {
 
     case AddToCover(selected) => effectOnly {
-      val photoToAdd = getPhotos(selected.page).filter(_.id.get == getID(selected))
-      Effect(Api.shufflePage(getPhotos(0) ++ photoToAdd, value.collection.get.id.get, value.album.get(0).id.get)
-        .map(UpdatePages))
+      val photoToAdd = getPhotos(selected.page).filter(_.id == getID(selected))
+      Effect(AjaxClient[Api].shufflePage(value.get.pages(selected.page), getPhotos(0) ++ photoToAdd)
+        .map(UpdatePages(_)))
     }
 
     case RemoveLastPage => effectOnly {
-      println("remove last page")
-      Effect.action(UpdatePages(value.album.map(al => List(al.last.copy(tiles = Nil)))))
+      Effect.action(UpdatePages(value.map(album => List(album.pages.last.copy(tiles = Nil)))))
     }
 
     case MoveTile(from, to) => {
       val fromPhotos = getPhotos(from.page)
-      val fromComposition = value.album.get(from.page)
+      val fromPage = value.get.pages(from.page)
       val photoID = getID(from)
 
       if (to.page == -1) 
         if (fromPhotos.length == 1) noChange else effectOnly {
-        Effect(Api.shufflePage(fromPhotos.filter(_.id != Some(photoID)), value.collection.get.id.get, fromComposition.id.get).map(UpdatePages)) +
-        Effect(Api.makePages(fromPhotos.filter(_.id == Some(photoID)), value.collection.get.id.get, value.album.get.length).map(UpdatePages))
+        Effect(AjaxClient[Api].shufflePage(fromPage, fromPhotos.filter(_.id != photoID)).map(UpdatePages(_))) +
+        Effect(AjaxClient[Api].generatePage(value.get.id, fromPhotos.filter(_.id == photoID), value.get.pages.length).map(UpdatePages(_)))
       } else {
         val toPhotos = getPhotos(to.page)
-        val toComposition = value.album.get(to.page)
+        val toPage = value.get.pages(to.page)
 
         if (fromPhotos.length == 1) {
-          if (from.page == value.album.get.length-1) effectOnly {
-            Effect(Api.shufflePage(toPhotos ++ fromPhotos, value.collection.get.id.get, toComposition.id.get)
-              .map(UpdatePages)) +
+          if (from.page == value.get.pages.length-1) effectOnly {
+            Effect(AjaxClient[Api].shufflePage(toPage, toPhotos ++ fromPhotos).map(UpdatePages(_))) +
             Effect.action(RemoveLastPage)
           } else noChange
 
           } else effectOnly {
-            Effect(Api.shufflePage(fromPhotos.filter(_.id != Some(photoID)), value.collection.get.id.get, fromComposition.id.get).map(UpdatePages)) +
-            Effect(Api.shufflePage(toPhotos ++ fromPhotos.filter(_.id == Some(photoID)), value.collection.get.id.get, toComposition.id.get).map(UpdatePages))
+            Effect(AjaxClient[Api].shufflePage(fromPage, fromPhotos.filter(_.id != photoID))
+              .map(UpdatePages(_))) +
+            Effect(AjaxClient[Api].shufflePage(toPage, toPhotos ++ fromPhotos.filter(_.id == photoID)).map(UpdatePages(_)))
           }
       }
     }
 
-    case SetAlbum(album) => {
-      updated(value.copy(album = album))
-    }
+    case SetAlbum(album) => updated(album)
 
     case ShufflePage(index: Int) => effectOnly {
-      val page = value.album.get(index)
-      Effect(Api.shufflePage(getPhotos(index), value.collection.get.id.get, page.id.get).map(UpdatePages))
+      val page = value.get.pages(index)
+      Effect(AjaxClient[Api].shufflePage(page, getPhotos(index)).map(p => Ready(List(p))).map(UpdatePages(_)))
     }
 
     case RemoveTile(selected) => effectOnly {
-      Effect(shuffle(getPhotos(selected.page).filter(_.id != Some(getID(selected))), selected).map(UpdatePages))
+      val photos = value.get.pages(selected.page).tiles.map(_.photo).filter(_.id != getID(selected))
+      Effect(AjaxClient[Api].shufflePage(value.get.pages(selected.page), photos).map(p => Ready(List(p))).map(UpdatePages(_)))
     }
+
+    case UpdatePages(pages) => pages map { newPages =>
+      updated(value.map(album => album.copy(pages =
+          (album.pages.filter(p => !newPages.exists(_.index == p.index)) ++ newPages)
+        .filter(_.tiles.nonEmpty).groupBy(_.index).map(_._2.head).toList.sortBy(_.index))))
+    } getOrElse noChange
   }
 }
 
 
-class CollectionHandler[M](modelRW: ModelRW[M, Pot[Collection]]) extends ActionHandler(modelRW) {
-  def handle = {
-    case UpdateTitle(title) => updated(value.map(c => c.copy(name = Some(title))))
-  }
-}
+//class CollectionHandler[M](modelRW: ModelRW[M, Pot[Collection]]) extends ActionHandler(modelRW) {
+//  def handle = {
+//    case UpdateTitle(title) => updated(value.map(c => c.copy(name = Some(title))))
+//  }
+//}
 
 
 class FileUploadHandler[M](modelRW: ModelRW[M, RootModel]) extends ActionHandler(modelRW) {
 
   def handle = {
     case UploadFiles(files, index) => value.user match {
-      case Ready(user) => value.collection match {
-        case Ready(collection) => files match {
+      case Ready(user) => value.album match {
+        case Ready(album) => files match {
           case Nil => noChange
           case _: List[_] =>
-            val updatedIndex = value.album match {
-              case Ready(pages) => if (index == 0) pages.length else index
-              case _ => index
+            val updatedIndex = album.pages match {
+              case Nil => index
+              case pages => if (index == 0) pages.length else index
             }
             val (fileSet, rest) =
               if (updatedIndex == 0) (files.take(1), files)
               else files.splitAt(Math.min(new Random().nextInt(3)+1, files.length))
             effectOnly {
-              Effect(Future.sequence(fileSet.map(f => Api.uploadFile(f, collection.id.get)))
+              Effect(Future.sequence(fileSet.map(f => Helper.uploadFile(f, album.id)))
                 .map(photos => MakePages(photos, updatedIndex))) >>
               Effect.action(UploadFiles(rest, updatedIndex+1))
             }
         }
-        case Empty => effectOnly(Effect(Api.createCollection(user.id.get)
-            .map({
-              case col: Ready[_] => UpdateCollectionThenUpload(col, files)
-              case _ => None
-            })
+        case Empty => effectOnly(Effect(AjaxClient[Api].createAlbum(user.id).map(Ready(_))
+            .map(album => UpdateCollectionThenUpload(album, files))
         ))
         case _ => noChange
       }
       case Empty =>  effectOnly {
-        Effect(Api.getUserIDFromCookie.map(id => Api.getUser(id))
-          .getOrElse(Api.createUser) map {
-            case user: Ready[_] => UpdateUserThenUpload(user, files)
-            case _ => None
-          }
+        Effect(Helper.getUserIDFromCookie.map(id => AjaxClient[Api].getUser(id))
+          .getOrElse(AjaxClient[Api].createUser).map(Ready(_))
+          .map(user => UpdateUserThenUpload(user, files))
         )
       }
       case _ => noChange
@@ -157,27 +145,17 @@ class FileUploadHandler[M](modelRW: ModelRW[M, RootModel]) extends ActionHandler
       updated(value.copy(user = user), Effect.action(UploadFiles(files)))
 
     case UpdateCollectionThenUpload(col, files) =>
-      updated(value.copy(collection = col), Effect.action(UploadFiles(files)))
+      updated(value.copy(album = col), Effect.action(UploadFiles(files)))
 
     case MakePages(photos, index) => effectOnly {
-      Effect(Api.makePages(photos, value.collection.get.id.get, index).map(p => UpdatePages(p))) >>
-      Effect.action(UpdatePhotos(photos))
+      Effect(AjaxClient[Api].generatePage(value.album.get.id, photos, index)
+        .map(p => Ready(List(p))).map(UpdatePages))
     }
 
-    case UpdatePages(pages) => pages match {
-      case Ready(newPages) => updated(value.copy(album = Ready(value.album match {
-        case Ready(existingPages) => existingPages
-          .filter(p => !newPages.exists(_.index == p.index)) ++ newPages
-        case _ => newPages
-      })
-        .map(_.filter(_.tiles.nonEmpty).groupBy(_.index).map(_._2.head).toList.sortBy(_.index))))
-      case _ => noChange
-    }
-
-    case UpdateCollection(collection) => updated(value.copy(collection = Ready(collection)))
+    case UpdateAlbum(collection) => updated(value.copy(collection = Ready(collection)))
 
     case UpdateFromHash(stored) => effectOnly {
-      Effect(Future(UpdateCollection(stored.collection))) >>
+      Effect(Future(UpdateAlbum(stored.collection))) >>
       Effect(Future(UpdatePhotos(stored.photos))) >>
       Effect(Future(UpdatePages(Ready(stored.pages))))
     }
@@ -191,7 +169,7 @@ class FileUploadHandler[M](modelRW: ModelRW[M, RootModel]) extends ActionHandler
     }
 
     case SaveAlbum => effectOnly {
-      Effect(Api.save(Save(value.album.get, value.collection.get)))
+      Effect(AjaxClient[Api].saveAlbum(value.album.get))
     }
 
     case EmailAndSave(email) => effectOnly {
@@ -207,9 +185,7 @@ object AppCircuit extends Circuit[RootModel] with ReactConnector[RootModel] {
 
   override protected def actionHandler = combineHandlers (
     new UserHandler(zoomRW(_.user)((m,v) => m.copy(user = v))),
-    new PhotoHandler(zoomRW(_.photos)((m,v) => m.copy(photos = v))),
     new FileUploadHandler(zoomRW(identity)((m,v) => v)),
-    new CollectionHandler(zoomRW(_.collection)((m,v) => m.copy(collection = v))),
-    new AlbumHandler(zoomRW(identity)((m,v) => v))
+    new AlbumHandler(zoomRW(_.album)((m,v) => v))
   )
 }

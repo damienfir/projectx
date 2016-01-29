@@ -8,9 +8,9 @@ import bigpiq.shared._
 import bigpiq.server.db
 
 
-class ServerApi @Inject()(usersDAO: db.UsersDAO, collectionDAO: db.CollectionDAO, mosaicService: MosaicService, emailService: Email) extends Api {
+class ServerApi @Inject() (usersDAO: db.UsersDAO, collectionDAO: db.CollectionDAO, mosaicService: MosaicService, emailService: Email) extends Api {
 
-  def getUser(id: Long): Future[User] =  usersDAO.get(id)
+  def getUser(id: Long): Future[User] = usersDAO.get(id)
 
   def createUser: Future[User] = usersDAO.insert
 
@@ -30,8 +30,7 @@ class ServerApi @Inject()(usersDAO: db.UsersDAO, collectionDAO: db.CollectionDAO
     _ <- collectionDAO.updatePage(albumID, page.copy(tiles=tiles, index=index))
   } yield page
 
-  def shufflePage(page: Page): Future[Page] = {
-    val photos = page.tiles.map(_.photo)
+  def shufflePage(page: Page, photos: List[Photo]): Future[Page] = {
     mosaicService.generateComposition(page.id, photos) map ( tiles =>
       page.copy(tiles = tiles)
     )

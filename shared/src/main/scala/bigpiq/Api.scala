@@ -17,7 +17,8 @@ trait Api {
 
   def saveAlbum(album: Album): Future[Album]
 
-  def shufflePage(page: Page): Future[Page]
+  def shufflePage(page: Page, photos: List[Photo]): Future[Page]
 
   def generatePage(albumID: Long, photos: List[Photo], index: Int): Future[Page]
+
 }
