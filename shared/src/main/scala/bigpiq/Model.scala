@@ -1,38 +1,13 @@
 package bigpiq.shared
 
-trait HasID{
-  def id: Option[Long]
-}
 
-case class User (
-  id: Option[Long] = None,
-  email: Option[String] = None
-) extends HasID
+case class User(id: Long, email: String, albums: List[Album])
 
-case class Collection (
-  id: Option[Long],
-  name: Option[String],
-  hash: String
-)
+case class Album(id: Long, hash: String, title: String, pages: List[Page])
 
-case class Photo (
-  id: Option[Long],
-  collectionID: Long,
-  hash: String,
-  data: Array[Byte]
-)
+case class Page(id: Long, index: Int, tiles: List[Tile])
 
-case class Composition (
-  id: Option[Long],
-  collectionID: Long,
-  index: Int,
-  // photos: List[String],
-  tiles: List[Tile]
-)
-
-case class Tile(
-  photoID: Long,
-  rot: Option[Int],
+case class Tile(photo: Photo, rot: Int, 
   cx1: Float,
   cx2: Float,
   cy1: Float,
@@ -43,26 +18,4 @@ case class Tile(
   ty2: Float
 )
 
-
-case class Stored(
-  collection: Collection,
-  pages: List[Composition],
-  photos: List[Photo]
-)
-
-case class Info(
-  firstName: String,
-  lastName: String,
-  email: String,
-  address: String,
-  zip: String,
-  city: String,
-  country: String
-)
-
-case class Order(
-  userID: Long,
-  collectionID: Long,
-  nonce: String,
-  qty: Int
-)
+case class Photo(id: Long, hash: String)

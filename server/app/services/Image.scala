@@ -83,21 +83,21 @@ class ImageService @Inject()() {
 //   }
   
   
-  def bytesFromTemp(uploaded: TemporaryFile) : Photo = {
-    val data = FileUtils.readFileToByteArray(uploaded.file)
-    val hash = hashFromContent(data)
-    Photo(None, 0, hash, data)
-  }
+//  def bytesFromTemp(uploaded: TemporaryFile) : Photo = {
+//    val data = FileUtils.readFileToByteArray(uploaded.file)
+//    val hash = hashFromContent(data)
+//    Photo(None, 0, hash, data)
+//  }
 
 
-  def save(uploaded: TemporaryFile): Photo = {
+  def save(uploaded: TemporaryFile): (String, Array[Byte]) = {
     val data = FileUtils.readFileToByteArray(uploaded.file)
     val hash = hashFromContent(data)
     val newFile = new File(photoFile(hash))
     uploaded.moveTo(newFile)
     newFile.setReadable(true, false)
     newFile.setExecutable(true, false)
-    Photo(None, 0, hash, data)
+  (hash, data)
     // val thumbFilename = resize(filename)
     // val thumb = new File(thumbFile(thumbFilename))
     // thumb.setReadable(true, false)

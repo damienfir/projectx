@@ -1,4 +1,4 @@
-package services
+package bigpiq.server.services
 
 import javax.inject.Inject
 import scala.concurrent.Future
@@ -27,28 +27,28 @@ class Email @Inject()(ws: WSClient) {
         "text" -> Seq(s"""Thank you for saving your album on bigpiq.
 
 To get back to your album, please click on this link:
-http://${host}/ui/${hash}
+http://$host/ui/$hash
 
 Faithfully yours,
 Damien & RK""")))
     .map(x => {
         println(x)
-        x.json
+        x.body
     })
   }
 
-  def confirmOrder(order: Order, info: Info) = {
+  def confirmOrder(collectionID: Long, email: String, firstName: String) = {
     val res = message
       .post(Map(
         "from" -> Seq(fromEmail),
-        "to" -> Seq(info.email),
+        "to" -> Seq(email),
         "subject" -> Seq("Thank you. Your order is processing"),
-        "text" -> Seq(s"""Dear ${info.firstName},
+        "text" -> Seq(s"""Dear $firstName,
 
 Thank you for ordering your album with us, we are processing your order and will let you know when it's ready.
 
 You can view your album and modify it until the order is processed. Please click on the following url:
-http://${host}/ui/${order.collectionID}
+http://$host/ui/$collectionID
 
 Faithfully yours,
 Damien & RK""")))

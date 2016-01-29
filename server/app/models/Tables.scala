@@ -1,9 +1,8 @@
-package models
+package bigpiq.server.db
 
 import slick.driver.PostgresDriver
 
 import upickle.default._
-import bigpiq.shared._
 
 
 object Tables {

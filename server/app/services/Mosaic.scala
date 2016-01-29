@@ -1,4 +1,4 @@
-package services
+package bigpiq.server.services
 
 import javax.inject._
 import java.util.UUID
@@ -46,10 +46,10 @@ class MosaicService @Inject()() {
   //   )
   // }
 
-  def tilesToDB(photos: Seq[Photo])(tile: MosaicModels.Tile2): Tile = {
+  def tilesToDB(photos: List[Photo])(tile: MosaicModels.Tile2): Tile = {
     Tile(
-      photoID=photos.filter(_.hash.equals((tile.imfile).split("/").last)).head.id.get,
-      rot=Some(tile.rot),
+      photo=photos.filter(_.hash == tile.imfile.split("/").last).head,
+      rot=tile.rot,
       cx1=tile.cx1,
       cx2=tile.cx2,
       cy1=tile.cy1,
@@ -61,26 +61,26 @@ class MosaicService @Inject()() {
     )
   }
 
-  def tilesToMosaic(tiles: List[Tile], photos: Seq[Photo]): (MosaicModels.Cluster, List[MosaicModels.Tile]) = {
-    val gists = tiles.map(t => photos.find(_.id == Some(t.photoID)).get.hash).map(gistFile)
-    val newTiles = tiles.zipWithIndex.map({ case (tile,i) => MosaicModels.Tile(
-      tileindex = i,
-      imgindex = i,
-      cx1=tile.cx1,
-      cx2=tile.cx2,
-      cy1=tile.cy1,
-      cy2=tile.cy2,
-      tx1=tile.tx1,
-      tx2=tile.tx2,
-      ty1=tile.ty1,
-      ty2=tile.ty2
-      )})
-    val cluster = MosaicModels.Cluster(
-      gists = gists,
-      sorted = gists.zipWithIndex.map(_._2)
-    )
-    (cluster, newTiles)
-  }
+//  def tilesToMosaic(tiles: List[Tile], photos: Seq[Photo]): (MosaicModels.Cluster, List[MosaicModels.Tile]) = {
+//    val gists = tiles.map(t => photos.find(_.id == Some(t.photoID)).get.hash).map(gistFile)
+//    val newTiles = tiles.zipWithIndex.map({ case (tile,i) => MosaicModels.Tile(
+//      tileindex = i,
+//      imgindex = i,
+//      cx1=tile.cx1,
+//      cx2=tile.cx2,
+//      cy1=tile.cy1,
+//      cy2=tile.cy2,
+//      tx1=tile.tx1,
+//      tx2=tile.tx2,
+//      ty1=tile.ty1,
+//      ty2=tile.ty2
+//      )})
+//    val cluster = MosaicModels.Cluster(
+//      gists = gists,
+//      sorted = gists.zipWithIndex.map(_._2)
+//    )
+//    (cluster, newTiles)
+//  }
 
 
   def preprocess(filename: String): String =  {
@@ -124,23 +124,15 @@ class MosaicService @Inject()() {
   def tilesPython(photos: Seq[String], id: String) = Future {
     val out = matchFile(id) 
     val cmd = binary +: "1.414" +: photos.map(photoFile) :+ out
-    // println(cmd)
     cmd ! match {
       case 0 => Json.parse(Source.fromFile(out).mkString).as[List[MosaicModels.Tile2]]
       case _ => throw new Exception
     }
   }
 
-  def generateComposition(compositionID: Long, photos: Seq[Photo]): Future[List[Tile]] = {
-    val id = compositionID.toString
-    // for {
-    //   clu <- cluster(photos.map(_.hash), id)
-    //   tiles <- assign(id, id, id)
-    // } yield tiles.map(tilesToDB(clu, photos))
-    for {
-      tiles <- tilesPython(photos.map(_.hash), id)
-    } yield tiles.map(tilesToDB(photos))
-  }
+  def generateComposition(pageID: Long, photos: List[Photo]): Future[List[Tile]] =
+    tilesPython(photos.map(_.hash), pageID.toString)
+      .map(_.map(tilesToDB(photos)))
 
 
   def render(tile: String, cluster: String, match_id: String, output: String): Future[String] = Future {
@@ -168,13 +160,13 @@ class MosaicService @Inject()() {
     writeFile(filename, content.toString)
   }
 
-  def renderComposition(composition: Composition, photos: Seq[Photo]): Future[String] = {
-    val id = composition.id.get.toString
-    val (cluster,mosaictiles) = tilesToMosaic(composition.tiles, photos)
-    writeJson(clusterFile(id), Json.toJson(cluster))
-    writeJson(matchFile(id), Json.toJson(mosaictiles))
-    render(id, id, id, id + ".jpg")
-  }
+//  def renderComposition(composition: Composition, photos: Seq[Photo]): Future[String] = {
+//    val id = composition.id.get.toString
+//    val (cluster,mosaictiles) = tilesToMosaic(composition.tiles, photos)
+//    writeJson(clusterFile(id), Json.toJson(cluster))
+//    writeJson(matchFile(id), Json.toJson(mosaictiles))
+//    render(id, id, id, id + ".jpg")
+//  }
 
   def blankSVG = """<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
     width="297mm"
