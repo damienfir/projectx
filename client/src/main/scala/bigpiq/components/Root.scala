@@ -25,7 +25,7 @@ object Root {
         // ^.onMouseMove ==> ((ev: ReactMouseEvent) => Callback(mouseMove$.onNext(CoordEvent(0, 0, ev, jQuery(ev.target))))),
 //        <.button(^.cls := "btn btn-primary", dataToggle := "modal", dataTarget := "#upload-modal"),
         proxy.connect(identity)(Nav(_)),
-        proxy.connect(identity)(p => Album(Album.Props(p))),
+        proxy.connect(_.album)(p => Album(Album.Props(p))),
         proxy.connect(identity)(p => Order(Order.Props(p))),
         proxy.connect(identity)(Upload(_)),
         proxy.connect(identity)(p => Save(Save.Props(p)))

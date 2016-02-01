@@ -1,7 +1,7 @@
 package bigpiq.client.components
 
 import bigpiq.client.{RootModel, SaveAlbum}
-import bigpiq.shared.Collection
+import bigpiq.shared._
 import diode.data.Ready
 import diode.react.ModelProxy
 import japgolly.scalajs.react.BackendScope
@@ -28,14 +28,9 @@ object Nav {
     def onSave = $.props.flatMap(_.dispatch(SaveAlbum))
 
     def render(proxy: ModelProxy[RootModel]) = {
-      val isDemo = proxy().collection match {
-        case Ready(Collection(_, _, hash)) => hash.equals("")
-        case _ => false
-      }
-      val loaded = proxy().album match {
-        case Ready(album) => album.nonEmpty && !isDemo
-        case _ => false
-      }
+      val isDemo = proxy().album.map(_.hash == "").getOrElse(false)
+      val loaded = proxy().album.map(_.pages.nonEmpty && !isDemo).getOrElse(false)
+
       <.div(^.cls := "nav navbar-transparent navbar-fixed-top", ^.id := "nav",
         <.div(^.cls := "container-fluid",
           <.ul(^.cls := "nav navbar-nav",

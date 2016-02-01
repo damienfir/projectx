@@ -44,7 +44,7 @@ GET     /assets/*file               @controllers.Assets.at(path="/public", file)
 # DELETE  /collections/:id/users/:uid controllers.Collections.removeUser(id, uid)
 # POST     /collections/:id/download    @controllers.Collections.download(id: Long)
 # GET     /collections/:id/photos     @controllers.Collections.getPhotos(id: Long)
-POST    /collections/:id/photos     @controllers.Collections.addToCollection(id: Long)
+POST    /collections/:id/photos     @controllers.Photos.addToCollection(id: Long)
 # GET     /collections/:id/photos/:photo_id controllers.Collections.getPhoto(id, photo_id)
 # DELETE  /collections/:id/photos/:photos_id  controllers.Collections.removePhoto(id, photo_id)
 
@@ -59,7 +59,7 @@ POST    /collections/:id/photos     @controllers.Collections.addToCollection(id:
 # GET /client_token @controllers.Payment.getToken
 # POST /order @controllers.Payment.submitOrder
 
-# GET     /photos/:photoID/:region/:size/:rotation/:quality.:format     @controllers.Photos.get(photoID: Long, region, size, rotation, quality, format)
+GET     /photos/:photoID/:region/:size/:rotation/:quality.:format     @controllers.Photos.get(photoID: Long, region, size, rotation, quality, format)
 
 # GET /pdf/:hash                      @controllers.Collections.pdf(hash: String)
 

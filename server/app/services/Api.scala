@@ -27,8 +27,8 @@ class ServerApi @Inject() (usersDAO: db.UsersDAO, collectionDAO: db.CollectionDA
   def generatePage(albumID: Long, photos: List[Photo], index: Int): Future[Page] = for {
     page <- collectionDAO.addPage(albumID)
     tiles <- mosaicService.generateComposition(page.id, photos)
-    _ <- collectionDAO.updatePage(albumID, page.copy(tiles=tiles, index=index))
-  } yield page
+    updatedPage <- collectionDAO.updatePage(albumID, page.copy(tiles=tiles, index=index))
+  } yield updatedPage
 
   def shufflePage(page: Page, photos: List[Photo]): Future[Page] = {
     mosaicService.generateComposition(page.id, photos) map ( tiles =>

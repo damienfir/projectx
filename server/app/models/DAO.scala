@@ -32,8 +32,10 @@ case class Collection (
   name: Option[String],
   hash: String
 ) {
-  def export: shared.Album = shared.Album(id.get, hash, name.get, Nil)
+  def export: shared.Album = shared.Album(id.get, hash, name.getOrElse(""), Nil)
+  def export(pages: List[Composition], photos: List[Photo]): shared.Album = export.copy(pages = pages.map(_.export(photos)))
 }
+
 object Collection {
   def from(album: shared.Album): Collection = Collection(Some(album.id), Some(album.title), album.hash)
   def tupled = (Collection.apply _).tupled
@@ -54,8 +56,10 @@ case class Composition (
   index: Int,
   tiles: List[Tile]
 ) {
-  def export: shared.Page = shared.Page(id.get, index, Nil)
+  def export(photos: List[Photo] = Nil): shared.Page =
+    shared.Page(id.get, index, tiles.map(t => t.export(photos.find(_.id == Some(t.photoID)))))
 }
+
 object Composition {
   def from(album: shared.Album): List[Composition] =
     album.pages.map(p => from(album.id, p))
@@ -76,7 +80,8 @@ case class Tile(
   ty1: Float,
   ty2: Float
 ) {
-//  def export: shared.Tile = shared.Tile()
+  def export(photo: Option[Photo]): shared.Tile =
+    shared.Tile(photo.get.export,rot.getOrElse(0),cx1,cx2,cy1,cy2,tx1,tx2,ty1,ty2)
 }
 object Tile {
   def from(tile: shared.Tile): Tile = Tile(tile.photo.id, Some(tile.rot),
@@ -146,7 +151,7 @@ class CollectionDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProv
   def addPage(albumID: Long): Future[shared.Page] = for {
     col <- getCollection(albumID)
     comp <- db.run((compositions returning compositions) += Composition(None, col.id.get, 0, Nil))
-  } yield comp.export
+  } yield comp.export()
 
   def updatePage(albumID: Long, page: shared.Page): Future[shared.Page] = db.run {
     val comp = Composition.from(albumID, page)
@@ -165,7 +170,11 @@ class CollectionDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProv
       // r <- usercollectionrelations.filter(_.userID === userID)
       col <- collections if col.hash === hash// && col.id === r.collectionID)
     } yield col
-    db.run(query.result) map (_.head) map (_.export)
+    for {
+      cols <- db.run(query.result)
+      pages <- db.run(compositions.filter(_.collectionID === cols.head.id.get).result)
+      photos <- db.run(photos.filter(_.collectionID === cols.head.id.get).result)
+    } yield cols.head.export(pages.toList, photos.toList)
   }
 }
 

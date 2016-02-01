@@ -1,4 +1,4 @@
-package services
+package bigpiq.server.services
 
 import javax.inject._
 import play.api.libs.json._

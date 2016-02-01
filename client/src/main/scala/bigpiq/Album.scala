@@ -1,7 +1,7 @@
 package bigpiq.client
 
 import bigpiq.client.components.{CoordEvent, EdgeParams, Move, Selected}
-import bigpiq.shared.{Composition, Tile}
+import bigpiq.shared.{Page, Tile}
 
 import scala.scalajs.js.Dynamic.{global => g}
 import scala.util.Try
@@ -22,8 +22,8 @@ object AlbumUtil {
     newT
   }
 
-  def move(album: List[Composition], move: Move) = album.map {
-    case comp@Composition(_, _, move.coordEvent.page, tiles) =>
+  def move(album: List[Page], move: Move) = album.map {
+    case comp@Page(_, move.coordEvent.page, tiles) =>
       Try(tiles(move.coordEvent.idx))
         .map(moveTile(_, move))
         .map(tiles.updated(move.coordEvent.idx, _))
@@ -33,16 +33,16 @@ object AlbumUtil {
   }
 
   def rotateTile(tile: Tile): Tile =
-    resizeTile(tile, tile, transpose = true).copy(rot = Some((tile.rot.getOrElse(0)+90) % 360))
+    resizeTile(tile, tile, transpose = true).copy(rot = (tile.rot+90) % 360)
 
-  def rotate(album: List[Composition], selected: Selected): List[Composition] = album map {
-    case comp@Composition(_, _, selected.page, tiles) =>
+  def rotate(album: List[Page], selected: Selected): List[Page] = album map {
+    case comp@Page(_, selected.page, tiles) =>
       comp.copy(tiles = tiles.updated(selected.index, rotateTile(tiles(selected.index))))
     case x => x
   }
 
-  def swapTiles(album: List[Composition], from: Selected, to: Selected): List[Composition] = album map {
-    case comp@Composition(_, _, from.page, oldTiles) => {
+  def swapTiles(album: List[Page], from: Selected, to: Selected): List[Page] = album map {
+    case comp@Page(_, from.page, oldTiles) => {
       val fromTile = oldTiles(from.index)
       val toTile = oldTiles(to.index)
       comp.copy(tiles = oldTiles
@@ -68,13 +68,13 @@ object AlbumUtil {
 
     val dx = Math.min(1-c.cx2, Math.max(0, center._1-c.cx2/2.0)).asInstanceOf[Float]
     val dy = Math.min(1-c.cy2, Math.max(0, center._2-c.cy2/2.0)).asInstanceOf[Float]
-    c.copy(cx1 = c.cx1+dx, cx2 = c.cx2+dx, cy1 = c.cy1+dy, cy2 = c.cy2+dy, photoID = a.photoID)
+    c.copy(cx1 = c.cx1+dx, cx2 = c.cx2+dx, cy1 = c.cy1+dy, cy2 = c.cy2+dy, photo = a.photo)
   }
 
   val d = 0.1
 
-  def edge(album: List[Composition], params: EdgeParams, move: Move): List[Composition] = album map {
-    case comp@Composition(_, _, move.coordEvent.page, oldTiles) => {
+  def edge(album: List[Page], params: EdgeParams, move: Move): List[Page] = album map {
+    case comp@Page(_, move.coordEvent.page, oldTiles) => {
       def moveEdge(indices: List[Int], canMove: Boolean, updateTile: Tile => Tile)(pair: (Tile, Int)) = pair match {
         case (t,i) => if (canMove && indices.contains(i)) (updateTile(t), i) else (t, i)
       }
@@ -101,17 +101,20 @@ object AlbumUtil {
   val margin = 0.05
 
 
-  def getParams(album: List[Composition], ev: CoordEvent): EdgeParams = {
-    def closeEnough(getCoord: Tile => Float, click: Double)(t: (Tile, Int)) = t match {
-      case (tile, i) => Math.abs(getCoord(tile) - click) < margin
+  def getParams(album: List[Page], ev: CoordEvent): EdgeParams = {
+    println(ev)
+    def closeEnough(getCoord: Tile => Float, click: Double, f: Double)(t: (Tile, Int)) = {
+      Math.abs(getCoord(t._1) - click/f) < margin
     }
 
     val tiles = album(ev.page).tiles.zipWithIndex
-    EdgeParams(
-       x_tl = tiles.filter(closeEnough(_.tx1, ev.x)).map(_._2),
-       y_tl = tiles.filter(closeEnough(_.ty1, ev.y)).map(_._2),
-       x_br = tiles.filter(closeEnough(_.tx2, ev.x)).map(_._2),
-       y_br = tiles.filter(closeEnough(_.ty2, ev.y)).map(_._2)
+    val e = EdgeParams(
+       x_tl = tiles.filter(closeEnough(_.tx1, ev.x, ev.w)).map(_._2),
+       y_tl = tiles.filter(closeEnough(_.ty1, ev.y, ev.h)).map(_._2),
+       x_br = tiles.filter(closeEnough(_.tx2, ev.x, ev.w)).map(_._2),
+       y_br = tiles.filter(closeEnough(_.ty2, ev.y, ev.h)).map(_._2)
     )
+    println(e)
+    e
   }
 }

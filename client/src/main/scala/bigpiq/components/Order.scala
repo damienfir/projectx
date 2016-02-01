@@ -99,10 +99,10 @@ object Order {
             ),
 
             <.div(^.cls := "modal-footer",
-              props.proxy().collection.map(col =>
+              props.proxy().album.map(album =>
                 <.a(
                 ^.cls := "btn btn-primary pull-right",
-                ^.href := getURL+"&item_number="+col.id.get,
+                ^.href := getURL+"&item_number="+album.id,
                 ^.target := "_blank",
                 "Order"
               )).getOrElse(<.div()),

@@ -39,13 +39,11 @@ object CoordEvent {
     ev.stopPropagation()
     val parent = jQuery(ev.target).parent(".box-mosaic")
     val pos = jQuery(ev.target).position().asInstanceOf[Dynamic]
-    val w = parent.width()
-    val h = parent.height()
     CoordEvent(
-      x = pos.selectDynamic("left").asInstanceOf[Double] / w,
-      y = pos.selectDynamic("top").asInstanceOf[Double] / h,
-      w = w,
-      h = h,
+      x = pos.selectDynamic("left").asInstanceOf[Double],
+      y = pos.selectDynamic("top").asInstanceOf[Double],
+      w = parent.width(),
+      h = parent.height(),
       page = page,
       idx = 0
     )
@@ -93,9 +91,9 @@ class Drag {
 
 
 object Album {
-  case class Props(proxy: ModelProxy[RootModel])//, mouseUp: PublishSubject[CoordEvent], mouseMove: PublishSubject[CoordEvent])
-  case class State(album: Pot[List[Composition]] = Empty, editing: Option[Either[Selected, Selected]] = None, edge: Option[EdgeParams] = None)
-  case class Node(x: Float, y: Float)
+  case class Props(proxy: ModelProxy[Pot[Album]])//, mouseUp: PublishSubject[CoordEvent], mouseMove: PublishSubject[CoordEvent])
+  case class State(pages: List[Page] = Nil, editing: Option[Either[Selected, Selected]] = None, edge: Option[EdgeParams] = None)
+  case class Node(x: Double, y: Double)
 
   val imageDrag = new Drag()
   val edgeDrag = new Drag()
@@ -105,8 +103,8 @@ object Album {
     val dataToggle = "data-toggle".reactAttr
     val dataTarget = "data-target".reactAttr
 
-    val blankpage = Composition(Some(0), 0, -1, List())
-    val coverpage = Composition(Some(0), 0, 0, List())
+    val blankPage = Page(0, -1, Nil)
+    val coverPage = Page(0, 0, Nil)
 
     def cancelSelected = $.modState(s => s.copy(editing = None))
 
@@ -116,7 +114,7 @@ object Album {
         case Right(selected) => selected match {
           case Selected(to.page, to.index) => $.setState(s.copy(editing = None))
           case from@Selected(to.page, _) =>
-            $.setState(s.copy(album = Ready(AlbumUtil.swapTiles(s.album.get, from, to)), editing = None))// >> updateAlbum
+            $.setState(s.copy(pages = AlbumUtil.swapTiles(s.pages, from, to), editing = None))// >> updateAlbum
           case from => to match {
             case Selected(0, _) =>
               $.props.flatMap(_.proxy.dispatch(AddToCover(from))) >>
@@ -138,7 +136,7 @@ object Album {
         case Some(Right(editing)) => Callback(None)
         case selected =>
           imageDrag.mouseMove(CoordEvent(page, index, ev, jQuery(ev.target))).map(move =>
-            $.modState(s => s.copy(album = Ready(AlbumUtil.move(s.album.get, move))))
+            $.modState(s => s.copy(pages = AlbumUtil.move(s.pages, move)))
           ).getOrElse(Callback(None)) >>
             nodeMouseMove(page)(ev) >>
             selected.map(_ => $.modState (s => s.copy(editing = None))).getOrElse(Callback(None))
@@ -152,19 +150,19 @@ object Album {
       val coordEvent = CoordEvent.edgeClick(page, ev)
       Callback(edgeDrag.mouseDown(coordEvent)) >>
         $.modState(s =>
-          s.copy(edge = Some(AlbumUtil.getParams(s.album.get, coordEvent)))
+          s.copy(edge = Some(AlbumUtil.getParams(s.pages, coordEvent)))
         )
     }
 
     def rotateSelected = $.modState(s => s.editing match {
-      case Some(Right(selected)) => s.copy(album = Ready(AlbumUtil.rotate(s.album.get, selected)))
+      case Some(Right(selected)) => s.copy(pages = AlbumUtil.rotate(s.pages, selected))
       case _ => s
     })
 
     def nodeMouseMove(page: Int)(ev: ReactMouseEvent) =
       edgeDrag.mouseMove(CoordEvent(page, 0, ev, jQuery(ev.target).parent(".box-mosaic"))) map { move =>
-        $.modState(s => s.copy(album =
-          s.edge.map(edge => Ready(AlbumUtil.edge(s.album.get, edge, move))).getOrElse(s.album)))
+        $.modState(s => s.copy(pages =
+          s.edge.map(edge => AlbumUtil.edge(s.pages, edge, move)).getOrElse(s.pages)))
       } getOrElse Callback(None)
 
     def nodeMouseUp = Callback(edgeDrag.mouseUp) >>
@@ -173,15 +171,15 @@ object Album {
       ) >> updateAlbum
 
     def updateAlbum: Callback = {
-      $.state flatMap (s => $.props flatMap (p => p.proxy.dispatch(SetAlbum(s.album))))
+      $.state flatMap (s => $.props flatMap (p => p.proxy.dispatch(UpdatePages(s.pages))))
     }
 
     def onChangeTitle(ev: ReactEventI) = $.props flatMap (p => p.proxy.dispatch(UpdateTitle(ev.target.value)))
 
-    def toSpreads(pages: List[Composition]): List[List[Composition]] = {
-      val pages2: List[Composition] = pages match {
-        case Nil => List(coverpage)
-        case head :: tail => head +: blankpage +: tail :+ blankpage
+    def toSpreads(pages: List[Page]): List[List[Page]] = {
+      val pages2: List[Page] = pages match {
+        case Nil => List(coverPage)
+        case head :: tail => head +: blankPage +: tail :+ blankPage
       }
       List(pages2.head) +: pages2.tail.grouped(2).toList
     }
@@ -206,7 +204,7 @@ object Album {
         ^.onMouseDown ==> imageMouseDown(page, index),
         ^.onMouseMove ==> imageMouseMove(page, index),
         ^.onMouseUp --> imageMouseUp(page, index),
-        < img(^.src := "/photos/"+tile.photoID+"/full/800,/"+tile.rot.getOrElse(0)+"/default.jpg",
+        < img(^.src := "/photos/"+tile.photo.id+"/full/800,/"+tile.rot+"/default.jpg",
           ^.draggable := false,
           ^.height := pct(scaleY),
           ^.width  := pct(scaleX),
@@ -216,7 +214,7 @@ object Album {
         )
     }}
 
-    def buttons(row: Int)(t: (Composition, Int)) = t match { case (page, col) => {
+    def buttons(row: Int)(t: (Page, Int)) = t match { case (page, col) => {
       val p = row*2+col
       val pull = if ((p % 2) == 0) "pull-left" else "pull-right"
       <.div(^.cls := pull, ^.key := page.index,
@@ -241,13 +239,13 @@ object Album {
         )
       )
 
-    def title(collection: Collection) =
+    def title(collection: Album) =
       <.input(^.cls := "cover-title",  ^.id := "album-title",
         ^.onBlur ==> onChangeTitle,
         ^.`type` := "text",
         ^.placeholder := "Album title",
         ^.maxLength := 50,
-        ^.defaultValue := collection.name,
+        ^.defaultValue := collection.title,
         ^.autoComplete := false
       )
 
@@ -262,16 +260,17 @@ object Album {
         ^.onMouseUp --> nodeMouseUp
       )
 
-    def nodes(page: Composition) = {
-      val shift = 0.3e-2f
+    def nodes(page: Page) = {
       val topLeft = page.tiles
-        .filter(t => t.tx1 > 0.01 || t.ty1 > 0.01)
         .map(t => Node(t.tx1, t.ty1))
+          .filter(n => n.x > 0.01 || n.y > 0.01)
       val bottomRight = page.tiles
-        .filter(t => t.tx2 < 0.99 || t.ty2 < 0.99)
         .map(t => Node(t.tx2, t.ty2))
-        .filter(a => !topLeft.exists(b => (Math.abs(a.x - b.x) + Math.abs(a.y - b.y)) < 0.1))
-      bottomRight.map(drawNode(shift, page.index)) ++ topLeft.map(drawNode(-shift, page.index))
+        .filter(n => n.x < 0.99 || n.y < 0.99)
+      val hori = topLeft.flatMap(a => bottomRight.flatMap(b =>
+        List(Node((a.x+b.x)/2.0, a.y), Node((a.x+b.x)/2.0, b.y))))
+      val vert = topLeft.flatMap(a => bottomRight.flatMap(b =>
+        List(Node(a.x, (a.y+b.y)/2.0), Node(b.x, (a.y-b.y)/2.0))))
     }
 
     def addPhotosStart() =
@@ -282,14 +281,14 @@ object Album {
         UI.icon("cloud-upload"), "Upload photos"
       )
 
-    def addPhotosEnd(col: Collection) =
+    def addPhotosEnd(col: Album) =
       <.button(^.cls := "btn btn-primary center", ^.id := "addmore-btn",
         dataToggle := "modal",
         dataTarget := "#upload-modal",
         UI.icon("cloud-upload"), "Upload more photos"
       )
 
-    def toolbar(page: Composition, selected: Selected) =
+    def toolbar(page: Page, selected: Selected) =
       <.div(^.cls := "btn-group toolbar",
         if (page.tiles.length > 1)
           <.button(^.cls := "btn btn-info btn-lg", ^.id := "remove-btn",
@@ -313,15 +312,14 @@ object Album {
         )
       )
 
-    def hover(page: Composition) =
+    def hover(page: Page) =
       <.div(^.cls := "page-hover",
         ^.onMouseUp --> imageMouseUp(page.index, 0),
         <.h2(^.cls := "center", if (page.index == 0) "Copy here" else "Move here")
       )
 
     def render(p: Props, s: State) = <.div(^.cls:="container-fluid album",
-      s.album.render { pages =>
-        toSpreads(pages).zipWithIndex.map({ case (spread, row) => {
+        toSpreads(s.pages).zipWithIndex.map({ case (spread, row) => {
           val isCover = spread.length == 1 && spread.head.index == 0
           < div(^.cls := "row spread "+(if (isCover) "spread-cover" else ""), ^.key := row,
 
@@ -340,13 +338,13 @@ object Album {
                 else
                   < div(^.cls := cls, ^.key := page.index,
                     page.tiles.zipWithIndex.map(tile(page.index, s.editing)),
-                    if (page.index == 0) p.proxy().collection.render(col => title(col)) else "",
+                    if (page.index == 0) p.proxy().render(col => title(col)) else "",
                     nodes(page),
                     if (page.tiles.isEmpty) {
                       if (page.index == 0)
-                        p.proxy().collection.renderEmpty(addPhotosStart)
+                        p.proxy().renderEmpty(addPhotosStart)
                       else
-                        p.proxy().collection.render(addPhotosEnd)
+                        p.proxy().render(addPhotosEnd)
                     } else "",
                     s.editing.map({
                       case Left(_) => <.div()
@@ -366,16 +364,15 @@ object Album {
               )
             )
         }})
-      }
     )
 
     def willMount(props: Props) = {
       // imageDrag.setProps($.props, updateAlbum, moveAlbum)
       // edgeDrag.setProps($.props, freeParams, moveEdge)
-      props.proxy().collection.map { col =>
+      props.proxy().map { col =>
         dom.history.pushState("", "", s"/ui/${col.hash}")
       }
-      $.setState(State(props.proxy().album, None, None))
+      $.setState(State(props.proxy().map(_.pages).getOrElse(Nil), None, None))
     }
   }
 
