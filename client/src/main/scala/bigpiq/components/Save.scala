@@ -23,24 +23,29 @@ object Save {
 
     def render(props: Props, state: State) = {
       <.div(^.cls := "modal fade", ^.id := "save-modal",
-        <.div(^.cls := "modal-dialog modal-lg",
+        <.div(^.cls := "modal-dialog modal-sm",
           <.div(^.cls := "modal-content",
             <.div(^.cls := "modal-header"),
 
             <.div(^.cls := "modal-body",
-              <.input(^.cls := "input-control", ^.placeholder := "Email address", ^.ref := "email")
+              <.div(^.cls := "input-group",
+                <.span(^.cls := "input-group-addon", "@"),
+                <.input(^.cls := "form-control", ^.placeholder := "john@doe.com", ^.ref := "email")
+              )
             ),
 
             <.div(^.cls := "modal-footer",
-              <.button(^.cls := "btn btn-primary pull-right",
-                ^.onClick --> props.proxy.dispatch(EmailAndSave(emailInput($).get.value)),
-                "Save"
-              ),
-              <.button(
-                ^.cls := "btn btn-default pull-right",
-                dataToggle := "modal",
-                dataTarget := "#save-modal",
-                "Cancel")
+              <.div(^.cls := "alert alert-info text-left clearfix",
+                <.p("We will send you an email with a link to edit your album"),
+                <.button(^.cls := "btn btn-primary pull-right",
+                  ^.onClick --> props.proxy.dispatch(EmailAndSave(emailInput($).get.value)),
+                  "Save"),
+                <.button(
+                  ^.cls := "btn btn-default pull-right",
+                  dataToggle := "modal",
+                  dataTarget := "#save-modal",
+                  "Cancel")
+              )
             )
           )
         )
