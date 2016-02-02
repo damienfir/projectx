@@ -38,10 +38,11 @@ object CoordEvent {
     ev.preventDefault()
     ev.stopPropagation()
     val parent = jQuery(ev.target).parent(".box-mosaic")
-    val pos = jQuery(ev.target).position().asInstanceOf[Dynamic]
+    val node = jQuery(ev.target)
+    val pos = node.position().asInstanceOf[Dynamic]
     CoordEvent(
-      x = pos.selectDynamic("left").asInstanceOf[Double],
-      y = pos.selectDynamic("top").asInstanceOf[Double],
+      x = pos.selectDynamic("left").asInstanceOf[Double] + node.width()/2.0,
+      y = pos.selectDynamic("top").asInstanceOf[Double] + node.height()/2.0,
       w = parent.width(),
       h = parent.height(),
       page = page,
@@ -250,27 +251,30 @@ object Album {
       )
 
 
-    def drawNode(shift: Float, page: Int)(node: Node) =
+    def drawNode(page: Int)(node: Node) =
       <.button(
         ^.cls := "node shadow",
-        ^.top := pct(node.y + shift),
-        ^.left := pct(node.x + shift),
+        ^.top := pct(node.y),
+        ^.left := pct(node.x),
         ^.onMouseDown ==> nodeMouseDown(page),
         ^.onMouseMove ==> nodeMouseMove(page),
         ^.onMouseUp --> nodeMouseUp
       )
 
+    def dist(n1: Node, n2: Node) = Math.sqrt(Math.pow(n1.x-n2.x, 2) + Math.pow(n1.y-n2.y,2))
+
     def nodes(page: Page) = {
-      val topLeft = page.tiles
-        .map(t => Node(t.tx1, t.ty1))
-          .filter(n => n.x > 0.01 || n.y > 0.01)
-      val bottomRight = page.tiles
-        .map(t => Node(t.tx2, t.ty2))
-        .filter(n => n.x < 0.99 || n.y < 0.99)
-      val hori = topLeft.flatMap(a => bottomRight.flatMap(b =>
-        List(Node((a.x+b.x)/2.0, a.y), Node((a.x+b.x)/2.0, b.y))))
-      val vert = topLeft.flatMap(a => bottomRight.flatMap(b =>
-        List(Node(a.x, (a.y+b.y)/2.0), Node(b.x, (a.y-b.y)/2.0))))
+      val all = (for {
+        tl <- page.tiles.map(t => Node(t.tx1, t.ty1)).filter(n => n.x > 0.01 || n.y > 0.01)
+        br <- page.tiles.map(t => Node(t.tx2, t.ty2)).filter(n => n.x < 0.99 || n.y < 0.99)
+      } yield {
+        val x2 = (tl.x + br.x) / 2.0
+        val y2 = (tl.y + br.y) / 2.0
+        List(Node(x2, tl.y), Node(x2, br.y), Node(tl.x, y2), Node(br.x, y2))
+          .filter(n => dist(n, tl) < 0.02 || dist(n, br) < 0.02)
+      }).flatten
+      all.zipWithIndex.filter({ case (n,i) => !all.slice(i+1, all.length).filter(_ != n).map(dist(n, _)).exists(_ < 0.01)}).map(_._1)
+        .map(drawNode(page.index))
     }
 
     def addPhotosStart() =
