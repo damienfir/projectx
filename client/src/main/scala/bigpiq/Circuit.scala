@@ -91,11 +91,17 @@ class AlbumHandler[M](modelRW: ModelRW[M, Pot[Album]]) extends ActionHandler(mod
       Effect(AjaxClient[Api].shufflePage(value.get.pages(selected.page), photos).call().map(UpdatePages(_)))
     }
 
-    case UpdatePages(pages) => updated(value.map(album =>
-      album.copy(pages = (album.pages.filter(p => !pages.exists(_.index == p.index)) ++ pages)
+    case UpdatePages(pages) => {
+      println("update pages")
+      updated(value.map(album =>
+        album.copy(pages = (album.pages.filter(p => !pages.exists(_.index == p.index)) ++ pages)
           .filter(_.tiles.nonEmpty).groupBy(_.index).map(_._2.head).toList.sortBy(_.index))))
+    }
 
-    case UpdateAlbum(album) => updated(Ready(album), Effect.action(UpdatePages(album.pages)))
+    case UpdateAlbum(album) => {
+      println("update album")
+      updated(Ready(album), Effect.action(UpdatePages(album.pages)))
+    }
   }
 }
 

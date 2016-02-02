@@ -102,19 +102,16 @@ object AlbumUtil {
 
 
   def getParams(album: List[Page], ev: CoordEvent): EdgeParams = {
-    println(ev)
     def closeEnough(getCoord: Tile => Float, click: Double, f: Double)(t: (Tile, Int)) = {
       Math.abs(getCoord(t._1) - click/f) < margin
     }
 
     val tiles = album(ev.page).tiles.zipWithIndex
-    val e = EdgeParams(
+    EdgeParams(
        x_tl = tiles.filter(closeEnough(_.tx1, ev.x, ev.w)).map(_._2),
        y_tl = tiles.filter(closeEnough(_.ty1, ev.y, ev.h)).map(_._2),
        x_br = tiles.filter(closeEnough(_.tx2, ev.x, ev.w)).map(_._2),
        y_br = tiles.filter(closeEnough(_.ty2, ev.y, ev.h)).map(_._2)
     )
-    println(e)
-    e
   }
 }
