@@ -16,14 +16,8 @@ object Root {
       proxy.dispatch(GetFromCookie)
     }
 
-    // val mouseUp$ = PublishSubject[CoordEvent]()
-    // val mouseMove$ = PublishSubject[CoordEvent]()
-
     def render(proxy: ModelProxy[RootModel]) = {
       <.div(^.className := "theme-blue",
-        // ^.onMouseUp ==> ((ev: ReactMouseEvent) => Callback(mouseUp$.onNext(CoordEvent(0, 0, ev, jQuery(ev.target))))),
-        // ^.onMouseMove ==> ((ev: ReactMouseEvent) => Callback(mouseMove$.onNext(CoordEvent(0, 0, ev, jQuery(ev.target))))),
-//        <.button(^.cls := "btn btn-primary", dataToggle := "modal", dataTarget := "#upload-modal"),
         proxy.connect(identity)(Nav(_)),
         proxy.connect(_.album)(p => Album(Album.Props(p))),
         proxy.connect(identity)(p => Order(Order.Props(p))),

@@ -1,7 +1,8 @@
 package bigpiq.client
 
-import bigpiq.client.components.{CoordEvent, EdgeParams, Move, Selected}
+import bigpiq.client.components.{EdgeParams, UI, Selected}
 import bigpiq.shared.{Page, Tile}
+import UI._
 
 import scala.scalajs.js.Dynamic.{global => g}
 import scala.util.Try
@@ -23,10 +24,10 @@ object AlbumUtil {
   }
 
   def move(album: List[Page], move: Move) = album.map {
-    case comp@Page(_, move.coordEvent.page, tiles) =>
-      Try(tiles(move.coordEvent.idx))
+    case comp@Page(_, move.down.page, tiles) =>
+      Try(tiles(move.down.idx))
         .map(moveTile(_, move))
-        .map(tiles.updated(move.coordEvent.idx, _))
+        .map(tiles.updated(move.down.idx, _))
         .map(tiles => comp.copy(tiles = tiles))
         .getOrElse(comp)
     case x => x
@@ -74,7 +75,7 @@ object AlbumUtil {
   val d = 0.1
 
   def edge(album: List[Page], params: EdgeParams, move: Move): List[Page] = album map {
-    case comp@Page(_, move.coordEvent.page, oldTiles) => {
+    case comp@Page(_, move.down.page, oldTiles) => {
       def moveEdge(indices: List[Int], canMove: Boolean, updateTile: Tile => Tile)(pair: (Tile, Int)) = pair match {
         case (t,i) => if (canMove && indices.contains(i)) (updateTile(t), i) else (t, i)
       }
@@ -101,7 +102,7 @@ object AlbumUtil {
   val margin = 0.05
 
 
-  def getParams(album: List[Page], ev: CoordEvent): EdgeParams = {
+  def getParams(album: List[Page], ev: MouseDown): EdgeParams = {
     def closeEnough(getCoord: Tile => Float, click: Double, f: Double)(t: (Tile, Int)) = {
       Math.abs(getCoord(t._1) - click/f) < margin
     }

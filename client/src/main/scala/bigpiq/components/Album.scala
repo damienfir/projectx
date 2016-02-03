@@ -7,99 +7,29 @@ import diode.react._
 import diode.react.ReactPot._
 import scala.scalajs.js._
 import org.scalajs.dom
-import org.scalajs.jquery.jQuery
-import org.scalajs.jquery.JQuery
+import org.scalajs.dom.raw.MouseEvent
+import org.scalajs.jquery.{JQueryEventObject, jQuery}
 import japgolly.scalajs.react.Callback
 import japgolly.scalajs.react.vdom.prefix_<^._
 import japgolly.scalajs.react._
 
 
-case class Move(dx: Double, dy: Double, coordEvent: CoordEvent)
-
-case class EdgeParams(x_tl: List[Int], y_tl: List[Int], x_br: List[Int], y_br: List[Int])
 case class Selected(page: Int, index: Int)
-
-case class CoordEvent(x: Double, y: Double, w: Double, h: Double, idx: Int, page: Int)
-object CoordEvent {
-  def apply(page: Int, idx: Int, ev: ReactMouseEvent, target: JQuery): CoordEvent = {
-    ev.preventDefault()
-    ev.stopPropagation()
-    CoordEvent(
-      x = ev.screenX,
-      y = ev.screenY,
-      w = target.width(),
-      h = target.height(),
-      idx = idx,
-      page = page
-    )
-  }
-
-  def edgeClick(page: Int, ev: ReactMouseEvent): CoordEvent = {
-    ev.preventDefault()
-    ev.stopPropagation()
-    val parent = jQuery(ev.target).parent(".box-mosaic")
-    val node = jQuery(ev.target)
-    val pos = node.position().asInstanceOf[Dynamic]
-    CoordEvent(
-      x = pos.selectDynamic("left").asInstanceOf[Double] + node.width()/2.0,
-      y = pos.selectDynamic("top").asInstanceOf[Double] + node.height()/2.0,
-      w = parent.width(),
-      h = parent.height(),
-      page = page,
-      idx = 0
-    )
-  }
-}
-
-class Drag {
-
-  var down : Option[CoordEvent] = None
-  var prevMove : Option[CoordEvent] = None
-
-  def mouseDown(ev: CoordEvent) = {
-    down = Some(ev)
-    ev
-  }
-
-  def mouseUp: Option[CoordEvent] = {
-    down = None
-    val prevMoveSave = prevMove
-    prevMoveSave map { p =>
-      prevMove = None
-      p
-    }
-  }
-
-  def mouseMove(curr: CoordEvent): Option[Move] = down match {
-    case Some(down) => prevMove match {
-      case Some(prev) => {
-        prevMove = Some(curr)
-        Some(Move(
-          dx = (curr.x - prev.x) / down.w,
-          dy = (curr.y - prev.y) / down.h,
-          coordEvent = down
-        ))
-      }
-      case None => {
-        prevMove = Some(curr)
-        None
-      }
-    }
-    case None => None
-  }
-}
-
-
+case class EdgeParams(x_tl: List[Int], y_tl: List[Int], x_br: List[Int], y_br: List[Int])
 
 object Album {
-  case class Props(proxy: ModelProxy[Pot[Album]])//, mouseUp: PublishSubject[CoordEvent], mouseMove: PublishSubject[CoordEvent])
-  case class State(pages: List[Page] = Nil, editing: Option[Either[Selected, Selected]] = None, edge: Option[EdgeParams] = None)
+  case class Props(proxy: ModelProxy[Pot[Album]])
+  case class State(
+    pages: List[Page] = Nil,
+    editing: Option[Either[Selected, Selected]] = None,
+    edge: Option[EdgeParams] = None)
+
   case class Node(x: Double, y: Double)
 
-  val imageDrag = new Drag()
-  val edgeDrag = new Drag()
-
   class Backend($: BackendScope[Props, State]) {
+
+    val imageDrag = new UI.Drag()
+    val edgeDrag = new UI.Drag()
 
     val dataToggle = "data-toggle".reactAttr
     val dataTarget = "data-target".reactAttr
@@ -109,46 +39,44 @@ object Album {
 
     def cancelSelected = $.modState(s => s.copy(editing = None))
 
-    def swapOrMoveTile(to: Selected): Callback = $.state.flatMap{s =>
+    def swapOrMoveTile(to: Selected): Callback = $.state.flatMap { s =>
       s.editing.map({
         case Left(selected) => $.setState(s.copy(editing = Some(Right(selected))))
-        case Right(selected) => selected match {
-          case Selected(to.page, to.index) => $.setState(s.copy(editing = None))
-          case from@Selected(to.page, _) =>
-            $.setState(s.copy(pages = AlbumUtil.swapTiles(s.pages, from, to), editing = None))// >> updateAlbum
-          case from => to match {
-            case Selected(0, _) =>
-              $.props.flatMap(_.proxy.dispatch(AddToCover(from))) >>
-              cancelSelected
-            case _ =>
-              $.props.flatMap(_.proxy.dispatch(MoveTile(from, to))) >>
-              cancelSelected
+        case Right(selected) => (selected match {
+          case Selected(to.page, to.index) => Callback(None)
+          case from@Selected(to.page, _) => {
+            val newPages = AlbumUtil.swapTiles(s.pages, from, to)
+            $.setState(s.copy(pages = newPages)) >>
+              $.props.flatMap(_.proxy.dispatch(UpdatePages(newPages)))
           }
-        }
+          case from => to match {
+            case Selected(0, _) => $.props.flatMap(_.proxy.dispatch(AddToCover(from)))
+            case _ => $.props.flatMap(_.proxy.dispatch(MoveTile(from, to)))
+          }
+        }) >> cancelSelected
       }) getOrElse Callback(None)
     }
 
     def imageMouseDown(page: Int, index: Int)(ev: ReactMouseEvent) =
-      Callback(imageDrag.mouseDown(CoordEvent(page, index, ev, jQuery(ev.target)))) >>
+      Callback(imageDrag.mouseDown(UI.MouseDown(page, index, ev, jQuery(ev.target)))) >>
         $.modState(s => s.copy(editing = Some(s.editing.getOrElse(Left(Selected(page, index))))))
 
-    def imageMouseMove(page: Int, index: Int)(ev: ReactMouseEvent) =
+    def imageMouseMove(ev: ReactMouseEvent) =
       $.state.flatMap(s => s.editing match {
         case Some(Right(editing)) => Callback(None)
         case selected =>
-          imageDrag.mouseMove(CoordEvent(page, index, ev, jQuery(ev.target))).map(move =>
+          imageDrag.mouseMove(UI.MouseMove(ev)).map(move =>
             $.modState(s => s.copy(pages = AlbumUtil.move(s.pages, move)))
-          ).getOrElse(Callback(None)) >>
-            nodeMouseMove(page)(ev) >>
-            selected.map(_ => $.modState (s => s.copy(editing = None))).getOrElse(Callback(None))
+          ).getOrElse(nodeMouseMove(ev)) >>
+            selected.map(_ => cancelSelected).getOrElse(Callback(None))
       })
 
-    def imageMouseUp(page: Int, index: Int) =
-      (imageDrag.mouseUp orElse edgeDrag.mouseUp).map(_ => updateAlbum).getOrElse(Callback(None)) >>
-        swapOrMoveTile(Selected(page, index))
+    def imageMouseUp(ev: Option[UI.MouseDown]) =
+      (imageDrag.mouseUp orElse edgeDrag.mouseUp).map(_ => updateAlbum()).getOrElse(Callback(None)) >>
+        ev.map(e => swapOrMoveTile(Selected(e.page, e.idx))).getOrElse(Callback(None))
 
     def nodeMouseDown(page: Int)(ev: ReactMouseEvent) = {
-      val coordEvent = CoordEvent.edgeClick(page, ev)
+      val coordEvent = UI.MouseDown.edgeClick(page, ev)
       Callback(edgeDrag.mouseDown(coordEvent)) >>
         $.modState(s =>
           s.copy(edge = Some(AlbumUtil.getParams(s.pages, coordEvent)))
@@ -160,18 +88,16 @@ object Album {
       case _ => s
     })
 
-    def nodeMouseMove(page: Int)(ev: ReactMouseEvent) =
-      edgeDrag.mouseMove(CoordEvent(page, 0, ev, jQuery(ev.target).parent(".box-mosaic"))) map { move =>
+    def nodeMouseMove(ev: ReactMouseEvent) =
+      edgeDrag.mouseMove(UI.MouseMove(ev)) map { move =>
         $.modState(s => s.copy(pages =
           s.edge.map(edge => AlbumUtil.edge(s.pages, edge, move)).getOrElse(s.pages)))
       } getOrElse Callback(None)
 
-    def nodeMouseUp = Callback(edgeDrag.mouseUp) >>
-      $.modState(s =>
-        s.copy(edge = None)
-      ) >> updateAlbum
+    def nodeMouseUp(ev: ReactMouseEvent) = Callback(edgeDrag.mouseUp) >>
+      $.modState(s => s.copy(edge = None) ) >> updateAlbum()
 
-    def updateAlbum: Callback = {
+    def updateAlbum(): Callback = {
       $.state flatMap (s => $.props flatMap (p => p.proxy.dispatch(UpdatePages(s.pages))))
     }
 
@@ -197,15 +123,17 @@ object Album {
         case Right(Selected(_,_)) => "tile-unselected"
         case Left(_) => ""
       }) getOrElse ""
-      < div(^.cls := "ui-tile " + selClass,
+      < div(
+        ^.cls := "ui-tile " + selClass,
         ^.height := pct(tile.ty2-tile.ty1),
         ^.width  := pct(tile.tx2-tile.tx1),
         ^.top    := pct(tile.ty1),
         ^.left  := pct(tile.tx1),
         ^.onMouseDown ==> imageMouseDown(page, index),
-        ^.onMouseMove ==> imageMouseMove(page, index),
-        ^.onMouseUp --> imageMouseUp(page, index),
-        < img(^.src := "/photos/"+tile.photo.id+"/full/800,/"+tile.rot+"/default.jpg",
+        ^.onMouseMove ==> imageMouseMove,
+        ^.onMouseUp ==> ((ev: ReactMouseEvent) => imageMouseUp(Some(UI.MouseDown(page, index, ev)))),
+        < img(
+          ^.src := "/photos/"+tile.photo.id+"/full/800,/"+tile.rot+"/default.jpg",
           ^.draggable := false,
           ^.height := pct(scaleY),
           ^.width  := pct(scaleX),
@@ -218,7 +146,7 @@ object Album {
     def buttons(row: Int)(t: (Page, Int)) = t match { case (page, col) => {
       val p = row*2+col
       val pull = if ((p % 2) == 0) "pull-left" else "pull-right"
-      <.div(^.cls := pull, ^.key := page.index,
+      <.div(^.cls := pull,
         <.span(^.cls := "page", if (p == 0) "Cover Page" else s"Page ${p-1}"),
         if (page.tiles.length > 1)
           <.div(^.cls := "btn-group",
@@ -234,8 +162,11 @@ object Album {
     }}
 
     def arrow(direction: String, row: Int) =
-      <.div(^.cls := "col-xs-1 spread-arrow",
-        <.a(^.cls := "btn btn-link", ^.href := "#spread"+row,
+      <.div(
+        ^.cls := "col-xs-1 spread-arrow",
+        <.a(
+          ^.cls := "btn btn-link",
+          ^.href := "#spread"+row,
           UI.icon(s"chevron-$direction fa-3x")
         )
       )
@@ -257,8 +188,8 @@ object Album {
         ^.top := pct(node.y),
         ^.left := pct(node.x),
         ^.onMouseDown ==> nodeMouseDown(page),
-        ^.onMouseMove ==> nodeMouseMove(page),
-        ^.onMouseUp --> nodeMouseUp
+        ^.onMouseMove ==> nodeMouseMove,
+        ^.onMouseUp ==> nodeMouseUp
       )
 
     def dist(n1: Node, n2: Node) = Math.sqrt(Math.pow(n1.x-n2.x, 2) + Math.pow(n1.y-n2.y,2))
@@ -282,7 +213,7 @@ object Album {
         ^.id := "create-btn",
         dataToggle := "modal",
         dataTarget := "#upload-modal",
-        UI.icon("cloud-upload"), "Upload photos"
+        UI.icon("cloud-upload fa-3x"), "Upload photos"
       )
 
     def addPhotosEnd(col: Album) =
@@ -318,14 +249,14 @@ object Album {
 
     def hover(page: Page) =
       <.div(^.cls := "page-hover",
-        ^.onMouseUp --> imageMouseUp(page.index, 0),
+        ^.onMouseUp ==> ((ev: ReactMouseEvent) => imageMouseUp(Some(UI.MouseDown(page.index, -1, ev)))),
         <.h2(^.cls := "center", if (page.index == 0) "Copy here" else "Move here")
       )
 
     def render(p: Props, s: State) = <.div(^.cls:="container-fluid album",
         toSpreads(s.pages).zipWithIndex.map({ case (spread, row) => {
           val isCover = spread.length == 1 && spread.head.index == 0
-          < div(^.cls := "row spread "+(if (isCover) "spread-cover" else ""), ^.key := row,
+          < div(^.cls := "row spread "+(if (isCover) "spread-cover" else ""),
 
             < a(^.cls := "spread-anchor",
               ^.name := "spread" + row
@@ -338,15 +269,15 @@ object Album {
               spread.zipWithIndex.map({case (page, col) => {
                 val cls = "box-mosaic " + (if ((row*2+col) % 2 == 0) "pull-left" else "pull-right")
                 if (col == 0 && row == 1)
-                  < div(^.cls := cls, ^.key := page.index, backside())
+                  < div(^.cls := cls, backside())
                 else
-                  < div(^.cls := cls, ^.key := page.index,
+                  < div(^.cls := cls,
                     page.tiles.zipWithIndex.map(tile(page.index, s.editing)),
                     if (page.index == 0) p.proxy().render(col => title(col)) else "",
                     nodes(page),
                     if (page.tiles.isEmpty) {
                       if (page.index == 0)
-                        p.proxy().renderEmpty(addPhotosStart)
+                        p.proxy().renderEmpty(addPhotosStart())
                       else
                         p.proxy().render(addPhotosEnd)
                     } else "",
@@ -370,12 +301,14 @@ object Album {
         }})
     )
 
-    def willMount(props: Props) = {
-      // imageDrag.setProps($.props, updateAlbum, moveAlbum)
-      // edgeDrag.setProps($.props, freeParams, moveEdge)
-      props.proxy().map { col =>
-        dom.history.pushState("", "", s"/ui/${col.hash}")
-      }
+    def willMount(props: Props, backend: Backend) = {
+      dom.document.onmousemove = (ev: MouseEvent) =>
+        backend.imageMouseMove(ev.asInstanceOf[ReactMouseEvent]).runNow()
+
+      dom.document.body.onmouseup = (ev: MouseEvent) =>
+        backend.imageMouseUp(None).runNow()
+
+      props.proxy().map { col => dom.history.pushState("", "", s"/ui/${col.hash}") }
       $.setState(State(props.proxy().map(_.pages).getOrElse(Nil), None, None))
     }
   }
@@ -383,7 +316,7 @@ object Album {
   def apply(props: Props) = ReactComponentB[Props]("Album")
     .initialState(State())
     .renderBackend[Backend]
-    .componentWillMount(scope => scope.backend.willMount(scope.props))
+    .componentWillMount(scope => scope.backend.willMount(scope.props, scope.backend))
     .build
     .apply(props)
 }
