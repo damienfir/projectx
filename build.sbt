@@ -2,8 +2,6 @@ import sbt.Keys._
 import sbt.Project.projectToRef
 
 
-lazy val scalaV = "2.11.7"
-
 
 lazy val server = (project in file("server"))
   .settings(

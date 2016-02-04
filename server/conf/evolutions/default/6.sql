@@ -1,8 +1,6 @@
 # --- !Ups
-ALTER TABLE compositions DROP COLUMN tiles;
-ALTER TABLE compositions ADD COLUMN tiles text;
+ALTER TABLE compositions ALTER COLUMN tiles TYPE text USING tiles::json#>>'{}'
 
 
 # --- !Downs
-ALTER TABLE compositions DROP COLUMN tiles;
-ALTER TABLE compositions ADD COLUMN tiles jsonb;
+ALTER TABLE compositions ALTER COLUMN tiles TYPE text USING to_json(tiles)
