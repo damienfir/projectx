@@ -5,7 +5,7 @@ import scala.util.{Try, Success, Failure}
 import javax.inject._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.concurrent.Future
-import com.braintreegateway._;
+// import com.braintreegateway._;
 import scala.collection.JavaConversions._
 
 import bigpiq.shared._
