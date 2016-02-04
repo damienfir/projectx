@@ -55,6 +55,10 @@ class Application @Inject()(val messagesApi: MessagesApi, serverApi: ServerApi) 
         //   case ex => BadRequest
         // })
   }
+
+  def pdf(hash: String) = Action.async {
+    serverApi.pdf(hash).map(a => Ok.sendFile(a))
+  }
 }
 
 

@@ -3,12 +3,14 @@ package bigpiq.server.services
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.concurrent.Future
 import javax.inject.Inject
+import java.io._
 
 import bigpiq.shared._
 import bigpiq.server.db
 
 
-class ServerApi @Inject() (usersDAO: db.UsersDAO, collectionDAO: db.CollectionDAO, mosaicService: MosaicService, emailService: Email) extends Api {
+
+class ServerApi @Inject() (usersDAO: db.UsersDAO, collectionDAO: db.CollectionDAO, mosaicService: MosaicService, emailService: Email, imageService: ImageService) extends Api {
 
   def getUser(id: Long): Future[User] = usersDAO.get(id)
 
@@ -35,4 +37,12 @@ class ServerApi @Inject() (usersDAO: db.UsersDAO, collectionDAO: db.CollectionDA
       page.copy(tiles = tiles)
     )
   }
+
+  def pdf(hash: String): Future[File] =
+    collectionDAO.getByHash(0, hash) map { album =>
+      val tiles = album.pages.map(_.tiles).reduce((acc, t) => acc ++ t)
+      val photoFiles = tiles.map(t => t.photo.id -> imageService.bytesToFile(imageService.convert(t.photo.hash, "full", "full", t.rot.toString, "default", "jpg"))).toMap
+      val svgFiles = album.filter.pages.map(p => views.html.page(p, if (p.index == 0) Some(album.title) else None, photoFiles).toString)
+      mosaicService.makeAlbumFile(svgFiles)
+    }
 }

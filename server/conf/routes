@@ -61,7 +61,7 @@ POST    /collections/:id/photos     @controllers.Photos.addToCollection(id: Long
 
 GET     /photos/:photoID/:region/:size/:rotation/:quality.:format     @controllers.Photos.get(photoID: Long, region, size, rotation, quality, format)
 
-# GET /pdf/:hash                      @controllers.Collections.pdf(hash: String)
+GET /pdf/:hash                      @controllers.Application.pdf(hash: String)
 
 POST     /api/*path                  @controllers.Application.autowireApi(path: String)
 
