@@ -122,7 +122,7 @@ class MosaicService @Inject()() {
   // }
   
   def tilesPython(photos: Seq[String], id: String) = Future {
-    val out = matchFile(id) 
+    val out = matchFile(id)
     val cmd = binary +: "1.414" +: photos.map(photoFile) :+ out
     cmd ! match {
       case 0 => Json.parse(Source.fromFile(out).mkString).as[List[MosaicModels.Tile2]]

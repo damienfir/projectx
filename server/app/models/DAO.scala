@@ -107,7 +107,7 @@ class UsersDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
 @Singleton
 class CollectionDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvider, usersDAO: UsersDAO) extends HasDatabaseConfigProvider[JdbcProfile] {
 
-   def getCollection(id: Long) = db.run(collections.filter(_.id === id).result) map (_.head)
+  def getCollection(id: Long) = db.run(collections.filter(_.id === id).result) map (_.head)
 
   def makeHash = UUID.randomUUID.toString
 

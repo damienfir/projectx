@@ -1,26 +1,26 @@
-@(comp: bigpiq.shared.Page, title: Option[String], photos: Map[Long, String])
+@(comp: bigpiq.shared.Page, title: Option[String], photos: Map[Long, String], dim: (Int,Int), ratio: Float)
 
 <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-  width="297mm"
-  height="210mm"
-  viewBox="0 0 @math.sqrt(2) 1"
+                   width="@{dim._1}mm"
+                   height="@{dim._2}mm"
+                   viewBox="0 0 @ratio 1"
   preserveAspectRatio="none">
 
   @for((t,i) <- comp.tiles.zipWithIndex) {
 
   <clipPath id="@i">
     <rect
-      x="@{t.tx1*math.sqrt(2)}"
+      x="@{t.tx1*ratio}"
       y="@{t.ty1}"
-      width="@{math.sqrt(2)*(t.tx2-t.tx1)}"
+      width="@{ratio*(t.tx2-t.tx1)}"
       height="@{t.ty2-t.ty1}"
       style="fill: #000;" />
   </clipPath>
 
   <image
-    x="@{math.sqrt(2)*(t.tx1-t.cx1*(t.tx2-t.tx1)/(t.cx2-t.cx1))}"
+    x="@{ratio*(t.tx1-t.cx1*(t.tx2-t.tx1)/(t.cx2-t.cx1))}"
     y="@{t.ty1-t.cy1*(t.ty2-t.ty1)/(t.cy2-t.cy1)}"
-    width="@{math.sqrt(2)*(t.tx2-t.tx1)/(t.cx2-t.cx1)}"
+    width="@{ratio*(t.tx2-t.tx1)/(t.cx2-t.cx1)}"
     height="@{(t.ty2-t.ty1)/(t.cy2-t.cy1)}"
     preserveAspectRatio="none"
     xlink:href="file://@{photos(t.photo.id)}"
@@ -33,7 +33,7 @@
   <rect
     x="0"
     y="0.85"
-    width="1.414"
+    width="@ratio"
     height="0.15"
     style="fill: #fff;" />
 

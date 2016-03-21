@@ -30,7 +30,11 @@ object AjaxClient extends autowire.Client[Js.Value, Reader, Writer] {
 
 object Helper {
   def getUserIDFromCookie: Option[Long] = {
-    dom.document.cookie.split(";").map(_.trim).map(_.split("=")).map(l => (l.head, l.tail.head)).toMap.get("bigpiquser").map(_.toInt)
+    dom.document.cookie.split(";")
+      .map(_.trim).map(_.split("="))
+      .map(l => (l.head, l.tail.headOption.getOrElse("")))
+      .toMap.get("bigpiquser")
+      .map(_.toLong)
   }
 
   def getAlbumHash(): Option[String] =
