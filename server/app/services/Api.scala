@@ -17,7 +17,7 @@ import scala.util.Random
 class ServerApi @Inject() (usersDAO: db.UsersDAO, collectionDAO: db.CollectionDAO, mosaicService: MosaicService, emailService: Email, imageService: ImageService) extends Api {
 
   val dim = (297,210)
-  val ratio = dim._2 / dim._1
+  val ratio = dim._1.toFloat / dim._2.toFloat
   val demoID = Play.current.configuration.getString("px.demoID").get
 
 
@@ -61,9 +61,14 @@ class ServerApi @Inject() (usersDAO: db.UsersDAO, collectionDAO: db.CollectionDA
 
   def pdf(hash: String): Future[File] =
     collectionDAO.getByHash(0, hash) map { album =>
-      val tiles = album.pages.map(_.tiles).reduce((acc, t) => acc ++ t)
-      val photoFiles = tiles.map(t => t.photo.id -> imageService.bytesToFile(imageService.convert(t.photo.hash, "full", "full", t.rot.toString, "default", "jpg"))).toMap
-      val svgFiles = album.filter.pages.map(p => views.html.page(p, if (p.index == 0) Some(album.title) else None, photoFiles, dim, ratio).toString)
+      val photoFiles = album.pages.map(_.tiles)
+        .reduce((acc, t) => acc ++ t)
+        .map(t =>
+          t.photo.id -> imageService.bytesToFile(imageService.convert(t.photo.hash, "full", "full", t.rot.toString, "default", "jpg"))).toMap
+
+      val svgFiles = album.filter.pages.map(p =>
+        views.html.page(p, if (p.index == 0) Some(album.title) else None, photoFiles, dim, ratio).toString)
+
       mosaicService.makeAlbumFile(svgFiles)
     }
 }
