@@ -15,7 +15,9 @@ import Bootstrap._
 object Upload {
   val fileInput = Ref[HTMLInputElement]("fileInput")
 
-  class Backend($: BackendScope[ModelProxy[RootModel], Unit]) {
+  case class Props(proxy: ModelProxy[RootModel])
+
+  class Backend($: BackendScope[Props, Unit]) {
     def triggerClick = {
       //      jQuery.apply(fileInput($)).trigger("click")
       jQuery(fileInput($).get).trigger("click")
@@ -27,11 +29,14 @@ object Upload {
 
     def triggerUpload(ev: ReactEventI) = {
       jQuery($.getDOMNode()).modal("hide")
-      $.props.flatMap(_.dispatch(UploadFiles(filelistToList(ev.target.files))))
+//      $.props.flatMap(p => p.uploadFunc(filelistToList(ev.target.files)))
+      $.props.flatMap(_.proxy.dispatch(UploadFiles(filelistToList(ev.target.files))))
     }
 
-    def render(p: ModelProxy[RootModel]) = {
-      <.div(^.className := "modal fade", ^.id := "upload-modal",
+    def render(p: Props) = {
+      <.div(
+        ^.className := "modal fade",
+        ^.id := "upload-modal",
         <.div(^.className := "modal-dialog",
           <.div(^.className := "modal-content", ^.id := "upload-area",
             ^.onClick --> Callback(triggerClick),
@@ -50,11 +55,16 @@ object Upload {
         )
       )
     }
+
+    def showModal = {
+      jQuery($.getDOMNode()).modal("show")
+    }
   }
 
-  val component = ReactComponentB[ModelProxy[RootModel]]("Upload")
-    .renderBackend[Backend]
-    .build
 
-  def apply(proxy: ModelProxy[RootModel]) = component(proxy)
+  def apply(props: Props) = ReactComponentB[Props]("Upload")
+    .renderBackend[Backend]
+    .componentDidMount(scope => Callback(scope.backend.showModal))
+    .build
+    .apply(props)
 }

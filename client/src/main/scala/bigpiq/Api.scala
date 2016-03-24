@@ -40,7 +40,7 @@ object Helper {
   def getAlbumHash(): Option[String] =
     Some(dom.window.location.pathname.split("/")).filter(_.length > 2).map(_.last)
 
-  def uploadFile(file: File, id: Long) = {
+  def uploadFile(file: File, id: Long): Future[Photo] = {
     var fd = new FormData()
     fd.append("image", file)
     val p = Promise[Photo]()
@@ -56,6 +56,7 @@ object Helper {
     p.future
   }
 }
+
 //object Api {
 //  def postJSON(url: String, data: String) = Ajax.post(
 //    url=url,

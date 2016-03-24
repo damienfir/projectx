@@ -12,6 +12,7 @@ import org.scalajs.jquery.{JQueryEventObject, jQuery}
 import japgolly.scalajs.react.Callback
 import japgolly.scalajs.react.vdom.prefix_<^._
 import japgolly.scalajs.react._
+import org.scalajs.dom.document
 
 
 case class Selected(page: Int, index: Int)
@@ -146,17 +147,41 @@ object Album {
     def buttons(row: Int)(t: (Page, Int)) = t match { case (page, col) => {
       val p = row*2+col
       val pull = if ((p % 2) == 0) "pull-left" else "pull-right"
+
+      val btnShuffle = <.button(^.cls := "btn btn-primary shuffle-btn",
+          ^.onClick --> $.props.flatMap(_.proxy.dispatch(ShufflePage(page.index))),
+          ^.disabled := false,
+          UI.icon("refresh"),
+          " Shuffle")
+
+      val btnAdd = <.button(
+        "Add photos after",
+        ^.cls := "btn btn-primary",
+        ^.onClick --> $.props.flatMap(p => p.proxy.dispatch(RequestUpload(0))))
+
+      val btnLeft = <.button(
+          UI.icon("chevron-left"),
+          ^.cls := "btn btn-primary",
+          ^.onClick --> $.props.flatMap(p => p.proxy.dispatch(MovePageLeft(page))))
+
+      val btnRight = <.button(
+        UI.icon("chevron-right"),
+        ^.cls := "btn btn-primary",
+        ^.onClick --> $.props.flatMap(p => p.proxy.dispatch(MovePageRight(page))))
+
       <.div(^.cls := pull,
         <.span(^.cls := "page", if (p == 0) "Cover Page" else s"Page ${p-1}"),
-        if (page.tiles.length > 1)
-          <.div(^.cls := "btn-group",
-            <.button(^.cls := "btn btn-primary shuffle-btn",
-              ^.onClick --> $.props.flatMap(_.proxy.dispatch(ShufflePage(page.index))),
-              ^.disabled := false,
-              UI.icon("refresh"),
-              " Shuffle"
-            )
-          )
+        if (page.tiles.nonEmpty) {
+          if (page.tiles.length > 1)
+            <.div(^.cls := "btn-group", btnShuffle, btnAdd)
+          else
+            <.div(^.cls := "btn-group", btnAdd)
+        }
+        else "",
+
+        if (page.tiles.nonEmpty) {
+          <.div(^.cls:="btn-group", btnLeft, btnRight)
+        }
         else ""
       )
     }}

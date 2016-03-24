@@ -11,24 +11,12 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.Random
 import autowire._
-
-case class RootModel(user: Pot[User] = Empty, album: Pot[Album] = Empty)
-
-
-class UserHandler[M](modelRW: ModelRW[M, Pot[User]]) extends ActionHandler(modelRW) {
-
-  override def handle = {
-    case UpdateUser(user) => updated(user)
-    case GetUser(id) => effectOnly(Effect(AjaxClient[Api].getUser(id).call().map(UpdateUser(_))))
-//    case CreateUser => effectOnly(UserApi.createUser())
-    case GetFromCookie => effectOnly {
-      Effect(Future(Helper.getUserIDFromCookie.map(GetUser).getOrElse(None))) >>
-      Effect.action(GetFromHash)
-    }
-  }
-}
+import org.scalajs.dom.File
 
 
+case class UploadState(filesRemaining: List[File] = Nil, index: Int = 0)
+
+case class RootModel(user: Pot[User] = Empty, album: Pot[Album] = Empty, upload: Option[UploadState] = None)
 
 
 class AlbumHandler[M](modelRW: ModelRW[M, Pot[Album]]) extends ActionHandler(modelRW) {
@@ -112,84 +100,141 @@ class AlbumHandler[M](modelRW: ModelRW[M, Pot[Album]]) extends ActionHandler(mod
     }
 
     case UpdateTitle(title) => updated(value.map(_.copy(title=title)))
+
+    case MovePageLeft(page) =>
+      if (page.index < 2) noChange
+      else {
+        value match {
+          case Ready(album) =>
+            val pages = album.pages map { p =>
+              if (p.index == page.index) p.copy(index = p.index-1)
+              else if (p.index == page.index-1) p.copy(index = p.index+1)
+              else p
+            }
+            updated(value.map(album => album.copy(pages = pages).filter))
+
+          case _ => noChange
+        }
+      }
+
+    case MovePageRight(page) =>
+      value match {
+        case Ready(album) =>
+          if (page.index >= album.pages.length-1) noChange
+          else {
+            val pages = album.pages map { p =>
+              if (p.index == page.index) p.copy(index = p.index + 1)
+              else if (p.index == page.index + 1) p.copy(index = p.index - 1)
+              else p
+            }
+            updated(value.map(album => album.copy(pages = pages).filter))
+          }
+        case _ => noChange
+      }
   }
 }
 
 
-class FileUploadHandler[M](modelRW: ModelRW[M, RootModel]) extends ActionHandler(modelRW) {
+case class NewUser(user: Pot[User])
+case class AddRemainingPhotos(albumID: Long)
+case class NewAlbum(album: Pot[Album])
+case class CreateUser()
+case class CreateAlbum(userID: Long)
+
+
+class MainHandler[M](modelRW: ModelRW[M, RootModel]) extends ActionHandler(modelRW) {
 
   def handle = {
 
-    case UploadFiles(files, index) =>
-      value.user match {
+    case NoOp => noChange
 
-        case Ready(user) =>
+    case RequestUpload(index) =>
+      updated(value.copy(upload = Some(UploadState(Nil, index))))
+
+    case UploadFiles(files) =>
+      val effect = value.user match {
+        case Ready(_) =>
           value.album match {
-
-            case Ready(album) =>
-              files match {
-
-                case Nil =>
-                  noChange
-
-                case _: List[_] => {
-                  val updatedIndex = album.pages match {
-                    case Nil => index
-                    case pages => if (index == 0) pages.length else index
-                  }
-
-                  val (fileSet, rest) =
-                    if (updatedIndex == 0) (files.take(1), files)
-                    else files.splitAt(Math.min(new Random().nextInt(3) + 1, files.length))
-
-                  effectOnly {
-                    Effect {
-                      Future.sequence(fileSet.map(f => Helper.uploadFile(f, album.id)))
-                        .map(photos => MakePages(photos, updatedIndex))
-                    } >>
-                      Effect.action(UploadFiles(rest, updatedIndex + 1))
-                  }
-                }
-              }
-
-            case Empty => effectOnly(Effect(AjaxClient[Api].createAlbum(user.id).call().map(Ready(_))
-              .map(album => UpdateCollectionThenUpload(album, files))
-            ))
-
-            case _ => noChange
+            case Ready(_) =>
+              Effect.action(AddRemainingPhotos)
+            case Empty =>
+              Effect.action(CreateAlbum)
+            case _ =>
+              Effect.action(NoOp)
           }
-
         case Empty =>
-          effectOnly {
-            Effect(Helper.getUserIDFromCookie
-                    .map(id => {
-                      println(id)
-                      AjaxClient[Api].getUser(id).call()
-                    })
-                    .getOrElse({
-                      println("creating new user")
-                      AjaxClient[Api].createUser().call()
-                    })
-                    .map(Ready(_))
-                    .map(user => UpdateUserThenUpload(user, files))
-            )
-          }
-
+          Effect.action(CreateUser)
         case _ =>
-          noChange
+          Effect.action(NoOp)
+      }
+      val index = value.upload.map(_.index).getOrElse(0)
+      updated(value.copy(upload = Some(UploadState(files, index))), effect)
+
+    case CreateUser =>
+      effectOnly {
+        Effect(Helper.getUserIDFromCookie
+          .map(id => AjaxClient[Api].getUser(id).call())
+          .getOrElse(AjaxClient[Api].createUser().call())
+          .map(Ready(_))
+          .map(user => NewUser(user))
+        )
       }
 
-    case UpdateUserThenUpload(user, files) =>
-      updated(value.copy(user = user), Effect.action(UploadFiles(files)))
+    case NewUser(newUser) =>
+      updated(value.copy(user = newUser),
+        newUser.map(user => Effect.action(CreateAlbum(user.id)))
+          .getOrElse(Effect.action(NoOp)))
 
-    case UpdateCollectionThenUpload(col, files) =>
-      updated(value.copy(album = col), Effect.action(UploadFiles(files)))
-
-    case MakePages(photos, index) =>
+    case CreateAlbum(userID) =>
       effectOnly {
-        Effect(AjaxClient[Api].generatePage(value.album.get.id, photos, index).call()
+        Effect(AjaxClient[Api].createAlbum(userID).call().map(Ready(_))
+          .map(album => NewAlbum(album)))
+      }
+
+    case NewAlbum(newAlbum) =>
+      updated(value.copy(album = newAlbum),
+        newAlbum.map(album => Effect.action(AddRemainingPhotos(album.id)))
+          .getOrElse(Effect.action(NoOp)))
+
+    case AddRemainingPhotos(albumID) =>
+      value.upload match {
+
+        case None => noChange
+
+        case Some(UploadState(Nil, _)) =>
+          updated(value.copy(upload = None))
+
+        case Some(UploadState(files, index)) =>
+          val pages = value.album.map(_.pages).getOrElse(Nil)
+          val updatedIndex = pages match {
+            case Nil => index
+            case p => if (index == 0) p.length else index
+          }
+
+          val (fileSet, rest) =
+            if (updatedIndex == 0) (files.take(1), files)
+            else files.splitAt(Math.min(new Random().nextInt(3) + 1, files.length))
+
+          val effect = Effect {
+            Future.sequence(fileSet.map(f => Helper.uploadFile(f, albumID)))
+              .map(photos => MakePages(albumID, photos, updatedIndex))
+          } >>
+            Effect.action(AddRemainingPhotos(albumID))
+
+          updated(value.copy(upload = Some(UploadState(rest, updatedIndex+1))), effect)
+
+      }
+
+    case MakePages(albumID, photos, index) =>
+      effectOnly {
+          Effect(AjaxClient[Api].generatePage(albumID, photos, index).call()
           .map(UpdatePages(_)))
       }
+
+    case GetFromCookie => effectOnly {
+      Effect(Future(Helper.getUserIDFromCookie.map(GetUser).getOrElse(None))) >>
+        Effect.action(GetFromHash)
+    }
 
     case GetAlbum(hash) =>
       effectOnly {
@@ -219,8 +264,7 @@ object AppCircuit extends Circuit[RootModel] with ReactConnector[RootModel] {
   override protected var model: RootModel = RootModel()
 
   override protected def actionHandler = combineHandlers (
-    new UserHandler(zoomRW(_.user)((m,v) => m.copy(user = v))),
-    new FileUploadHandler(zoomRW(identity)((m,v) => v)),
+    new MainHandler(zoomRW(identity)((m,v) => v)),
     new AlbumHandler(zoomRW(_.album)((m,v) => m.copy(album = v)))
   )
 }

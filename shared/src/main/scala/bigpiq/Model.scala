@@ -6,6 +6,10 @@ case class User(id: Long, email: String, albums: List[Album])
 case class Album(id: Long, hash: String, title: String, pages: List[Page]) {
   def filter = this.copy(pages =
     pages.filter(_.tiles.nonEmpty).groupBy(_.index).map(_._2.head).toList.sortBy(_.index))
+    .updateIndex
+
+  def updateIndex = this.copy(pages =
+    pages.zipWithIndex.map({case (page, i) => page.copy(index = i)}))
 }
 
 case class Page(id: Long, index: Int, tiles: List[Tile])

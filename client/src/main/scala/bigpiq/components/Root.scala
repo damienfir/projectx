@@ -1,6 +1,6 @@
 package bigpiq.client.components
 
-import bigpiq.client.{GetFromCookie, RootModel}
+import bigpiq.client.{GetFromCookie, RootModel, UploadState}
 import diode.react.ModelProxy
 import japgolly.scalajs.react.{BackendScope, ReactComponentB}
 import japgolly.scalajs.react.vdom.prefix_<^._
@@ -18,11 +18,21 @@ object Root {
 
     def render(proxy: ModelProxy[RootModel]) = {
       <.div(^.className := "theme-blue",
+
         proxy.connect(identity)(Nav(_)),
+
         proxy.connect(_.album)(p => Album(Album.Props(p))),
+
         proxy.connect(identity)(p => Order(Order.Props(p))),
-        proxy.connect(identity)(Upload(_)),
+
+        proxy().upload match {
+          case Some(UploadState(Nil, _)) => proxy.connect(identity)(p => Upload(Upload.Props(p)))
+          case None => ""
+        },
+
         proxy.connect(identity)(p => Save(Save.Props(p)))
+
+//        proxy.wrap(_.album)(p => Feedback(Feedback.Props(p)))
       )
     }
   }
