@@ -97,7 +97,7 @@ class ImageService @Inject()() {
     uploaded.moveTo(newFile)
     newFile.setReadable(true, false)
     newFile.setExecutable(true, false)
-  (hash, data)
+    (hash, data)
     // val thumbFilename = resize(filename)
     // val thumb = new File(thumbFile(thumbFilename))
     // thumb.setReadable(true, false)

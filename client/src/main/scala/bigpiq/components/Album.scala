@@ -157,7 +157,7 @@ object Album {
       val btnAdd = <.button(
         "Add photos after",
         ^.cls := "btn btn-primary",
-        ^.onClick --> $.props.flatMap(p => p.proxy.dispatch(RequestUpload(0))))
+        ^.onClick --> ($.props.flatMap(p => p.proxy.dispatch(RequestUploadAfter(page.index))) >> Callback(Upload.show)))
 
       val btnLeft = <.button(
           UI.icon("chevron-left"),
@@ -173,9 +173,8 @@ object Album {
         <.span(^.cls := "page", if (p == 0) "Cover Page" else s"Page ${p-1}"),
         if (page.tiles.nonEmpty) {
           if (page.tiles.length > 1)
-            <.div(^.cls := "btn-group", btnShuffle, btnAdd)
-          else
-            <.div(^.cls := "btn-group", btnAdd)
+            <.div(^.cls := "btn-group", btnShuffle)
+          else ""
         }
         else "",
 
@@ -236,16 +235,14 @@ object Album {
     def addPhotosStart() =
       <.button(^.cls := "btn btn-info btn-lg btn-step center shadow",
         ^.id := "create-btn",
-        dataToggle := "modal",
-        dataTarget := "#upload-modal",
-        UI.icon("cloud-upload fa-3x"), "Upload photos"
+        UI.icon("cloud-upload fa-3x"), "Upload photos",
+        ^.onClick --> Callback(Upload.show)
       )
 
     def addPhotosEnd(col: Album) =
       <.button(^.cls := "btn btn-primary center", ^.id := "addmore-btn",
-        dataToggle := "modal",
-        dataTarget := "#upload-modal",
-        UI.icon("cloud-upload"), "Upload more photos"
+        UI.icon("cloud-upload"), "Upload more photos",
+        ^.onClick --> Callback(Upload.show)
       )
 
     def toolbar(page: Page, selected: Selected) =
@@ -333,7 +330,6 @@ object Album {
       dom.document.body.onmouseup = (ev: MouseEvent) =>
         backend.imageMouseUp(None).runNow()
 
-      props.proxy().map { col => dom.history.pushState("", "", s"/ui/${col.hash}") }
       $.setState(State(props.proxy().map(_.pages).getOrElse(Nil), None, None))
     }
   }

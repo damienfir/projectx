@@ -1,8 +1,6 @@
 import sbt.Keys._
 import sbt.Project.projectToRef
 
-
-
 lazy val server = (project in file("server"))
   .settings(
     name := "server",
@@ -15,7 +13,6 @@ lazy val server = (project in file("server"))
   .enablePlugins(PlayScala)
   .aggregate(clients.map(projectToRef): _*)
   .dependsOn(sharedJVM)
-
 
 lazy val client: Project = (project in file("client"))
   .settings(
@@ -35,13 +32,11 @@ lazy val client: Project = (project in file("client"))
 
 lazy val clients = Seq(client)
 
-
 lazy val shared = (crossProject.crossType(CrossType.Pure) in file("shared"))
   .settings(scalaVersion := Settings.versions.scala)
   .jsConfigure(_ enablePlugins ScalaJSPlay)
 
 lazy val sharedJVM = shared.jvm
 lazy val sharedJS = shared.js
-
 
 onLoad in Global := (Command.process("project server", _: State)) compose (onLoad in Global).value

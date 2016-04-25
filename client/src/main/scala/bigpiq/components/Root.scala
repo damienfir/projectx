@@ -9,8 +9,6 @@ import japgolly.scalajs.react.vdom.prefix_<^._
 object Root {
 
   class Backend($: BackendScope[ModelProxy[RootModel], Unit]) {
-    val dataToggle = "data-toggle".reactAttr
-    val dataTarget = "data-target".reactAttr
 
     def mounted(proxy: ModelProxy[RootModel]) = {
       proxy.dispatch(GetFromCookie)
@@ -25,10 +23,7 @@ object Root {
 
         proxy.connect(identity)(p => Order(Order.Props(p))),
 
-        proxy().upload match {
-          case Some(UploadState(Nil, _)) => proxy.connect(identity)(p => Upload(Upload.Props(p)))
-          case None => ""
-        },
+        proxy.connect(identity)(p => Upload(Upload.Props(p))),
 
         proxy.connect(identity)(p => Save(Save.Props(p)))
 

@@ -42,6 +42,9 @@ object Settings {
     val postgresql = "9.4-1201-jdbc41"
     val playslick = "1.0.1"
     val slickPg = "0.9.1"
+
+    val scalatest = "2.2.1"
+    val scalatestplus = "1.4.0-M3"
   }
 
   val jvmDependencies = Def.setting(Seq(
@@ -53,8 +56,11 @@ object Settings {
       "com.github.tminglei" %% "slick-pg" % versions.slickPg,
       "com.vmunier" %% "play-scalajs-scripts" % versions.playScripts,
       "com.lihaoyi" %%% "upickle" % versions.upickle,
-      "com.lihaoyi" %%% "autowire" % versions.autowire
-//      "org.webjars" % "font-awesome" % versions.fontawesome % Provided,
+      "com.lihaoyi" %%% "autowire" % versions.autowire,
+      "org.scalatest" %% "scalatest" % versions.scalatest % "test",
+      "org.scalatestplus" %% "play" % versions.scalatestplus % "test"
+
+    //      "org.webjars" % "font-awesome" % versions.fontawesome % Provided,
 //      "org.webjars" % "bootstrap" % versions.bootstrap % Provided
     ))
 

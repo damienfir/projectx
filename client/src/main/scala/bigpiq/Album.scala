@@ -8,7 +8,6 @@ import scala.scalajs.js.Dynamic.{global => g}
 import scala.util.Try
 
 
-
 object AlbumUtil {
   def moveCoord(c: (Float, Float), offset: Double): (Float, Float) = {
     val new1 = Math.max(0, c._1 - offset.asInstanceOf[Float])

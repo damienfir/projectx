@@ -55,6 +55,8 @@ object Helper {
     ).asInstanceOf[JQueryAjaxSettings])
     p.future
   }
+
+  def updateUrl(hash: String) = dom.history.pushState("", "", s"/ui/${hash}")
 }
 
 //object Api {

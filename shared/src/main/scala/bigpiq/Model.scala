@@ -8,7 +8,7 @@ case class Album(id: Long, hash: String, title: String, pages: List[Page]) {
     pages.filter(_.tiles.nonEmpty).groupBy(_.index).map(_._2.head).toList.sortBy(_.index))
     .updateIndex
 
-  def updateIndex = this.copy(pages =
+  def updateIndex() = this.copy(pages =
     pages.zipWithIndex.map({case (page, i) => page.copy(index = i)}))
 }
 

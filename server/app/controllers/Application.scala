@@ -70,7 +70,7 @@ class Photos @Inject()(imageService: ImageService, photoDAO: db.PhotoDAO) extend
       case Right(body) =>
         val (hash, data) = imageService.save(body.files.head.ref)
         photoDAO.addToCollection(id, hash, data)
-          .map(p => Ok(write(p)))
+          .map((p: Photo) => Ok(write(p)))
     }
   }
 

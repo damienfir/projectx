@@ -1,6 +1,6 @@
 package bigpiq.client.components
 
-import bigpiq.client.{RootModel, SaveAlbum}
+import bigpiq.client.{RequestUploadAfter, RootModel, SaveAlbum}
 import bigpiq.shared._
 import diode.data.Ready
 import diode.react.ModelProxy
@@ -41,8 +41,7 @@ object Nav {
           <.ul(^.cls := "nav navbar-nav",
             <.li(
               <.button(^.cls := "btn btn-primary navbar-btn", ^.id := "upload-btn",
-                dataToggle := "modal",
-                dataTarget := "#upload-modal",
+                ^.onClick --> Callback(Upload.show),// >> proxy.dispatch(RequestUploadAfter(0))),
                 UI.icon("cloud-upload"), " Upload more photos"
               )
             )
