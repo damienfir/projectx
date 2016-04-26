@@ -5,11 +5,18 @@ case class User(id: Long, email: String, albums: List[Album])
 
 case class Album(id: Long, hash: String, title: String, pages: List[Page]) {
   def filter = this.copy(pages =
-    pages.filter(_.tiles.nonEmpty).groupBy(_.index).map(_._2.head).toList.sortBy(_.index))
-    .updateIndex
+    pages.filter(_.tiles.nonEmpty)
+      .sortBy(_.index))
 
-  def updateIndex() = this.copy(pages =
-    pages.zipWithIndex.map({case (page, i) => page.copy(index = i)}))
+  def adjustIndex = this.copy(pages =
+    pages.zipWithIndex.map({
+      case (page, i) => page.copy(index = i)
+    }))
+
+  def getAllPhotos: List[Photo] =
+    pages.flatMap(p => p.tiles.map(t => t.photo))
+
+  def density = getAllPhotos.length.toDouble / pages.length.toDouble
 }
 
 case class Page(id: Long, index: Int, tiles: List[Tile])

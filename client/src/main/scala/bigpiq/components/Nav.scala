@@ -1,6 +1,6 @@
 package bigpiq.client.components
 
-import bigpiq.client.{RequestUploadAfter, RootModel, SaveAlbum}
+import bigpiq.client._
 import bigpiq.shared._
 import diode.data.Ready
 import diode.react.ModelProxy
@@ -13,6 +13,7 @@ import org.scalajs.dom.raw
 
 
 object Nav {
+
   class Backend($: BackendScope[ModelProxy[RootModel], Unit]) {
     val dataToggle = "data-toggle".reactAttr
     val dataTarget = "data-target".reactAttr
@@ -20,8 +21,9 @@ object Nav {
     def didMount = {
       jQuery(dom.window).scroll { ev: JQueryEventObject =>
         if (jQuery(dom.document).scrollTop() == 0)
-        jQuery("#nav").removeClass("shadow-lg") else
-        jQuery("#nav").addClass("shadow-lg")
+          jQuery("#nav").removeClass("shadow-lg")
+        else
+          jQuery("#nav").addClass("shadow-lg")
       }
     }
 
@@ -41,8 +43,29 @@ object Nav {
           <.ul(^.cls := "nav navbar-nav",
             <.li(
               <.button(^.cls := "btn btn-primary navbar-btn", ^.id := "upload-btn",
-                ^.onClick --> Callback(Upload.show),// >> proxy.dispatch(RequestUploadAfter(0))),
+                ^.onClick --> Callback(Upload.show), // >> proxy.dispatch(RequestUploadAfter(0))),
                 UI.icon("cloud-upload"), " Upload more photos"
+              )
+            )
+          ),
+
+          <.ul(^.cls := "nav navbar-nav",
+            <.li(
+              <.button(^.cls := "btn btn-primary navbar-btn",
+                ^.onClick --> proxy.dispatch(DecreaseDensity),
+                "Dec density"
+              ),
+              <.button(^.cls := "btn btn-primary navbar-btn",
+                ^.onClick --> proxy.dispatch(IncreaseDensity),
+                "Inc density"
+              )
+            )),
+
+          <.ul(^.cls := "nav navbar-nav",
+            <.li(
+              <.button(^.cls := "btn btn-primary navbar-btn",
+                ^.onClick --> proxy.dispatch(OrderByDate), // >> proxy.dispatch(RequestUploadAfter(0))),
+                "Order by date"
               )
             )
           ),
