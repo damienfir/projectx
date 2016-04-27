@@ -21,4 +21,5 @@ trait Api {
 
   def generatePage(albumID: Long, photos: List[Photo], index: Int): Future[Page]
 
+  def reorder(photos: List[Photo]): Future[List[Photo]]
 }

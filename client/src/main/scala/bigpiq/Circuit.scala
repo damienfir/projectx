@@ -76,13 +76,14 @@ class AlbumHandler[M](modelRW: ModelRW[M, Pot[Album]]) extends ActionHandler(mod
       (for {
         album <- value.toOption
         page <- getPage(selected.page)
+        photo <- album.getPhoto(selected.page, selected.index)
       } yield {
-        val (including, excluding) = page.getPhotos.partition(_.id == getID(selected).get)
+        val (including, excluding) = page.getPhotos.partition(_.id == photo.id)
         val effect = Effect(AjaxClient[Api].shufflePage(page, excluding).call().map(UpdatePages(_))) +
           Effect(AjaxClient[Api].generatePage(album.id, including, selected.page + 1).call().map(UpdatePages(_))) >>
           Effect.action(SaveAlbum)
 
-        updated(Ready(album.shiftPagesAfter(selected.page)), effect)
+        updated(Ready(album.adjustIndex.shiftPagesAfter(selected.page)), effect)
       }) getOrElse noChange
 
     case ClearPages =>
@@ -145,7 +146,7 @@ class AlbumHandler[M](modelRW: ModelRW[M, Pot[Album]]) extends ActionHandler(mod
         } getOrElse noChange
       }
 
-    case UpdateTitle(title) => updated(value.map(_.copy(title = title)))
+    case UpdateTitle(title) => updated(value.map(_.copy(title = title)), Effect.action(SaveAlbum))
 
     case MovePageLeft(page) =>
       value map { album =>
@@ -173,6 +174,21 @@ class AlbumHandler[M](modelRW: ModelRW[M, Pot[Album]]) extends ActionHandler(mod
             Effect.action(SaveAlbum)
         }
       } getOrElse noChange
+
+    case GeneratePages(photos) =>
+      value.map { album =>
+        Effect.action(ClearPages) >>
+          makePages(album.id, makeDensityList(photos, math.ceil(album.density).toInt, 3)) >>
+          Effect.action(SaveAlbum)
+      }.map(effectOnly(_))
+        .getOrElse(noChange)
+
+    case OrderByDate =>
+      value.map(_.getAllPhotos)
+        .map(photos => AjaxClient[Api].reorder(photos).call().map(GeneratePages(_)))
+        .map(Effect(_))
+        .map(effectOnly)
+        .getOrElse(noChange)
   }
 }
 
@@ -236,9 +252,7 @@ class UploadHandler[M](modelRW: ModelRW[M, Option[UploadState]]) extends ActionH
     case AddRemainingPhotos(albumID) => {
       value match {
         case None => noChange
-
-        case Some(UploadState(Nil, _)) =>
-          noChange
+        case Some(UploadState(Nil, _)) => noChange
 
         case Some(UploadState(files, index)) =>
           val (fileSet, rest) =
@@ -306,11 +320,13 @@ class MainHandler[M](modelRW: ModelRW[M, RootModel]) extends ActionHandler(model
       }
 
     case SaveAlbum =>
-      value.album map { album =>
-        val toSave = album.adjustIndex
-        updated(value.copy(album = Ready(toSave)),
-          Effect(AjaxClient[Api].saveAlbum(album).call()))
-      } getOrElse noChange
+      value.album
+        .map(_.adjustIndex)
+        .filterNot(_.pages.length == 0)
+        .map { album =>
+          updated(value.copy(album = Ready(album)),
+            Effect(AjaxClient[Api].saveAlbum(album).call()))
+        } getOrElse noChange
 
     case EmailAndSave(email) =>
       value.user flatMap { user: User =>

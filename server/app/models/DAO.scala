@@ -127,7 +127,7 @@ class CollectionDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProv
   def removeUnused(collection: Collection, comps: List[Composition]) = {
     db.run(compositions.filter(_.collectionID === collection.id).result) flatMap { allcomp =>
       Future.sequence {
-        allcomp.filter(c => !comps.map(_.id).contains(c.id))
+        allcomp.filterNot(c => comps.map(_.id).contains(c.id))
           .map(c => compositions.filter(_.id === c.id).delete)
           .map(db.run(_))
       }

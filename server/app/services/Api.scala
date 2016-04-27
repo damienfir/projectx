@@ -71,4 +71,7 @@ class ServerApi @Inject() (usersDAO: db.UsersDAO, collectionDAO: db.CollectionDA
 
       mosaicService.makeAlbumFile(svgFiles)
     }
+
+  def reorder(photos: List[Photo]): Future[List[Photo]] =
+    Future(new Random().shuffle(photos))
 }

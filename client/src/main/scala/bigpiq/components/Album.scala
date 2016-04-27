@@ -50,10 +50,7 @@ object Album {
           case Selected(to.page, to.index) => Callback(None)
           case from@Selected(to.page, _) => {
             val newPages = AlbumUtil.swapTiles(s.pages, from, to)
-            $.setState(s.copy(pages = newPages)) >>
-              $.props.flatMap(p =>
-                p.proxy.dispatch(UpdatePages(newPages)) >>
-                  p.proxy.dispatch(SaveAlbum))
+            updateAlbum(newPages)
           }
           case from => to match {
             case Selected(0, _) => $.props.flatMap(_.proxy.dispatch(AddToCover(from)))
@@ -106,12 +103,17 @@ object Album {
     def nodeMouseUp(ev: ReactMouseEvent) = Callback(edgeDrag.mouseUp) >>
       $.modState(s => s.copy(edge = None)) >> updateAlbum()
 
-    def updateAlbum(): Callback = {
+    def updateAlbum(): Callback =
       $.state flatMap (s =>
         $.props flatMap (p =>
           p.proxy.dispatch(UpdatePages(s.pages)) >>
             p.proxy.dispatch(SaveAlbum)))
-    }
+
+    def updateAlbum(newPages: List[Page]): Callback =
+      $.modState(s => s.copy(pages = newPages)) >>
+        $.props.flatMap(p =>
+          p.proxy.dispatch(UpdatePages(newPages)) >>
+            p.proxy.dispatch(SaveAlbum))
 
     def onChangeTitle(ev: ReactEventI) = $.props flatMap (p => p.proxy.dispatch(UpdateTitle(ev.target.value)))
 
@@ -146,7 +148,7 @@ object Album {
           ^.onMouseMove ==> imageMouseMove,
           ^.onMouseUp ==> ((ev: ReactMouseEvent) => imageMouseUp(Some(UI.MouseDown(page, index, ev)))),
           < img(
-            ^.src := "/photos/" + tile.photo.id + "/full/800,/" + tile.rot + "/default.jpg",
+            ^.src := "/photos/" + tile.photo.id + "/full/600,/" + tile.rot + "/default.jpg",
             ^.draggable := false,
             ^.height := pct(scaleY),
             ^.width := pct(scaleX),
@@ -174,22 +176,18 @@ object Album {
           ^.onClick --> ($.props.flatMap(p => p.proxy.dispatch(RequestUploadAfter(page.index))) >> Callback(Upload.show)))
 
         val btnLeft = <.button(
-          UI.icon("chevron-left"),
+          UI.icon("chevron-left"), "Backwards",
           ^.cls := "btn btn-primary",
           ^.onClick --> $.props.flatMap(p => p.proxy.dispatch(MovePageLeft(page))))
 
         val btnRight = <.button(
-          UI.icon("chevron-right"),
+          "Forwards ", UI.icon("chevron-right"),
           ^.cls := "btn btn-primary",
           ^.onClick --> $.props.flatMap(p => p.proxy.dispatch(MovePageRight(page))))
 
         <.div(^.cls := pull,
           <.span(^.cls := "page", if (p == 0) "Cover Page" else s"Page ${p - 1}"),
-          if (page.tiles.nonEmpty) {
-            if (page.tiles.length > 1)
-              <.div(^.cls := "btn-group", btnShuffle)
-            else ""
-          }
+          if (page.tiles.nonEmpty) btnShuffle
           else "",
 
           if (page.tiles.nonEmpty) {

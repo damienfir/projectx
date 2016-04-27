@@ -6,8 +6,6 @@ import diode.data.{Pot,Ready}
 import org.scalajs.dom.File
 
 
-trait DensityAction
-
 case class AddRemainingPhotos(albumID: Long)
 case class AddToCover(selected: Selected)
 case class AddToNextPage(selected: Selected)
@@ -17,14 +15,15 @@ case class CancelUploadRequest()
 case class ClearPages()
 case class CreateAlbum(userID: Long)
 case class CreateUser()
-case class DecreaseDensity() extends DensityAction
+case class DecreaseDensity()
 case class EmailAndSave(email: String)
 case class FileUploaded(photo: Photo)
+case class GeneratePages(photos: List[Photo])
 case class GetUser(id: Long)
 case class GetFromHash()
 case class GetFromCookie()
 case class GetAlbum(hash: String)
-case class IncreaseDensity() extends DensityAction
+case class IncreaseDensity()
 case class MakePages(albumID: Long, photos: List[Photo], index: Int)
 case class MoveTile(from: Selected, to: Selected)
 case class MovePageLeft(page: Page)

@@ -232,6 +232,10 @@ html, body {
   margin-right: 5px;
 }
 
+.spread-btn .btn-group {
+  margin: 0 5px;
+}
+
 #save-alert {
   position: fixed;
   bottom: 20px;

@@ -56,7 +56,6 @@ class MosaicService @Inject()() {
   def tilesPython(photos: Seq[String], id: String) = Future {
     val json = new ByteArrayOutputStream()
     val cmd = (binary +: "1.414" +: photos.map(photoFile) :+ "-") #> json
-    println(cmd)
     cmd ! match {
       case 0 => Json.parse(json.toString).as[List[MosaicModels.Tile2]]
       case _ => throw new Exception

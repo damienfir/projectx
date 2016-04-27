@@ -53,11 +53,11 @@ object Nav {
             <.li(
               <.button(^.cls := "btn btn-primary navbar-btn",
                 ^.onClick --> proxy.dispatch(DecreaseDensity),
-                "Dec density"
+                UI.icon("plus"), " More pages"
               ),
               <.button(^.cls := "btn btn-primary navbar-btn",
                 ^.onClick --> proxy.dispatch(IncreaseDensity),
-                "Inc density"
+                UI.icon("minus"), " Less pages"
               )
             )),
 
@@ -65,11 +65,7 @@ object Nav {
             <.li(
               <.button(^.cls := "btn btn-primary navbar-btn",
                 ^.onClick --> proxy.dispatch(OrderByDate), // >> proxy.dispatch(RequestUploadAfter(0))),
-                "Order by date"
-              )
-            )
-          ),
-          //          } else "",
+                "Order by date"))),
 
           if (isDemo) {
             <.li(

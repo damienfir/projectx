@@ -16,21 +16,29 @@ case class Album(id: Long, hash: String, title: String, pages: List[Page]) {
   def getAllPhotos: List[Photo] =
     pages.flatMap(p => p.tiles.map(t => t.photo))
 
-  def density = getAllPhotos.length.toDouble / pages.length.toDouble
+  def density: Double = getAllPhotos.length.toDouble / pages.length.toDouble
 
   def getPhoto(page: Int, tile: Int): Option[Photo] = for {
     page <- pages.lift(page)
     tile <- page.tiles.lift(tile)
   } yield tile.photo
 
-  def shiftPagesAfter(page: Int) =
+  // increment page numbers
+  def shiftPagesAfter(page: Int): Album =
     this.copy(pages =
       pages.take(page+1) ++
-      pages.drop(page+1).map(page => page.copy(index = page.index + 1)))
+      pages.drop(page+1).map(p => p.copy(index = p.index + 1)))
 }
 
 case class Page(id: Long, index: Int, tiles: List[Tile]) {
-  def getPhotos = tiles.map(_.photo)
+  def getPhotos: List[Photo] = tiles.map(_.photo)
+
+  // keep rotations
+  def update(newTiles: List[Tile]): Page =
+    this.copy(tiles = newTiles.map(newTile =>
+      tiles.find(t => t.photo.id == newTile.photo.id)
+        .map(t => newTile.copy(rot = t.rot)).getOrElse(newTile)
+    ))
 }
 
 case class Tile(photo: Photo, rot: Int,
