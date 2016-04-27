@@ -260,29 +260,41 @@ object Album {
         ^.onClick --> Callback(Upload.show)
       )
 
-    def toolbar(page: Page, selected: Selected) =
-      <.div(^.cls := "btn-group toolbar",
-        if (page.tiles.length > 1)
-          <.button(^.cls := "btn btn-info btn-lg", ^.id := "remove-btn",
-            ^.onClick --> ($.props.flatMap(_.proxy.dispatch(RemoveTile(selected))) >> cancelSelected),
-            UI.icon("trash-o")
-          )
-        else "",
+    def toolbar(page: Page, selected: Selected) = {
+
+      val removeBtn =
+        <.button(^.cls := "btn btn-info btn-lg", ^.id := "remove-btn",
+          ^.onClick --> ($.props.flatMap(_.proxy.dispatch(RemoveTile(selected))) >> cancelSelected),
+          UI.icon("trash-o"))
+
+      val newPageBtn =
+        <.button(^.cls := "btn btn-info btn-lg",
+          ^.onClick --> ($.props.flatMap(_.proxy.dispatch(AddToNextPage(selected))) >> cancelSelected),
+          UI.icon("plus"))
+
+      val rotateBtn =
         <.button(^.cls := "btn btn-info btn-lg", ^.id := "rotate-btn",
           ^.onClick --> rotateSelected,
-          UI.icon("rotate-right")
-        ),
-        if (page.index != 0)
-          <.button(^.cls := "btn btn-info btn-lg", ^.id := "add-cover-btn",
-            ^.onClick --> ($.props.flatMap(_.proxy.dispatch(AddToCover(selected))) >> cancelSelected),
-            UI.icon("book")
-          )
-        else "",
+          UI.icon("rotate-right"))
+
+      val addToCoverBtn =
+        <.button(^.cls := "btn btn-info btn-lg", ^.id := "add-cover-btn",
+          ^.onClick --> ($.props.flatMap(_.proxy.dispatch(AddToCover(selected))) >> cancelSelected),
+          UI.icon("book"))
+
+      val cancelBtn =
         <.button(^.cls := "btn btn-info btn-lg", ^.id := "cancel-btn",
           ^.onClick --> cancelSelected,
-          UI.icon("times")
-        )
+          UI.icon("times"))
+
+      <.div(^.cls := "btn-group toolbar",
+        removeBtn,
+        if (page.tiles.length > 1) newPageBtn else "",
+        rotateBtn,
+        if (page.index != 0) addToCoverBtn else "",
+        cancelBtn
       )
+    }
 
     def hover(page: Page) =
       <.div(^.cls := "page-hover",

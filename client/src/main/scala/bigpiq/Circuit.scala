@@ -25,16 +25,16 @@ class AlbumHandler[M](modelRW: ModelRW[M, Pot[Album]]) extends ActionHandler(mod
   def getPage(index: Int): Option[Page] =
     value.map(_.pages.find(_.index == index)).getOrElse(None)
 
-  def getPhotos(page: Page): List[Photo] =
-    page.tiles.map(_.photo)
+  def getPhotos(index: Int): Option[List[Photo]] =
+    getPage(index).map(_.getPhotos)
 
-  def getPhotos(index: Int): List[Photo] =
-    getPage(index).get.tiles.map(_.photo)
+  def getID(selected: Selected): Option[Long] =
+    for {
+      page <- album.get.pages.lift(selected.page)
+      tile <- page.tiles.lift(selected.index)
+    } yield tile.photo.id
 
-  def getID(selected: Selected) =
-    album.get.pages(selected.page).tiles(selected.index).photo.id
-
-  def removeOnlyOne(list: List[Photo], condition: Photo => Boolean) =
+  def removeOnlyOne(list: List[Photo], condition: Photo => Boolean): List[Photo] =
     list.indexWhere(condition) match {
       case -1 => list
       case idx => list.take(idx) ++ list.drop(idx + 1)
@@ -58,23 +58,32 @@ class AlbumHandler[M](modelRW: ModelRW[M, Pot[Album]]) extends ActionHandler(mod
   override def handle = {
 
     case AddToCover(selected) =>
-      effectOnly {
-        val photoToAdd = getPhotos(selected.page).filter(_.id == getID(selected))
+      (for {
+        photos <- getPhotos(selected.page)
+        cover <- getPage(0)
+        photoID <- getID(selected)
+      } yield {
+        val photoToAdd = photos.filter(_.id == photoID)
         Effect {
-          AjaxClient[Api].shufflePage(getPage(0).get, getPhotos(0) ++ photoToAdd)
+          AjaxClient[Api].shufflePage(cover, cover.getPhotos ++ photoToAdd)
             .call()
             .map(UpdatePages(_))
         } >>
-        Effect.action(SaveAlbum)
-      }
+          Effect.action(SaveAlbum)
+      }) map (effectOnly(_)) getOrElse noChange
 
-    case RemoveLastPage =>
-      effectOnly {
-        Effect.action(UpdatePages(
-          value.map(a => List(a.pages.last.copy(tiles = Nil))).getOrElse(Nil)
-        )) >>
-        Effect.action(SaveAlbum)
-      }
+    case AddToNextPage(selected) =>
+      (for {
+        album <- value.toOption
+        page <- getPage(selected.page)
+      } yield {
+        val (including, excluding) = page.getPhotos.partition(_.id == getID(selected).get)
+        val effect = Effect(AjaxClient[Api].shufflePage(page, excluding).call().map(UpdatePages(_))) +
+          Effect(AjaxClient[Api].generatePage(album.id, including, selected.page + 1).call().map(UpdatePages(_))) >>
+          Effect.action(SaveAlbum)
+
+        updated(Ready(album.shiftPagesAfter(selected.page)), effect)
+      }) getOrElse noChange
 
     case ClearPages =>
       updated(value.map(_.copy(pages = Nil)))
@@ -83,8 +92,8 @@ class AlbumHandler[M](modelRW: ModelRW[M, Pot[Album]]) extends ActionHandler(mod
       (getPage(from.page), getPage(to.page)) match {
         case (None, _) => noChange
         case (Some(fromPage), toPageOpt) =>
-          val fromPhotos = getPhotos(fromPage)
-          val photoID = getID(from)
+          val fromPhotos = fromPage.getPhotos
+          val photoID = getID(from).get
 
           toPageOpt match {
             // moving to a new page
@@ -92,41 +101,49 @@ class AlbumHandler[M](modelRW: ModelRW[M, Pot[Album]]) extends ActionHandler(mod
               effectOnly {
                 Effect(AjaxClient[Api].shufflePage(fromPage, fromPhotos.filter(_.id != photoID)).call().map(UpdatePages(_))) +
                   Effect(AjaxClient[Api].generatePage(album.get.id, fromPhotos.filter(_.id == photoID), album.get.pages.length).call().map(UpdatePages(_))) >>
-                Effect.action(SaveAlbum)
+                  Effect.action(SaveAlbum)
               }
 
             // both pages have tiles
             case Some(toPage) =>
-              val toPhotos = getPhotos(toPage)
               effectOnly {
                 Effect(AjaxClient[Api].shufflePage(fromPage, fromPhotos.filter(_.id != photoID)).call()
                   .map(UpdatePages(_))) +
-                  Effect(AjaxClient[Api].shufflePage(toPage, toPhotos ++ fromPhotos.filter(_.id == photoID)).call().map(UpdatePages(_))) >>
-                Effect.action(SaveAlbum)
+                  Effect(AjaxClient[Api].shufflePage(toPage, toPage.getPhotos ++ fromPhotos.filter(_.id == photoID)).call().map(UpdatePages(_))) >>
+                  Effect.action(SaveAlbum)
               }
           }
       }
 
     case ShufflePage(index: Int) => effectOnly {
       val page = getPage(index)
-      Effect(AjaxClient[Api].shufflePage(page.get, getPhotos(page.get)).call().map(UpdatePages(_))) >>
-      Effect.action(SaveAlbum)
+      Effect(AjaxClient[Api].shufflePage(page.get, page.get.getPhotos).call().map(UpdatePages(_))) >>
+        Effect.action(SaveAlbum)
     }
 
-    case RemoveTile(selected) => effectOnly {
-      val photos = removeOnlyOne(getPhotos(selected.page), _.id == getID(selected))
-      Effect(AjaxClient[Api].shufflePage(value.get.pages(selected.page), photos).call().map(UpdatePages(_))) >>
-      Effect.action(SaveAlbum)
-    }
+    case RemoveTile(selected) =>
+      (for {
+        photos <- getPhotos(selected.page)
+        photoID <- getID(selected)
+      } yield {
+        effectOnly {
+          val photosReduced = removeOnlyOne(photos, _.id == photoID)
+          Effect(AjaxClient[Api].shufflePage(value.get.pages(selected.page), photosReduced).call().map(UpdatePages(_))) >>
+            Effect.action(SaveAlbum)
+        }
+      }) getOrElse noChange
 
     case UpdatePages(pages) =>
       updated(value.map(album =>
         album.copy(pages = album.pages.filter(p => !pages.exists(_.id == p.id)) ++ pages).filter))
 
     case UpdateAlbum(albumPot) =>
-      albumPot map { album: Album =>
-        updated(albumPot, Effect.action(UpdatePages(album.pages)))
-      } getOrElse noChange
+      value.map(_ => noChange).getOrElse {
+        //        println("updating album")
+        albumPot map { album: Album =>
+          updated(albumPot, Effect.action(UpdatePages(album.pages)))
+        } getOrElse noChange
+      }
 
     case UpdateTitle(title) => updated(value.map(_.copy(title = title)))
 
@@ -139,9 +156,9 @@ class AlbumHandler[M](modelRW: ModelRW[M, Pot[Album]]) extends ActionHandler(mod
 
     case MovePageRight(page) =>
       value map { album =>
-          val (left, right) = album.filter.pages.splitAt(album.pages.indexOf(page))
-          val pages = left ++ right.take(2).reverse ++ right.drop(2)
-          updated(value.map(album => album.copy(pages = pages).adjustIndex), Effect.action(SaveAlbum))
+        val (left, right) = album.filter.pages.splitAt(album.pages.indexOf(page))
+        val pages = left ++ right.take(2).reverse ++ right.drop(2)
+        updated(value.map(album => album.copy(pages = pages).adjustIndex), Effect.action(SaveAlbum))
       } getOrElse noChange
 
     case action@(IncreaseDensity | DecreaseDensity) =>
@@ -163,6 +180,11 @@ class AlbumHandler[M](modelRW: ModelRW[M, Pot[Album]]) extends ActionHandler(mod
 class UserHandler[M](modelRW: ModelRW[M, Pot[User]]) extends ActionHandler(modelRW) {
   def handle = {
     case UpdateUser(user) => updated(user)
+
+    case GetUser(id) =>
+      effectOnly {
+        Effect(AjaxClient[Api].getUser(id).call().map(u => UpdateUser(Ready(u))))
+      }
   }
 }
 
@@ -212,9 +234,7 @@ class UploadHandler[M](modelRW: ModelRW[M, Option[UploadState]]) extends ActionH
       }
 
     case AddRemainingPhotos(albumID) => {
-      //      println(value)
       value match {
-
         case None => noChange
 
         case Some(UploadState(Nil, _)) =>
@@ -287,9 +307,9 @@ class MainHandler[M](modelRW: ModelRW[M, RootModel]) extends ActionHandler(model
 
     case SaveAlbum =>
       value.album map { album =>
-        effectOnly {
-          Effect(AjaxClient[Api].saveAlbum(album).call())
-        }
+        val toSave = album.adjustIndex
+        updated(value.copy(album = Ready(toSave)),
+          Effect(AjaxClient[Api].saveAlbum(album).call()))
       } getOrElse noChange
 
     case EmailAndSave(email) =>

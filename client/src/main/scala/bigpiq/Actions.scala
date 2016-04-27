@@ -10,6 +10,7 @@ trait DensityAction
 
 case class AddRemainingPhotos(albumID: Long)
 case class AddToCover(selected: Selected)
+case class AddToNextPage(selected: Selected)
 //case class CreateUser()
 //case class CreateAlbum(userID: Long)
 case class CancelUploadRequest()

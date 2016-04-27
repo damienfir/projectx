@@ -13,8 +13,8 @@ object App extends js.JSApp {
   @JSExport
   override def main(): Unit = {
 
-//    val proc = new LoggingProcessor[RootModel]
-//    AppCircuit.addProcessor(proc)
+    val proc = new LoggingProcessor[RootModel]
+    AppCircuit.addProcessor(proc)
     val connectedRoot = AppCircuit.connect(m => m)(p => Root(p))
 
     ReactDOM.render(connectedRoot, dom.document.getElementById("app"))
