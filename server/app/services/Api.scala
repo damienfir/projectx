@@ -14,9 +14,9 @@ import bigpiq.server.db
 import scala.util.Random
 
 
-class ServerApi @Inject() (usersDAO: db.UsersDAO, collectionDAO: db.CollectionDAO, mosaicService: MosaicService, emailService: Email, imageService: ImageService) extends Api {
+class ServerApi @Inject()(usersDAO: db.UsersDAO, collectionDAO: db.CollectionDAO, mosaicService: MosaicService, emailService: Email, imageService: ImageService) extends Api {
 
-  val dim = (297,210)
+  val dim = (297, 210)
   val ratio = dim._1.toFloat / dim._2.toFloat
   val demoID = Play.current.configuration.getString("px.demoID").get
 
@@ -54,9 +54,9 @@ class ServerApi @Inject() (usersDAO: db.UsersDAO, collectionDAO: db.CollectionDA
     }
 
   def shufflePage(page: Page, photos: List[Photo]): Future[Page] = {
-    mosaicService.generateComposition(page.id, photos) map ( tiles =>
+    mosaicService.generateComposition(page.id, photos) map (tiles =>
       page.copy(tiles = tiles)
-    )
+      )
   }
 
   def pdf(hash: String): Future[File] =
@@ -72,6 +72,8 @@ class ServerApi @Inject() (usersDAO: db.UsersDAO, collectionDAO: db.CollectionDA
       mosaicService.makeAlbumFile(svgFiles)
     }
 
-  def reorder(photos: List[Photo]): Future[List[Photo]] =
+  def reorderPhotos(photos: List[Photo]): Future[List[Photo]] = {
+    println("reordering...")
     Future(new Random().shuffle(photos))
+  }
 }

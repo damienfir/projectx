@@ -40,7 +40,7 @@ object Settings {
     val playScripts = "0.3.0"
 
     val postgresql = "9.4-1201-jdbc41"
-    val playslick = "1.0.1"
+    val playslick = "2.0.0"
     val slickPg = "0.9.1"
 
     val scalatest = "2.2.1"

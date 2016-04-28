@@ -53,15 +53,16 @@ class ImageService @Inject()() {
     "-rotate " + rotation
   }
 
-  def convert(hash: String, region: String, size: String, rotation: String, quality: String, format: String) = Future {
-    val converted = new ByteArrayOutputStream()
+  def convert(data: Array[Byte], region: String, size: String, rotation: String, quality: String, format: String) = Future {
+    val output = new ByteArrayOutputStream()
+    val input = new ByteArrayInputStream(data)
     val opts = Array(
       getSizeOpt(size),
       getRotationOpt(rotation)
     ).mkString(" ")
-    val cmd = s"convert - $opts -" #< new File(photoFile(hash)) #> converted
+    val cmd = s"convert - $opts -" #< input #> output
     cmd.!
-    converted.toByteArray
+    output.toByteArray
   }
 
   def bytesToFile(bytes: Future[Array[Byte]]) : String = {

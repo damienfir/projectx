@@ -66,6 +66,7 @@ object Nav {
               <.button(^.cls := "btn btn-primary navbar-btn",
                 ^.onClick --> proxy.dispatch(OrderByDate), // >> proxy.dispatch(RequestUploadAfter(0))),
                 "Order by date"))),
+          //          },
 
           if (isDemo) {
             <.li(

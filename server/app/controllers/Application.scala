@@ -43,9 +43,9 @@ class Application @Inject()(val messagesApi: MessagesApi, serverApi: ServerApi) 
   def autowireApi(path: String) = Action.async(parse.tolerantText) {
     implicit request => 
 
-      Router.route[Api](serverApi)(
+      Router.route[Api](serverApi) {
         autowire.Core.Request(path.split("/"), json.read(request.body).asInstanceOf[Js.Obj].value.toMap)
-      )
+      }
         .map(s => (s, json.write(s)))
         .map {
           case (user: User, p: String) => Ok(p).withCookies(makeCookie(user.id))
@@ -75,9 +75,11 @@ class Photos @Inject()(imageService: ImageService, photoDAO: db.PhotoDAO) extend
   }
 
   def get(photoID: Long, region: String, size: String, rotation: String, quality: String, format: String) = Action.async {
-    photoDAO.get(photoID) flatMap { photo =>
-      imageService.convert(photo.hash, region, size, rotation, quality, format)
+    photoDAO.get(photoID) flatMap { maybePhoto =>
+      maybePhoto.map { photo =>
+        imageService.convert(photo.data, region, size, rotation, quality, format)
         .map(file => Ok(file))
+      } getOrElse Future(NotFound)
     }
   }
 }

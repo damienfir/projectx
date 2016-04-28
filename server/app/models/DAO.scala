@@ -181,7 +181,7 @@ class CollectionDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProv
 
 @Singleton
 class PhotoDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvider, collectionDAO: CollectionDAO) extends HasDatabaseConfigProvider[JdbcProfile] {
-  def get(id: Long) = db.run(photos.filter(_.id === id).result).map(_.head)
+  def get(id: Long): Future[Option[Photo]] = db.run(photos.filter(_.id === id).result).map(_.headOption)
 
   def addToCollection(id: Long, hash: String, data: Array[Byte]): Future[shared.Photo] =
     db.run(collections.filter(_.id === id).result).map(_.head) flatMap { col =>
