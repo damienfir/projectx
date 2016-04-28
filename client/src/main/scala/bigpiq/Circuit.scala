@@ -184,8 +184,8 @@ class AlbumHandler[M](modelRW: ModelRW[M, Pot[Album]]) extends ActionHandler(mod
         .getOrElse(noChange)
 
     case OrderByDate =>
-      value.map(_.getAllPhotos)
-        .map(photos => AjaxClient[Api].reorderPhotos(photos).call().map(GeneratePages(_)))
+      value
+        .map(album => AjaxClient[Api].reorderPhotos(album.id).call().map(GeneratePages(_)))
         .map(Effect(_))
         .map(effectOnly)
         .getOrElse(noChange)

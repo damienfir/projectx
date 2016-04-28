@@ -14,7 +14,7 @@ import bigpiq.server.db
 import scala.util.Random
 
 
-class ServerApi @Inject()(usersDAO: db.UsersDAO, collectionDAO: db.CollectionDAO, mosaicService: MosaicService, emailService: Email, imageService: ImageService) extends Api {
+class ServerApi @Inject()(usersDAO: db.UsersDAO, collectionDAO: db.CollectionDAO, photoDAO: db.PhotoDAO, mosaicService: MosaicService, emailService: Email, imageService: ImageService) extends Api {
 
   val dim = (297, 210)
   val ratio = dim._1.toFloat / dim._2.toFloat
@@ -60,11 +60,18 @@ class ServerApi @Inject()(usersDAO: db.UsersDAO, collectionDAO: db.CollectionDAO
   }
 
   def pdf(hash: String): Future[File] =
-    collectionDAO.getByHash(0, hash) map { album =>
-      val photoFiles = album.pages.map(_.tiles)
-        .reduce((acc, t) => acc ++ t)
-        .map(t =>
-          t.photo.id -> imageService.bytesToFile(imageService.convert(t.photo.hash, "full", "full", t.rot.toString, "default", "jpg"))).toMap
+    for {
+      album <- collectionDAO.getByHash(0, hash)
+      photos <- photoDAO.allFromCollection(album.id)
+    } yield {
+      val tiles = album.pages.flatMap(_.tiles)
+      val photoFiles = photos.map { photo =>
+        photo.id.get -> tiles.find(_.photo.id == photo.id).map { tile =>
+          imageService.bytesToFile(imageService.convert(photo.data, "full", "full", tile.rot.toString, "default", "jpg"))
+        }
+      }.filter({ case (_, v) => v.isDefined })
+        .map({ case (k, Some(v)) => (k, v) })
+        .toMap
 
       val svgFiles = album.filter.pages.map(p =>
         views.html.page(p, if (p.index == 0) Some(album.title) else None, photoFiles, dim, ratio).toString)
@@ -72,8 +79,10 @@ class ServerApi @Inject()(usersDAO: db.UsersDAO, collectionDAO: db.CollectionDAO
       mosaicService.makeAlbumFile(svgFiles)
     }
 
-  def reorderPhotos(photos: List[Photo]): Future[List[Photo]] = {
-    println("reordering...")
-    Future(new Random().shuffle(photos))
+  def reorderPhotos(albumID: Long): Future[List[Photo]] = {
+    photoDAO.allFromCollection(albumID) map { photos =>
+      val (canSort, cannotSort) = photos.map(p => (p, imageService.getDate(p.data))).partition(_._2.isDefined)
+      canSort.sortBy({ case (p,date) => date }).map(_._1.export).toList ++ cannotSort.map(_._1.export)
+    }
   }
 }
