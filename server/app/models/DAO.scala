@@ -190,6 +190,8 @@ class PhotoDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvider,
     }
 
   def allFromCollection(id: Long) = db.run(photos.filter(_.collectionID === id).result)
+
+  def getSet(ids: List[Long]): Future[List[Photo]] = Future.sequence(ids.map(get(_))).flatten
 }
 
 

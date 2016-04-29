@@ -9,9 +9,7 @@ case class Album(id: Long, hash: String, title: String, pages: List[Page]) {
       .sortBy(_.index))
 
   def adjustIndex = this.copy(pages =
-    pages.zipWithIndex.map({
-      case (page, i) => page.copy(index = i)
-    }))
+    pages.zipWithIndex.map({ case (page, i) => page.copy(index = i) }))
 
   def getAllPhotos: List[Photo] =
     pages.flatMap(p => p.tiles.map(t => t.photo))
@@ -26,8 +24,8 @@ case class Album(id: Long, hash: String, title: String, pages: List[Page]) {
   // increment page numbers
   def shiftPagesAfter(page: Int): Album =
     this.copy(pages =
-      pages.take(page+1) ++
-      pages.drop(page+1).map(p => p.copy(index = p.index + 1)))
+      pages.take(page + 1) ++
+        pages.drop(page + 1).map(p => p.copy(index = p.index + 1)))
 }
 
 case class Page(id: Long, index: Int, tiles: List[Tile]) {

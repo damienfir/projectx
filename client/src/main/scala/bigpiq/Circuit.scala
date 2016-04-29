@@ -140,7 +140,6 @@ class AlbumHandler[M](modelRW: ModelRW[M, Pot[Album]]) extends ActionHandler(mod
 
     case UpdateAlbum(albumPot) =>
       value.map(_ => noChange).getOrElse {
-        //        println("updating album")
         albumPot map { album: Album =>
           updated(albumPot, Effect.action(UpdatePages(album.pages)))
         } getOrElse noChange
@@ -185,7 +184,8 @@ class AlbumHandler[M](modelRW: ModelRW[M, Pot[Album]]) extends ActionHandler(mod
 
     case OrderByDate =>
       value
-        .map(album => AjaxClient[Api].reorderPhotos(album.id).call().map(GeneratePages(_)))
+        .map(album => AjaxClient[Api].reorderPhotos(album.id).call()
+          .map(GeneratePages(_)))
         .map(Effect(_))
         .map(effectOnly)
         .getOrElse(noChange)
@@ -322,11 +322,12 @@ class MainHandler[M](modelRW: ModelRW[M, RootModel]) extends ActionHandler(model
     case SaveAlbum =>
       value.album
         .map(_.adjustIndex)
-        .filterNot(_.pages.length == 0)
+        .filterNot(_.pages.isEmpty)
         .map { album =>
           updated(value.copy(album = Ready(album)),
             Effect(AjaxClient[Api].saveAlbum(album).call()))
-        } getOrElse noChange
+        }
+        .getOrElse(noChange)
 
     case EmailAndSave(email) =>
       value.user flatMap { user: User =>

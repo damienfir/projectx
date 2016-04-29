@@ -1,51 +1,38 @@
 package bigpiq.server.services
 
-import javax.inject._
-
-import play.api.libs.json._
-import play.api.libs.Files.TemporaryFile
-import play.api.Play
-
-import scala.util.{Failure, Success, Try}
-import scala.concurrent.{Await, Future}
-import scala.concurrent.duration._
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
-
-import scala.sys.process._
 import java.io._
 import java.nio.file._
-
-import org.apache.commons.io.FileUtils
-import org.apache.commons.codec.binary.Hex
 import java.security.MessageDigest
-import java.util.Date
+import java.util.{Date, UUID}
+import javax.inject._
 
-import collection.JavaConversions._
-import models._
+import bigpiq.server.db
 import bigpiq.shared._
 import com.drew.imaging.ImageMetadataReader
-import com.drew.metadata.exif.{ExifDirectoryBase, ExifSubIFDDescriptor, ExifSubIFDDirectory}
+import com.drew.metadata.exif.{ExifDirectoryBase, ExifSubIFDDirectory}
+import models._
+import org.apache.commons.codec.binary.Hex
+import org.apache.commons.io.FileUtils
+import play.api.Play
+import play.api.libs.Files.TemporaryFile
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
+import play.api.libs.json._
+
+import scala.concurrent.Future
+import scala.sys.process._
 
 
 class ImageService @Inject()() {
   def tmp(s: String) = s"/tmp/$s"
 
-  def photoFile(id: String) = Play.current.configuration.getString("px.dir_photos").get + s"/$id"
+  val binary = Play.current.configuration.getString("px.binary").get
 
-  def thumbFile(id: String) = Play.current.configuration.getString("px.dir_thumbs").get + s"/$id"
+  def tmpFile(name: String) = Play.current.configuration.getString("px.dir_photos").get + s"/$name"
 
   def hashFromContent(data: Array[Byte]): String = {
     var digest = MessageDigest.getInstance("SHA-1")
     digest.update(data)
     Hex.encodeHexString(digest.digest())
-  }
-
-  def resize(filename: String): String = {
-    val cmd = Seq("convert", photoFile(filename), "-resize", "800x800", thumbFile(filename))
-    cmd.! match {
-      case 0 => filename
-      case _ => throw new Exception()
-    }
   }
 
   def getSizeOpt(size: String): String = if (size == "full") ""
@@ -73,7 +60,6 @@ class ImageService @Inject()() {
         getQuality(quality)
       ).mkString(" ")
       val cmd = s"convert - $opts jpg:-" #< input #> output
-      println(cmd)
       cmd.!
       output.toByteArray
     }
@@ -84,52 +70,102 @@ class ImageService @Inject()() {
     try {
       Some(exifDirectory.getDate(ExifDirectoryBase.TAG_DATETIME_ORIGINAL))
     } catch {
-      case e => None
+      case e: Throwable => None
     }
   }
 
-  def bytesToFile(bytes: Future[Array[Byte]]): String = {
-    val content = Await.result(bytes, 5.seconds)
-    val fname = tmp(hashFromContent(content))
+  def bytesToFile(bytes: Array[Byte]): File = {
+    val fname = tmp(hashFromContent(bytes))
     val f = Paths.get(fname)
-    Files.write(f, content)
-    fname
+    Files.write(f, bytes)
+    new File(fname)
   }
-
-  //   def save(data: Array[Byte]): String = {
-  //     val filename = hashFromContent(data)
-  //     val file = new File(photoFile(filename))
-
-  //     FileUtils.writeByteArrayToFile(file, data)
-  //     // resize(filename)
-  //     // Success(filename)
-  //     filename
-  //   }
-
-
-  //  def bytesFromTemp(uploaded: TemporaryFile) : Photo = {
-  //    val data = FileUtils.readFileToByteArray(uploaded.file)
-  //    val hash = hashFromContent(data)
-  //    Photo(None, 0, hash, data)
-  //  }
-
 
   def save(uploaded: TemporaryFile): (String, Array[Byte]) = {
     val data = FileUtils.readFileToByteArray(uploaded.file)
     val hash = hashFromContent(data)
-    val newFile = new File(photoFile(hash))
-    uploaded.moveTo(newFile)
-    newFile.setReadable(true, false)
-    newFile.setExecutable(true, false)
     (hash, data)
-    // val thumbFilename = resize(filename)
-    // val thumb = new File(thumbFile(thumbFilename))
-    // thumb.setReadable(true, false)
-    // thumb.setExecutable(true, false)
-    // thumbFilename
   }
 
-  // def saveImages(newImages: Seq[TemporaryFile]): Future[Seq[String]] = Future {
-  //   newImages.filter(_.file.length > 4).map(save)
-  // }
+  def tilesToDB(photos: List[Photo])(tile: MosaicModels.Tile2): Option[Tile] =
+    photos.find(_.hash == tile.imfile.split("/").last) map { p =>
+      Tile(
+        photo = p,
+        rot = tile.rot,
+        cx1 = tile.cx1,
+        cx2 = tile.cx2,
+        cy1 = tile.cy1,
+        cy2 = tile.cy2,
+        tx1 = tile.tx1,
+        tx2 = tile.tx2,
+        ty1 = tile.ty1,
+        ty2 = tile.ty2
+      )
+    }
+
+  def tilesPython(photos: List[File]) = Future {
+    val json = new ByteArrayOutputStream()
+    val filenames = photos.map(f => tmpFile(f.getName))
+    val cmd = (binary +: "1.414" +: filenames :+ "-") #> json
+    cmd ! match {
+      case 0 => Json.parse(json.toString).as[List[MosaicModels.Tile2]]
+      case _ => throw new Exception
+    }
+  }
+
+  def generateComposition(photos: List[db.Photo]): Future[List[Tile]] =
+    if (photos.isEmpty) Future(Nil)
+    else tilesPython(photos.map(p => bytesToFile(p.data))) map { tiles =>
+      tiles.map(tilesToDB(photos.map(_.export)))
+        .flatten
+    }
+
+  def writeFile(filename: String, content: String) = {
+    val file = new File(filename)
+    val writer = new PrintWriter(file);
+    writer.write(content)
+    writer.close()
+    filename
+  }
+
+  def blankSVG =
+    """<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+    width="297mm"
+    height="210mm"></svg>
+    """
+
+  def joinPDFs(fnames: List[String]): String = {
+    val out = UUID.randomUUID.toString + ".pdf"
+    "pdfunite " + fnames.mkString(" ") + " " + tmpFile(out) ! match {
+      case 0 => {
+        fnames.map(f => new File(f).delete)
+        out
+      }
+      case _ => throw new Exception
+    }
+  }
+
+  def makePDFs(svgs: List[String]) = (svgs.head :: (blankSVG :: svgs.tail)) map {
+    svg => {
+      val f = tmpFile(UUID.randomUUID.toString)
+      writeFile(f + ".svg", svg)
+      "inkscape -d 300 " + f + ".svg -A " + f + ".pdf" ! match {
+        case 0 => {
+          new File(f + ".svg").delete
+          f + ".pdf"
+        }
+        case _ => throw new Exception
+      }
+    }
+  }
+
+  def makeAlbum(svgs: List[String]) = joinPDFs(makePDFs(svgs))
+
+  def makeAlbumFile(svgs: List[String]): File = new File(tmpFile(makeAlbum(svgs)))
+
+  def writeSVG(id: Long, content: String) = {
+    val fname = id.toString + ".svg"
+    writeFile(tmpFile(fname), content)
+    fname
+  }
 }
