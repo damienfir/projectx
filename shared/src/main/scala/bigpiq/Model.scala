@@ -28,7 +28,9 @@ case class Album(id: Long, hash: String, title: String, pages: List[Page]) {
         pages.drop(page + 1).map(p => p.copy(index = p.index + 1)))
 }
 
-case class Page(id: Long, index: Int, tiles: List[Tile]) {
+trait PageElement
+
+case class Page(id: Long, index: Int, tiles: List[Tile]) extends PageElement {
   def getPhotos: List[Photo] = tiles.map(_.photo)
 
   // keep rotations

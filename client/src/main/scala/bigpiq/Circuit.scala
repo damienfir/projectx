@@ -177,7 +177,7 @@ class AlbumHandler[M](modelRW: ModelRW[M, Pot[Album]]) extends ActionHandler(mod
     case GeneratePages(photos) =>
       value.map { album =>
         Effect.action(ClearPages) >>
-          makePages(album.id, makeDensityList(photos, math.ceil(album.density).toInt, 3)) >>
+          makePages(album.id, makeDensityList(photos, math.round(album.density).toInt, 3)) >>
           Effect.action(SaveAlbum)
       }.map(effectOnly(_))
         .getOrElse(noChange)

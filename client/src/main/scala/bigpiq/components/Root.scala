@@ -16,17 +16,11 @@ object Root {
 
     def render(proxy: ModelProxy[RootModel]) = {
       <.div(^.className := "theme-blue",
-
         proxy.connect(identity)(Nav(_)),
-
         proxy.connect(_.album)(p => Album(Album.Props(p))),
-
         proxy.connect(identity)(p => Order(Order.Props(p))),
-
         proxy.connect(identity)(p => Upload(Upload.Props(p))),
-
         proxy.connect(identity)(p => Save(Save.Props(p)))
-
 //        proxy.wrap(_.album)(p => Feedback(Feedback.Props(p)))
       )
     }

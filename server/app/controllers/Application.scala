@@ -64,7 +64,7 @@ class Application @Inject()(val messagesApi: MessagesApi, serverApi: ServerApi) 
 
 class Photos @Inject()(imageService: ImageService, photoDAO: db.PhotoDAO) extends Controller {
 
-  def addToCollection(id: Long) = Action.async(parse.maxLength(1024*1024*1000*1000, parser=parse.multipartFormData)) { request =>
+  def addToCollection(id: Long) = Action.async(parse.maxLength(50*1024*1024*1000*1000, parser=parse.multipartFormData)) { request =>
     request.body match {
       case Left(_) => Future(EntityTooLarge)
       case Right(body) =>

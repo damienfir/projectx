@@ -23,11 +23,9 @@ import scala.sys.process._
 
 
 class ImageService @Inject()() {
-  def tmp(s: String) = s"/tmp/$s"
-
   val binary = Play.current.configuration.getString("px.binary").get
-
-  def tmpFile(name: String) = Play.current.configuration.getString("px.dir_photos").get + s"/$name"
+  def tmpFolder = Play.current.configuration.getString("px.dir_photos").get
+  def tmpFile(name: String) = tmpFolder + s"/$name"
 
   def hashFromContent(data: Array[Byte]): String = {
     var digest = MessageDigest.getInstance("SHA-1")
@@ -74,12 +72,14 @@ class ImageService @Inject()() {
     }
   }
 
-  def bytesToFile(bytes: Array[Byte]): File = {
-    val fname = tmp(hashFromContent(bytes))
+  def bytesToFile(bytes: Array[Byte], folder: String): File = {
+    val fname = s"$folder/${hashFromContent(bytes)}"
     val f = Paths.get(fname)
     Files.write(f, bytes)
     new File(fname)
   }
+
+  def bytesToFile(bytes: Array[Byte]): File = bytesToFile(bytes, tmpFolder)
 
   def save(uploaded: TemporaryFile): (String, Array[Byte]) = {
     val data = FileUtils.readFileToByteArray(uploaded.file)
@@ -105,7 +105,7 @@ class ImageService @Inject()() {
 
   def tilesPython(photos: List[File]) = Future {
     val json = new ByteArrayOutputStream()
-    val filenames = photos.map(f => tmpFile(f.getName))
+    val filenames = photos.map(_.getAbsolutePath)
     val cmd = (binary +: "1.414" +: filenames :+ "-") #> json
     cmd ! match {
       case 0 => Json.parse(json.toString).as[List[MosaicModels.Tile2]]
@@ -115,7 +115,7 @@ class ImageService @Inject()() {
 
   def generateComposition(photos: List[db.Photo]): Future[List[Tile]] =
     if (photos.isEmpty) Future(Nil)
-    else tilesPython(photos.map(p => bytesToFile(p.data))) map { tiles =>
+    else tilesPython(photos.map(p => bytesToFile(p.data, tmpFolder))) map { tiles =>
       tiles.map(tilesToDB(photos.map(_.export)))
         .flatten
     }

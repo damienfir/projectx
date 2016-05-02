@@ -17,6 +17,12 @@ import org.scalajs.dom.document
 
 case class Selected(page: Int, index: Int)
 
+case class BlankPage() extends PageElement
+
+case class BacksidePage() extends PageElement
+
+case class CoverPage() extends PageElement
+
 case class EdgeParams(x_tl: List[Int], y_tl: List[Int], x_br: List[Int], y_br: List[Int])
 
 object Album {
@@ -35,11 +41,9 @@ object Album {
     val imageDrag = new UI.Drag()
     val edgeDrag = new UI.Drag()
 
-    val dataToggle = "data-toggle".reactAttr
-    val dataTarget = "data-target".reactAttr
-
-    val blankPage = Page(0, -1, Nil)
-    val coverPage = Page(0, 0, Nil)
+    val blankPage = BlankPage()
+    val backsidePage = BacksidePage()
+    val coverPage = CoverPage()
 
     def cancelSelected = $.modState(s => s.copy(editing = None))
 
@@ -117,8 +121,8 @@ object Album {
 
     def onChangeTitle(ev: ReactEventI) = $.props flatMap (p => p.proxy.dispatch(UpdateTitle(ev.target.value)))
 
-    def toSpreads(pages: List[Page]): List[List[Page]] = {
-      val pages2: List[Page] = pages match {
+    def toSpreads(pages: List[Page]): List[List[PageElement]] = {
+      val pages2 = pages match {
         case Nil => List(coverPage)
         case head :: tail => head +: blankPage +: tail :+ blankPage
       }
@@ -159,8 +163,8 @@ object Album {
       }
     }
 
-    def buttons(row: Int)(t: (Page, Int)) = t match {
-      case (page, col) => {
+    def buttons(row: Int)(t: (PageElement, Int)) = t match {
+      case (page: Page, col) => {
         val p = row * 2 + col
         val pull = if ((p % 2) == 0) "pull-left" else "pull-right"
 
@@ -208,13 +212,13 @@ object Album {
         )
       )
 
-    def title(collection: Album) =
+    def title(t: String) =
       <.input(^.cls := "cover-title", ^.id := "album-title",
         ^.onBlur ==> onChangeTitle,
         ^.`type` := "text",
         ^.placeholder := "Album title",
         ^.maxLength := 50,
-        ^.defaultValue := collection.title,
+        ^.defaultValue := t,
         ^.autoComplete := false
       )
 
@@ -245,14 +249,14 @@ object Album {
         .map(drawNode(page.index))
     }
 
-    def addPhotosStart() =
+    def photoAddStart =
       <.button(^.cls := "btn btn-info btn-lg btn-step center shadow",
         ^.id := "create-btn",
         UI.icon("cloud-upload fa-3x"), "Upload photos",
         ^.onClick --> Callback(Upload.show)
       )
 
-    def addPhotosEnd(col: Album) =
+    def photosAddEnd =
       <.button(^.cls := "btn btn-primary center", ^.id := "addmore-btn",
         UI.icon("cloud-upload"), "Upload more photos",
         ^.onClick --> Callback(Upload.show)
@@ -260,27 +264,27 @@ object Album {
 
     def toolbar(page: Page, selected: Selected) = {
 
-      val removeBtn =
+      def removeBtn =
         <.button(^.cls := "btn btn-info btn-lg", ^.id := "remove-btn",
           ^.onClick --> ($.props.flatMap(_.proxy.dispatch(RemoveTile(selected))) >> cancelSelected),
           UI.icon("trash-o"))
 
-      val newPageBtn =
+      def newPageBtn =
         <.button(^.cls := "btn btn-info btn-lg",
           ^.onClick --> ($.props.flatMap(_.proxy.dispatch(AddToNextPage(selected))) >> cancelSelected),
           UI.icon("plus"))
 
-      val rotateBtn =
+      def rotateBtn =
         <.button(^.cls := "btn btn-info btn-lg", ^.id := "rotate-btn",
           ^.onClick --> rotateSelected,
           UI.icon("rotate-right"))
 
-      val addToCoverBtn =
+      def addToCoverBtn =
         <.button(^.cls := "btn btn-info btn-lg", ^.id := "add-cover-btn",
           ^.onClick --> ($.props.flatMap(_.proxy.dispatch(AddToCover(selected))) >> cancelSelected),
           UI.icon("book"))
 
-      val cancelBtn =
+      def cancelBtn =
         <.button(^.cls := "btn btn-info btn-lg", ^.id := "cancel-btn",
           ^.onClick --> cancelSelected,
           UI.icon("times"))
@@ -300,55 +304,65 @@ object Album {
         <.h2(^.cls := "center", if (page.index == 0) "Copy here" else "Move here")
       )
 
-    def render(p: Props, s: State) = <.div(^.cls := "container-fluid album",
-      toSpreads(s.pages).zipWithIndex.map({ case (spread, row) => {
-        val isCover = spread.length == 1 && spread.head.index == 0
-        < div(^.cls := "row spread " + (if (isCover) "spread-cover" else ""),
+    def singlePage(s: State, row: Int, t: String)(p: (PageElement, Int)) = {
 
-          < a(^.cls := "spread-anchor",
-            ^.name := "spread" + row
-            ),
+      def cls(row: Int, col: Int) =
+        "box-mosaic " + (if ((row * 2 + col) % 2 == 0) "pull-left" else "pull-right")
 
-          if (!isCover) arrow("left", row - 1) else "",
+      p match {
 
-          < div(^.cls := "spread-paper shadow clearfix " +
-            (if (isCover) "col-xs-6 col-xs-offset-3" else "col-xs-10"),
-            spread.zipWithIndex.map({ case (page, col) => {
-              val cls = "box-mosaic " + (if ((row * 2 + col) % 2 == 0) "pull-left" else "pull-right")
-              if (col == 0 && row == 1)
-                < div(^.cls := cls, backside())
-              else
-                < div(^.cls := cls,
-                  page.tiles.zipWithIndex.map(tile(page.index, s.editing)),
-                  if (page.index == 0) p.proxy().render(col => title(col)) else "",
-                  nodes(page),
-                  if (page.tiles.isEmpty) {
-                    if (page.index == 0)
-                      p.proxy().renderEmpty(addPhotosStart())
-                    else
-                      p.proxy().render(addPhotosEnd)
-                  } else "",
-                  s.editing.map({
-                    case Left(_) => <.div()
-                    case Right(e) =>
-                      if (e.page == page.index) toolbar(page, e)
-                      else hover(page)
-                  }).getOrElse("")
-                  )
-            }
-            })
-            ),
+        case (_: BacksidePage, col) => <.div(^.cls := cls(row, col), backside())
 
-          if (!isCover) arrow("right", row + 1) else "",
+        case (_: BlankPage, col) => <.div(^.cls := cls(row, col), photosAddEnd)
 
-          < div(^.cls := "spread-btn clearfix " +
-            (if (isCover) "col-xs-6 col-xs-offset-3" else "col-xs-10 col-xs-offset-1"),
-            spread.zipWithIndex.map(buttons(row))
-            )
+        case (page: Page, col) =>
+          <.div(^.cls := cls(row, col),
+            page.tiles.zipWithIndex.map(tile(page.index, s.editing)),
+            if (page.index == 0) title(t) else "",
+            nodes(page),
+            s.editing.map({
+              case Left(_) => <.div()
+              case Right(e) =>
+                if (e.page == page.index) toolbar(page, e)
+                else hover(page)
+            }).getOrElse("")
           )
       }
-      })
-    )
+    }
+
+    def render(p: Props, s: State) = s.pages match {
+
+      case Nil => photoAddStart
+
+      case pages =>
+        <.div(^.cls := "container-fluid album",
+
+          toSpreads(pages).zipWithIndex.map({ case (spread, row) =>
+
+            val title = p.proxy().map(_.title).getOrElse("")
+            val isCover = row == 0
+
+            <.div(^.cls := "row spread " + (if (isCover) "spread-cover" else ""),
+
+              <.a(^.cls := "spread-anchor",
+                ^.name := "spread" + row),
+
+              if (!isCover) arrow("left", row - 1) else "",
+
+              <.div(^.cls := "spread-paper shadow clearfix " +
+                (if (isCover) "col-xs-6 col-xs-offset-3" else "col-xs-10"),
+                spread.zipWithIndex.map(singlePage(s, row, title)),
+
+                if (!isCover) arrow("right", row + 1) else "",
+
+                <.div(^.cls := "spread-btn clearfix " +
+                  (if (isCover) "col-xs-6 col-xs-offset-3" else "col-xs-10 col-xs-offset-1"),
+                  spread.zipWithIndex.map(buttons(row)))
+              )
+            )
+          })
+        )
+    }
 
     def willMount(props: Props, backend: Backend) = {
       dom.document.onmousemove = (ev: MouseEvent) =>
