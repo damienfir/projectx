@@ -146,6 +146,18 @@ html, body {
 .navbar .btn .fa {
   margin-right: 7px;
 }
+
+.pending {
+  color: #000;
+  opacity: 0.3;
+}
+
+.pending-tile {
+  color: #000;
+  background: #ddd;
+  opacity: 0.3;
+}
+
 /* .btn-xs .fa { */
 /*   margin-right: 3px; */
 /* } */

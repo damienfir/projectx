@@ -14,25 +14,29 @@ import japgolly.scalajs.react.vdom.prefix_<^._
 import japgolly.scalajs.react._
 import org.scalajs.dom.document
 
-
 case class Selected(page: Int, index: Int)
-
-case class BlankPage() extends PageElement
-
-case class BacksidePage() extends PageElement
-
-case class CoverPage() extends PageElement
 
 case class EdgeParams(x_tl: List[Int], y_tl: List[Int], x_br: List[Int], y_br: List[Int])
 
 object Album {
 
-  case class Props(proxy: ModelProxy[Pot[Album]])
+  case class BlankPage() extends PageElement
+
+  case class BacksidePage() extends PageElement
+
+  case class CoverPage() extends PageElement
+
+  case class Props(proxy: ModelProxy[Pot[AlbumPot]])
 
   case class State(
-                    pages: List[Page] = Nil,
+                    pages: List[Pot[Page]] = Nil,
                     editing: Option[Either[Selected, Selected]] = None,
-                    edge: Option[EdgeParams] = None)
+                    edge: Option[EdgeParams] = None) {
+
+    def allPages: List[Page] = pages.flatten
+
+    def update(f: List[Page] => List[Page]) = this.copy(pages = f(allPages).map(Ready(_)))
+  }
 
   case class Node(x: Double, y: Double)
 
@@ -53,7 +57,7 @@ object Album {
         case Right(selected) => (selected match {
           case Selected(to.page, to.index) => Callback(None)
           case from@Selected(to.page, _) => {
-            val newPages = AlbumUtil.swapTiles(s.pages, from, to)
+            val newPages = AlbumUtil.swapTiles(s.allPages, from, to)
             updateAlbum(newPages)
           }
           case from => to match {
@@ -73,7 +77,7 @@ object Album {
         case Some(Right(editing)) => Callback(None)
         case selected =>
           imageDrag.mouseMove(UI.MouseMove(ev)).map(move =>
-            $.modState(s => s.copy(pages = AlbumUtil.move(s.pages, move)))
+            $.modState(s => s.update(AlbumUtil.move(_, move)))
           ).getOrElse(nodeMouseMove(ev)) >>
             selected.map(_ => cancelSelected).getOrElse(Callback(None))
       })
@@ -89,19 +93,19 @@ object Album {
       val coordEvent = UI.MouseDown.edgeClick(page, ev)
       Callback(edgeDrag.mouseDown(coordEvent)) >>
         $.modState(s =>
-          s.copy(edge = Some(AlbumUtil.getParams(s.pages, coordEvent)))
+          s.copy(edge = Some(AlbumUtil.getParams(s.allPages, coordEvent)))
         )
     }
 
     def rotateSelected = $.modState(s => s.editing match {
-      case Some(Right(selected)) => s.copy(pages = AlbumUtil.rotate(s.pages, selected))
+      case Some(Right(selected)) => s.update(pages => AlbumUtil.rotate(pages, selected))
       case _ => s
     })
 
     def nodeMouseMove(ev: ReactMouseEvent) =
       edgeDrag.mouseMove(UI.MouseMove(ev)) map { move =>
-        $.modState(s => s.copy(pages =
-          s.edge.map(edge => AlbumUtil.edge(s.pages, edge, move)).getOrElse(s.pages)))
+        $.modState(s => s.update(pages =>
+          s.edge.map(edge => AlbumUtil.edge(pages, edge, move)).getOrElse(pages)))
       } getOrElse Callback(None)
 
     def nodeMouseUp(ev: ReactMouseEvent) = Callback(edgeDrag.mouseUp) >>
@@ -114,17 +118,17 @@ object Album {
             p.proxy.dispatch(SaveAlbum)))
 
     def updateAlbum(newPages: List[Page]): Callback =
-      $.modState(s => s.copy(pages = newPages)) >>
+      $.modState(s => s.update(_ => newPages)) >>
         $.props.flatMap(p =>
-          p.proxy.dispatch(UpdatePages(newPages)) >>
+          p.proxy.dispatch(UpdatePages(newPages.map(Ready(_)))) >>
             p.proxy.dispatch(SaveAlbum))
 
     def onChangeTitle(ev: ReactEventI) = $.props flatMap (p => p.proxy.dispatch(UpdateTitle(ev.target.value)))
 
-    def toSpreads(pages: List[Page]): List[List[PageElement]] = {
+    def toSpreads(pages: List[Pot[Page]]): List[List[Pot[PageElement]]] = {
       val pages2 = pages match {
-        case Nil => List(coverPage)
-        case head :: tail => head +: blankPage +: tail :+ blankPage
+        case Nil => List(Ready(coverPage))
+        case head :: tail => head +: Ready(backsidePage) +: tail :+ Ready(blankPage)
       }
       List(pages2.head) +: pages2.tail.grouped(2).toList
     }
@@ -142,6 +146,7 @@ object Album {
           case Right(Selected(_, _)) => "tile-unselected"
           case Left(_) => ""
         }) getOrElse ""
+
         < div(
           ^.cls := "ui-tile " + selClass,
           ^.height := pct(tile.ty2 - tile.ty1),
@@ -151,6 +156,7 @@ object Album {
           ^.onMouseDown ==> imageMouseDown(page, index),
           ^.onMouseMove ==> imageMouseMove,
           ^.onMouseUp ==> ((ev: ReactMouseEvent) => imageMouseUp(Some(UI.MouseDown(page, index, ev)))),
+          <.div(^.cls := "pending-tile full", UI.icon("camera fa-2x center")),
           < img(
             ^.src := "/photos/" + tile.photo.id + "/full/600,/" + tile.rot + "/default.jpg",
             ^.draggable := false,
@@ -163,8 +169,8 @@ object Album {
       }
     }
 
-    def buttons(row: Int)(t: (PageElement, Int)) = t match {
-      case (page: Page, col) => {
+    def buttons(row: Int)(t: (Pot[PageElement], Int)) = t match {
+      case (Ready(page: Page), col) => {
         val p = row * 2 + col
         val pull = if ((p % 2) == 0) "pull-left" else "pull-right"
 
@@ -189,17 +195,15 @@ object Album {
           ^.cls := "btn btn-primary",
           ^.onClick --> $.props.flatMap(p => p.proxy.dispatch(MovePageRight(page))))
 
+        val btnGroup = <.div(^.cls := "btn-group", btnLeft, btnRight)
+
         <.div(^.cls := pull,
           <.span(^.cls := "page", if (p == 0) "Cover Page" else s"Page ${p - 1}"),
-          if (page.tiles.nonEmpty) btnShuffle
-          else "",
-
-          if (page.tiles.nonEmpty) {
-            <.div(^.cls := "btn-group", btnLeft, btnRight)
-          }
-          else ""
+          page.tiles.nonEmpty ?= btnShuffle,
+          page.tiles.nonEmpty ?= btnGroup
         )
       }
+      case (_, _) => EmptyTag
     }
 
     def arrow(direction: String, row: Int) =
@@ -291,9 +295,9 @@ object Album {
 
       <.div(^.cls := "btn-group toolbar",
         removeBtn,
-        if (page.tiles.length > 1) newPageBtn else "",
+        page.tiles.length > 1 ?= newPageBtn,
         rotateBtn,
-        if (page.index != 0) addToCoverBtn else "",
+        page.index != 0 ?= addToCoverBtn,
         cancelBtn
       )
     }
@@ -304,29 +308,44 @@ object Album {
         <.h2(^.cls := "center", if (page.index == 0) "Copy here" else "Move here")
       )
 
-    def singlePage(s: State, row: Int, t: String)(p: (PageElement, Int)) = {
+    def pending =
+      <.div("page-hover",
+        UI.icon("camera fa-3x center pending"))
+
+
+    def singlePage(s: State, row: Int, t: String)(p: (Pot[PageElement], Int)) = {
 
       def cls(row: Int, col: Int) =
         "box-mosaic " + (if ((row * 2 + col) % 2 == 0) "pull-left" else "pull-right")
 
       p match {
 
-        case (_: BacksidePage, col) => <.div(^.cls := cls(row, col), backside())
+        case (_: Pending, col) =>
+          <.div(^.cls := cls(row, col), pending)
 
-        case (_: BlankPage, col) => <.div(^.cls := cls(row, col), photosAddEnd)
+        case (page: Pot[PageElement], col) => page.map {
+          case _: BacksidePage =>
+            <.div(^.cls := cls(row, col), backside())
 
-        case (page: Page, col) =>
-          <.div(^.cls := cls(row, col),
-            page.tiles.zipWithIndex.map(tile(page.index, s.editing)),
-            if (page.index == 0) title(t) else "",
-            nodes(page),
-            s.editing.map({
-              case Left(_) => <.div()
-              case Right(e) =>
-                if (e.page == page.index) toolbar(page, e)
-                else hover(page)
-            }).getOrElse("")
-          )
+          case _: BlankPage =>
+            <.div(^.cls := cls(row, col), photosAddEnd)
+
+          case p: Page =>
+            <.div(^.cls := cls(row, col),
+              p.tiles.zipWithIndex.map(tile(p.index, s.editing)),
+              (p.index == 0) ?= title(t),
+              nodes(p),
+              s.editing.map({
+                case Left(_) => EmptyTag
+                case Right(e) =>
+                  if (e.page == p.index) toolbar(p, e)
+                  else hover(p)
+              }),
+              page.isPending ?= pending)
+
+        } getOrElse EmptyTag
+
+        case _ => EmptyTag
       }
     }
 
@@ -342,23 +361,30 @@ object Album {
             val title = p.proxy().map(_.title).getOrElse("")
             val isCover = row == 0
 
-            <.div(^.cls := "row spread " + (if (isCover) "spread-cover" else ""),
+            <.div(
+              ^.classSet1("row spread", "spread-cover" -> isCover),
 
-              <.a(^.cls := "spread-anchor",
+              <.a(
+                ^.cls := "spread-anchor",
                 ^.name := "spread" + row),
 
-              if (!isCover) arrow("left", row - 1) else "",
+              !isCover ?= arrow("left", row - 1),
 
-              <.div(^.cls := "spread-paper shadow clearfix " +
-                (if (isCover) "col-xs-6 col-xs-offset-3" else "col-xs-10"),
-                spread.zipWithIndex.map(singlePage(s, row, title)),
+              <.div(
+                ^.classSet1("spread-paper shadow clearfix",
+                  "col-xs-6 col-xs-offset-3" -> isCover,
+                  "col-xs-10" -> !isCover),
+                spread.zipWithIndex.map(singlePage(s, row, title))),
 
-                if (!isCover) arrow("right", row + 1) else "",
+              !isCover ?= arrow("right", row + 1),
 
-                <.div(^.cls := "spread-btn clearfix " +
-                  (if (isCover) "col-xs-6 col-xs-offset-3" else "col-xs-10 col-xs-offset-1"),
-                  spread.zipWithIndex.map(buttons(row)))
+              <.div(
+                ^.classSet1("spread-btn clearfix",
+                  "col-xs-6 col-xs-offset-3" -> isCover,
+                  "col-xs-10 col-xs-offset-1" -> !isCover),
+                spread.zipWithIndex.map(buttons(row))
               )
+
             )
           })
         )

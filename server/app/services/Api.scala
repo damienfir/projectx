@@ -75,7 +75,7 @@ class ServerApi @Inject()(usersDAO: db.UsersDAO, collectionDAO: db.CollectionDAO
         }
 
         Future.sequence(photoFiles) map { files =>
-          val svgFiles = album.filter.pages.map(p =>
+          val svgFiles = album.pages.map(p =>
             views.html.page(p, if (p.index == 0) Some(album.title) else None, files.map({ case (id, f) => (id, f.getName) }).toMap, dim, ratio).toString)
 
           imageService.makeAlbumFile(svgFiles)

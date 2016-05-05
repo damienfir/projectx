@@ -37,13 +37,14 @@ case class RemoveLastPage()
 case class RequestUploadAfter(index: Int)
 case class SaveAlbum()
 case class ShufflePage(index: Int)
-case class UpdatePages(pages: List[Page])
-case class UpdateAlbum(album: Pot[Album])
+case class UpdatePage(page: Pot[Page])
+case class UpdatePages(pages: List[Pot[Page]])
+case class UpdateAlbum(album: Pot[AlbumPot])
 case class UpdateCollectionThenUpload(album: Pot[Album], files: List[File])
 case class UpdateTitle(title: String)
 case class UpdateUser(user: Pot[User])
 case class UpdateUserThenUpload(user: Pot[User], files: List[File])
 case class UploadFiles(files: List[File])
 
-object UpdatePages { def apply(page: Page) = new UpdatePages(List(page)) }
-object UpdateUser { def apply(u: User) = new UpdateUser(Ready(u)) }
+object UpdateUser { def apply(u: User): UpdateUser = UpdateUser(Ready(u)) }
+object UpdatePage { def apply(p: Page): UpdatePage = UpdatePage(Ready(p)) }
