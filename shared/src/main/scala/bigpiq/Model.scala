@@ -16,6 +16,10 @@ case class Page(id: Long, index: Int, tiles: List[Tile]) extends PageElement {
       tiles.find(t => t.photo.id == newTile.photo.id)
         .map(t => newTile.copy(rot = t.rot)).getOrElse(newTile)
     ))
+
+  def photosExcept(id: Long): List[Photo] =
+    if (index == 0) getPhotos
+    else getPhotos.filter(_.id != id)
 }
 
 case class Tile(photo: Photo, rot: Int,

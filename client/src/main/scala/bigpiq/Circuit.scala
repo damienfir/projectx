@@ -114,7 +114,6 @@ class AlbumHandler[M](modelRW: ModelRW[M, Pot[AlbumPot]]) extends ActionHandler(
       .map({ case (pagePhotos, i) => Effect.action(MakePages(albumID, pagePhotos, i)) })
       .foldLeft(Effect(Future(None)) >> Effect(Future(None)))((a, b) => a >> b)
 
-
   override def handle = {
 
     case AddToCover(selected) =>
@@ -160,7 +159,7 @@ class AlbumHandler[M](modelRW: ModelRW[M, Pot[AlbumPot]]) extends ActionHandler(
             // moving to a new page
             case None =>
               effectOnly {
-                Effect(AjaxClient[Api].shufflePage(fromPage, fromPhotos.filter(_.id != photoID)).call()
+                Effect(AjaxClient[Api].shufflePage(fromPage, fromPage.photosExcept(photoID)).call()
                   .map(UpdatePage(_))) +
                   Effect(AjaxClient[Api].generatePage(album.get.id, fromPhotos.filter(_.id == photoID), album.get.pages.length).call()
                     .map(UpdatePage(_))) >>
@@ -170,7 +169,7 @@ class AlbumHandler[M](modelRW: ModelRW[M, Pot[AlbumPot]]) extends ActionHandler(
             // both pages have tiles
             case Some(toPage) =>
               effectOnly {
-                Effect(AjaxClient[Api].shufflePage(fromPage, fromPhotos.filter(_.id != photoID)).call()
+                Effect(AjaxClient[Api].shufflePage(fromPage, fromPage.photosExcept(photoID)).call()
                   .map(UpdatePage(_))) +
                   Effect(AjaxClient[Api].shufflePage(toPage, toPage.getPhotos ++ fromPhotos.filter(_.id == photoID)).call().map(UpdatePage(_))) >>
                   Effect.action(SaveAlbum)
