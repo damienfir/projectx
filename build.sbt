@@ -4,6 +4,7 @@ import sbt.Project.projectToRef
 lazy val server = (project in file("server"))
   .settings(
     name := "server",
+    version := Settings.version,
     scalaVersion := Settings.versions.scala,
     routesGenerator := InjectedRoutesGenerator,
     scalaJSProjects := clients,
@@ -17,6 +18,7 @@ lazy val server = (project in file("server"))
 lazy val client: Project = (project in file("client"))
   .settings(
     name := "client",
+    version := Settings.version,
     scalaVersion := Settings.versions.scala,
     jsDependencies ++= Settings.jsDependencies.value,
     skip in packageJSDependencies := false,
@@ -25,8 +27,9 @@ lazy val client: Project = (project in file("client"))
     // workbenchSettings,
     // bootSnippet := "bigpiq.client.App().main();",
     // refreshBrowsers <<= refreshBrowsers.triggeredBy(fastOptJS in Compile),
-    libraryDependencies ++= Settings.scalajsDependencies.value
-  )
+    libraryDependencies ++= Settings.scalajsDependencies.value,
+    testFrameworks += new TestFramework("utest.runner.Framework")
+)
   .enablePlugins(ScalaJSPlugin, ScalaJSPlay)
   .dependsOn(sharedJS)
 

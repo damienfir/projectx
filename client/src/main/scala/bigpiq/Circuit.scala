@@ -216,14 +216,14 @@ class AlbumHandler[M](modelRW: ModelRW[M, Pot[AlbumPot]]) extends ActionHandler(
 
     case MovePageLeft(page) =>
       value map { album =>
-        val (left, right) = album.filter.pages.splitAt(album.pages.indexOf(page) + 1)
+        val (left, right) = album.filter.pages.splitAt(album.pages.indexWhere(_.map(_ == page).getOrElse(false)) + 1)
         val pages = left.dropRight(2) ++ left.takeRight(2).reverse ++ right
         updated(value.map(album => album.copy(pages = pages).adjustIndex), Effect.action(SaveAlbum))
       } getOrElse noChange
 
     case MovePageRight(page) =>
       value map { album =>
-        val (left, right) = album.filter.pages.splitAt(album.pages.indexOf(page))
+        val (left, right) = album.filter.pages.splitAt(album.pages.indexWhere(_.map(_ == page).getOrElse(false)))
         val pages = left ++ right.take(2).reverse ++ right.drop(2)
         updated(value.map(album => album.copy(pages = pages).adjustIndex), Effect.action(SaveAlbum))
       } getOrElse noChange
@@ -421,9 +421,9 @@ class LoggingProcessor[M <: AnyRef] extends ActionProcessor[M] {
 }
 
 object AppCircuit extends Circuit[RootModel] with ReactConnector[RootModel] {
-  override protected var model: RootModel = RootModel()
+  def initialModel: RootModel = RootModel()
 
-  override protected def actionHandler = combineHandlers(
+  override protected def actionHandler = composeHandlers(
     new MainHandler(zoomRW(identity)((m, v) => v)),
     new UploadHandler(zoomRW(_.upload)((m, v) => m.copy(upload = v))),
     new UserHandler(zoomRW(_.user)((m, v) => m.copy(user = v))),

@@ -170,40 +170,44 @@ object Album {
     }
 
     def buttons(row: Int)(t: (Pot[PageElement], Int)) = t match {
-      case (Ready(page: Page), col) => {
-        val p = row * 2 + col
-        val pull = if ((p % 2) == 0) "pull-left" else "pull-right"
+      case (pagePot: Pot[PageElement], col) => pagePot map {
+        case page: Page =>
+          val p = row * 2 + col
+          val pull = if ((p % 2) == 0) "pull-left" else "pull-right"
 
-        val btnShuffle = <.button(^.cls := "btn btn-primary shuffle-btn",
-          ^.onClick --> $.props.flatMap(_.proxy.dispatch(ShufflePage(page.index))),
-          ^.disabled := false,
-          UI.icon("refresh"),
-          " Shuffle")
+          val btnShuffle = <.button(^.cls := "btn btn-primary shuffle-btn",
+            ^.onClick --> $.props.flatMap(_.proxy.dispatch(ShufflePage(page.index))),
+            ^.disabled := pagePot.isPending,
+            UI.icon("refresh"),
+            " Shuffle")
 
-        val btnAdd = <.button(
-          "Add photos after",
-          ^.cls := "btn btn-primary",
-          ^.onClick --> ($.props.flatMap(p => p.proxy.dispatch(RequestUploadAfter(page.index))) >> Callback(Upload.show)))
+          //        val btnAdd = <.button(
+          //          "Add photos after",
+          //          ^.cls := "btn btn-primary",
+          //          ^.onClick --> ($.props.flatMap(p => p.proxy.dispatch(RequestUploadAfter(page.index))) >> Callback(Upload.show)))
 
-        val btnLeft = <.button(
-          UI.icon("chevron-left"), "Backwards",
-          ^.cls := "btn btn-primary",
-          ^.onClick --> $.props.flatMap(p => p.proxy.dispatch(MovePageLeft(page))))
+          val btnLeft = <.button(
+            UI.icon("chevron-left"), "Backwards",
+            ^.cls := "btn btn-primary",
+            ^.disabled := pagePot.isPending,
+            ^.onClick --> $.props.flatMap(_.proxy.dispatch(MovePageLeft(page))))
 
-        val btnRight = <.button(
-          "Forwards ", UI.icon("chevron-right"),
-          ^.cls := "btn btn-primary",
-          ^.onClick --> $.props.flatMap(p => p.proxy.dispatch(MovePageRight(page))))
+          val btnRight = <.button(
+            "Forwards ", UI.icon("chevron-right"),
+            ^.cls := "btn btn-primary",
+            ^.onClick --> $.props.flatMap(_.proxy.dispatch(MovePageRight(page))))
 
-        val btnGroup = <.div(^.cls := "btn-group", btnLeft, btnRight)
+          val btnGroup = <.div(^.cls := "btn-group", btnLeft, btnRight)
 
-        <.div(^.cls := pull,
-          <.span(^.cls := "page", if (p == 0) "Cover Page" else s"Page ${p - 1}"),
-          page.tiles.nonEmpty ?= btnShuffle,
-          page.tiles.nonEmpty ?= btnGroup
-        )
-      }
-      case (_, _) => EmptyTag
+          <.div(^.cls := pull,
+            <.span(^.cls := "page", if (p == 0) "Cover Page" else s"Page ${p - 1}"),
+            page.tiles.length > 1 ?= btnShuffle,
+            btnGroup
+          )
+
+        case _ => EmptyTag
+
+      } getOrElse EmptyTag
     }
 
     def arrow(direction: String, row: Int) =

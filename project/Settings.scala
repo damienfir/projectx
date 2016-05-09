@@ -29,7 +29,7 @@ object Settings {
     val scalaCSS = "0.3.1"
     val autowire = "0.2.5"
     val upickle = "0.3.6"
-    val diode = "0.3.0"
+    val diode = "0.5.1"
     val uTest = "0.3.1"
 
     val react = "0.14.3"
@@ -74,7 +74,8 @@ object Settings {
     "org.scala-js" %%% "scalajs-dom" % versions.scalaDom,
     "com.lihaoyi" %%% "upickle" % versions.upickle,
     "com.lihaoyi" %%% "autowire" % versions.autowire,
-    "be.doeraene" %%% "scalajs-jquery" % versions.scalajsJquery
+    "be.doeraene" %%% "scalajs-jquery" % versions.scalajsJquery,
+    "com.lihaoyi" %%% "utest" % versions.uTest % "test"
   ))
 
   /** Dependencies for external JS libs that are bundled into a single .js file according to dependency order */
