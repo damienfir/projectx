@@ -324,7 +324,7 @@ object Album {
 
       p match {
 
-        case (_: Pending, col) =>
+        case (_: Pending | Empty, col) =>
           <.div(^.cls := cls(row, col), pending)
 
         case (page: Pot[PageElement], col) => page.map {

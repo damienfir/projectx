@@ -55,7 +55,7 @@ case class AlbumPot(id: Long, hash: String, title: String, pages: List[Pot[Page]
         case (emptys, tail) => tail ++ emptys.tail :+ newPage
       }
       case (matching :: tail, rest) => rest :+ newPage
-    })
+    }).sort
 
   def invalidate(index: Int) =
     this.copy(pages = pages.map(page => page.flatMap {
@@ -111,7 +111,7 @@ class AlbumHandler[M](modelRW: ModelRW[M, Pot[AlbumPot]]) extends ActionHandler(
 
   def makePages(albumID: Long, list: List[List[Photo]]): EffectSeq =
     list.zipWithIndex
-      .map({ case (pagePhotos, i) => Effect.action(MakePages(albumID, pagePhotos, i)) })
+      .map({ case (pagePhotos, i) => Effect.action(MakePage(albumID, pagePhotos, i)) })
       .foldLeft(Effect(Future(None)) >> Effect(Future(None)))((a, b) => a >> b)
 
   override def handle = {
@@ -201,7 +201,7 @@ class AlbumHandler[M](modelRW: ModelRW[M, Pot[AlbumPot]]) extends ActionHandler(
 
     case UpdatePage(newPage) =>
       updated(value.map { album =>
-        album.update(newPage).filter
+        album.update(newPage)
       })
 
     case UpdatePages(newPages) =>
@@ -257,7 +257,7 @@ class AlbumHandler[M](modelRW: ModelRW[M, Pot[AlbumPot]]) extends ActionHandler(
         .map(effectOnly)
         .getOrElse(noChange)
 
-    case MakePages(albumID, photos, index) =>
+    case MakePage(albumID, photos, index) =>
       updated(
         value.map(album => album.copy(pages = album.pages :+ Pot.empty.pending())),
         Effect(AjaxClient[Api].generatePage(albumID, photos, index).call()
@@ -336,7 +336,7 @@ class UploadHandler[M](modelRW: ModelRW[M, Option[UploadState]]) extends ActionH
           val effect =
             Effect {
               Future.sequence(fileSet.map(f => Helper.uploadFile(f, albumID)))
-                .map(photos => MakePages(albumID, photos, index))
+                .map(photos => MakePage(albumID, photos, index))
             } >>
               Effect.action(AddRemainingPhotos(albumID))
 
@@ -391,7 +391,7 @@ class MainHandler[M](modelRW: ModelRW[M, RootModel]) extends ActionHandler(model
 
     case SaveAlbum =>
       value.album
-        .map(_.adjustIndex)
+        .map(_.adjustIndex.filter)
         .filterNot(_.pages.isEmpty)
         .map { album =>
           updated(value.copy(album = Ready(album)),
@@ -400,14 +400,15 @@ class MainHandler[M](modelRW: ModelRW[M, RootModel]) extends ActionHandler(model
         .getOrElse(noChange)
 
     case EmailAndSave(email) =>
-      value.user flatMap { user: User =>
-        value.album map { album: AlbumPot =>
-          effectOnly {
-            Effect.action(SaveAlbum) >>
-              Effect(AjaxClient[Api].sendLink(user.id, email, album.hash).call().map(_ => None))
-          }
-        }
-      } getOrElse noChange
+      effectOnly {
+        Effect.action(SaveAlbum) >>
+          (for {
+            user <- value.user.toOption
+            album <- value.album.toOption
+          } yield {
+            Effect(AjaxClient[Api].sendLink(user.id, email, album.hash).call().map(_ => None))
+          }).getOrElse(Effect(Future(None)))
+      }
   }
 }
 

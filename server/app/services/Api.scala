@@ -35,6 +35,7 @@ class ServerApi @Inject()(usersDAO: db.UsersDAO, collectionDAO: db.CollectionDAO
 
   def saveAlbum(album: Album): Future[Album] =
     if (album.hash.equals(demoID)) Future(album)
+    else if (album.pages.isEmpty) Future(album)
     else collectionDAO.update(album)
 
   def generatePage(albumID: Long, photos: List[Photo], index: Int): Future[Page] =
