@@ -96,11 +96,17 @@ import Tables._
 class UsersDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvider) extends HasDatabaseConfigProvider[JdbcProfile] {
   def one(id: Long) = users.filter(_.id === id)
 
-  def get(id: Long) = db.run(one(id).result).map(_.head).map(_.export)
+  def get(id: Long): Future[shared.User] = db.run(one(id).result).map(_.head).map(_.export)
   def insert = db.run((users returning users) += User()).map(_.export)
   // def list = db.run(users.result)
   // def update(item: User) = db.run(one(item.id.get).update(item).asTry)
   // def delete(id: Long) = dbConfig.db.run(one(id).delete)
+
+  def getFromAlbum(albumID: Long): Future[shared.User] =
+    for {
+      userscols <- db.run(usercollectionrelations.filter(_.collectionID === albumID).result)
+      user <- get(userscols.head._1)
+    } yield user
 }
 
 

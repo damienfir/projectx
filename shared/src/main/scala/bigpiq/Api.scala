@@ -13,7 +13,7 @@ trait Api {
 
   def sendLink(userID: Long, email: String, hash: String): Future[String]
 
-  def getAlbumFromHash(userID: Long, hash: String): Future[Album]
+  def getAlbumFromHash(hash: String): Future[(User,Album)]
 
   def saveAlbum(album: Album): Future[Album]
 

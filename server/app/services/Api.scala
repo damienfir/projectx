@@ -30,8 +30,11 @@ class ServerApi @Inject()(usersDAO: db.UsersDAO, collectionDAO: db.CollectionDAO
   def sendLink(userID: Long, email: String, hash: String): Future[String] =
     emailService.sendLink(email, hash)
 
-  def getAlbumFromHash(userID: Long, hash: String): Future[Album] =
-    collectionDAO.getByHash(userID, hash)
+  def getAlbumFromHash(hash: String): Future[(User, Album)] =
+    for {
+      album <- collectionDAO.getByHash(0, hash)
+      user <- usersDAO.getFromAlbum(album.id)
+    } yield (user, album)
 
   def saveAlbum(album: Album): Future[Album] =
     if (album.hash.equals(demoID)) Future(album)
@@ -68,16 +71,16 @@ class ServerApi @Inject()(usersDAO: db.UsersDAO, collectionDAO: db.CollectionDAO
       photoDAO.allFromCollection(album.id) flatMap { photos =>
         val tiles = album.pages.flatMap(_.tiles)
         val photoFiles = photos.flatMap { photo =>
-          tiles.find(_.photo.id == photo.id).map { tile =>
+          tiles.find(_.photo.id == photo.id.get).map { tile =>
             imageService.convert(photo.data, "full", "full", tile.rot.toString, "default", "jpg") map { bytes =>
-              photo.id.get -> imageService.bytesToFile(bytes)
+              (photo.id.get, imageService.bytesToFile(bytes))
             }
           }
         }
 
         Future.sequence(photoFiles) map { files =>
-          val svgFiles = album.pages.map(p =>
-            views.html.page(p, if (p.index == 0) Some(album.title) else None, files.map({ case (id, f) => (id, f.getName) }).toMap, dim, ratio).toString)
+          val svgFiles = album.sort.pages.map(p =>
+            views.html.page(p, if (p.index == 0) Some(album.title) else None, files.map({ case (id, f) => (id, f.getAbsolutePath) }).toMap, dim, ratio).toString)
 
           imageService.makeAlbumFile(svgFiles)
         }

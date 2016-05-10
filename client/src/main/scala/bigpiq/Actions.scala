@@ -43,6 +43,7 @@ case class UpdateAlbum(album: Pot[AlbumPot])
 case class UpdateCollectionThenUpload(album: Pot[Album], files: List[File])
 case class UpdateTitle(title: String)
 case class UpdateUser(user: Pot[User])
+case class UpdateUserAndAlbum(user: Pot[User], album: Pot[AlbumPot])
 case class UpdateUserThenUpload(user: Pot[User], files: List[File])
 case class UploadFiles(files: List[File])
 

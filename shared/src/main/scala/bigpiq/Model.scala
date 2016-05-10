@@ -3,7 +3,9 @@ package bigpiq.shared
 
 case class User(id: Long, email: String, albums: List[Album])
 
-case class Album(id: Long, hash: String, title: String, pages: List[Page])
+case class Album(id: Long, hash: String, title: String, pages: List[Page]) {
+  def sort = this.copy(pages = pages.sortBy(_.index))
+}
 
 trait PageElement
 

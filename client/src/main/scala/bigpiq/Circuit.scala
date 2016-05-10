@@ -263,7 +263,10 @@ class AlbumHandler[M](modelRW: ModelRW[M, Pot[AlbumPot]]) extends ActionHandler(
 
 class UserHandler[M](modelRW: ModelRW[M, Pot[User]]) extends ActionHandler(modelRW) {
   def handle = {
-    case UpdateUser(user) => updated(user)
+    case UpdateUser(user) => {
+      println(user)
+      updated(user)
+    }
 
     case GetUser(id) =>
       effectOnly {
@@ -372,10 +375,13 @@ class MainHandler[M](modelRW: ModelRW[M, RootModel]) extends ActionHandler(model
           Effect.action(GetFromHash)
       }
 
+    case UpdateUserAndAlbum(user, album) =>
+      effectOnly(Effect.action(UpdateUser(user)) + Effect.action(UpdateAlbum(album)))
+
     case GetAlbum(hash) =>
       effectOnly {
-        Effect(AjaxClient[Api].getAlbumFromHash(value.user.map(_.id).getOrElse(0), hash).call()
-          .map(a => UpdateAlbum(Ready(AlbumPot(a)))))
+        Effect(AjaxClient[Api].getAlbumFromHash(hash).call()
+          .map { case (user, album) => UpdateUserAndAlbum(Ready(user), Ready(AlbumPot(album))) })
       }
 
     case GetFromHash =>
