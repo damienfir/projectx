@@ -12,6 +12,8 @@ import scala.concurrent.Future
 import scala.util.Random
 import autowire._
 import org.scalajs.dom.File
+import scala.concurrent.duration._
+import diode.Implicits.runAfterImpl
 
 
 case class UploadState(filesRemaining: List[File] = Nil, index: Int = 0)
@@ -38,18 +40,12 @@ case class AlbumPot(id: Long, hash: String, title: String, pages: List[Pot[Page]
     tile <- page.tiles.lift(tile)
   } yield tile.photo
 
-  // increment page numbers
-  def shiftPagesAfter(page: Int) =
-    this.copy(pages =
-      pages.take(page + 1) ++
-        pages.drop(page + 1).map(_.map(p => p.copy(index = p.index + 1))))
-
   def nonPot: Album = Album(this.id, this.hash, this.title, this.pages.flatten)
 
   def allPages: List[Page] = pages.flatten
 
   def update(newPage: Pot[Page]) =
-    this.copy(pages = pages.partition(_.flatMap(a => newPage.map(_.id == a.id)).getOrElse(true)) match {
+    this.copy(pages = pages.partition(_.flatMap(p => newPage.map(_.id == p.id)).getOrElse(false)) match {
       case (Nil, rest) => rest.partition(_.isEmpty) match {
         case (Nil, all) => all :+ newPage
         case (emptys, tail) => tail ++ emptys.tail :+ newPage
@@ -59,9 +55,17 @@ case class AlbumPot(id: Long, hash: String, title: String, pages: List[Pot[Page]
 
   def invalidate(index: Int) =
     this.copy(pages = pages.map(page => page.flatMap {
-      case Page(_, index, _) => page.pending()
+      case Page(_, `index`, _) => page.pending()
       case _ => page
     }))
+
+  def clearPages = this.copy(pages = Nil)
+
+  def insertEmptyAfter(page: Int) =
+    this.copy(pages = (pages.take(page + 1) :+ Pot.empty.pending()) ++
+      pages.drop(page + 1).map(_.map(p => p.copy(index = p.index + 1))))
+
+  def pagesLoaded: Boolean = !pages.exists(_.isPending)
 }
 
 object AlbumPot {
@@ -79,8 +83,6 @@ case class RootModel(user: Pot[User] = Empty, album: Pot[AlbumPot] = Empty, uplo
 
 class AlbumHandler[M](modelRW: ModelRW[M, Pot[AlbumPot]]) extends ActionHandler(modelRW) {
 
-  def album = value
-
   def getPage(index: Int): Option[Page] =
     value.toOption.flatMap(_.pages.find(p => p.map(_.index == index).getOrElse(false)).flatMap(_.toOption))
 
@@ -89,7 +91,8 @@ class AlbumHandler[M](modelRW: ModelRW[M, Pot[AlbumPot]]) extends ActionHandler(
 
   def getID(selected: Selected): Option[Long] =
     for {
-      pagePot <- album.get.pages.lift(selected.page)
+      album <- value.toOption
+      pagePot <- album.pages.lift(selected.page)
       page <- pagePot.toOption
       tile <- page.tiles.lift(selected.index)
     } yield tile.photo.id
@@ -109,10 +112,11 @@ class AlbumHandler[M](modelRW: ModelRW[M, Pot[AlbumPot]]) extends ActionHandler(
       .map({ case (a, b) => photos.slice(a, b) })
       .filterNot(_.isEmpty)
 
-  def makePages(albumID: Long, list: List[List[Photo]]): EffectSeq =
+  def makePages(list: List[List[Photo]]): EffectSeq =
     list.zipWithIndex
-      .map({ case (pagePhotos, i) => Effect.action(MakePage(albumID, pagePhotos, i)) })
+      .map({ case (pagePhotos, i) => Effect.action(GeneratePage(pagePhotos, i)) })
       .foldLeft(Effect(Future(None)) >> Effect(Future(None)))((a, b) => a >> b)
+
 
   override def handle = {
 
@@ -123,13 +127,13 @@ class AlbumHandler[M](modelRW: ModelRW[M, Pot[AlbumPot]]) extends ActionHandler(
         photoID <- getID(selected)
       } yield {
         val photoToAdd = photos.filter(_.id == photoID)
-        Effect {
-          AjaxClient[Api].shufflePage(cover, cover.getPhotos ++ photoToAdd)
-            .call()
-            .map(UpdatePage(_))
-        } >>
-          Effect.action(SaveAlbum)
-      }) map (effectOnly(_)) getOrElse noChange
+        updated(value.map(_.invalidate(cover.index)),
+          Effect {
+            AjaxClient[Api].shufflePage(cover, cover.getPhotos ++ photoToAdd).call()
+              .map(MergePage(_))
+          } >>
+            Effect.action(SaveAlbum))
+      }) getOrElse noChange
 
     case AddToNextPage(selected) =>
       (for {
@@ -138,15 +142,13 @@ class AlbumHandler[M](modelRW: ModelRW[M, Pot[AlbumPot]]) extends ActionHandler(
         photo <- album.getPhoto(selected.page, selected.index)
       } yield {
         val (including, excluding) = page.getPhotos.partition(_.id == photo.id)
-        val effect = Effect(AjaxClient[Api].shufflePage(page, excluding).call().map(UpdatePage(_))) +
-          Effect(AjaxClient[Api].generatePage(album.id, including, selected.page + 1).call().map(UpdatePage(_))) >>
-          Effect.action(SaveAlbum)
-
-        updated(Ready(album.adjustIndex.shiftPagesAfter(selected.page)), effect)
+        updated(value.map(_.adjustIndex
+          .invalidate(page.index)
+          .insertEmptyAfter(page.index)),
+          Effect(AjaxClient[Api].shufflePage(page, excluding).call().map(MergePage(_))) +
+            Effect.action(GeneratePage(including, page.index + 1)) >>
+            Effect.action(SaveAlbum))
       }) getOrElse noChange
-
-    case ClearPages =>
-      updated(value.map(_.copy(pages = Nil)))
 
     case MoveTile(from, to) =>
       (getPage(from.page), getPage(to.page)) match {
@@ -158,29 +160,28 @@ class AlbumHandler[M](modelRW: ModelRW[M, Pot[AlbumPot]]) extends ActionHandler(
           toPageOpt match {
             // moving to a new page
             case None =>
-              effectOnly {
+              updated(value.map(_.invalidate(fromPage.index)),
                 Effect(AjaxClient[Api].shufflePage(fromPage, fromPage.photosExcept(photoID)).call()
-                  .map(UpdatePage(_))) +
-                  Effect(AjaxClient[Api].generatePage(album.get.id, fromPhotos.filter(_.id == photoID), album.get.pages.length).call()
-                    .map(UpdatePage(_))) >>
+                  .map(MergePage(_))) +
+                  Effect.action(GeneratePage(fromPhotos.filter(_.id == photoID), value.get.pages.length)) >>
                   Effect.action(SaveAlbum)
-              }
+              )
 
             // both pages have tiles
             case Some(toPage) =>
-              effectOnly {
+              updated(value.map(_.invalidate(fromPage.index).invalidate(toPage.index)),
                 Effect(AjaxClient[Api].shufflePage(fromPage, fromPage.photosExcept(photoID)).call()
-                  .map(UpdatePage(_))) +
-                  Effect(AjaxClient[Api].shufflePage(toPage, toPage.getPhotos ++ fromPhotos.filter(_.id == photoID)).call().map(UpdatePage(_))) >>
+                  .map(MergePage(_))) +
+                  Effect(AjaxClient[Api].shufflePage(toPage, toPage.getPhotos ++ fromPhotos.filter(_.id == photoID)).call().map(MergePage(_))) >>
                   Effect.action(SaveAlbum)
-              }
+              )
           }
       }
 
     case ShufflePage(index: Int) => updated(
       value.map(_.invalidate(index)),
       getPage(index).map(page =>
-        Effect(AjaxClient[Api].shufflePage(page, page.getPhotos).call().map(UpdatePage(_))) >>
+        Effect(AjaxClient[Api].shufflePage(page, page.getPhotos).call().map(MergePage(_))) >>
           Effect.action(SaveAlbum)
       ).getOrElse(Effect(Future(None)))
     )
@@ -192,27 +193,26 @@ class AlbumHandler[M](modelRW: ModelRW[M, Pot[AlbumPot]]) extends ActionHandler(
         photoID <- getID(selected)
         page <- album.pages(selected.page).toOption
       } yield {
-        effectOnly {
-          val photosReduced = removeOnlyOne(photos, _.id == photoID)
-          Effect(AjaxClient[Api].shufflePage(page, photosReduced).call().map(UpdatePage(_))) >>
+        val photosReduced = removeOnlyOne(photos, _.id == photoID)
+        updated(value.map(_.invalidate(page.index)), {
+          Effect(AjaxClient[Api].shufflePage(page, photosReduced).call().map(MergePage(_))) >>
             Effect.action(SaveAlbum)
-        }
+        })
       }) getOrElse noChange
 
-    case UpdatePage(newPage) =>
-      updated(value.map { album =>
-        album.update(newPage)
-      })
+    case MergePage(newPage) =>
+      updated(value.map { _.update(newPage) })
 
     case UpdatePages(newPages) =>
       updated(value.map { album =>
-        newPages.foldLeft(album)({ case (a, newPage) => a.update(newPage) })
+        newPages.foldLeft(album) { case (a, newPage) => a.update(newPage) }
       })
 
     case UpdateAlbum(albumPot) =>
       updated(albumPot.map(_.sort))
 
-    case UpdateTitle(title) => updated(value.map(_.copy(title = title)), Effect.action(SaveAlbum))
+    case UpdateTitle(title) =>
+      updated(value.map(_.copy(title = title)), Effect.action(SaveAlbum))
 
     case MovePageLeft(page) =>
       value map { album =>
@@ -230,39 +230,33 @@ class AlbumHandler[M](modelRW: ModelRW[M, Pot[AlbumPot]]) extends ActionHandler(
 
     case action@(IncreaseDensity | DecreaseDensity) =>
       value map { album =>
-        effectOnly {
-          val (targetDensity, variance) = action match {
-            case IncreaseDensity => (math.ceil(album.density).toInt + 1, 3)
-            case DecreaseDensity => (math.max(math.ceil(album.density).toInt - 1, 1), 3)
-          }
-          Effect.action(ClearPages) >>
-            makePages(album.id, makeDensityList(album.getAllPhotos, targetDensity, variance)) >>
-            Effect.action(SaveAlbum)
+        val (targetDensity, variance) = action match {
+          case IncreaseDensity => (math.ceil(album.density).toInt + 1, 3)
+          case DecreaseDensity => (math.max(math.ceil(album.density).toInt - 1, 1), 3)
         }
+        updated(value.map(_.clearPages),
+          Effect.action(GeneratePages(makeDensityList(album.getAllPhotos, targetDensity, variance))))
       } getOrElse noChange
 
-    case GeneratePages(photos) =>
-      value.map { album =>
-        Effect.action(ClearPages) >>
-          makePages(album.id, makeDensityList(photos, math.round(album.density).toInt, 3)) >>
-          Effect.action(SaveAlbum)
-      }.map(effectOnly(_))
-        .getOrElse(noChange)
+    case GeneratePages(densityList) =>
+        effectOnly(makePages(densityList) >> Effect.action(SaveAlbum))
 
     case OrderByDate =>
-      value
-        .map(album => AjaxClient[Api].reorderPhotos(album.id).call()
-          .map(GeneratePages(_)))
-        .map(Effect(_))
-        .map(effectOnly)
-        .getOrElse(noChange)
+      value.map { album =>
+        updated(value.map(_.clearPages),
+          Effect(AjaxClient[Api].reorderPhotos(album.id).call()
+            .map(photos => GeneratePages(makeDensityList(photos, math.round(album.density).toInt, 3)))))
+      } getOrElse noChange
 
-    case MakePage(albumID, photos, index) =>
-      updated(
-        value.map(album => album.copy(pages = album.pages :+ Pot.empty.pending())),
-        Effect(AjaxClient[Api].generatePage(albumID, photos, index).call()
-          .map(UpdatePage(_)))
-      )
+    case GeneratePage(photos, index) =>
+      value map { album =>
+        updated(
+          value.map(album => album.copy(pages = album.pages :+ Pot.empty.pending())),
+          Effect(AjaxClient[Api].generatePage(album.id, photos, index).call()
+            .map(MergePage(_)))
+        )
+      } getOrElse noChange
+
   }
 }
 
@@ -336,7 +330,7 @@ class UploadHandler[M](modelRW: ModelRW[M, Option[UploadState]]) extends ActionH
           val effect =
             Effect {
               Future.sequence(fileSet.map(f => Helper.uploadFile(f, albumID)))
-                .map(photos => MakePage(albumID, photos, index))
+                .map(photos => GeneratePage(photos, index))
             } >>
               Effect.action(AddRemainingPhotos(albumID))
 
@@ -391,13 +385,18 @@ class MainHandler[M](modelRW: ModelRW[M, RootModel]) extends ActionHandler(model
 
     case SaveAlbum =>
       value.album
-        .map(_.adjustIndex.filter)
-        .filterNot(_.pages.isEmpty)
-        .map { album =>
+        .filter(_.pagesLoaded)
+        .map(_.adjustIndex)
+        .map { album => {
+          println("album fully loaded, saving...")
           updated(value.copy(album = Ready(album)),
             Effect(AjaxClient[Api].saveAlbum(album).call()))
         }
-        .getOrElse(noChange)
+        }
+        .getOrElse({
+          println("album not fully loaded, retrying...")
+          effectOnly(Effect.action(SaveAlbum).after(2.seconds))
+        })
 
     case EmailAndSave(email) =>
       effectOnly {
