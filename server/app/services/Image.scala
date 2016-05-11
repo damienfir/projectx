@@ -103,19 +103,19 @@ class ImageService @Inject()() {
       )
     }
 
-  def tilesPython(photos: List[File]) = Future {
+  def tilesPython(photos: List[File], ratio: Double) = Future {
     val json = new ByteArrayOutputStream()
     val filenames = photos.map(_.getAbsolutePath)
-    val cmd = (binary +: "1.414" +: filenames :+ "-") #> json
+    val cmd = (binary +: ratio.toString +: filenames :+ "-") #> json
     cmd ! match {
       case 0 => Json.parse(json.toString).as[List[MosaicModels.Tile2]]
       case _ => throw new Exception
     }
   }
 
-  def generateComposition(photos: List[db.Photo]): Future[List[Tile]] =
+  def generateComposition(photos: List[db.Photo], ratio: Double): Future[List[Tile]] =
     if (photos.isEmpty) Future(Nil)
-    else tilesPython(photos.map(p => bytesToFile(p.data, tmpFolder))) map { tiles =>
+    else tilesPython(photos.map(p => bytesToFile(p.data, tmpFolder)), ratio) map { tiles =>
       tiles.map(tilesToDB(photos.map(_.export)))
         .flatten
     }

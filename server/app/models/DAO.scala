@@ -1,7 +1,8 @@
 package bigpiq.server.db
 
-import scala.util.{Try, Success, Failure}
+import scala.util.{Failure, Success, Try}
 import javax.inject._
+
 import scala.concurrent.Future
 import play.api.db.slick.DatabaseConfigProvider
 import play.api.db.slick.HasDatabaseConfigProvider
@@ -12,6 +13,7 @@ import java.util.UUID
 
 import slick.driver.PostgresDriver.api._
 import bigpiq.shared
+import bigpiq.shared.BookModels
 
 
 trait HasID{
@@ -30,14 +32,15 @@ case class User (
 case class Collection (
   id: Option[Long],
   name: Option[String],
-  hash: String
+  hash: String,
+  bookModel: Int
 ) {
-  def export: shared.Album = shared.Album(id.get, hash, name.getOrElse(""), Nil)
+  def export: shared.Album = shared.Album(id.get, hash, name.getOrElse(""), Nil, BookModels.models.getOrElse(bookModel, BookModels.defaultModel))
   def export(pages: List[Composition], photos: List[Photo]): shared.Album = export.copy(pages = pages.map(_.export(photos)))
 }
 
 object Collection {
-  def from(album: shared.Album): Collection = Collection(Some(album.id), Some(album.title), album.hash)
+  def from(album: shared.Album): Collection = Collection(Some(album.id), Some(album.title), album.hash, BookModels.indexOf(album.bookModel))
   def tupled = (Collection.apply _).tupled
 }
 
@@ -148,7 +151,7 @@ class CollectionDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProv
   // } yield c
 
   db.run(usersDAO.one(id).result) map (_.head) flatMap { u =>
-      db.run((collections returning collections) += Collection(None, None, makeHash)) flatMap { c =>
+      db.run((collections returning collections) += Collection(None, None, makeHash, BookModels.default)) flatMap { c =>
         db.run(usercollectionrelations += (u.id.get, c.id.get)) map (_ => c.export)
       }
     }

@@ -78,7 +78,9 @@ class Photos @Inject()(imageService: ImageService, photoDAO: db.PhotoDAO) extend
     photoDAO.get(photoID) flatMap { maybePhoto =>
       maybePhoto.map { photo =>
         imageService.convert(photo.data, region, size, rotation, quality, format)
-        .map(file => Ok(file))
+        .map(file => Ok(file).withHeaders(
+          CACHE_CONTROL -> "max-age=3600"
+        ))
       } getOrElse Future(NotFound)
     }
   }

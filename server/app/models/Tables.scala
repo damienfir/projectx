@@ -25,7 +25,8 @@ object Tables {
     def id = column[Option[Long]]("id", O.PrimaryKey, O.AutoInc)
     def name = column[Option[String]]("name")
     def hash = column[String]("hash")
-    def * = (id, name, hash) <> (Collection.tupled, Collection.unapply)
+    def bookmodel = column[Int]("bookmodel")
+    def * = (id, name, hash, bookmodel) <> (Collection.tupled, Collection.unapply)
   }
   val collections = TableQuery[Collections]
 

@@ -1,26 +1,26 @@
-@(comp: bigpiq.shared.Page, title: Option[String], photos: Map[Long, String], dim: (Int,Int), ratio: Float)
+@(comp: bigpiq.shared.Page, title: Option[String], photos: Map[Long, String], size: bigpiq.shared.PageSize, bookmodel: bigpiq.shared.BookModel, bleed: (Double, Double))
 
 <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-                   width="@{dim._1}mm"
-                   height="@{dim._2}mm"
-                   viewBox="0 0 @ratio 1"
+                   width="@{size.w + 2*bookmodel.bleed}mm"
+                   height="@{size.h + 2*bookmodel.bleed}mm"
+                   viewBox="0 0 @{size.ratio} 1"
   preserveAspectRatio="none">
 
   @for((t,i) <- comp.tiles.zipWithIndex) {
 
   <clipPath id="@i">
     <rect
-      x="@{t.tx1*ratio}"
-      y="@{t.ty1}"
-      width="@{ratio*(t.tx2-t.tx1)}"
+      x="@{t.tx1*size.ratio + bleed._1}"
+      y="@{t.ty1 + bleed._2}"
+      width="@{size.ratio*(t.tx2-t.tx1)}"
       height="@{t.ty2-t.ty1}"
       style="fill: #000;" />
   </clipPath>
 
   <image
-    x="@{ratio*(t.tx1-t.cx1*(t.tx2-t.tx1)/(t.cx2-t.cx1))}"
-    y="@{t.ty1-t.cy1*(t.ty2-t.ty1)/(t.cy2-t.cy1)}"
-    width="@{ratio*(t.tx2-t.tx1)/(t.cx2-t.cx1)}"
+    x="@{size.ratio*(t.tx1-t.cx1*(t.tx2-t.tx1)/(t.cx2-t.cx1)) + bleed._1}"
+    y="@{t.ty1-t.cy1*(t.ty2-t.ty1)/(t.cy2-t.cy1) + bleed._2}"
+    width="@{size.ratio*(t.tx2-t.tx1)/(t.cx2-t.cx1)}"
     height="@{(t.ty2-t.ty1)/(t.cy2-t.cy1)}"
     preserveAspectRatio="none"
     xlink:href="file://@{photos(t.photo.id)}"
@@ -31,15 +31,15 @@
   @if(comp.index == 0 && !title.isEmpty) {
 
   <rect
-    x="0"
-    y="0.85"
-    width="@ratio"
-    height="0.15"
+    x="@{0 + bleed._1}"
+    y="@{0.85 + bleed._2}"
+    width="@{size.ratio}"
+    height="0.15",
     style="fill: #fff;" />
 
   <text
-    x="1.35"
-    y="0.95"
+    x="1.35 + bleed._1"
+    y="0.95 + bleed._2"
     style="text-anchor: end; fill: #000000; font-size: 0.06; font-family: 'Open Sans';">
       @{title.get}
   </text>

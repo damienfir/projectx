@@ -16,10 +16,7 @@ import scala.util.Random
 
 class ServerApi @Inject()(usersDAO: db.UsersDAO, collectionDAO: db.CollectionDAO, photoDAO: db.PhotoDAO, emailService: Email, imageService: ImageService) extends Api {
 
-  val dim = (297, 210)
-  val ratio = dim._1.toFloat / dim._2.toFloat
   val demoID = Play.current.configuration.getString("px.demoID").get
-
 
   def getUser(id: Long): Future[User] = usersDAO.get(id)
 
@@ -41,26 +38,26 @@ class ServerApi @Inject()(usersDAO: db.UsersDAO, collectionDAO: db.CollectionDAO
     else if (album.pages.isEmpty) Future(album)
     else collectionDAO.update(album)
 
-  def generatePage(albumID: Long, photos: List[Photo], index: Int): Future[Page] =
+  def generatePage(albumID: Long, photos: List[Photo], index: Int, ratio: Double): Future[Page] =
     collectionDAO.getCollection(albumID) flatMap { album =>
       photoDAO.getSet(photos.map(_.id)) flatMap { photosDB =>
         if (album.hash.equals(demoID)) {
-          imageService.generateComposition(photosDB) map { tiles =>
+          imageService.generateComposition(photosDB, ratio) map { tiles =>
             Page(Random.nextLong(), index, tiles)
           }
         } else {
           for {
             page <- collectionDAO.addPage(albumID)
-            tiles <- imageService.generateComposition(photosDB)
+            tiles <- imageService.generateComposition(photosDB, ratio)
             updatedPage <- collectionDAO.updatePage(albumID, page.copy(tiles = tiles, index = index))
           } yield updatedPage
         }
       }
     }
 
-  def shufflePage(page: Page, photos: List[Photo]): Future[Page] = {
+  def shufflePage(page: Page, photos: List[Photo], ratio: Double): Future[Page] = {
     photoDAO.getSet(photos.map(_.id)) flatMap { photosDB =>
-      imageService.generateComposition(photosDB) map { tiles =>
+      imageService.generateComposition(photosDB, ratio) map { tiles =>
         page.copy(tiles = tiles)
       }
     }
@@ -79,8 +76,12 @@ class ServerApi @Inject()(usersDAO: db.UsersDAO, collectionDAO: db.CollectionDAO
         }
 
         Future.sequence(photoFiles) map { files =>
-          val svgFiles = album.sort.pages.map(p =>
-            views.html.page(p, if (p.index == 0) Some(album.title) else None, files.map({ case (id, f) => (id, f.getAbsolutePath) }).toMap, dim, ratio).toString)
+          val svgFiles = album.sort.pages.map(p => {
+            val (title, size) =
+              if (p.index == 0) (Some(album.title), album.bookModel.cover)
+              else (None, album.bookModel.pages)
+            views.html.page(p, title, files.map({ case (id, f) => (id, f.getAbsolutePath) }).toMap, size, album.bookModel, album.bookModel.bleedP(size)).toString
+          })
 
           imageService.makeAlbumFile(svgFiles)
         }

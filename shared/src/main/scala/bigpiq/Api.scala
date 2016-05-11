@@ -17,9 +17,9 @@ trait Api {
 
   def saveAlbum(album: Album): Future[Album]
 
-  def shufflePage(page: Page, photos: List[Photo]): Future[Page]
+  def shufflePage(page: Page, photos: List[Photo], ratio: Double): Future[Page]
 
-  def generatePage(albumID: Long, photos: List[Photo], index: Int): Future[Page]
+  def generatePage(albumID: Long, photos: List[Photo], index: Int, ratio: Double): Future[Page]
 
   def reorderPhotos(albumID: Long): Future[List[Photo]]
 }
