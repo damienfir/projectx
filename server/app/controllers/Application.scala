@@ -19,13 +19,14 @@ import upickle.json
 
 object Router extends autowire.Server[Js.Value, Reader, Writer] {
   override def read[R: Reader](s: Js.Value) = readJs[R](s)
+
   override def write[R: Writer](r: R) = writeJs(r)
 }
 
 
 class Application @Inject()(val messagesApi: MessagesApi, serverApi: ServerApi) extends Controller with I18nSupport {
 
-  def makeCookie(id: Long) = Cookie("bigpiquser", id.toString, maxAge=Some(315360000), httpOnly=false)
+  def makeCookie(id: Long) = Cookie("bigpiquser", id.toString, maxAge = Some(315360000), httpOnly = false)
 
   def index(lang: Option[String]) = Action { implicit request =>
     val id = Play.current.configuration.getString("px.demoID").get
@@ -41,7 +42,7 @@ class Application @Inject()(val messagesApi: MessagesApi, serverApi: ServerApi) 
   def uiWithHash(hash: String) = ui
 
   def autowireApi(path: String) = Action.async(parse.tolerantText) {
-    implicit request => 
+    implicit request =>
 
       Router.route[Api](serverApi) {
         autowire.Core.Request(path.split("/"), json.read(request.body).asInstanceOf[Js.Obj].value.toMap)
@@ -51,20 +52,25 @@ class Application @Inject()(val messagesApi: MessagesApi, serverApi: ServerApi) 
           case (user: User, p: String) => Ok(p).withCookies(makeCookie(user.id))
           case (_, p: String) => Ok(p)
         }
-        // .recover({
-        //   case ex => BadRequest
-        // })
+    // .recover({
+    //   case ex => BadRequest
+    // })
   }
 
   def pdf(hash: String) = Action.async {
-    serverApi.pdf(hash).map(a => Ok.sendFile(a))
+    serverApi.pdf(hash).map(a =>
+      Ok.sendFile(a)
+        .as("application/pdf")
+        .withHeaders(
+          CONTENT_DISPOSITION -> "Inline"
+        ))
   }
 }
 
 
 class Photos @Inject()(imageService: ImageService, photoDAO: db.PhotoDAO) extends Controller {
 
-  def addToCollection(id: Long) = Action.async(parse.maxLength(50*1024*1024*1000*1000, parser=parse.multipartFormData)) { request =>
+  def addToCollection(id: Long) = Action.async(parse.maxLength(50 * 1024 * 1024 * 1000 * 1000, parser = parse.multipartFormData)) { request =>
     request.body match {
       case Left(_) => Future(EntityTooLarge)
       case Right(body) =>
@@ -78,9 +84,9 @@ class Photos @Inject()(imageService: ImageService, photoDAO: db.PhotoDAO) extend
     photoDAO.get(photoID) flatMap { maybePhoto =>
       maybePhoto.map { photo =>
         imageService.convert(photo.data, region, size, rotation, quality, format)
-        .map(file => Ok(file).withHeaders(
-          CACHE_CONTROL -> "max-age=3600"
-        ))
+          .map(file => Ok(file).withHeaders(
+            CACHE_CONTROL -> "max-age=3600"
+          ))
       } getOrElse Future(NotFound)
     }
   }

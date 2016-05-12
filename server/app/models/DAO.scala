@@ -122,6 +122,7 @@ class CollectionDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProv
 
   def update(album: shared.Album): Future[shared.Album] = {
     val (collection, comps) = (Collection.from(album), Composition.from(album))
+    println(collection)
     for {
       col <- db.run(collections.filter(_.id === collection.id).update(collection))
       comp <- updateAll(comps)

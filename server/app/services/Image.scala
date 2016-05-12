@@ -128,11 +128,6 @@ class ImageService @Inject()() {
     filename
   }
 
-  def blankSVG =
-    """<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-    width="297mm"
-    height="210mm"></svg>
-    """
 
   def joinPDFs(fnames: List[String]): String = {
     val out = UUID.randomUUID.toString + ".pdf"
@@ -145,11 +140,11 @@ class ImageService @Inject()() {
     }
   }
 
-  def makePDFs(svgs: List[String]) = (svgs.head :: (blankSVG :: svgs.tail)) map {
+  def makePDFs(svgs: List[String], pdfVersion: String, dpi: Int) = svgs map {
     svg => {
       val f = tmpFile(UUID.randomUUID.toString)
       writeFile(f + ".svg", svg)
-      "inkscape -d 300 " + f + ".svg -A " + f + ".pdf" ! match {
+      s"inkscape -d $dpi --export-text-to-path $f.svg -A $f.pdf" ! match {
         case 0 => {
           new File(f + ".svg").delete
           f + ".pdf"
@@ -159,9 +154,8 @@ class ImageService @Inject()() {
     }
   }
 
-  def makeAlbum(svgs: List[String]) = joinPDFs(makePDFs(svgs))
-
-  def makeAlbumFile(svgs: List[String]): File = new File(tmpFile(makeAlbum(svgs)))
+  def makeAlbumFile(svgs: List[String], bookModel: BookModel): File =
+    new File(tmpFile(joinPDFs(makePDFs(svgs, bookModel.pdfVersion, 300))))
 
   def writeSVG(id: Long, content: String) = {
     val fname = id.toString + ".svg"

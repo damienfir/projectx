@@ -1,48 +1,52 @@
-@(comp: bigpiq.shared.Page, title: Option[String], photos: Map[Long, String], size: bigpiq.shared.PageSize, bookmodel: bigpiq.shared.BookModel, bleed: (Double, Double))
+@(page: bigpiq.shared.Page, title: Option[String], photos: Map[Long, String], size: bigpiq.shared.PageSize, bookmodel: bigpiq.shared.BookModel)
 
 <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-                   width="@{size.w + 2*bookmodel.bleed}mm"
-                   height="@{size.h + 2*bookmodel.bleed}mm"
-                   viewBox="0 0 @{size.ratio} 1"
-  preserveAspectRatio="none">
+     width="@{bookmodel.fullWidth(page.index)}mm"
+     height="@{bookmodel.fullHeight(page.index)}mm"
+     viewBox="0 0 @{bookmodel.fullWidth(page.index)} @{bookmodel.fullHeight(page.index)}"
+     preserveAspectRatio="none">
 
-  @for((t,i) <- comp.tiles.zipWithIndex) {
+    @for((t,i) <- page.tiles.zipWithIndex) {
 
-  <clipPath id="@i">
-    <rect
-      x="@{t.tx1*size.ratio + bleed._1}"
-      y="@{t.ty1 + bleed._2}"
-      width="@{size.ratio*(t.tx2-t.tx1)}"
-      height="@{t.ty2-t.ty1}"
-      style="fill: #000;" />
-  </clipPath>
+    <clipPath id="@i">
+        <rect x="@{t.tx1*size.w + bookmodel.offset(page.index)}"
+              y="@{t.ty1*size.h + bookmodel.offset(page.index)}"
+              width="@{(t.tx2-t.tx1)*size.w}"
+              height="@{(t.ty2-t.ty1)*size.h}"
+              style="fill: #fff;"/>
+    </clipPath>
 
-  <image
-    x="@{size.ratio*(t.tx1-t.cx1*(t.tx2-t.tx1)/(t.cx2-t.cx1)) + bleed._1}"
-    y="@{t.ty1-t.cy1*(t.ty2-t.ty1)/(t.cy2-t.cy1) + bleed._2}"
-    width="@{size.ratio*(t.tx2-t.tx1)/(t.cx2-t.cx1)}"
-    height="@{(t.ty2-t.ty1)/(t.cy2-t.cy1)}"
-    preserveAspectRatio="none"
-    xlink:href="file://@{photos(t.photo.id)}"
-    clip-path="url(#@i)"/>
+    <image x="@{(t.tx1-t.cx1*(t.tx2-t.tx1)/(t.cx2-t.cx1))*size.w + bookmodel.offset(page.index)}"
+           y="@{(t.ty1-t.cy1*(t.ty2-t.ty1)/(t.cy2-t.cy1))*size.h + bookmodel.offset(page.index)}"
+           width="@{((t.tx2-t.tx1)/(t.cx2-t.cx1))*size.w}"
+           height="@{((t.ty2-t.ty1)/(t.cy2-t.cy1))*size.h}"
+           preserveAspectRatio="none"
+           xlink:href="file://@{photos(t.photo.id)}"
+           clip-path="url(#@i)"/>
 
-  }
+    };
 
-  @if(comp.index == 0 && !title.isEmpty) {
+    @if(page.tiles.isEmpty) {
+    <text x="@{0.8*size.w + bookmodel.bleed}"
+          y="@{0.8*size.h + bookmodel.bleed}"
+          style="text-anchor: end; fill: #000; font-size: 0.06; font-family: 'Open Sans';">
+        bigpiq
+    </text>
+    }
 
-  <rect
-    x="@{0 + bleed._1}"
-    y="@{0.85 + bleed._2}"
-    width="@{size.ratio}"
-    height="0.15",
-    style="fill: #fff;" />
+    @title.map { albumName =>
 
-  <text
-    x="1.35 + bleed._1"
-    y="0.95 + bleed._2"
-    style="text-anchor: end; fill: #000000; font-size: 0.06; font-family: 'Open Sans';">
-      @{title.get}
-  </text>
-  }
+    <rect x="@{0*size.w + bookmodel.bleed}"
+          y="@{0.85*size.h + bookmodel.bleed}"
+          width="@{size.w}"
+          height="@{0.15*size.h}"
+          style="fill: #fff;"/>
+
+    <text x="@{0.97*size.w + bookmodel.bleed}"
+          y="@{0.95*size.h + bookmodel.bleed}"
+          style="text-anchor: end; fill: #000000; font-size: 14; font-family: 'Open Sans';">
+        @{albumName}
+    </text>
+    } getOrElse("")
 
 </svg>

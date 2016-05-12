@@ -20,12 +20,6 @@ case class EdgeParams(x_tl: List[Int], y_tl: List[Int], x_br: List[Int], y_br: L
 
 object Album {
 
-  case class BlankPage() extends PageElement
-
-  case class BacksidePage() extends PageElement
-
-  case class CoverPage() extends PageElement
-
   case class Props(proxy: ModelProxy[Pot[AlbumPot]])
 
   case class State(

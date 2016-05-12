@@ -35,7 +35,6 @@ class ServerApi @Inject()(usersDAO: db.UsersDAO, collectionDAO: db.CollectionDAO
 
   def saveAlbum(album: Album): Future[Album] =
     if (album.hash.equals(demoID)) Future(album)
-    else if (album.pages.isEmpty) Future(album)
     else collectionDAO.update(album)
 
   def generatePage(albumID: Long, photos: List[Photo], index: Int, ratio: Double): Future[Page] =
@@ -76,14 +75,14 @@ class ServerApi @Inject()(usersDAO: db.UsersDAO, collectionDAO: db.CollectionDAO
         }
 
         Future.sequence(photoFiles) map { files =>
-          val svgFiles = album.sort.pages.map(p => {
+          val svgFiles = album.sort.withBlankPages.pages.map(p => {
             val (title, size) =
               if (p.index == 0) (Some(album.title), album.bookModel.cover)
               else (None, album.bookModel.pages)
-            views.html.page(p, title, files.map({ case (id, f) => (id, f.getAbsolutePath) }).toMap, size, album.bookModel, album.bookModel.bleedP(size)).toString
+            views.html.page(p, title, files.map({ case (id, f) => (id, f.getAbsolutePath) }).toMap, size, album.bookModel).toString
           })
 
-          imageService.makeAlbumFile(svgFiles)
+          imageService.makeAlbumFile(svgFiles, album.bookModel)
         }
       }
     }

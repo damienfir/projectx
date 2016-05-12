@@ -11,6 +11,10 @@ case class Album(id: Long,
                  pages: List[Page],
                  bookModel: BookModel) {
   def sort = this.copy(pages = pages.sortBy(_.index))
+
+  def withBlankPages = this.copy(pages =
+    if (bookModel.blankBackside) pages.head +: Page(-1, -1, Nil) +: pages.tail
+    else pages)
 }
 
 trait PageElement
@@ -33,6 +37,13 @@ case class Page(id: Long,
     else getPhotos.filter(_.id != id)
 }
 
+case class BlankPage() extends PageElement
+
+case class BacksidePage() extends PageElement
+
+case class CoverPage() extends PageElement
+
+
 case class Tile(photo: Photo,
                 rot: Int,
                 cx1: Float,
@@ -48,20 +59,28 @@ case class Photo(id: Long,
                  hash: String)
 
 
-case class PageSize(w: Double, h: Double) {
+case class PageSize(w: Double, h: Double, bleed: Double, fold: Double) {
   def ratio: Double = w / h
+
+  def extra = 2 * bleed + 2 * fold
+
+  def fullWidth = w + extra
+
+  def fullHeight = h + extra
 }
 
-case class BookModel(minPagesTotal: Int,
-                     cover: PageSize,
-                     pages: PageSize,
-                     mustBeEven: Boolean,
-                     bleed: Double,
-                     spine: (Double, Double),
-                     pdfVersion: String,
-                     minDPI: Int
+abstract case class BookModel(minPagesTotal: Int,
+                              cover: PageSize,
+                              pages: PageSize,
+                              mustBeEven: Boolean,
+                              spine: (Double, Double),
+                              pdfVersion: String,
+                              minDPI: Int,
+                              coverSeparate: Boolean,
+                              blankBackside: Boolean
                     ) {
-  def bleedP(size: PageSize): (Double, Double) = (bleed/size.w, bleed/size.h)
+  def fullCoverWidth = 2 * cover.fullWidth + spine._1
+  def offset(index: Int)
 }
 
 
@@ -72,29 +91,37 @@ object BookModels {
   case class A4Landscape() extends PageType
 
   val models: Map[Int, BookModel] = Map(
-    0 -> bookfactory(A4Landscape())
+    0 -> BookFactory(A4Landscape())
   )
 
   val default = 0
   val defaultModel = models.get(default).get
 
-  def bookfactory(size: PageType): BookModel = {
-    val (cover, pages) = size match {
-      case _: A4Landscape => (PageSize(297.0, 210.0), PageSize(297.0, 210.0))
-    }
+  case class BookFactory(coverSize: PageSize, pagesSize: PageSize) extends BookModel(
+    minDPI = 200,
+    cover = coverSize,
+    pages = pagesSize,
+    minPagesTotal = 16,
+    pdfVersion = "PDF 1.4",
+    spine = (6, 0),
+    mustBeEven = false,
+    coverSeparate = true,
+    blankBackside = false
+  ) {
+    def offset(index: Int): Double =
+      if (index == 0) cover.fullWidth + spine._1
+      else pages.bleed
+  }
 
-    BookModel(
-      minDPI = 200,
-      bleed = 3,
-      cover = cover,
-      pages = pages,
-      minPagesTotal = 16,
-      pdfVersion = "PDF 1.6",
-      spine = (0, 0),
-      mustBeEven = false
-    )
+  object BookFactory {
+    def apply(size: PageType): BookFactory = {
+      val (cover, pages) = size match {
+        case _: A4Landscape => (PageSize(297.0, 210.0, 2.5, 15), PageSize(297.0, 210.0, 3, 0))
+      }
+      BookFactory(cover, pages)
+    }
   }
 
   def indexOf(model: BookModel): Int =
-    models.find { case (i, m) => m == model }.map(_._1).getOrElse(0)
+    models.find { case (i, m) => m == model }.map(_._1).getOrElse(default)
 }
