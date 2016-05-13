@@ -162,8 +162,8 @@ class ImageService @Inject()() {
     }}
 
   def zip(files: List[File]): Future[File] = {
-    val o = tmpFile(files.head + ".zip")
-    Future(s"zip $o" +: files.map(_.getAbsolutePath) !) map {
+    val o = files.head + ".zip"
+    Future("zip" +: "-j" +: o +: files.map(_.getAbsolutePath) !) map {
       case 0 =>
         files.map(_.delete())
         new File(o)

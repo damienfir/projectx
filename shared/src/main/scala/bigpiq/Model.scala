@@ -63,15 +63,15 @@ case class PageSize(w: Double, h: Double, bleed: Double, fold: Double, spine: Do
   def ratio: Double = w / h
 
   def offsetW =
-    if (cover) fold + bleed + w + bleed + spine + bleed
+    if (cover) fold + w + bleed + spine + 0.5*bleed
     else bleed
 
   def offsetH =
-    if (cover) bleed + fold
+    if (cover) 0.5*bleed + fold
     else bleed
 
   def printWidth =
-    if (spine > 0) offsetW + w + bleed + fold
+    if (spine > 0) offsetW + w + 0.5*bleed + fold
     else w + 2 * offsetW
 
   def printHeight = h + 2 * offsetH
@@ -110,8 +110,8 @@ object BookModels {
     def apply(size: BookType): BookModel = {
       val (coverSize, pagesSize) = size match {
         case _: A4Landscape =>
-          (PageSize(297.0, 210.0, 2.5, 15, 6, cover = true),
-            PageSize(297.0, 210.0, 3, 0, 0, cover = false))
+          (PageSize(w=297.0, h=210.0, bleed=5, fold=15, spine=6, cover = true),
+            PageSize(w=297.0, h=210.0, bleed=3, fold=0, spine=0, cover = false))
       }
       BookModel(
         minDPI = 200,
