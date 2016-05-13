@@ -9,9 +9,10 @@ import diode.react.ReactConnector
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.util.Random
+import scala.util.{Failure, Random, Success}
 import autowire._
 import org.scalajs.dom.File
+
 import scala.concurrent.duration._
 import diode.Implicits.runAfterImpl
 
@@ -51,7 +52,7 @@ case class AlbumPot(id: Long, hash: String, title: String, pages: List[Pot[Page]
         case (emptys, tail) => tail ++ emptys.tail :+ newPage
       }
       case (matching :: tail, rest) => rest :+ newPage
-    }).sort
+    }).filter.sort
 
   def invalidate(index: Int) =
     this.copy(pages = pages.map(page => page.flatMap {
@@ -116,10 +117,6 @@ class AlbumHandler[M](modelRW: ModelRW[M, Pot[AlbumPot]]) extends ActionHandler(
       .map({ case (a, b) => photos.slice(a, b) })
       .filterNot(_.isEmpty)
 
-  def makePages(list: List[List[Photo]]): EffectSeq =
-    list.zipWithIndex
-      .map({ case (pagePhotos, i) => Effect.action(GeneratePage(pagePhotos, i)) })
-      .foldLeft(Effect(Future(None)) >> Effect(Future(None)))((a, b) => a >> b)
 
 
   override def handle = {
@@ -151,7 +148,7 @@ class AlbumHandler[M](modelRW: ModelRW[M, Pot[AlbumPot]]) extends ActionHandler(
           .invalidate(page.index)
           .insertEmptyAfter(page.index)),
           Effect(AjaxClient[Api].shufflePage(page, excluding, album.ratio(page.index)).call().map(MergePage(_))) +
-            Effect.action(GeneratePage(including, page.index + 1)) >>
+            Effect.action(GeneratePage(including, page.index + 1, insertEmpty = false)) >>
             Effect.action(SaveAlbum))
       }) getOrElse noChange
 
@@ -251,7 +248,10 @@ class AlbumHandler[M](modelRW: ModelRW[M, Pot[AlbumPot]]) extends ActionHandler(
       } getOrElse noChange
 
     case GeneratePages(densityList) =>
-      effectOnly(makePages(densityList) >> Effect.action(SaveAlbum))
+      effectOnly(densityList.zipWithIndex
+        .map({ case (pagePhotos, i) => Effect.action(GeneratePage(pagePhotos, i)) })
+        .foldLeft(Effect(Future(None)) >> Effect(Future(None)))((a, b) => a >> b) >>
+        Effect.action(SaveAlbum))
 
     case OrderByDate =>
       value.map { album =>
@@ -260,15 +260,16 @@ class AlbumHandler[M](modelRW: ModelRW[M, Pot[AlbumPot]]) extends ActionHandler(
             .map(photos => GeneratePages(makeDensityList(photos, math.round(album.density).toInt, 3)))))
       } getOrElse noChange
 
-    case GeneratePage(photos, index) =>
+    case GeneratePage(photos, index, insertEmtpy) =>
       value map { album =>
         updated(
-          value.map(album => album.copy(pages = album.pages :+ Pot.empty.pending())),
+          value.map(album => album.copy(pages =
+            if (insertEmtpy) album.pages :+ Pot.empty.pending()
+            else album.pages)),
           Effect(AjaxClient[Api].generatePage(album.id, photos, index, album.ratio(index)).call()
             .map(MergePage(_)))
         )
       } getOrElse noChange
-
   }
 }
 
@@ -343,7 +344,9 @@ class UploadHandler[M](modelRW: ModelRW[M, Option[UploadState]]) extends ActionH
 
           val effect =
             Effect {
-              Future.sequence(fileSet.map(f => Helper.uploadFile(f, albumID)))
+              Future.sequence(fileSet.map(f => Helper.uploadFile(f, albumID))
+                  .map(f => f.map(Success(_)).recover{ case e => Failure(e) }))
+                .map(_.collect{ case Success(x) => x })
                 .map(photos => GeneratePage(photos, index))
             } >>
               Effect.action(AddRemainingPhotos(albumID))

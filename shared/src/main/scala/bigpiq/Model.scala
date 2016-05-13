@@ -59,36 +59,45 @@ case class Photo(id: Long,
                  hash: String)
 
 
-case class PageSize(w: Double, h: Double, bleed: Double, fold: Double) {
+case class PageSize(w: Double, h: Double, bleed: Double, fold: Double, spine: Double, cover: Boolean) {
   def ratio: Double = w / h
 
-  def extra = 2 * bleed + 2 * fold
+  def offsetW =
+    if (cover) fold + bleed + w + bleed + spine + bleed
+    else bleed
 
-  def fullWidth = w + extra
+  def offsetH =
+    if (cover) bleed + fold
+    else bleed
 
-  def fullHeight = h + extra
+  def printWidth =
+    if (spine > 0) offsetW + w + bleed + fold
+    else w + 2 * offsetW
+
+  def printHeight = h + 2 * offsetH
+
 }
 
-abstract case class BookModel(minPagesTotal: Int,
-                              cover: PageSize,
-                              pages: PageSize,
-                              mustBeEven: Boolean,
-                              spine: (Double, Double),
-                              pdfVersion: String,
-                              minDPI: Int,
-                              coverSeparate: Boolean,
-                              blankBackside: Boolean
+case class BookModel(minPagesTotal: Int,
+                     cover: PageSize,
+                     pages: PageSize,
+                     mustBeEven: Boolean,
+                     pdfVersion: String,
+                     minDPI: Int,
+                     coverSeparate: Boolean,
+                     blankBackside: Boolean
                     ) {
-  def fullCoverWidth = 2 * cover.fullWidth + spine._1
-  def offset(index: Int)
+  def size(index: Int): PageSize =
+    if (index == 0) cover
+    else pages
 }
 
 
 object BookModels {
 
-  sealed trait PageType
+  sealed trait BookType
 
-  case class A4Landscape() extends PageType
+  case class A4Landscape() extends BookType
 
   val models: Map[Int, BookModel] = Map(
     0 -> BookFactory(A4Landscape())
@@ -97,28 +106,22 @@ object BookModels {
   val default = 0
   val defaultModel = models.get(default).get
 
-  case class BookFactory(coverSize: PageSize, pagesSize: PageSize) extends BookModel(
-    minDPI = 200,
-    cover = coverSize,
-    pages = pagesSize,
-    minPagesTotal = 16,
-    pdfVersion = "PDF 1.4",
-    spine = (6, 0),
-    mustBeEven = false,
-    coverSeparate = true,
-    blankBackside = false
-  ) {
-    def offset(index: Int): Double =
-      if (index == 0) cover.fullWidth + spine._1
-      else pages.bleed
-  }
-
   object BookFactory {
-    def apply(size: PageType): BookFactory = {
-      val (cover, pages) = size match {
-        case _: A4Landscape => (PageSize(297.0, 210.0, 2.5, 15), PageSize(297.0, 210.0, 3, 0))
+    def apply(size: BookType): BookModel = {
+      val (coverSize, pagesSize) = size match {
+        case _: A4Landscape =>
+          (PageSize(297.0, 210.0, 2.5, 15, 6, cover = true),
+            PageSize(297.0, 210.0, 3, 0, 0, cover = false))
       }
-      BookFactory(cover, pages)
+      BookModel(
+        minDPI = 200,
+        cover = coverSize,
+        pages = pagesSize,
+        minPagesTotal = 16,
+        pdfVersion = "PDF 1.4",
+        mustBeEven = false,
+        coverSeparate = true,
+        blankBackside = false)
     }
   }
 

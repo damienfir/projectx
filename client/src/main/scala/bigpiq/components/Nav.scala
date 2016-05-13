@@ -31,7 +31,6 @@ object Nav {
 
     def render(proxy: ModelProxy[RootModel]) = {
       val isDemo = proxy().album.map(_.hash == "").getOrElse(false)
-      val loaded = proxy().album.map(_.pages.nonEmpty && !isDemo).getOrElse(false)
 
       <.div(^.cls := "nav navbar-transparent navbar-fixed-top", ^.id := "nav",
         <.div(^.cls := "container-fluid",
@@ -39,34 +38,31 @@ object Nav {
             <.li(<.a(^.cls := "navbar-brand", ^.href := "/", "bigpiq"))
           ),
 
-          //          if (loaded) {
-          <.ul(^.cls := "nav navbar-nav",
-            <.li(
-              <.button(^.cls := "btn btn-primary navbar-btn", ^.id := "upload-btn",
-                ^.onClick --> Callback(Upload.show), // >> proxy.dispatch(RequestUploadAfter(0))),
-                UI.icon("cloud-upload"), " Upload more photos"
-              )
-            )
-          ),
-
-          <.ul(^.cls := "nav navbar-nav",
-            <.li(
-              <.button(^.cls := "btn btn-primary navbar-btn",
-                ^.onClick --> proxy.dispatch(DecreaseDensity),
-                UI.icon("plus"), " More pages"
+          proxy().album.map { album =>
+            <.ul(^.cls := "nav navbar-nav",
+              <.li(
+                <.button(^.cls := "btn btn-primary navbar-btn", ^.id := "upload-btn",
+                  ^.onClick --> Callback(Upload.show), // >> proxy.dispatch(RequestUploadAfter(0))),
+                  UI.icon("cloud-upload"), " Upload more photos"
+                )
               ),
-              <.button(^.cls := "btn btn-primary navbar-btn",
-                ^.onClick --> proxy.dispatch(IncreaseDensity),
-                UI.icon("minus"), " Less pages"
-              )
-            )),
+              <.li(
+                <.button(^.cls := "btn btn-primary navbar-btn",
+                  ^.onClick --> proxy.dispatch(DecreaseDensity),
+                  UI.icon("plus"), " More pages"
+                ),
+                <.button(^.cls := "btn btn-primary navbar-btn",
+                  ^.onClick --> proxy.dispatch(IncreaseDensity),
+                  UI.icon("minus"), " Less pages"
+                )
+              ),
 
-          <.ul(^.cls := "nav navbar-nav",
-            <.li(
-              <.button(^.cls := "btn btn-primary navbar-btn",
-                ^.onClick --> proxy.dispatch(OrderByDate), // >> proxy.dispatch(RequestUploadAfter(0))),
-                "Order by date"))),
-          //          },
+              <.li(
+                <.button(^.cls := "btn btn-primary navbar-btn",
+                  ^.onClick --> proxy.dispatch(OrderByDate), // >> proxy.dispatch(RequestUploadAfter(0))),
+                  UI.icon("calendar"), " Order by date"))
+            )
+          } getOrElse EmptyTag,
 
           if (isDemo) {
             <.li(
@@ -75,9 +71,9 @@ object Nav {
                 UI.icon("flask"),
                 " Try"
               ))
-          } else "",
+          } else EmptyTag,
 
-          if (loaded) {
+          proxy().album.map { album =>
             <.ul(^.cls := "nav navbar-nav navbar-right",
               <.li(
                 <.button(^.cls := "btn btn-primary navbar-btn",
@@ -95,7 +91,7 @@ object Nav {
                 )
               )
             )
-          } else ""
+          } getOrElse EmptyTag
         )
       )
     }

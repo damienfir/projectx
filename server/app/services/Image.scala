@@ -24,7 +24,9 @@ import scala.sys.process._
 
 class ImageService @Inject()() {
   val binary = Play.current.configuration.getString("px.binary").get
+
   def tmpFolder = Play.current.configuration.getString("px.dir_photos").get
+
   def tmpFile(name: String) = tmpFolder + s"/$name"
 
   def hashFromContent(data: Array[Byte]): String = {
@@ -81,10 +83,15 @@ class ImageService @Inject()() {
 
   def bytesToFile(bytes: Array[Byte]): File = bytesToFile(bytes, tmpFolder)
 
-  def save(uploaded: TemporaryFile): (String, Array[Byte]) = {
+  def validateImageFile(bytes: Array[Byte]): Future[Boolean] =
+    Future("identify -" #< new ByteArrayInputStream(bytes) #> new ByteArrayOutputStream() !) map {
+      case 0 => true
+      case _ => false
+    }
+
+  def save(uploaded: TemporaryFile): Future[Option[(String, Array[Byte])]] = {
     val data = FileUtils.readFileToByteArray(uploaded.file)
-    val hash = hashFromContent(data)
-    (hash, data)
+    validateImageFile(data) map (valid => if (valid) Some((hashFromContent(data), data)) else None)
   }
 
   def tilesToDB(photos: List[Photo])(tile: MosaicModels.Tile2): Option[Tile] =
@@ -120,7 +127,7 @@ class ImageService @Inject()() {
         .flatten
     }
 
-  def writeFile(filename: String, content: String) = {
+  def writeFile(filename: String, content: String): String = {
     val file = new File(filename)
     val writer = new PrintWriter(file);
     writer.write(content)
@@ -140,22 +147,37 @@ class ImageService @Inject()() {
     }
   }
 
-  def makePDFs(svgs: List[String], pdfVersion: String, dpi: Int) = svgs map {
-    svg => {
-      val f = tmpFile(UUID.randomUUID.toString)
-      writeFile(f + ".svg", svg)
-      s"inkscape -d $dpi --export-text-to-path $f.svg -A $f.pdf" ! match {
-        case 0 => {
-          new File(f + ".svg").delete
-          f + ".pdf"
+  def makePDFs(svgs: List[String], pdfVersion: String, dpi: Int): Future[List[String]] =
+    Future {svgs.map{ svg => {
+        val f = tmpFile(UUID.randomUUID.toString)
+        writeFile(f + ".svg", svg)
+        s"inkscape -d $dpi --export-text-to-path $f.svg -A $f.pdf" ! match {
+          case 0 => {
+            new File(f + ".svg").delete
+            f + ".pdf"
+          }
+          case _ => throw new Exception
         }
-        case _ => throw new Exception
       }
+    }}
+
+  def zip(files: List[File]): Future[File] = {
+    val o = tmpFile(files.head + ".zip")
+    Future(s"zip $o" +: files.map(_.getAbsolutePath) !) map {
+      case 0 =>
+        files.map(_.delete())
+        new File(o)
+      case _ => throw new Exception
     }
   }
 
-  def makeAlbumFile(svgs: List[String], bookModel: BookModel): File =
-    new File(tmpFile(joinPDFs(makePDFs(svgs, bookModel.pdfVersion, 300))))
+  def makeAlbumFile(svgs: List[String], bookModel: BookModel): Future[File] = {
+    makePDFs(svgs, bookModel.pdfVersion, 300).flatMap { files =>
+      val (cover, pages) = files.splitAt(if (bookModel.coverSeparate) 1 else 0)
+      val pdfs = List(cover, pages).filterNot(_.isEmpty).map(f => new File(tmpFile(joinPDFs(f))))
+      zip(pdfs)
+    }
+  }
 
   def writeSVG(id: Long, content: String) = {
     val fname = id.toString + ".svg"

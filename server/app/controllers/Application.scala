@@ -60,23 +60,25 @@ class Application @Inject()(val messagesApi: MessagesApi, serverApi: ServerApi) 
   def pdf(hash: String) = Action.async {
     serverApi.pdf(hash).map(a =>
       Ok.sendFile(a)
-        .as("application/pdf")
-        .withHeaders(
-          CONTENT_DISPOSITION -> "Inline"
-        ))
+//        .as("application/pdf")
+//        .withHeaders(
+//          CONTENT_DISPOSITION -> "Inline"
+//        )
+    )
   }
 }
 
 
 class Photos @Inject()(imageService: ImageService, photoDAO: db.PhotoDAO) extends Controller {
 
-  def addToCollection(id: Long) = Action.async(parse.maxLength(50 * 1024 * 1024 * 1000 * 1000, parser = parse.multipartFormData)) { request =>
+  def addToCollection(id: Long) = Action.async(parse.maxLength(1024 * 1024 * 1000 * 1000, parser = parse.multipartFormData)) { request =>
     request.body match {
       case Left(_) => Future(EntityTooLarge)
       case Right(body) =>
-        val (hash, data) = imageService.save(body.files.head.ref)
-        photoDAO.addToCollection(id, hash, data)
-          .map((p: Photo) => Ok(write(p)))
+        imageService.save(body.files.head.ref).flatMap(_.map{ case (hash, data) =>
+          photoDAO.addToCollection(id, hash, data)
+            .map((p: Photo) => Ok(write(p)))
+        }.getOrElse(Future(BadRequest)))
     }
   }
 

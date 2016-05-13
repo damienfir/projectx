@@ -74,19 +74,19 @@ class ServerApi @Inject()(usersDAO: db.UsersDAO, collectionDAO: db.CollectionDAO
           }
         }
 
-        Future.sequence(photoFiles) map { files =>
+        Future.sequence(photoFiles) flatMap { files =>
           val svgFiles = album.sort.withBlankPages.pages.map(p => {
             val (title, size) =
               if (p.index == 0) (Some(album.title), album.bookModel.cover)
               else (None, album.bookModel.pages)
-            views.html.page(p, title, files.map({ case (id, f) => (id, f.getAbsolutePath) }).toMap, size, album.bookModel).toString
+            views.html.page(p, title, files.map({ case (id, f) => (id, f.getAbsolutePath) }).toMap, size).toString
           })
 
           imageService.makeAlbumFile(svgFiles, album.bookModel)
         }
       }
     }
-
+;;
   def reorderPhotos(albumID: Long): Future[List[Photo]] = {
     photoDAO.allFromCollection(albumID) map { photos =>
       val (canSort, cannotSort) = photos.map(p => (p, imageService.getDate(p.data))).partition(_._2.isDefined)

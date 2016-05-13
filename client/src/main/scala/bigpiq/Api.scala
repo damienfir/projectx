@@ -51,7 +51,8 @@ object Helper {
       processData = false,
       contentType = false,
       dataType = "text",
-      success = (data: String) => p.success(read[Photo](data))
+      success = (data: String, textStatus: String, jqXHR: JQueryXHR) => p.success(read[Photo](data)),
+      error = (jqXHR: JQueryXHR, textStatus: String, errorThrow: String) => p.failure(new Exception(errorThrow))
     ).asInstanceOf[JQueryAjaxSettings])
     p.future
   }
