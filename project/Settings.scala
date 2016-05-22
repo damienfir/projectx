@@ -10,7 +10,7 @@ object Settings {
   val name = "bigpiq"
 
   /** The version of your application */
-  val version = "0.9.1"
+  val version = "1.0"
 
   /** Options for the scala compiler */
   val scalacOptions = Seq(
