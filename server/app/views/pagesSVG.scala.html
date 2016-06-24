@@ -1,0 +1,11 @@
+@(page: bigpiq.shared.Page, photos: Map[Long, String], book: bigpiq.shared.BookModel)
+
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="@{book.pageSize._1}mm"
+     height="@{book.pageSize._2}mm"
+     viewBox="0 0 @{book.pageSize._1} @{book.pageSize._2}"
+     preserveAspectRatio="none">
+
+    tilesSVG(page.tiles, book.page.size, book.pageOffset, photos)
+
+</svg>

@@ -20,3 +20,7 @@ node_modules
 public/photos/*
 public/generated/*
 public/js/bundle.js
+.ensime
+.ensime_cache
+.projectile
+*#*

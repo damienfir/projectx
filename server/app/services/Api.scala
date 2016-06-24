@@ -20,7 +20,7 @@ class ServerApi @Inject()(usersDAO: db.UsersDAO, collectionDAO: db.CollectionDAO
 
   def getUser(id: Long): Future[User] = usersDAO.get(id)
 
-  def createUser: Future[User] = usersDAO.insert
+  def createUser(): Future[User] = usersDAO.insert
 
   def createAlbum(userID: Long): Future[Album] = collectionDAO.withUser(userID)
 
@@ -68,25 +68,30 @@ class ServerApi @Inject()(usersDAO: db.UsersDAO, collectionDAO: db.CollectionDAO
         val tiles = album.pages.flatMap(_.tiles)
         val photoFiles = photos.flatMap { photo =>
           tiles.find(_.photo.id == photo.id.get).map { tile =>
-            imageService.convert(photo.data, "full", "full", tile.rot.toString, "default", "jpg") map { bytes =>
-              (photo.id.get, imageService.bytesToFile(bytes))
-            }
+            imageService.convert(photo.data, "full", "full", tile.rot.toString, "default", "jpg")
+              .map { bytes => (photo.id.get, imageService.bytesToFile(bytes)) }
           }
         }
 
-        Future.sequence(photoFiles) flatMap { files =>
-          val svgFiles = album.sort.withBlankPages.pages.map(p => {
-            val (title, size) =
-              if (p.index == 0) (Some(album.title), album.bookModel.cover)
-              else (None, album.bookModel.pages)
-            views.html.page(p, title, files.map({ case (id, f) => (id, f.getAbsolutePath) }).toMap, size).toString
-          })
+        Future.sequence(photoFiles)
+          .map(_.map {
+            case (id, f: File) => (id, f.getAbsolutePath)
+          }.toMap)
+          .flatMap { filesMap =>
+            val svgFiles = album.sort.withBlankPages.pages.map(p => {
+              if (p.index == 0) {
+                views.html.coverSVG(p, album.title, filesMap, album.bookModel).toString
+              }
+              else {
+                views.html.pagesSVG(p, filesMap, album.bookModel).toString
+              }
+            })
 
-          imageService.makeAlbumFile(svgFiles, album.bookModel)
-        }
+            imageService.makeAlbumFile(svgFiles, album.bookModel)
+          }
       }
     }
-;;
+
   def reorderPhotos(albumID: Long): Future[List[Photo]] = {
     photoDAO.allFromCollection(albumID) map { photos =>
       val (canSort, cannotSort) = photos.map(p => (p, imageService.getDate(p.data))).partition(_._2.isDefined)

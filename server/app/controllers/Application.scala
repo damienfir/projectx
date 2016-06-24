@@ -12,15 +12,15 @@ import bigpiq.server.services._
 import bigpiq.server.db
 import bigpiq.shared._
 
+
 import upickle.default._
 import upickle.Js
 import upickle.json
 
 
-object Router extends autowire.Server[Js.Value, Reader, Writer] {
-  override def read[R: Reader](s: Js.Value) = readJs[R](s)
-
+object AutowireServer extends autowire.Server[Js.Value, Reader, Writer] {
   override def write[R: Writer](r: R) = writeJs(r)
+  override def read[R: Reader](s: Js.Value) = readJs[R](s)
 }
 
 
@@ -44,7 +44,7 @@ class Application @Inject()(val messagesApi: MessagesApi, serverApi: ServerApi) 
   def autowireApi(path: String) = Action.async(parse.tolerantText) {
     implicit request =>
 
-      Router.route[Api](serverApi) {
+      AutowireServer.route[Api](serverApi) {
         autowire.Core.Request(path.split("/"), json.read(request.body).asInstanceOf[Js.Obj].value.toMap)
       }
         .map(s => (s, json.write(s)))

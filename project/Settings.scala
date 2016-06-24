@@ -1,3 +1,4 @@
+
 import sbt._
 import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
 
@@ -28,7 +29,7 @@ object Settings {
     val scalajsReact = "0.10.2"
     val scalaCSS = "0.3.1"
     val autowire = "0.2.5"
-    val upickle = "0.3.6"
+    val upickle = "0.4.1"
     val diode = "0.5.1"
     val uTest = "0.3.1"
 

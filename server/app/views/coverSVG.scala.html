@@ -1,0 +1,29 @@
+@(page: bigpiq.shared.Page, title: String, photos: Map[Long, String], book: bigpiq.shared.BookModel)
+
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="@{book.coverSize._1}mm"
+     height="@{book.coverSize._2}mm"
+     viewBox="0 0 @{book.coverSize._1} @{book.coverSize._2}"
+     preserveAspectRatio="none">
+
+    tilesSVG(page.tiles, book.cover.size, book.coverOffset, photos)
+
+    <text x="@{0.8*book.cover.size._1 + book.coverOffset._1}"
+          y="@{0.8*book.cover.size._2 + book.coverOffset._2}"
+          style="text-anchor: end; fill: #000; font-size: 0.06; font-family: 'Open Sans';">
+        bigpiq
+    </text>
+
+    <rect x="@{0*book.cover.size._1 + book.coverOffset._1}"
+          y="@{0.85*book.cover.size._2 + book.coverOffset._2}"
+          width="@{book.cover.size._1}"
+          height="@{0.15*book.cover.size._2}"
+          style="fill: #fff;"/>
+
+    <text x="@{0.97*book.cover.size._1 + book.coverOffset._1}"
+          y="@{0.95*book.cover.size._2 + book.coverOffset._2}"
+          style="text-anchor: end; fill: #000000; font-size: 14; font-family: 'Open Sans';">
+        @{title}
+    </text>
+
+</svg>

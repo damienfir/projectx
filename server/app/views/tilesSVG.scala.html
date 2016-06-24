@@ -1,0 +1,21 @@
+@(tiles: List[bigpiq.shared.Tile], pageSize: (Double, Double), offset: (Double, Double), photos: Map[Long, String])
+
+@for((t,i) <- tiles.zipWithIndex) {
+
+<clipPath id="@i">
+    <rect x="@{t.tx1*pageSize._1 + offset._1}"
+          y="@{t.ty1*pageSize._2 + offset._2}"
+          width="@{(t.tx2-t.tx1)*pageSize._1}"
+          height="@{(t.ty2-t.ty1)*pageSize._2}"
+          style="fill: #fff;"/>
+</clipPath>
+
+<image x="@{(t.tx1-t.cx1*(t.tx2-t.tx1)/(t.cx2-t.cx1))*pageSize._1 + offset._1}"
+       y="@{(t.ty1-t.cy1*(t.ty2-t.ty1)/(t.cy2-t.cy1))*pageSize._2 + offset._2}"
+       width="@{((t.tx2-t.tx1)/(t.cx2-t.cx1))*pageSize._1}"
+       height="@{((t.ty2-t.ty1)/(t.cy2-t.cy1))*pageSize._2}"
+       preserveAspectRatio="none"
+       xlink:href="file://@{photos(t.photo.id)}"
+       clip-path="url(#@i)"/>
+
+}

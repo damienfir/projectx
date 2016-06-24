@@ -172,10 +172,8 @@ class ImageService @Inject()() {
   }
 
   def makeAlbumFile(svgs: List[String], bookModel: BookModel): Future[File] = {
-    makePDFs(svgs, bookModel.pdfVersion, 300).flatMap { files =>
-      val (cover, pages) = files.splitAt(if (bookModel.coverSeparate) 1 else 0)
-      val pdfs = List(cover, pages).filterNot(_.isEmpty).map(f => new File(tmpFile(joinPDFs(f))))
-      zip(pdfs)
+    makePDFs(svgs, bookModel.pdfVersion, 300).map { files =>
+      new File(tmpFile(joinPDFs(files)))
     }
   }
 

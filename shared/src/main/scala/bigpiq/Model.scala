@@ -59,37 +59,51 @@ case class Photo(id: Long,
                  hash: String)
 
 
-case class PageSize(w: Double, h: Double, bleed: Double, fold: Double, spine: Double, cover: Boolean) {
+case class PageModel(w: Double, h: Double, bleed: Double) {
   def ratio: Double = w / h
-
-  def offsetW =
-    if (cover) fold + w + bleed + spine + 0.5*bleed
-    else bleed
-
-  def offsetH =
-    if (cover) 0.5*bleed + fold
-    else bleed
-
-  def printWidth =
-    if (spine > 0) offsetW + w + 0.5*bleed + fold
-    else w + 2 * offsetW
-
-  def printHeight = h + 2 * offsetH
-
+  def size: (Double, Double) = (w, h)
 }
 
-case class BookModel(minPagesTotal: Int,
-                     cover: PageSize,
-                     pages: PageSize,
-                     mustBeEven: Boolean,
-                     pdfVersion: String,
-                     minDPI: Int,
-                     coverSeparate: Boolean,
-                     blankBackside: Boolean
-                    ) {
-  def size(index: Int): PageSize =
-    if (index == 0) cover
-    else pages
+
+trait BookModel {
+  val minPagesTotal: Int
+  val cover: PageModel
+  val page: PageModel
+  val mustBeEven: Boolean
+  val pdfVersion: String
+  val minDPI: Int
+  val blankBackside: Boolean
+
+  def coverSize: (Double, Double)
+
+  def coverOffset: (Double, Double)
+
+  def pageSize: (Double, Double)
+
+  def pageOffset: (Double, Double)
+}
+
+
+case class BookfactoryModel(minPagesTotal: Int = 16,
+                       mustBeEven: Boolean = false,
+                       pdfVersion: String = "PDF 1.4",
+                       minDPI: Int = 200,
+                       blankBackside: Boolean = true,
+                       cover: PageModel,
+                       page: PageModel,
+                       coverFold: Int,
+                       coverSpine: Double)
+  extends BookModel {
+
+  def coverOffset = (coverFold + cover.w + cover.bleed + coverSpine + 0.5 * cover.bleed, cover.bleed)
+
+  def coverSize = (cover.w + 2 * cover.bleed, cover.h + 2 * cover.bleed)
+
+  def pageOffset = (page.bleed, page.bleed)
+
+  def pageSize = (page.w + 2 * page.bleed, page.h + 2 * page.bleed)
+
+  def adjustSpine(spine: Double) = this.copy(coverSpine = spine)
 }
 
 
@@ -108,20 +122,14 @@ object BookModels {
 
   object BookFactory {
     def apply(size: BookType): BookModel = {
-      val (coverSize, pagesSize) = size match {
+      size match {
         case _: A4Landscape =>
-          (PageSize(w=297.0, h=210.0, bleed=5, fold=15, spine=6, cover = true),
-            PageSize(w=297.0, h=210.0, bleed=3, fold=0, spine=0, cover = false))
+          BookfactoryModel(
+            coverFold = 15,
+            coverSpine = 6,
+            cover = PageModel(w = 297.0, h = 210.0, bleed = 5),
+            page = PageModel(w = 297.0, h = 210.0, bleed = 3))
       }
-      BookModel(
-        minDPI = 200,
-        cover = coverSize,
-        pages = pagesSize,
-        minPagesTotal = 16,
-        pdfVersion = "PDF 1.4",
-        mustBeEven = false,
-        coverSeparate = true,
-        blankBackside = false)
     }
   }
 
