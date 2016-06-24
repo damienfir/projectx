@@ -5,13 +5,12 @@ import javax.inject.Inject
 import play.api._
 import play.api.mvc._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
+
 import scala.concurrent.Future
 import play.api.i18n._
-
-import bigpiq.server.services._
 import bigpiq.server.db
+import bigpiq.server.services._
 import bigpiq.shared._
-
 import upickle.default._
 import upickle.Js
 import upickle.json
@@ -24,7 +23,7 @@ object Router extends autowire.Server[Js.Value, Reader, Writer] {
 }
 
 
-class Application @Inject()(val messagesApi: MessagesApi, serverApi: ServerApi) extends Controller with I18nSupport {
+class Application @Inject()(val messagesApi: MessagesApi, serverApi: ServerApi, pdfApi: PDFApi) extends Controller with I18nSupport {
 
   def makeCookie(id: Long) = Cookie("bigpiquser", id.toString, maxAge = Some(315360000), httpOnly = false)
 
@@ -41,11 +40,13 @@ class Application @Inject()(val messagesApi: MessagesApi, serverApi: ServerApi) 
 
   def uiWithHash(hash: String) = ui
 
-  def autowireApi(path: String) = Action.async(parse.tolerantText) {
-    implicit request =>
+  def autowireApi(path: String) = Action.async(parse.tolerantText) { request =>
 
-      Router.route[Api](serverApi) {
-        autowire.Core.Request(path.split("/"), json.read(request.body).asInstanceOf[Js.Obj].value.toMap)
+      Router.route[Api](serverApi).apply {
+        autowire.Core.Request(
+          path.split("/"),
+          json.read(request.body).asInstanceOf[Js.Obj].value.toMap
+        )
       }
         .map(s => (s, json.write(s)))
         .map {
@@ -58,12 +59,12 @@ class Application @Inject()(val messagesApi: MessagesApi, serverApi: ServerApi) 
   }
 
   def pdf(hash: String) = Action.async {
-    serverApi.pdf(hash).map(a =>
+    pdfApi.pdf(hash).map(a =>
       Ok.sendFile(a)
-//        .as("application/pdf")
-//        .withHeaders(
-//          CONTENT_DISPOSITION -> "Inline"
-//        )
+        .as("application/pdf")
+        .withHeaders(
+          CONTENT_DISPOSITION -> "Inline"
+        )
     )
   }
 }

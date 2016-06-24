@@ -171,11 +171,11 @@ class ImageService @Inject()() {
     }
   }
 
-  def makeAlbumFile(svgs: List[String], bookModel: BookModel): Future[File] = {
+  def makeAlbumFile(svgs: List[String], bookModel: BookModel): Future[File] =
     makePDFs(svgs, bookModel.pdfVersion, 300).map { files =>
       new File(tmpFile(joinPDFs(files)))
     }
-  }
+  
 
   def writeSVG(id: Long, content: String) = {
     val fname = id.toString + ".svg"

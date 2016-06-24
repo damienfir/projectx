@@ -1,7 +1,5 @@
 package bigpiq.server.services
 
-import java.util.UUID
-
 import play.api.Play
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.concurrent.Future
@@ -20,7 +18,7 @@ class ServerApi @Inject()(usersDAO: db.UsersDAO, collectionDAO: db.CollectionDAO
 
   def getUser(id: Long): Future[User] = usersDAO.get(id)
 
-  def createUser: Future[User] = usersDAO.insert
+  def createUser(): Future[User] = usersDAO.insert
 
   def createAlbum(userID: Long): Future[Album] = collectionDAO.withUser(userID)
 
@@ -62,6 +60,17 @@ class ServerApi @Inject()(usersDAO: db.UsersDAO, collectionDAO: db.CollectionDAO
     }
   }
 
+
+  def reorderPhotos(albumID: Long): Future[List[Photo]] = {
+    photoDAO.allFromCollection(albumID) map { photos =>
+      val (canSort, cannotSort) = photos.map(p => (p, imageService.getDate(p.data))).partition(_._2.isDefined)
+      canSort.sortBy({ case (p, date) => date }).map(_._1.export).toList ++ cannotSort.map(_._1.export)
+    }
+  }
+}
+
+
+class PDFApi @Inject()(collectionDAO: db.CollectionDAO, photoDAO: db.PhotoDAO, imageService: ImageService) {
   def pdf(hash: String): Future[File] =
     collectionDAO.getByHash(0, hash) flatMap { album =>
       photoDAO.allFromCollection(album.id) flatMap { photos =>
@@ -79,7 +88,7 @@ class ServerApi @Inject()(usersDAO: db.UsersDAO, collectionDAO: db.CollectionDAO
             case (id, f: File) => (id, f.getAbsolutePath)
           }).toMap)
           .flatMap { filesMap =>
-            val svgFiles = album.sort.withBlankPages.pages.map(p => {
+            val svgFiles: List[String] = album.sort.withBlankPages.pages.map(p => {
               if (p.index == 0) {
                 views.html.coverSVG(p, album.title, filesMap, album.bookModel).toString
               }
@@ -92,11 +101,4 @@ class ServerApi @Inject()(usersDAO: db.UsersDAO, collectionDAO: db.CollectionDAO
           }
       }
     }
-;;
-  def reorderPhotos(albumID: Long): Future[List[Photo]] = {
-    photoDAO.allFromCollection(albumID) map { photos =>
-      val (canSort, cannotSort) = photos.map(p => (p, imageService.getDate(p.data))).partition(_._2.isDefined)
-      canSort.sortBy({ case (p, date) => date }).map(_._1.export).toList ++ cannotSort.map(_._1.export)
-    }
-  }
 }
