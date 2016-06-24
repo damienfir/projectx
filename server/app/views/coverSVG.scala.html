@@ -6,7 +6,7 @@
      viewBox="0 0 @{book.coverSize._1} @{book.coverSize._2}"
      preserveAspectRatio="none">
 
-    tilesSVG(page.tiles, book.cover.size, book.coverOffset, photos)
+    @tilesSVG(page.tiles, book.cover.size, book.coverOffset, photos)
 
     <text x="@{0.8*book.cover.size._1 + book.coverOffset._1}"
           y="@{0.8*book.cover.size._2 + book.coverOffset._2}"
