@@ -65,7 +65,7 @@ case class PageModel(w: Double, h: Double, bleed: Double) {
 }
 
 
-trait BookModel {
+sealed trait BookModel {
   val minPagesTotal: Int
   val cover: PageModel
   val page: PageModel
@@ -73,14 +73,15 @@ trait BookModel {
   val pdfVersion: String
   val minDPI: Int
   val blankBackside: Boolean
-
-  def coverSize: (Double, Double)
+  val coverSize: (Double, Double)
 
   def coverOffset: (Double, Double)
 
   def pageSize: (Double, Double)
 
   def pageOffset: (Double, Double)
+
+  def adjustFoldWidth(fold: Int, width: Int): BookModel
 }
 
 
@@ -92,26 +93,24 @@ case class BookfactoryModel(minPagesTotal: Int = 16,
                        cover: PageModel,
                        page: PageModel,
                        coverFold: Int,
-                       coverSpine: Double)
+                        coverSize: (Double, Double))
   extends BookModel {
 
-  def coverOffset = (coverFold + cover.w + cover.bleed + coverSpine + 0.5 * cover.bleed, cover.bleed)
-
-  def coverSize = (cover.w + 2 * cover.bleed, cover.h + 2 * cover.bleed)
+  def coverOffset = (coverSize._1 - coverFold - cover.w, coverSize._2 - coverFold - cover.bleed - cover.h)
 
   def pageOffset = (page.bleed, page.bleed)
 
   def pageSize = (page.w + 2 * page.bleed, page.h + 2 * page.bleed)
 
-  def adjustSpine(spine: Double) = this.copy(coverSpine = spine)
+  def adjustFoldWidth(fold: Int, width: Int): BookModel = this.copy(coverSize = (width, coverSize._2), coverFold = fold)
 }
 
 
 object BookModels {
 
-  sealed trait BookType
+  sealed trait BookSize
 
-  case class A4Landscape() extends BookType
+  case class A4Landscape() extends BookSize
 
   val models: Map[Int, BookModel] = Map(
     0 -> BookFactory(A4Landscape())
@@ -121,13 +120,13 @@ object BookModels {
   val defaultModel = models.get(default).get
 
   object BookFactory {
-    def apply(size: BookType): BookModel = {
+    def apply(size: BookSize): BookModel = {
       size match {
         case _: A4Landscape =>
           BookfactoryModel(
-            coverFold = 15,
-            coverSpine = 6,
-            cover = PageModel(w = 297.0, h = 210.0, bleed = 5),
+            coverFold = 17,
+            coverSize = (646, 249),
+            cover = PageModel(w = 297.0, h = 210.0, bleed = 3),
             page = PageModel(w = 297.0, h = 210.0, bleed = 3))
       }
     }

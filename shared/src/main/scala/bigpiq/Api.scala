@@ -7,7 +7,7 @@ trait Api {
 
   def getUser(id: Long): Future[User]
 
-  def createUser: Future[User]
+  def createUser(): Future[User]
 
   def createAlbum(userID: Long): Future[Album]
 

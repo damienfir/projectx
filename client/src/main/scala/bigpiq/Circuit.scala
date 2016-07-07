@@ -70,7 +70,7 @@ case class AlbumPot(id: Long, hash: String, title: String, pages: List[Pot[Page]
 
   def ratio(index: Int): Double =
     if (index == 0) bookModel.cover.ratio
-    else bookModel.pages.ratio
+    else bookModel.page.ratio
 }
 
 object AlbumPot {

@@ -71,8 +71,9 @@ class ServerApi @Inject()(usersDAO: db.UsersDAO, collectionDAO: db.CollectionDAO
 
 
 class PDFApi @Inject()(collectionDAO: db.CollectionDAO, photoDAO: db.PhotoDAO, imageService: ImageService) {
-  def pdf(hash: String): Future[File] =
+  def pdf(hash: String, fold: Int, width: Int): Future[File] =
     collectionDAO.getByHash(0, hash) flatMap { album =>
+      val bookModel = album.bookModel.adjustFoldWidth(fold, width)
       photoDAO.allFromCollection(album.id) flatMap { photos =>
         val tiles = album.pages.flatMap(_.tiles)
         val photoFiles = photos.flatMap { photo =>
@@ -88,12 +89,12 @@ class PDFApi @Inject()(collectionDAO: db.CollectionDAO, photoDAO: db.PhotoDAO, i
             case (id, f: File) => (id, f.getAbsolutePath)
           }).toMap)
           .flatMap { filesMap =>
-            val svgFiles: List[String] = album.sort.withBlankPages.pages.map(p => {
+            val svgFiles: List[String] = album.sort.pages.map(p => {
               if (p.index == 0) {
-                views.html.coverSVG(p, album.title, filesMap, album.bookModel).toString
+                views.html.coverSVG(p, album.title, filesMap, bookModel).toString
               }
               else {
-                views.html.pagesSVG(p, filesMap, album.bookModel).toString
+                views.html.pagesSVG(p, filesMap, bookModel).toString
               }
             })
 

@@ -40,9 +40,10 @@ class Application @Inject()(val messagesApi: MessagesApi, serverApi: ServerApi, 
 
   def uiWithHash(hash: String) = ui
 
-  def autowireApi(path: String) = Action.async(parse.tolerantText) { request =>
+  def autowireApi(path: String) = Action.async(parse.tolerantText) {
+    implicit request =>
 
-      Router.route[Api](serverApi).apply {
+      Router.route[Api](serverApi) {
         autowire.Core.Request(
           path.split("/"),
           json.read(request.body).asInstanceOf[Js.Obj].value.toMap
@@ -58,8 +59,8 @@ class Application @Inject()(val messagesApi: MessagesApi, serverApi: ServerApi, 
     // })
   }
 
-  def pdf(hash: String) = Action.async {
-    pdfApi.pdf(hash).map(a =>
+  def pdf(hash: String, fold: Int, width: Int) = Action.async {
+    pdfApi.pdf(hash, fold, width).map(a =>
       Ok.sendFile(a)
         .as("application/pdf")
         .withHeaders(
