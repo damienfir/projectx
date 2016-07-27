@@ -1,16 +1,12 @@
-package bigpiq.server.services
+package bigpiq.services
 
 import javax.inject.Inject
-import scala.concurrent.Future
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.Play
 import play.api.libs.ws._
 
-import models._
-import bigpiq.shared._
 
-
-class Email @Inject()(ws: WSClient) {
+class EmailService @Inject()(ws: WSClient) {
   val host = Play.current.configuration.getString("px.host").get
   val apiBase = Play.current.configuration.getString("px.mailgun-base").get
   val apiKey = Play.current.configuration.getString("px.mailgun-key").get

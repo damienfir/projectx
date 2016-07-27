@@ -8,8 +8,8 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 import scala.concurrent.Future
 import play.api.i18n._
-import bigpiq.server.db
-import bigpiq.server.services._
+import bigpiq.db
+import bigpiq.services._
 import bigpiq.shared._
 import upickle.default._
 import upickle.Js
@@ -59,8 +59,8 @@ class Application @Inject()(val messagesApi: MessagesApi, serverApi: ServerApi, 
     // })
   }
 
-  def pdf(hash: String, fold: Int, width: Int) = Action.async {
-    pdfApi.pdf(hash, fold, width).map(a =>
+  def pdf(hash: String, spine: Double) = Action.async {
+    pdfApi.pdf(hash, spine).map(a =>
       Ok.sendFile(a)
         .as("application/pdf")
         .withHeaders(
@@ -86,8 +86,8 @@ class Photos @Inject()(imageService: ImageService, photoDAO: db.PhotoDAO) extend
 
   def get(photoID: Long, region: String, size: String, rotation: String, quality: String, format: String) = Action.async {
     photoDAO.get(photoID) flatMap { maybePhoto =>
-      maybePhoto.map { photo =>
-        imageService.convert(photo.data, region, size, rotation, quality, format)
+      maybePhoto.map { case (photo, data) =>
+        imageService.convert(data.data, region, size, rotation, quality, format)
           .map(file => Ok(file).withHeaders(
             CACHE_CONTROL -> "max-age=3600"
           ))

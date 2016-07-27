@@ -1,4 +1,4 @@
-package bigpiq.server.db
+package bigpiq.db
 
 import scala.util.{Failure, Success, Try}
 import javax.inject._
@@ -16,76 +16,86 @@ import bigpiq.shared
 import bigpiq.shared.BookModels
 
 
-trait HasID{
+trait HasID {
   def id: Option[Long]
 }
 
-case class User (
-  id: Option[Long] = None,
-  email: Option[String] = None
-) extends HasID {
+case class User(
+                 id: Option[Long] = None,
+                 email: Option[String] = None
+               ) extends HasID {
   def export: shared.User = shared.User(id.get, email.getOrElse(""), Nil)
-//  def export(collection: Collection): shared.User =
-//    export.copy(albums=List(collection.export))
+
+  //  def export(collection: Collection): shared.User =
+  //    export.copy(albums=List(collection.export))
 }
 
-case class Collection (
-  id: Option[Long],
-  name: Option[String],
-  hash: String,
-  bookModel: Int
-) {
+case class Collection(
+                       id: Option[Long],
+                       name: Option[String],
+                       hash: String,
+                       bookModel: Int
+                     ) {
   def export: shared.Album = shared.Album(id.get, hash, name.getOrElse(""), Nil, BookModels.models.getOrElse(bookModel, BookModels.defaultModel))
+
   def export(pages: List[Composition], photos: List[Photo]): shared.Album = export.copy(pages = pages.map(_.export(photos)))
 }
 
 object Collection {
   def from(album: shared.Album): Collection = Collection(Some(album.id), Some(album.title), album.hash, BookModels.indexOf(album.bookModel))
+
   def tupled = (Collection.apply _).tupled
 }
 
-case class Photo (
-  id: Option[Long],
-  collectionID: Long,
-  hash: String,
-  data: Array[Byte]
-) {
+case class Photo(
+                  id: Option[Long],
+                  collectionID: Long,
+                  hash: String
+                ) {
   def export: shared.Photo = shared.Photo(id.get, hash)
 }
 
-case class Composition (
-  id: Option[Long],
-  collectionID: Long,
-  index: Int,
-  tiles: List[Tile]
-) {
+case class PhotoData(
+                      photoID: Long,
+                      data: Array[Byte]
+                    )
+
+case class Composition(
+                        id: Option[Long],
+                        collectionID: Long,
+                        index: Int,
+                        tiles: List[Tile]
+                      ) {
   def export(photos: List[Photo] = Nil): shared.Page =
-    shared.Page(id.get, index, tiles.map(t => t.export(photos.find(_.id == Some(t.photoID)))))
+    shared.Page(id.get, index, tiles.map(t => t.export(photos.find(_.id contains t.photoID))))
 }
 
 object Composition {
   def from(album: shared.Album): List[Composition] =
     album.pages.map(p => from(album.id, p))
+
   def from(albumID: Long, page: shared.Page): Composition =
     Composition(Some(page.id), albumID, page.index, page.tiles.map(Tile.from))
+
   def tupled = (Composition.apply _).tupled
 }
 
 case class Tile(
-  photoID: Long,
-  rot: Option[Int],
-  cx1: Float,
-  cx2: Float,
-  cy1: Float,
-  cy2: Float,
-  tx1: Float,
-  tx2: Float,
-  ty1: Float,
-  ty2: Float
-) {
+                 photoID: Long,
+                 rot: Option[Int],
+                 cx1: Float,
+                 cx2: Float,
+                 cy1: Float,
+                 cy2: Float,
+                 tx1: Float,
+                 tx2: Float,
+                 ty1: Float,
+                 ty2: Float
+               ) {
   def export(photo: Option[Photo]): shared.Tile =
-    shared.Tile(photo.get.export,rot.getOrElse(0),cx1,cx2,cy1,cy2,tx1,tx2,ty1,ty2)
+    shared.Tile(photo.get.export, rot.getOrElse(0), cx1, cx2, cy1, cy2, tx1, tx2, ty1, ty2)
 }
+
 object Tile {
   def from(tile: shared.Tile): Tile = Tile(tile.photo.id, Some(tile.rot),
     tile.cx1, tile.cx2, tile.cy1, tile.cy2, tile.tx1, tile.tx2, tile.ty1, tile.ty2
@@ -100,7 +110,9 @@ class UsersDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
   def one(id: Long) = users.filter(_.id === id)
 
   def get(id: Long): Future[shared.User] = db.run(one(id).result).map(_.head).map(_.export)
+
   def insert = db.run((users returning users) += User()).map(_.export)
+
   // def list = db.run(users.result)
   // def update(item: User) = db.run(one(item.id.get).update(item).asTry)
   // def delete(id: Long) = dbConfig.db.run(one(id).delete)
@@ -145,13 +157,13 @@ class CollectionDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProv
   }
 
   def withUser(id: Long): Future[shared.Album] =
-    // for {
-    // u <- db.run(users.one(id).result)
-    // c <- db.run(collections.returning(collections) += Collection(None, None, UUID.randomUUID.toString))
-    // r <- db.run(usercollectionrelations += (u.get.id.get, c.id.get))
+  // for {
+  // u <- db.run(users.one(id).result)
+  // c <- db.run(collections.returning(collections) += Collection(None, None, UUID.randomUUID.toString))
+  // r <- db.run(usercollectionrelations += (u.get.id.get, c.id.get))
   // } yield c
 
-  db.run(usersDAO.one(id).result) map (_.head) flatMap { u =>
+    db.run(usersDAO.one(id).result) map (_.head) flatMap { u =>
       db.run((collections returning collections) += Collection(None, None, makeHash, BookModels.default)) flatMap { c =>
         db.run(usercollectionrelations += (u.id.get, c.id.get)) map (_ => c.export)
       }
@@ -175,10 +187,10 @@ class CollectionDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProv
 
   // def fromUser(id: Long) = db.run(fromUserQuery(id).result)
 
-  def getByHash(userID: Long, hash: String) : Future[shared.Album] = {
+  def getByHash(userID: Long, hash: String): Future[shared.Album] = {
     val query = for {
-      // r <- usercollectionrelations.filter(_.userID === userID)
-      col <- collections if col.hash === hash// && col.id === r.collectionID)
+    // r <- usercollectionrelations.filter(_.userID === userID)
+      col <- collections if col.hash === hash // && col.id === r.collectionID)
     } yield col
     for {
       cols <- db.run(query.result)
@@ -191,17 +203,36 @@ class CollectionDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProv
 
 @Singleton
 class PhotoDAO @Inject()(protected val dbConfigProvider: DatabaseConfigProvider, collectionDAO: CollectionDAO) extends HasDatabaseConfigProvider[JdbcProfile] {
-  def get(id: Long): Future[Option[Photo]] = db.run(photos.filter(_.id === id).result).map(_.headOption)
+
+  def get(id: Long): Future[Option[(Photo, PhotoData)]] = {
+    val query = for {
+      (p, d) <- photos.filter(_.id === id) join photosData on (_.id === _.photoID)
+    } yield (p, d)
+    db.run(query.result).map(_.headOption)
+  }
 
   def addToCollection(id: Long, hash: String, data: Array[Byte]): Future[shared.Photo] =
     db.run(collections.filter(_.id === id).result).map(_.head) flatMap { col =>
-      db.run((photos returning photos) += Photo(None, col.id.get, hash, data))
-        .map(_.export)
+      db.run((photos returning photos) += Photo(None, col.id.get, hash)) flatMap { photo =>
+        db.run(photosData += PhotoData(photo.id.get, data)) map (_ => photo.export)
+      }
     }
 
-  def allFromCollection(id: Long) = db.run(photos.filter(_.collectionID === id).result)
+  def allFromCollection(id: Long): Future[List[(Photo, PhotoData)]] = {
+    val query = for {
+      (p, d) <- photos.filter(_.collectionID === id) join photosData on (_.id === _.photoID)
+    } yield (p, d)
+    db.run(query.result) map (_.toList)
+    // db.run(photos.filter(_.collectionID === id).result)
+  }
 
-  def getSet(ids: List[Long]): Future[List[Photo]] = Future.sequence(ids.map(get(_))).map(_.flatten)
+  def getSet(ids: List[Long]): Future[List[(Photo, PhotoData)]] = {
+    // Future.sequence(ids.map(get(_))).map(_.flatten)
+    val query = for {
+      (p, d) <- photos.filter(_.id inSet ids) join photosData on (_.id === _.photoID)
+    } yield (p, d)
+    db.run(query.result).map(_.toList)
+  }
 }
 
 
@@ -212,15 +243,15 @@ class CompositionDAO @Inject()(protected val dbConfigProvider: DatabaseConfigPro
 
   def allFromCollection(id: Long) = db.run(compositions.filter(_.collectionID === id).result) map (_.sortBy(_.index))
 
-//  def addWithCollection(id: Long): Future[Composition] = for {
-//    col <- collectionDAO.get(id)
-//    comp <- db.run((compositions returning compositions) += Composition(None, col.get.id.get, 0, List()))
-//  } yield comp
-//
-//  def update(comp: Composition): Future[Composition] = db.run {
-//      compositions.filter(_.id === comp.id.get).update(comp).asTry
-//    } map {
-//      case Success(_) => comp
-//      case Failure(_) => throw new Exception
-//    }
+  //  def addWithCollection(id: Long): Future[Composition] = for {
+  //    col <- collectionDAO.get(id)
+  //    comp <- db.run((compositions returning compositions) += Composition(None, col.get.id.get, 0, List()))
+  //  } yield comp
+  //
+  //  def update(comp: Composition): Future[Composition] = db.run {
+  //      compositions.filter(_.id === comp.id.get).update(comp).asTry
+  //    } map {
+  //      case Success(_) => comp
+  //      case Failure(_) => throw new Exception
+  //    }
 }

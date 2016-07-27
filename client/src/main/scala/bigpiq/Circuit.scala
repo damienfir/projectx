@@ -68,9 +68,9 @@ case class AlbumPot(id: Long, hash: String, title: String, pages: List[Pot[Page]
 
   def pagesLoaded: Boolean = !pages.exists(_.isPending)
 
-  def ratio(index: Int): Double =
-    if (index == 0) bookModel.cover.ratio
-    else bookModel.page.ratio
+  def ratio(index: Int): Double = bookModel.page.ratio
+//    if (index == 0) bookModel.cover.ratio
+//    else bookModel.page.ratio
 }
 
 object AlbumPot {
@@ -116,8 +116,6 @@ class AlbumHandler[M](modelRW: ModelRW[M, Pot[AlbumPot]]) extends ActionHandler(
       .scanLeft((0, 0))((acc, a) => (acc._2, acc._2 + a))
       .map({ case (a, b) => photos.slice(a, b) })
       .filterNot(_.isEmpty)
-
-
 
   override def handle = {
 
@@ -345,8 +343,8 @@ class UploadHandler[M](modelRW: ModelRW[M, Option[UploadState]]) extends ActionH
           val effect =
             Effect {
               Future.sequence(fileSet.map(f => Helper.uploadFile(f, albumID))
-                  .map(f => f.map(Success(_)).recover{ case e => Failure(e) }))
-                .map(_.collect{ case Success(x) => x })
+                .map(f => f.map(Success(_)).recover { case e => Failure(e) }))
+                .map(_.collect { case Success(x) => x })
                 .map(photos => GeneratePage(photos, index))
             } >>
               Effect.action(AddRemainingPhotos(albumID))

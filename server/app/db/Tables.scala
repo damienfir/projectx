@@ -1,4 +1,4 @@
-package bigpiq.server.db
+package bigpiq.db
 
 import slick.driver.PostgresDriver
 
@@ -35,11 +35,16 @@ object Tables {
     def id = column[Option[Long]]("id", O.PrimaryKey, O.AutoInc)
     def collectionID = column[Long]("collection_id")
     def hash = column[String]("hash")
-    def data = column[Array[Byte]]("data")
-    def * = (id, collectionID, hash, data) <> (Photo.tupled, Photo.unapply)
+    def * = (id, collectionID, hash) <> (Photo.tupled, Photo.unapply)
   }
   val photos = TableQuery[Photos]
 
+  class PhotosData(tag: Tag) extends Table[PhotoData](tag, "photos_data") {
+    def photoID = column[Long]("photo_id")
+    def data = column[Array[Byte]]("data")
+    def * = (photoID, data) <> (PhotoData.tupled, PhotoData.unapply)
+  }
+  val photosData = TableQuery[PhotosData]
 
   class Compositions(tag: Tag) extends Table[Composition](tag, "compositions") {
     def id = column[Option[Long]]("id", O.PrimaryKey, O.AutoInc)

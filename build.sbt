@@ -3,7 +3,6 @@ import sbt.Project.projectToRef
 
 lazy val server = (project in file("server"))
   .settings(
-    name := "server",
     version := Settings.version,
     scalaVersion := Settings.versions.scala,
     routesGenerator := InjectedRoutesGenerator,
@@ -15,20 +14,15 @@ lazy val server = (project in file("server"))
   .aggregate(clients.map(projectToRef): _*)
   .dependsOn(sharedJVM)
 
-lazy val client: Project = (project in file("client"))
+lazy val client = (project in file("client"))
   .settings(
-    name := "client",
     version := Settings.version,
     scalaVersion := Settings.versions.scala,
     jsDependencies ++= Settings.jsDependencies.value,
     skip in packageJSDependencies := false,
     persistLauncher := true,
     persistLauncher in Test := false,
-    // workbenchSettings,
-    // bootSnippet := "bigpiq.client.App().main();",
-    // refreshBrowsers <<= refreshBrowsers.triggeredBy(fastOptJS in Compile),
-    libraryDependencies ++= Settings.scalajsDependencies.value,
-    testFrameworks += new TestFramework("utest.runner.Framework")
+    libraryDependencies ++= Settings.scalajsDependencies.value
 )
   .enablePlugins(ScalaJSPlugin, ScalaJSPlay)
   .dependsOn(sharedJS)
@@ -36,7 +30,9 @@ lazy val client: Project = (project in file("client"))
 lazy val clients = Seq(client)
 
 lazy val shared = (crossProject.crossType(CrossType.Pure) in file("shared"))
-  .settings(scalaVersion := Settings.versions.scala)
+  .settings(
+    scalaVersion := Settings.versions.scala
+  )
   .jsConfigure(_ enablePlugins ScalaJSPlay)
 
 lazy val sharedJVM = shared.jvm

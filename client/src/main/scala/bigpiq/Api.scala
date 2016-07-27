@@ -28,6 +28,7 @@ object AjaxClient extends autowire.Client[Js.Value, Reader, Writer] {
   def write[Result: Writer](r: Result) = writeJs(r)
 }
 
+
 object Helper {
   def getUserIDFromCookie: Option[Long] = {
     dom.document.cookie.split(";")
@@ -59,45 +60,3 @@ object Helper {
 
   def updateUrl(hash: String) = dom.history.pushState("", "", s"/ui/${hash}")
 }
-
-//object Api {
-//  def postJSON(url: String, data: String) = Ajax.post(
-//    url=url,
-//    data=data,
-//    responseType="text", // uPickle can't parse js.Object
-//    headers = Map("Content-Type" -> "application/json")
-//  ).map(r => r.responseText)
-//
-//
-//  def getUser(id: Long): Future[Pot[User]] = Ajax.get(s"/users/$id")
-//    .map(r => Ready(read[User](r.responseText)))
-//
-//  def createUser(): Future[Pot[User]] = postJSON(s"/users", write(User()))
-//    .map(v => Ready(read[User](v)))
-//
-//
-//  def getAlbumFromHash(userID: Long, hash: String): Future[Stored] = Ajax.get(s"/users/$userID/albums/$hash")
-//    .map(r => read[Stored](r.responseText))
-//
-//
-//  def createCollection(userID: Long) : Future[Pot[Collection]] = postJSON(s"/users/$userID/collections", "{}")
-//    .map(r => Ready(read[Collection](r)))
-//
-//  def makePages(photos: List[Photo], collectionID: Long, index: Int) : Future[Pot[List[Composition]]] =
-//    postJSON(s"/collections/$collectionID/pages?index=$index", write(photos))
-//      .map(v => Ready(List(read[Composition](v))))
-//
-//  def shufflePage(photos: List[Photo], collectionID: Long, pageID: Long): Future[Pot[List[Composition]]] = photos match {
-//    case Nil => Future(Empty)
-//    case _ => postJSON(s"/collections/$collectionID/page/$pageID", write(photos))
-//      .map(v => Ready(List(read[Composition](v))))
-//  }
-//
-//  def save(toSave: Save) = {
-//    postJSON(s"/save", write(toSave))
-//  }
-//
-//  def emailLink(userID: Long, email: String, hash: String): Future[String] = {
-//    postJSON(s"/users/$userID/link/$hash", write(Map("email" -> email)))
-//  }
-//}
